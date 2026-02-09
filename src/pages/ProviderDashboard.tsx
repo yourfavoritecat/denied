@@ -16,6 +16,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { providers } from "@/data/providers";
 
+interface PatientProfile {
+  first_name: string | null;
+  last_name: string | null;
+}
+
 interface Booking {
   id: string;
   user_id: string;
@@ -32,6 +37,8 @@ interface Booking {
   created_at: string;
   updated_at: string;
   trip_brief_id: string | null;
+  patient_name?: string;
+  patient_email?: string;
 }
 
 interface Message {
@@ -108,7 +115,27 @@ const ProviderDashboard = () => {
       .select("*")
       .eq("provider_slug", providerSlug)
       .order("created_at", { ascending: false });
-    setBookings((data as any[]) || []);
+
+    const rawBookings = (data as any[]) || [];
+
+    // Fetch patient profiles for all unique user_ids
+    const userIds = [...new Set(rawBookings.map((b) => b.user_id))];
+    const { data: profiles } = userIds.length > 0
+      ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds)
+      : { data: [] };
+
+    // Fetch emails from auth (we'll use user_id mapping)
+    const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
+
+    const enriched = rawBookings.map((b) => {
+      const prof = profileMap.get(b.user_id) as PatientProfile | undefined;
+      return {
+        ...b,
+        patient_name: prof ? [prof.first_name, prof.last_name].filter(Boolean).join(" ") : null,
+      };
+    });
+
+    setBookings(enriched);
     setLoading(false);
   };
 
@@ -240,9 +267,10 @@ const ProviderDashboard = () => {
   const BookingCard = ({ booking }: { booking: Booking }) => (
     <Card className="hover:shadow-md transition-shadow">
       <CardContent className="py-4 px-5">
-        <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="flex items-start justify-between gap-3 mb-2">
           <div className="min-w-0">
-            <p className="font-medium text-sm truncate">{getProcedureText(booking.procedures)}</p>
+            <p className="font-semibold text-sm truncate">{booking.patient_name || "Unknown Patient"}</p>
+            <p className="text-xs text-muted-foreground">{getProcedureText(booking.procedures)}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{formatDate(booking.created_at)}</p>
           </div>
           <Badge className={`text-xs shrink-0 ${STATUS_COLORS[booking.status] || ""}`}>
