@@ -8,15 +8,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Star, MapPin, BadgeCheck, ArrowLeft, Globe, MessageSquareQuote } from "lucide-react";
+import { Star, MapPin, BadgeCheck, ArrowLeft, Globe, MessageSquareQuote, PenLine, ExternalLink } from "lucide-react";
 import { providers } from "@/data/providers";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
+import LeaveReviewModal from "@/components/reviews/LeaveReviewModal";
+import ReviewCard from "@/components/reviews/ReviewCard";
+import { useReviews } from "@/hooks/useReviews";
+import { useAuth } from "@/hooks/useAuth";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number = 0) => ({
-    opacity: 1,
-    y: 0,
+    opacity: 1, y: 0,
     transition: { duration: 0.5, delay: i * 0.1 },
   }),
 };
@@ -24,10 +27,7 @@ const fadeUp = {
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5">
     {[1, 2, 3, 4, 5].map((s) => (
-      <Star
-        key={s}
-        className={`w-4 h-4 ${s <= rating ? "fill-secondary text-secondary" : "text-border"}`}
-      />
+      <Star key={s} className={`w-4 h-4 ${s <= rating ? "fill-secondary text-secondary" : "text-border"}`} />
     ))}
   </div>
 );
@@ -36,6 +36,9 @@ const ProviderProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const provider = providers.find((p) => p.slug === slug);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const { user } = useAuth();
+  const { reviews, loading: reviewsLoading, refetch } = useReviews(slug);
 
   if (!provider) {
     return (
@@ -44,9 +47,7 @@ const ProviderProfile = () => {
         <main className="pt-24 pb-16 text-center">
           <h1 className="text-3xl font-bold mb-4">Provider Not Found</h1>
           <p className="text-muted-foreground mb-6">This provider doesn't exist or has been removed.</p>
-          <Link to="/search">
-            <Button>Back to Search</Button>
-          </Link>
+          <Link to="/search"><Button>Back to Search</Button></Link>
         </main>
       </div>
     );
@@ -54,27 +55,27 @@ const ProviderProfile = () => {
 
   const totalReviews = provider.ratingBreakdown.reduce((a, b) => a + b, 0);
 
+  // Placeholder external review URLs
+  const externalReviews = {
+    google: `https://www.google.com/maps/search/${encodeURIComponent(provider.name)}`,
+    yelp: `https://www.yelp.com/search?find_desc=${encodeURIComponent(provider.name)}`,
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <main className="pt-16 pb-24">
-        {/* Hero / Cover */}
+        {/* Hero */}
         <motion.div
           className="bg-gradient-to-br from-denied-black to-denied-black/90 relative"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.6 }}
         >
           <div className="container mx-auto px-4 py-12 md:py-20">
             <Link to="/search" className="inline-flex items-center gap-1 text-white/60 hover:text-white transition-colors text-sm mb-6">
               <ArrowLeft className="w-4 h-4" /> Back to Search
             </Link>
-            <motion.div
-              className="flex flex-col md:flex-row md:items-end gap-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
+            <motion.div className="flex flex-col md:flex-row md:items-end gap-6"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
                 <span className="text-4xl md:text-5xl font-bold text-white/30">{provider.name.charAt(0)}</span>
               </div>
@@ -98,20 +99,11 @@ const ProviderProfile = () => {
         </motion.div>
 
         {/* Photo Gallery Placeholder */}
-        <motion.div
-          className="container mx-auto px-4 -mt-4 mb-10"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-50px" }}
-        >
+        <motion.div className="container mx-auto px-4 -mt-4 mb-10" initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <motion.div
-                key={i}
-                variants={fadeUp}
-                custom={i * 0.5}
-                className={`rounded-xl bg-gradient-to-br from-denied-mint/10 to-denied-peach/10 border border-border/50 flex items-center justify-center ${i === 1 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-64" : "aspect-square md:h-[7.5rem]"}`}
-              >
+              <motion.div key={i} variants={fadeUp} custom={i * 0.5}
+                className={`rounded-xl bg-gradient-to-br from-denied-mint/10 to-denied-peach/10 border border-border/50 flex items-center justify-center ${i === 1 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-64" : "aspect-square md:h-[7.5rem]"}`}>
                 <p className="text-sm text-muted-foreground">Photo {i}</p>
               </motion.div>
             ))}
@@ -124,9 +116,7 @@ const ProviderProfile = () => {
             <h2 className="text-2xl font-bold mb-4">About</h2>
             <p className="text-muted-foreground leading-relaxed max-w-3xl">{provider.description}</p>
             <div className="flex flex-wrap gap-2 mt-4">
-              {provider.specialties.map((s) => (
-                <Badge key={s} variant="secondary">{s}</Badge>
-              ))}
+              {provider.specialties.map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
             </div>
           </motion.section>
 
@@ -161,9 +151,16 @@ const ProviderProfile = () => {
             </Card>
           </motion.section>
 
-          {/* Reviews */}
+          {/* Reviews Section */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
-            <h2 className="text-2xl font-bold mb-6">Reviews</h2>
+            <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+              <h2 className="text-2xl font-bold">Reviews</h2>
+              {user && (
+                <Button onClick={() => setReviewOpen(true)} variant="outline" className="gap-2">
+                  <PenLine className="w-4 h-4" /> Leave a Review
+                </Button>
+              )}
+            </div>
             <div className="grid md:grid-cols-3 gap-8">
               {/* Rating Breakdown */}
               <Card className="border border-border/50 shadow-lg">
@@ -194,8 +191,17 @@ const ProviderProfile = () => {
                 </CardContent>
               </Card>
 
-              {/* Individual Reviews */}
+              {/* User Reviews from DB */}
               <div className="md:col-span-2 space-y-4">
+                {reviewsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                  </div>
+                ) : reviews.length > 0 ? (
+                  reviews.map((review) => <ReviewCard key={review.id} review={review} />)
+                ) : null}
+
+                {/* Static seed reviews */}
                 {provider.reviewsList.map((review) => (
                   <Card key={review.name + review.date} className="border border-border/50 shadow-md hover:shadow-lg transition-shadow">
                     <CardContent className="pt-6">
@@ -222,6 +228,23 @@ const ProviderProfile = () => {
                   </Card>
                 ))}
               </div>
+            </div>
+          </motion.section>
+
+          {/* External Reviews */}
+          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
+            <h2 className="text-2xl font-bold mb-4">External Reviews</h2>
+            <div className="flex flex-wrap gap-3">
+              <a href={externalReviews.google} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="gap-2">
+                  <ExternalLink className="w-4 h-4" /> View on Google Reviews
+                </Button>
+              </a>
+              <a href={externalReviews.yelp} target="_blank" rel="noopener noreferrer">
+                <Button variant="outline" className="gap-2">
+                  <ExternalLink className="w-4 h-4" /> View on Yelp
+                </Button>
+              </a>
             </div>
           </motion.section>
 
@@ -256,10 +279,14 @@ const ProviderProfile = () => {
         </div>
       </div>
 
-      <RequestQuoteModal
-        open={quoteOpen}
-        onOpenChange={setQuoteOpen}
+      <RequestQuoteModal open={quoteOpen} onOpenChange={setQuoteOpen} providerName={provider.name} />
+      <LeaveReviewModal
+        open={reviewOpen}
+        onOpenChange={setReviewOpen}
+        providerSlug={provider.slug}
         providerName={provider.name}
+        procedures={provider.procedures.map((p) => p.name)}
+        onReviewSubmitted={refetch}
       />
 
       <Footer />

@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import MyTrips from "./pages/MyTrips";
 import ProviderProfile from "./pages/ProviderProfile";
 import Apply from "./pages/Apply";
+import UserProfile from "./pages/UserProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/apply" element={<Apply />} />
             <Route path="/provider/:slug" element={<ProviderProfile />} />
+            <Route path="/user/:username" element={<UserProfile />} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/my-trips" element={<ProtectedRoute><MyTrips /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
