@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
@@ -9,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Star, MapPin, BadgeCheck, ArrowLeft, Globe, MessageSquareQuote } from "lucide-react";
 import { providers } from "@/data/providers";
+import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -33,6 +35,7 @@ const StarRating = ({ rating }: { rating: number }) => (
 const ProviderProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const provider = providers.find((p) => p.slug === slug);
+  const [quoteOpen, setQuoteOpen] = useState(false);
 
   if (!provider) {
     return (
@@ -243,12 +246,21 @@ const ProviderProfile = () => {
             <span className="text-sm text-muted-foreground">Starting at </span>
             <span className="text-2xl font-bold text-primary">${provider.startingPrice}</span>
           </div>
-          <Button className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold h-12 px-8 text-base shadow-lg">
+          <Button
+            className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold h-12 px-8 text-base shadow-lg"
+            onClick={() => setQuoteOpen(true)}
+          >
             <MessageSquareQuote className="w-5 h-5 mr-2" />
             Request Quote
           </Button>
         </div>
       </div>
+
+      <RequestQuoteModal
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        providerName={provider.name}
+      />
 
       <Footer />
     </div>
