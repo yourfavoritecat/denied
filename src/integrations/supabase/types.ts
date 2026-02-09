@@ -125,7 +125,9 @@ export type Database = {
           first_name: string | null
           id: string
           last_name: string | null
+          notification_preferences: Json | null
           phone: string | null
+          provider_slug: string | null
           public_profile: boolean
           updated_at: string
           user_id: string
@@ -138,7 +140,9 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
+          provider_slug?: string | null
           public_profile?: boolean
           updated_at?: string
           user_id: string
@@ -151,7 +155,9 @@ export type Database = {
           first_name?: string | null
           id?: string
           last_name?: string | null
+          notification_preferences?: Json | null
           phone?: string | null
+          provider_slug?: string | null
           public_profile?: boolean
           updated_at?: string
           user_id?: string
