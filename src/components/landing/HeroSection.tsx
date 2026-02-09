@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import logo from "@/assets/logo.svg";
 
 const HeroSection = () => {
   const [email, setEmail] = useState("");
@@ -71,15 +72,24 @@ const HeroSection = () => {
   return (
     <section className="bg-denied-black min-h-screen flex items-center pt-16">
       <div className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-secondary mb-6 animate-fade-in">
+        {/* Logo */}
+        <div className="mb-8 animate-fade-in flex justify-center">
+          <img 
+            src={logo} 
+            alt="Denied Logo" 
+            className="w-48 md:w-64 lg:w-80 h-auto [filter:invert(70%)_sepia(60%)_saturate(700%)_hue-rotate(330deg)_brightness(100%)]"
+          />
+        </div>
+        
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-secondary mb-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
           Fuck Health Insurance.
         </h1>
         
-        <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: "0.2s" }}>
           Save 50-70% on dental, cosmetic, and medical care with verified providers worldwide. Starting with Mexico.
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-16 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-16 animate-fade-in" style={{ animationDelay: "0.3s" }}>
           <Input
             type="email"
             placeholder="Enter your email"
@@ -98,7 +108,7 @@ const HeroSection = () => {
         </form>
 
         {/* Trust Indicators */}
-        <div className="flex flex-wrap justify-center gap-8 text-white/60 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+        <div className="flex flex-wrap justify-center gap-8 text-white/60 animate-fade-in" style={{ animationDelay: "0.4s" }}>
           <div className="text-center">
             <div className="text-3xl font-bold text-secondary">50-70%</div>
             <div className="text-sm">Average Savings</div>

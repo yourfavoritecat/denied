@@ -23,15 +23,15 @@
     --primary: 154 37% 53%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary: Peach #F8B4A0 */
-    --secondary: 15 83% 80%;
+    /* Secondary: Bold Peach #FF8C69 */
+    --secondary: 15 100% 71%;
     --secondary-foreground: 0 0% 10%;
 
     --muted: 13 100% 97%;
     --muted-foreground: 0 0% 45%;
 
-    /* Accent: Peach for headlines */
-    --accent: 15 83% 80%;
+    /* Accent: Bold Peach for headlines */
+    --accent: 15 100% 71%;
     --accent-foreground: 0 0% 10%;
 
     --destructive: 0 84% 60%;
@@ -45,7 +45,7 @@
 
     /* Custom tokens for Denied brand */
     --denied-black: 0 0% 10%;
-    --denied-peach: 15 83% 80%;
+    --denied-peach: 15 100% 71%;
     --denied-mint: 154 37% 53%;
     --denied-cream: 13 100% 97%;
 
@@ -72,13 +72,13 @@
     --primary: 154 37% 53%;
     --primary-foreground: 0 0% 10%;
 
-    --secondary: 15 83% 80%;
+    --secondary: 15 100% 71%;
     --secondary-foreground: 0 0% 10%;
 
     --muted: 0 0% 20%;
     --muted-foreground: 0 0% 65%;
 
-    --accent: 15 83% 80%;
+    --accent: 15 100% 71%;
     --accent-foreground: 0 0% 10%;
 
     --destructive: 0 62.8% 30.6%;
