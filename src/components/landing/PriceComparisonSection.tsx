@@ -36,7 +36,7 @@ const PriceComparisonSection = () => {
           Real prices. Real savings. No insurance games.
         </p>
 
-        <div className="max-w-4xl mx-auto overflow-hidden rounded-lg border shadow-lg">
+        <div className="max-w-4xl mx-auto overflow-hidden rounded-xl border border-border/50 shadow-2xl">
           <Table>
             <TableHeader>
               <TableRow className="bg-denied-black hover:bg-denied-black">

@@ -41,7 +41,7 @@ const TestimonialsSection = () => {
           {testimonials.map((testimonial, index) => (
             <Card 
               key={testimonial.name}
-              className="bg-white/5 border-white/10 backdrop-blur animate-fade-in"
+              className="bg-white/5 border border-white/10 backdrop-blur shadow-lg shadow-black/20 hover:bg-white/10 hover:-translate-y-1 transition-all duration-300 animate-fade-in"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CardContent className="pt-6">
