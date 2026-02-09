@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
@@ -149,7 +150,12 @@ const SearchPage = () => {
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4">
           {/* Search Header */}
-          <div className="mb-8">
+          <motion.div
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
               Find Your Provider
             </h1>
@@ -173,7 +179,7 @@ const SearchPage = () => {
                 Filters {hasActiveFilters && `(active)`}
               </Button>
             </div>
-          </div>
+          </motion.div>
 
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Desktop Filters */}
@@ -218,51 +224,58 @@ const SearchPage = () => {
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-6">
-                  {filtered.map((provider) => (
-                    <Link key={provider.slug} to={`/provider/${provider.slug}`}>
-                      <Card className="overflow-hidden border border-border/50 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full">
-                        <div className="aspect-[16/10] bg-gradient-to-br from-denied-mint/20 to-denied-peach/20 relative flex items-center justify-center">
-                          <div className="text-center p-4">
-                            <div className="w-16 h-16 rounded-full bg-denied-black/10 flex items-center justify-center mx-auto mb-2">
-                              <span className="text-2xl font-bold text-foreground/40">{provider.name.charAt(0)}</span>
+                  {filtered.map((provider, index) => (
+                    <motion.div
+                      key={provider.slug}
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.06 }}
+                    >
+                      <Link to={`/provider/${provider.slug}`}>
+                        <Card className="overflow-hidden border border-border/50 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full">
+                          <div className="aspect-[16/10] bg-gradient-to-br from-denied-mint/20 to-denied-peach/20 relative flex items-center justify-center">
+                            <div className="text-center p-4">
+                              <div className="w-16 h-16 rounded-full bg-denied-black/10 flex items-center justify-center mx-auto mb-2">
+                                <span className="text-2xl font-bold text-foreground/40">{provider.name.charAt(0)}</span>
+                              </div>
+                              <p className="text-sm text-muted-foreground">Clinic Photo</p>
                             </div>
-                            <p className="text-sm text-muted-foreground">Clinic Photo</p>
+                            {provider.verified && (
+                              <div className="absolute top-3 right-3">
+                                <Badge className="bg-primary text-primary-foreground gap-1 shadow-md">
+                                  <BadgeCheck className="w-3 h-3" /> Verified
+                                </Badge>
+                              </div>
+                            )}
                           </div>
-                          {provider.verified && (
-                            <div className="absolute top-3 right-3">
-                              <Badge className="bg-primary text-primary-foreground gap-1 shadow-md">
-                                <BadgeCheck className="w-3 h-3" /> Verified
-                              </Badge>
+                          <CardContent className="p-5">
+                            <div className="flex items-start justify-between mb-2">
+                              <h3 className="font-bold text-lg leading-tight">{provider.name}</h3>
                             </div>
-                          )}
-                        </div>
-                        <CardContent className="p-5">
-                          <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-bold text-lg leading-tight">{provider.name}</h3>
-                          </div>
-                          <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
-                            <MapPin className="w-4 h-4 shrink-0" />
-                            {provider.city}, Mexico
-                          </div>
-                          <div className="flex items-center gap-2 mb-3">
-                            <Star className="w-4 h-4 fill-secondary text-secondary" />
-                            <span className="font-bold">{provider.rating}</span>
-                            <span className="text-muted-foreground text-sm">({provider.reviews} reviews)</span>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5 mb-4">
-                            {provider.specialties.slice(0, 3).map((specialty) => (
-                              <Badge key={specialty} variant="secondary" className="text-xs font-medium">
-                                {specialty}
-                              </Badge>
-                            ))}
-                          </div>
-                          <div className="border-t pt-3">
-                            <span className="text-sm text-muted-foreground">From </span>
-                            <span className="text-xl font-bold text-primary">${provider.startingPrice}</span>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </Link>
+                            <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
+                              <MapPin className="w-4 h-4 shrink-0" />
+                              {provider.city}, Mexico
+                            </div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <Star className="w-4 h-4 fill-secondary text-secondary" />
+                              <span className="font-bold">{provider.rating}</span>
+                              <span className="text-muted-foreground text-sm">({provider.reviews} reviews)</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 mb-4">
+                              {provider.specialties.slice(0, 3).map((specialty) => (
+                                <Badge key={specialty} variant="secondary" className="text-xs font-medium">
+                                  {specialty}
+                                </Badge>
+                              ))}
+                            </div>
+                            <div className="border-t pt-3">
+                              <span className="text-sm text-muted-foreground">From </span>
+                              <span className="text-xl font-bold text-primary">${provider.startingPrice}</span>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    </motion.div>
                   ))}
                 </div>
               )}
