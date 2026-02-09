@@ -408,6 +408,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_my_provider_slug: { Args: never; Returns: string }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
