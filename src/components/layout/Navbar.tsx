@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Plane, User, LogOut, PlusCircle, Menu, X } from "lucide-react";
+import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.svg";
 
@@ -27,9 +27,12 @@ const Navbar = () => {
     ? [profile.first_name, profile.last_name].filter(Boolean).join(" ") || user?.email
     : user?.email;
 
+  const isProvider = !!(profile as any)?.provider_slug;
+
   const navLinks = [
     { to: "/search", icon: Search, label: "Search" },
     { to: "/my-trips", icon: Plane, label: "My Trips" },
+    ...(isProvider ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Dashboard" }] : []),
     { to: "/profile", icon: User, label: "Profile" },
   ];
 
@@ -89,6 +92,11 @@ const Navbar = () => {
                     <DropdownMenuItem onClick={() => navigate("/my-trips")}>
                       <Plane className="w-4 h-4 mr-2" /> My Trips
                     </DropdownMenuItem>
+                    {isProvider && (
+                      <DropdownMenuItem onClick={() => navigate("/provider-dashboard")}>
+                        <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="text-destructive">
                       <LogOut className="w-4 h-4 mr-2" /> Log Out
