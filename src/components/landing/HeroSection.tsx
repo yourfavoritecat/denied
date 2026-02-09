@@ -55,7 +55,9 @@ const HeroSection = () => {
         setEmail("");
       }
     } catch (error) {
-      console.error("Waitlist error:", error);
+      if (import.meta.env.DEV) {
+        console.error("Waitlist error:", error);
+      }
       toast({
         title: "Something went wrong",
         description: "Please try again later.",
