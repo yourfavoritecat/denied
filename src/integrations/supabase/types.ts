@@ -17,33 +17,42 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          city: string | null
           created_at: string
           first_name: string | null
           id: string
           last_name: string | null
           phone: string | null
+          public_profile: boolean
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
+          public_profile?: boolean
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
           avatar_url?: string | null
+          city?: string | null
           created_at?: string
           first_name?: string | null
           id?: string
           last_name?: string | null
           phone?: string | null
+          public_profile?: boolean
           updated_at?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: []
       }
@@ -107,6 +116,83 @@ export type Database = {
           whatsapp?: string | null
           why_join?: string | null
           years_in_practice?: number | null
+        }
+        Relationships: []
+      }
+      review_upvotes: {
+        Row: {
+          created_at: string
+          id: string
+          review_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          review_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          review_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_upvotes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          created_at: string
+          id: string
+          photos: string[] | null
+          procedure_name: string
+          provider_slug: string
+          rating: number
+          recommend: boolean
+          review_text: string
+          title: string
+          updated_at: string
+          user_id: string
+          verified_trip: boolean
+          videos: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          photos?: string[] | null
+          procedure_name: string
+          provider_slug: string
+          rating: number
+          recommend?: boolean
+          review_text: string
+          title: string
+          updated_at?: string
+          user_id: string
+          verified_trip?: boolean
+          videos?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          photos?: string[] | null
+          procedure_name?: string
+          provider_slug?: string
+          rating?: number
+          recommend?: boolean
+          review_text?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+          verified_trip?: boolean
+          videos?: string[] | null
         }
         Relationships: []
       }
