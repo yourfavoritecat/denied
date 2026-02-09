@@ -20,6 +20,22 @@ const SettingsTab = () => {
   const [publicProfile, setPublicProfile] = useState((profile as any)?.public_profile || false);
   const [saving, setSaving] = useState(false);
 
+  const defaultNotifPrefs = {
+    inquiry_received: true,
+    quote_received: true,
+    deposit_paid: true,
+    trip_confirmed: true,
+    new_message: true,
+    marketing: false,
+  };
+  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
+    (profile as any)?.notification_preferences || defaultNotifPrefs
+  );
+
+  const toggleNotif = (key: string) => {
+    setNotifPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const handleSave = async () => {
     if (!profile) return;
     setSaving(true);
@@ -32,6 +48,7 @@ const SettingsTab = () => {
         username: username.trim() || null,
         city: city.trim() || null,
         public_profile: publicProfile,
+        notification_preferences: notifPrefs,
       } as any)
       .eq("user_id", profile.user_id);
     setSaving(false);
@@ -132,18 +149,22 @@ const SettingsTab = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Email notifications for trip updates</span>
-              <Switch defaultChecked />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Price drop alerts for saved providers</span>
-              <Switch defaultChecked />
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Marketing emails</span>
-              <Switch />
-            </div>
+            {[
+              { key: "inquiry_received", label: "New inquiry received (providers)" },
+              { key: "quote_received", label: "Quote received from provider" },
+              { key: "deposit_paid", label: "Deposit payment confirmation" },
+              { key: "trip_confirmed", label: "Trip confirmed notification" },
+              { key: "new_message", label: "New message on a booking" },
+              { key: "marketing", label: "Marketing emails & promotions" },
+            ].map(({ key, label }) => (
+              <div key={key} className="flex items-center justify-between">
+                <span className="text-sm">{label}</span>
+                <Switch checked={notifPrefs[key] ?? true} onCheckedChange={() => toggleNotif(key)} />
+              </div>
+            ))}
+            <Button onClick={handleSave} disabled={saving} size="sm">
+              {saving ? "Saving..." : "Save Preferences"}
+            </Button>
           </div>
         </CardContent>
       </Card>
