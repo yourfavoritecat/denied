@@ -14,6 +14,7 @@ import ProviderProfile from "./pages/ProviderProfile";
 import Apply from "./pages/Apply";
 import UserProfile from "./pages/UserProfile";
 import BookingDetail from "./pages/BookingDetail";
+import ProviderDashboard from "./pages/ProviderDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/my-trips" element={<ProtectedRoute><MyTrips /></ProtectedRoute>} />
             <Route path="/booking/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
+            <Route path="/provider-dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
