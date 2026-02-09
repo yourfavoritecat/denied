@@ -17,6 +17,7 @@ import BookingDetail from "./pages/BookingDetail";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import TripAssistantChat from "./components/chat/TripAssistantChat";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,7 @@ const App = () => (
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <TripAssistantChat />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
