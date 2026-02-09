@@ -47,6 +47,57 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_briefs: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          destination: string | null
+          id: string
+          inquiry_description: string | null
+          medical_notes: string | null
+          procedures: Json | null
+          status: string
+          travel_end: string | null
+          travel_start: string | null
+          trip_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          destination?: string | null
+          id?: string
+          inquiry_description?: string | null
+          medical_notes?: string | null
+          procedures?: Json | null
+          status?: string
+          travel_end?: string | null
+          travel_start?: string | null
+          trip_name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          destination?: string | null
+          id?: string
+          inquiry_description?: string | null
+          medical_notes?: string | null
+          procedures?: Json | null
+          status?: string
+          travel_end?: string | null
+          travel_start?: string | null
+          trip_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       waitlist: {
         Row: {
           created_at: string
