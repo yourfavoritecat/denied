@@ -8,11 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Send, CheckCircle, Clock, CreditCard, Plane, MessageSquare } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ArrowLeft, Send, CheckCircle, Clock, CreditCard, Plane, MessageSquare, Map } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { providers } from "@/data/providers";
+import TripPlannerTab from "@/components/trips/TripPlannerTab";
 
 interface Booking {
   id: string;
@@ -27,8 +29,17 @@ interface Booking {
   deposit_amount: number | null;
   provider_message: string | null;
   provider_estimated_dates: string | null;
+  trip_brief_id: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface TripBrief {
+  id: string;
+  destination: string | null;
+  travel_start: string | null;
+  travel_end: string | null;
+  procedures: any;
 }
 
 interface Message {
@@ -63,11 +74,21 @@ const BookingDetail = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [paying, setPaying] = useState(false);
+  const [tripBrief, setTripBrief] = useState<TripBrief | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchBooking = async () => {
     const { data } = await supabase.from("bookings" as any).select("*").eq("id", id).single();
-    setBooking(data as any);
+    const bookingData = data as any;
+    setBooking(bookingData);
+    if (bookingData?.trip_brief_id) {
+      const { data: brief } = await supabase
+        .from("trip_briefs")
+        .select("id, destination, travel_start, travel_end, procedures")
+        .eq("id", bookingData.trip_brief_id)
+        .single();
+      setTripBrief(brief as any);
+    }
     setLoading(false);
   };
 
@@ -207,113 +228,146 @@ const BookingDetail = () => {
             </CardContent>
           </Card>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Booking Details */}
-            <div className="space-y-4">
-              <Card>
-                <CardHeader><CardTitle className="text-lg">Inquiry Details</CardTitle></CardHeader>
-                <CardContent className="space-y-3 text-sm">
-                  <div>
-                    <span className="font-medium">Procedures:</span>
-                    <p className="text-muted-foreground">{procedures}</p>
-                  </div>
-                  {booking.preferred_dates?.text && (
-                    <div>
-                      <span className="font-medium">Preferred Dates:</span>
-                      <p className="text-muted-foreground">{booking.preferred_dates.text}</p>
-                    </div>
-                  )}
-                  {booking.inquiry_message && (
-                    <div>
-                      <span className="font-medium">Message:</span>
-                      <p className="text-muted-foreground">{booking.inquiry_message}</p>
-                    </div>
-                  )}
-                  {booking.medical_notes && (
-                    <div>
-                      <span className="font-medium">Medical Notes:</span>
-                      <p className="text-muted-foreground">{booking.medical_notes}</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Quote info */}
-              {booking.quoted_price && (
-                <Card className="border-primary/30">
-                  <CardHeader><CardTitle className="text-lg">Quote</CardTitle></CardHeader>
-                  <CardContent className="space-y-3 text-sm">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Total Price:</span>
-                      <span className="text-xl font-bold text-primary">${Number(booking.quoted_price).toLocaleString()}</span>
-                    </div>
-                    {booking.deposit_amount && (
-                      <div className="flex justify-between">
-                        <span>Deposit (25%):</span>
-                        <span className="font-bold">${Number(booking.deposit_amount).toLocaleString()}</span>
-                      </div>
-                    )}
-                    {booking.provider_estimated_dates && (
-                      <div>
-                        <span className="font-medium">Estimated Dates:</span>
-                        <p className="text-muted-foreground">{booking.provider_estimated_dates}</p>
-                      </div>
-                    )}
-                    {booking.provider_message && (
-                      <div>
-                        <span className="font-medium">Provider Message:</span>
-                        <p className="text-muted-foreground">{booking.provider_message}</p>
-                      </div>
-                    )}
-                    {booking.status === "quoted" && (
-                      <Button className="w-full mt-2 bg-secondary hover:bg-secondary/90" onClick={handlePayDeposit} disabled={paying}>
-                        <CreditCard className="w-4 h-4 mr-2" />
-                        {paying ? "Processing..." : `Accept & Pay $${Number(booking.deposit_amount).toLocaleString()} Deposit`}
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="details" className="flex items-center gap-1.5">
+                <MessageSquare className="w-4 h-4" /> Booking Details
+              </TabsTrigger>
+              {(tripBrief || booking.trip_brief_id) && (
+                <TabsTrigger value="planner" className="flex items-center gap-1.5">
+                  <Map className="w-4 h-4" /> Trip Planner
+                </TabsTrigger>
               )}
-            </div>
+            </TabsList>
 
-            {/* Messages Thread */}
-            <Card className="flex flex-col h-[500px]">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Messages</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto space-y-3 pb-0">
-                {messages.length === 0 ? (
-                  <p className="text-center text-muted-foreground text-sm py-8">No messages yet. Start the conversation!</p>
-                ) : (
-                  messages.map((msg) => {
-                    const isMe = msg.sender_id === user?.id;
-                    return (
-                      <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
-                        <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${isMe ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                          <p>{msg.message}</p>
-                          <p className={`text-xs mt-1 ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                            {new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
-                          </p>
-                        </div>
+            <TabsContent value="details">
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Booking Details */}
+                <div className="space-y-4">
+                  <Card>
+                    <CardHeader><CardTitle className="text-lg">Inquiry Details</CardTitle></CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                      <div>
+                        <span className="font-medium">Procedures:</span>
+                        <p className="text-muted-foreground">{procedures}</p>
                       </div>
-                    );
-                  })
-                )}
-                <div ref={messagesEndRef} />
-              </CardContent>
-              <div className="p-4 border-t flex gap-2">
-                <Input
-                  placeholder="Type a message..."
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
-                />
-                <Button size="icon" onClick={sendMessage} disabled={sending || !newMessage.trim()}>
-                  <Send className="w-4 h-4" />
-                </Button>
+                      {booking.preferred_dates?.text && (
+                        <div>
+                          <span className="font-medium">Preferred Dates:</span>
+                          <p className="text-muted-foreground">{booking.preferred_dates.text}</p>
+                        </div>
+                      )}
+                      {booking.inquiry_message && (
+                        <div>
+                          <span className="font-medium">Message:</span>
+                          <p className="text-muted-foreground">{booking.inquiry_message}</p>
+                        </div>
+                      )}
+                      {booking.medical_notes && (
+                        <div>
+                          <span className="font-medium">Medical Notes:</span>
+                          <p className="text-muted-foreground">{booking.medical_notes}</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {booking.quoted_price && (
+                    <Card className="border-primary/30">
+                      <CardHeader><CardTitle className="text-lg">Quote</CardTitle></CardHeader>
+                      <CardContent className="space-y-3 text-sm">
+                        <div className="flex justify-between">
+                          <span className="font-medium">Total Price:</span>
+                          <span className="text-xl font-bold text-primary">${Number(booking.quoted_price).toLocaleString()}</span>
+                        </div>
+                        {booking.deposit_amount && (
+                          <div className="flex justify-between">
+                            <span>Deposit (25%):</span>
+                            <span className="font-bold">${Number(booking.deposit_amount).toLocaleString()}</span>
+                          </div>
+                        )}
+                        {booking.provider_estimated_dates && (
+                          <div>
+                            <span className="font-medium">Estimated Dates:</span>
+                            <p className="text-muted-foreground">{booking.provider_estimated_dates}</p>
+                          </div>
+                        )}
+                        {booking.provider_message && (
+                          <div>
+                            <span className="font-medium">Provider Message:</span>
+                            <p className="text-muted-foreground">{booking.provider_message}</p>
+                          </div>
+                        )}
+                        {booking.status === "quoted" && (
+                          <Button className="w-full mt-2 bg-secondary hover:bg-secondary/90" onClick={handlePayDeposit} disabled={paying}>
+                            <CreditCard className="w-4 h-4 mr-2" />
+                            {paying ? "Processing..." : `Accept & Pay $${Number(booking.deposit_amount).toLocaleString()} Deposit`}
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+
+                {/* Messages Thread */}
+                <Card className="flex flex-col h-[500px]">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Messages</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 overflow-y-auto space-y-3 pb-0">
+                    {messages.length === 0 ? (
+                      <p className="text-center text-muted-foreground text-sm py-8">No messages yet. Start the conversation!</p>
+                    ) : (
+                      messages.map((msg) => {
+                        const isMe = msg.sender_id === user?.id;
+                        return (
+                          <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
+                            <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${isMe ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                              <p>{msg.message}</p>
+                              <p className={`text-xs mt-1 ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                                {new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+                    <div ref={messagesEndRef} />
+                  </CardContent>
+                  <div className="p-4 border-t flex gap-2">
+                    <Input
+                      placeholder="Type a message..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
+                    />
+                    <Button size="icon" onClick={sendMessage} disabled={sending || !newMessage.trim()}>
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </Card>
               </div>
-            </Card>
-          </div>
+            </TabsContent>
+
+            {(tripBrief || booking.trip_brief_id) && (
+              <TabsContent value="planner">
+                <TripPlannerTab
+                  bookingId={booking.id}
+                  procedures={
+                    Array.isArray(tripBrief?.procedures)
+                      ? tripBrief!.procedures
+                      : Array.isArray(booking.procedures)
+                        ? booking.procedures
+                        : []
+                  }
+                  destination={tripBrief?.destination || provider?.city || "Mexico"}
+                  travelStart={tripBrief?.travel_start || null}
+                  travelEnd={tripBrief?.travel_end || null}
+                  providerEstimatedDates={booking.provider_estimated_dates}
+                />
+              </TabsContent>
+            )}
+          </Tabs>
         </div>
       </main>
       <Footer />
