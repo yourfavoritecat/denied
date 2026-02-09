@@ -31,7 +31,7 @@ const SearchPage = () => {
   const filtered = useMemo(() => {
     return providers.filter((p) => {
       if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.specialties.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))) return false;
-      if (selectedLocation && p.city !== selectedLocation) return false;
+      if (selectedLocation && selectedLocation !== "all" && p.city !== selectedLocation) return false;
       if (selectedProcedure && !p.specialties.some(s => s.toLowerCase().includes(selectedProcedure.toLowerCase()))) return false;
       if (p.startingPrice > priceRange[0]) return false;
       if (selectedLanguages.length > 0 && !selectedLanguages.every(l => p.languages.includes(l))) return false;
@@ -76,6 +76,7 @@ const SearchPage = () => {
             <SelectValue placeholder="All locations" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">Show All Locations</SelectItem>
             {locations.map((loc) => (
               <SelectItem key={loc} value={loc}>{loc}</SelectItem>
             ))}
@@ -91,7 +92,7 @@ const SearchPage = () => {
           onValueChange={setPriceRange}
           max={25000}
           min={0}
-          step={100}
+          step={1}
           className="mb-2"
         />
         <div className="flex justify-between text-sm text-muted-foreground">
