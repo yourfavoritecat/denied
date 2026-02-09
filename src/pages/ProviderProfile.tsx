@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,15 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Star, MapPin, BadgeCheck, ArrowLeft, Globe, MessageSquareQuote } from "lucide-react";
 import { providers } from "@/data/providers";
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, delay: i * 0.1 },
+  }),
+};
 
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5">
@@ -46,12 +56,22 @@ const ProviderProfile = () => {
       <Navbar />
       <main className="pt-16 pb-24">
         {/* Hero / Cover */}
-        <div className="bg-gradient-to-br from-denied-black to-denied-black/90 relative">
+        <motion.div
+          className="bg-gradient-to-br from-denied-black to-denied-black/90 relative"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+        >
           <div className="container mx-auto px-4 py-12 md:py-20">
             <Link to="/search" className="inline-flex items-center gap-1 text-white/60 hover:text-white transition-colors text-sm mb-6">
               <ArrowLeft className="w-4 h-4" /> Back to Search
             </Link>
-            <div className="flex flex-col md:flex-row md:items-end gap-6">
+            <motion.div
+              className="flex flex-col md:flex-row md:items-end gap-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
                 <span className="text-4xl md:text-5xl font-bold text-white/30">{provider.name.charAt(0)}</span>
               </div>
@@ -70,27 +90,34 @@ const ProviderProfile = () => {
                   <span className="flex items-center gap-1"><Globe className="w-4 h-4" /> {provider.languages.join(", ")}</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Photo Gallery Placeholder */}
-        <div className="container mx-auto px-4 -mt-4 mb-10">
+        <motion.div
+          className="container mx-auto px-4 -mt-4 mb-10"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-50px" }}
+        >
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[1, 2, 3, 4].map((i) => (
-              <div
+              <motion.div
                 key={i}
+                variants={fadeUp}
+                custom={i * 0.5}
                 className={`rounded-xl bg-gradient-to-br from-denied-mint/10 to-denied-peach/10 border border-border/50 flex items-center justify-center ${i === 1 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-64" : "aspect-square md:h-[7.5rem]"}`}
               >
                 <p className="text-sm text-muted-foreground">Photo {i}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         <div className="container mx-auto px-4 space-y-12">
           {/* About */}
-          <section>
+          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">About</h2>
             <p className="text-muted-foreground leading-relaxed max-w-3xl">{provider.description}</p>
             <div className="flex flex-wrap gap-2 mt-4">
@@ -98,10 +125,10 @@ const ProviderProfile = () => {
                 <Badge key={s} variant="secondary">{s}</Badge>
               ))}
             </div>
-          </section>
+          </motion.section>
 
           {/* Procedures Table */}
-          <section>
+          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">Procedures & Pricing</h2>
             <Card className="border border-border/50 shadow-lg overflow-hidden">
               <Table>
@@ -129,10 +156,10 @@ const ProviderProfile = () => {
                 </TableBody>
               </Table>
             </Card>
-          </section>
+          </motion.section>
 
           {/* Reviews */}
-          <section>
+          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-6">Reviews</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {/* Rating Breakdown */}
@@ -193,10 +220,10 @@ const ProviderProfile = () => {
                 ))}
               </div>
             </div>
-          </section>
+          </motion.section>
 
           {/* Map Placeholder */}
-          <section>
+          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">Location</h2>
             <div className="rounded-xl bg-muted border border-border/50 h-64 md:h-80 flex items-center justify-center">
               <div className="text-center">
@@ -205,7 +232,7 @@ const ProviderProfile = () => {
                 <p className="text-sm text-muted-foreground">Google Maps embed coming soon</p>
               </div>
             </div>
-          </section>
+          </motion.section>
         </div>
       </main>
 
