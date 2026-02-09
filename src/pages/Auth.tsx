@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
+import { User, Stethoscope } from "lucide-react";
 import logo from "@/assets/logo.svg";
+
+type SignupRole = null | "patient" | "provider";
 
 const AuthPage = () => {
   const [email, setEmail] = useState("");
@@ -18,6 +21,7 @@ const AuthPage = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [signupRole, setSignupRole] = useState<SignupRole>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -108,7 +112,7 @@ const AuthPage = () => {
             <Tabs defaultValue="login">
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="login">Log In</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+                <TabsTrigger value="signup" onClick={() => setSignupRole(null)}>Sign Up</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
@@ -128,31 +132,65 @@ const AuthPage = () => {
               </TabsContent>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name</Label>
-                      <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                {!signupRole ? (
+                  <div className="space-y-4">
+                    <p className="text-center text-sm text-muted-foreground mb-2">I am a...</p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setSignupRole("patient")}
+                        className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-border hover:border-primary hover:bg-primary/5 transition-all"
+                      >
+                        <User className="w-8 h-8 text-primary" />
+                        <span className="font-semibold">Patient</span>
+                        <span className="text-xs text-muted-foreground text-center">Looking for affordable care abroad</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => navigate("/apply")}
+                        className="flex flex-col items-center gap-3 p-6 rounded-lg border-2 border-border hover:border-secondary hover:bg-secondary/5 transition-all"
+                      >
+                        <Stethoscope className="w-8 h-8 text-secondary" />
+                        <span className="font-semibold">Provider</span>
+                        <span className="text-xs text-muted-foreground text-center">Join our provider network</span>
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">First Name</Label>
+                        <Input id="firstName" value={firstName} onChange={(e) => setFirstName(e.target.value)} required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                      </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <Input id="lastName" value={lastName} onChange={(e) => setLastName(e.target.value)} required />
+                      <Label htmlFor="signup-email">Email</Label>
+                      <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input id="signup-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Sign Up"}
-                  </Button>
-                </form>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? "Creating account..." : "Sign Up"}
+                    </Button>
+                    <button type="button" onClick={() => setSignupRole(null)} className="w-full text-sm text-muted-foreground hover:text-foreground text-center">
+                      ← Back to role selection
+                    </button>
+                  </form>
+                )}
               </TabsContent>
             </Tabs>
+
+            <p className="text-center text-xs text-muted-foreground mt-6">
+              Are you a provider?{" "}
+              <Link to="/apply" className="text-secondary hover:underline font-medium">Apply here</Link>
+            </p>
           </CardContent>
         </Card>
       </div>
