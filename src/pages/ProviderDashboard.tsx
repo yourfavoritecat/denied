@@ -229,6 +229,19 @@ const ProviderDashboard = () => {
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
+  const updateBookingStatus = async (booking: Booking, newStatus: string) => {
+    const { error } = await supabase
+      .from("bookings")
+      .update({ status: newStatus } as any)
+      .eq("id", booking.id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Status updated", description: `Booking marked as ${STATUS_LABELS[newStatus] || newStatus}.` });
+      fetchBookings();
+    }
+  };
+
   const getProcedureText = (procedures: any) => {
     if (!procedures || !Array.isArray(procedures)) return "—";
     return procedures.map((p: any) => `${p.name}${p.quantity > 1 ? ` ×${p.quantity}` : ""}`).join(", ");
@@ -304,7 +317,7 @@ const ProviderDashboard = () => {
           </p>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {booking.status === "inquiry" && (
             <Button size="sm" onClick={() => openQuoteForm(booking)} className="gap-1">
               <DollarSign className="w-3 h-3" /> Submit Quote
@@ -313,6 +326,16 @@ const ProviderDashboard = () => {
           {booking.status === "quoted" && (
             <Button size="sm" variant="outline" onClick={() => openQuoteForm(booking)} className="gap-1">
               <DollarSign className="w-3 h-3" /> Edit Quote
+            </Button>
+          )}
+          {booking.status === "deposit_paid" && (
+            <Button size="sm" onClick={() => updateBookingStatus(booking, "confirmed")} className="gap-1">
+              <CheckCircle className="w-3 h-3" /> Confirm Trip
+            </Button>
+          )}
+          {booking.status === "confirmed" && (
+            <Button size="sm" onClick={() => updateBookingStatus(booking, "completed")} className="gap-1">
+              <CheckCircle className="w-3 h-3" /> Mark Completed
             </Button>
           )}
           <Button size="sm" variant="outline" onClick={() => openChat(booking)} className="gap-1">
