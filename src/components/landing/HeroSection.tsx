@@ -77,7 +77,7 @@ const HeroSection = () => {
           <img 
             src={logo} 
             alt="Denied Logo" 
-            className="w-72 md:w-96 lg:w-[500px] h-auto [filter:invert(70%)_sepia(50%)_saturate(1000%)_hue-rotate(330deg)_brightness(105%)]"
+            className="w-72 md:w-96 lg:w-[500px] h-auto"
           />
         </div>
         

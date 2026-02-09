@@ -19,9 +19,9 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    /* Primary: Mint Green #5EB298 */
-    --primary: 154 37% 53%;
-    --primary-foreground: 0 0% 100%;
+    /* Primary: Light Mint Green #7DD3B8 */
+    --primary: 160 50% 65%;
+    --primary-foreground: 0 0% 10%;
 
     /* Secondary: Bold Peach #FF8C69 */
     --secondary: 15 100% 71%;
@@ -39,14 +39,14 @@
 
     --border: 0 0% 85%;
     --input: 0 0% 85%;
-    --ring: 154 37% 53%;
+    --ring: 160 50% 65%;
 
     --radius: 0.5rem;
 
     /* Custom tokens for Denied brand */
     --denied-black: 0 0% 10%;
     --denied-peach: 15 100% 71%;
-    --denied-mint: 154 37% 53%;
+    --denied-mint: 160 50% 65%;
     --denied-cream: 13 100% 97%;
 
     --sidebar-background: 0 0% 98%;
@@ -69,7 +69,7 @@
     --popover: 0 0% 10%;
     --popover-foreground: 13 100% 97%;
 
-    --primary: 154 37% 53%;
+    --primary: 160 50% 65%;
     --primary-foreground: 0 0% 10%;
 
     --secondary: 15 100% 71%;
@@ -86,7 +86,7 @@
 
     --border: 0 0% 25%;
     --input: 0 0% 25%;
-    --ring: 154 37% 53%;
+    --ring: 160 50% 65%;
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
