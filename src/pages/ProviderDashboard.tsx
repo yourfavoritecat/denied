@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Send, DollarSign, Calendar, FileText, MessageSquare, Clock, CheckCircle, CreditCard, Plane, ArrowLeft } from "lucide-react";
+import { Send, DollarSign, Calendar, FileText, MessageSquare, Clock, CheckCircle, CreditCard, Plane, ArrowLeft, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -326,6 +326,11 @@ const ProviderDashboard = () => {
           {booking.status === "quoted" && (
             <Button size="sm" variant="outline" onClick={() => openQuoteForm(booking)} className="gap-1">
               <DollarSign className="w-3 h-3" /> Edit Quote
+            </Button>
+          )}
+          {["inquiry", "quoted"].includes(booking.status) && (
+            <Button size="sm" variant="outline" onClick={() => updateBookingStatus(booking, "cancelled")} className="gap-1 text-destructive hover:text-destructive">
+              <XCircle className="w-3 h-3" /> Cancel
             </Button>
           )}
           {booking.status === "deposit_paid" && (
