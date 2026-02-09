@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
@@ -6,43 +6,26 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ChecklistItem } from "@/data/checklistData";
 import { ShoppingBag, Plus, X } from "lucide-react";
+import { useTripPlannerState } from "@/hooks/useTripPlannerState";
 
 interface PackingListSectionProps {
   items: ChecklistItem[];
   storageKey: string;
+  bookingId: string;
 }
 
-const PackingListSection = ({ items, storageKey }: PackingListSectionProps) => {
-  const customKey = `${storageKey}-custom`;
-  const checkedKey = `${storageKey}-checked`;
-
-  const [customItems, setCustomItems] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(customKey);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-
-  const [checked, setChecked] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem(checkedKey);
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
+const PackingListSection = ({ items, storageKey, bookingId }: PackingListSectionProps) => {
+  const [customItems, setCustomItems] = useTripPlannerState<string[]>(
+    bookingId,
+    `${storageKey}-custom`,
+    []
+  );
+  const [checked, setChecked] = useTripPlannerState<Record<string, boolean>>(
+    bookingId,
+    `${storageKey}-checked`,
+    {}
+  );
   const [newItem, setNewItem] = useState("");
-
-  useEffect(() => {
-    localStorage.setItem(customKey, JSON.stringify(customItems));
-  }, [customItems, customKey]);
-
-  useEffect(() => {
-    localStorage.setItem(checkedKey, JSON.stringify(checked));
-  }, [checked, checkedKey]);
 
   const allItems = [
     ...items.map((i) => ({ id: i.id, label: i.label, custom: false })),

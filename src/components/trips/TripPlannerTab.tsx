@@ -59,14 +59,16 @@ const TripPlannerTab = ({
         <ChecklistSection
           title="Pre-Trip Checklist"
           items={getPreTripChecklist()}
-          storageKey={`checklist-pre-${bookingId}`}
+          storageKey={`checklist-pre`}
+          bookingId={bookingId}
         />
       </TabsContent>
 
       <TabsContent value="packing">
         <PackingListSection
           items={getPackingList(category)}
-          storageKey={`packing-${bookingId}`}
+          storageKey="packing"
+          bookingId={bookingId}
         />
       </TabsContent>
 
@@ -78,7 +80,8 @@ const TripPlannerTab = ({
         <ChecklistSection
           title="Post-Procedure Checklist"
           items={getPostProcedureChecklist(category)}
-          storageKey={`checklist-post-${bookingId}`}
+          storageKey={`checklist-post`}
+          bookingId={bookingId}
         />
       </TabsContent>
 
@@ -88,7 +91,8 @@ const TripPlannerTab = ({
           travelEnd={travelEnd}
           providerEstimatedDates={providerEstimatedDates}
           destination={destination}
-          storageKey={`itinerary-${bookingId}`}
+          storageKey="itinerary"
+          bookingId={bookingId}
         />
       </TabsContent>
     </Tabs>

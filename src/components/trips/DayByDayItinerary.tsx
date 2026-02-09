@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { CalendarDays, Plus, Trash2, Plane, Stethoscope, BedDouble, MapPin } from "lucide-react";
+import { useTripPlannerState } from "@/hooks/useTripPlannerState";
 
 interface ItineraryEvent {
   id: string;
@@ -25,6 +26,7 @@ interface DayByDayItineraryProps {
   providerEstimatedDates: string | null;
   destination: string;
   storageKey: string;
+  bookingId: string;
 }
 
 const EVENT_ICONS: Record<string, React.ElementType> = {
@@ -94,23 +96,19 @@ const generateDefaultItinerary = (
   return days;
 };
 
-const DayByDayItinerary = ({ travelStart, travelEnd, destination, storageKey }: DayByDayItineraryProps) => {
-  const [days, setDays] = useState<DayPlan[]>(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return generateDefaultItinerary(travelStart, travelEnd, destination);
-  });
+const DayByDayItinerary = ({ travelStart, travelEnd, destination, storageKey, bookingId }: DayByDayItineraryProps) => {
+  const defaultDays = generateDefaultItinerary(travelStart, travelEnd, destination);
+
+  const [days, setDays] = useTripPlannerState<DayPlan[]>(
+    bookingId,
+    storageKey,
+    defaultDays
+  );
 
   const [addingTo, setAddingTo] = useState<string | null>(null);
   const [newTitle, setNewTitle] = useState("");
   const [newTime, setNewTime] = useState("");
   const [newNotes, setNewNotes] = useState("");
-
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(days));
-  }, [days, storageKey]);
 
   const addEvent = (dateStr: string) => {
     if (!newTitle.trim()) return;

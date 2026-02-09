@@ -356,6 +356,41 @@ export type Database = {
         }
         Relationships: []
       }
+      trip_planner_state: {
+        Row: {
+          booking_id: string
+          id: string
+          state_data: Json
+          state_key: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          booking_id: string
+          id?: string
+          state_data?: Json
+          state_key: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          booking_id?: string
+          id?: string
+          state_data?: Json
+          state_key?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_planner_state_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

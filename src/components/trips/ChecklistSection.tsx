@@ -1,29 +1,23 @@
-import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { ChecklistItem } from "@/data/checklistData";
 import { CheckCircle } from "lucide-react";
+import { useTripPlannerState } from "@/hooks/useTripPlannerState";
 
 interface ChecklistSectionProps {
   title: string;
   items: ChecklistItem[];
   storageKey: string;
+  bookingId: string;
 }
 
-const ChecklistSection = ({ title, items, storageKey }: ChecklistSectionProps) => {
-  const [checked, setChecked] = useState<Record<string, boolean>>(() => {
-    try {
-      const saved = localStorage.getItem(storageKey);
-      return saved ? JSON.parse(saved) : {};
-    } catch {
-      return {};
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(checked));
-  }, [checked, storageKey]);
+const ChecklistSection = ({ title, items, storageKey, bookingId }: ChecklistSectionProps) => {
+  const [checked, setChecked] = useTripPlannerState<Record<string, boolean>>(
+    bookingId,
+    storageKey,
+    {}
+  );
 
   const toggle = (id: string) => {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
