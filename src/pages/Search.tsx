@@ -10,8 +10,29 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Star, Filter, BadgeCheck, X } from "lucide-react";
-import { providers, procedureTypes, locations } from "@/data/providers";
+import { Search, MapPin, Star, Filter, BadgeCheck, X, Syringe, ArrowUpDown } from "lucide-react";
+import { providers, procedureTypes, locations, type Provider } from "@/data/providers";
+
+// Tooth SVG icon component
+const ToothIcon = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 2C9.5 2 7.6 3.1 6.5 4.5C5.4 5.9 5 7.7 5 9.5C5 11.3 5.3 12.8 5.5 14.2C5.7 15.6 5.8 16.9 5.5 18C5.2 19.1 5.3 20.1 5.8 20.8C6.3 21.5 7 22 8 22C9 22 9.5 21.3 9.8 20.3C10.1 19.3 10.2 18 10.5 16.8C10.8 15.6 11.3 14.5 12 14.5C12.7 14.5 13.2 15.6 13.5 16.8C13.8 18 13.9 19.3 14.2 20.3C14.5 21.3 15 22 16 22C17 22 17.7 21.5 18.2 20.8C18.7 20.1 18.8 19.1 18.5 18C18.2 16.9 18.3 15.6 18.5 14.2C18.7 12.8 19 11.3 19 9.5C19 7.7 18.6 5.9 17.5 4.5C16.4 3.1 14.5 2 12 2Z" />
+  </svg>
+);
+
+const dentalKeywords = ["dental", "crown", "implant", "all-on-4", "veneer", "root canal", "cleaning", "whitening", "denture"];
+const aestheticKeywords = ["botox", "syringe", "chemical peel", "microneedling", "prp", "liposuction", "rhinoplasty", "tummy tuck", "facelift", "medspa", "aesthetics", "cosmetic surgery", "breast"];
+
+const getClinicCategory = (provider: Provider): "dental" | "aesthetic" | "mixed" => {
+  const allText = [...provider.specialties, provider.name].join(" ").toLowerCase();
+  const isDental = dentalKeywords.some((k) => allText.includes(k));
+  const isAesthetic = aestheticKeywords.some((k) => allText.includes(k));
+  if (isDental && !isAesthetic) return "dental";
+  if (isAesthetic && !isDental) return "aesthetic";
+  return isDental ? "dental" : "aesthetic";
+};
+
+type SortOption = "default" | "price-low" | "price-high" | "rating" | "reviews";
 
 const SearchPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -21,6 +42,7 @@ const SearchPage = () => {
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [minRating, setMinRating] = useState<number>(0);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
 
   const toggleLanguage = (lang: string) => {
     setSelectedLanguages((prev) =>
@@ -29,7 +51,7 @@ const SearchPage = () => {
   };
 
   const filtered = useMemo(() => {
-    return providers.filter((p) => {
+    let results = providers.filter((p) => {
       if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.specialties.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))) return false;
       if (selectedLocation && selectedLocation !== "all" && p.city !== selectedLocation) return false;
       if (selectedProcedure && !p.specialties.some(s => s.toLowerCase().includes(selectedProcedure.toLowerCase()))) return false;
@@ -38,7 +60,24 @@ const SearchPage = () => {
       if (minRating > 0 && p.rating < minRating) return false;
       return true;
     });
-  }, [searchQuery, selectedLocation, selectedProcedure, priceRange, selectedLanguages, minRating]);
+
+    switch (sortBy) {
+      case "price-low":
+        results = [...results].sort((a, b) => a.startingPrice - b.startingPrice);
+        break;
+      case "price-high":
+        results = [...results].sort((a, b) => b.startingPrice - a.startingPrice);
+        break;
+      case "rating":
+        results = [...results].sort((a, b) => b.rating - a.rating);
+        break;
+      case "reviews":
+        results = [...results].sort((a, b) => b.reviews - a.reviews);
+        break;
+    }
+
+    return results;
+  }, [searchQuery, selectedLocation, selectedProcedure, priceRange, selectedLanguages, minRating, sortBy]);
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -51,7 +90,7 @@ const SearchPage = () => {
 
   const hasActiveFilters = selectedLocation || selectedProcedure || priceRange[0] < 25000 || selectedLanguages.length > 0 || minRating > 0;
 
-  const FilterSidebar = () => (
+  const filtersContent = (
     <div className="space-y-6">
       {/* Procedure Type */}
       <div>
@@ -61,6 +100,7 @@ const SearchPage = () => {
             <SelectValue placeholder="All procedures" />
           </SelectTrigger>
           <SelectContent className="bg-popover z-50">
+            <SelectItem value="all">All Procedures</SelectItem>
             {procedureTypes.map((proc) => (
               <SelectItem key={proc} value={proc}>{proc}</SelectItem>
             ))}
@@ -193,7 +233,7 @@ const SearchPage = () => {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <FilterSidebar />
+                  {filtersContent}
                 </CardContent>
               </Card>
             </aside>
@@ -203,7 +243,7 @@ const SearchPage = () => {
               <div className="lg:hidden">
                 <Card className="border border-border/50 shadow-lg">
                   <CardContent className="pt-6">
-                    <FilterSidebar />
+                    {filtersContent}
                   </CardContent>
                 </Card>
               </div>
@@ -211,10 +251,23 @@ const SearchPage = () => {
 
             {/* Results */}
             <div className="flex-1">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <p className="text-muted-foreground">
                   <span className="font-bold text-foreground">{filtered.length}</span> provider{filtered.length !== 1 ? "s" : ""} found
                 </p>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                  <SelectTrigger className="w-48 bg-background">
+                    <ArrowUpDown className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    <SelectItem value="default">Default</SelectItem>
+                    <SelectItem value="price-low">Price: Low to High</SelectItem>
+                    <SelectItem value="price-high">Price: High to Low</SelectItem>
+                    <SelectItem value="rating">Highest Rated</SelectItem>
+                    <SelectItem value="reviews">Most Reviews</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {filtered.length === 0 ? (
@@ -225,59 +278,66 @@ const SearchPage = () => {
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 gap-6">
-                  {filtered.map((provider, index) => (
-                    <motion.div
-                      key={provider.slug}
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: index * 0.06 }}
-                    >
-                      <Link to={`/provider/${provider.slug}`}>
-                        <Card className="overflow-hidden border border-border/50 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full">
-                          <div className="aspect-[16/10] bg-gradient-to-br from-denied-mint/20 to-denied-peach/20 relative flex items-center justify-center">
-                            <div className="text-center p-4">
-                              <div className="w-16 h-16 rounded-full bg-denied-black/10 flex items-center justify-center mx-auto mb-2">
-                                <span className="text-2xl font-bold text-foreground/40">{provider.name.charAt(0)}</span>
+                  {filtered.map((provider, index) => {
+                    const category = getClinicCategory(provider);
+                    return (
+                      <motion.div
+                        key={provider.slug}
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.06 }}
+                      >
+                        <Link to={`/provider/${provider.slug}`}>
+                          <Card className="overflow-hidden border border-border/50 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full">
+                            <div className="aspect-[16/10] bg-gradient-to-br from-denied-mint/20 to-denied-peach/20 relative flex items-center justify-center">
+                              <div className="text-center p-4">
+                                {category === "dental" ? (
+                                  <ToothIcon className="w-16 h-16 mx-auto mb-2 text-foreground/15" />
+                                ) : (
+                                  <Syringe className="w-16 h-16 mx-auto mb-2 text-foreground/15" strokeWidth={1} />
+                                )}
+                                <p className="text-xs text-muted-foreground/60 uppercase tracking-wider font-medium">
+                                  {category === "dental" ? "Dental Clinic" : "Aesthetics & MedSpa"}
+                                </p>
                               </div>
-                              <p className="text-sm text-muted-foreground">Clinic Photo</p>
+                              {provider.verified && (
+                                <div className="absolute top-3 right-3">
+                                  <Badge className="bg-primary text-primary-foreground gap-1 shadow-md">
+                                    <BadgeCheck className="w-3 h-3" /> Verified
+                                  </Badge>
+                                </div>
+                              )}
                             </div>
-                            {provider.verified && (
-                              <div className="absolute top-3 right-3">
-                                <Badge className="bg-primary text-primary-foreground gap-1 shadow-md">
-                                  <BadgeCheck className="w-3 h-3" /> Verified
-                                </Badge>
+                            <CardContent className="p-5">
+                              <div className="flex items-start justify-between mb-2">
+                                <h3 className="font-bold text-lg leading-tight">{provider.name}</h3>
                               </div>
-                            )}
-                          </div>
-                          <CardContent className="p-5">
-                            <div className="flex items-start justify-between mb-2">
-                              <h3 className="font-bold text-lg leading-tight">{provider.name}</h3>
-                            </div>
-                            <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
-                              <MapPin className="w-4 h-4 shrink-0" />
-                              {provider.city}, Mexico
-                            </div>
-                            <div className="flex items-center gap-2 mb-3">
-                              <Star className="w-4 h-4 fill-secondary text-secondary" />
-                              <span className="font-bold">{provider.rating}</span>
-                              <span className="text-muted-foreground text-sm">({provider.reviews} reviews)</span>
-                            </div>
-                            <div className="flex flex-wrap gap-1.5 mb-4">
-                              {provider.specialties.slice(0, 3).map((specialty) => (
-                                <Badge key={specialty} variant="secondary" className="text-xs font-medium">
-                                  {specialty}
-                                </Badge>
-                              ))}
-                            </div>
-                            <div className="border-t pt-3">
-                              <span className="text-sm text-muted-foreground">From </span>
-                              <span className="text-xl font-bold text-primary">${provider.startingPrice}</span>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </motion.div>
-                  ))}
+                              <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
+                                <MapPin className="w-4 h-4 shrink-0" />
+                                {provider.city}, Mexico
+                              </div>
+                              <div className="flex items-center gap-2 mb-3">
+                                <Star className="w-4 h-4 fill-secondary text-secondary" />
+                                <span className="font-bold">{provider.rating}</span>
+                                <span className="text-muted-foreground text-sm">({provider.reviews} reviews)</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1.5 mb-4">
+                                {provider.specialties.slice(0, 3).map((specialty) => (
+                                  <Badge key={specialty} variant="secondary" className="text-xs font-medium">
+                                    {specialty}
+                                  </Badge>
+                                ))}
+                              </div>
+                              <div className="border-t pt-3">
+                                <span className="text-sm text-muted-foreground">From </span>
+                                <span className="text-xl font-bold text-primary">${provider.startingPrice}</span>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               )}
             </div>
