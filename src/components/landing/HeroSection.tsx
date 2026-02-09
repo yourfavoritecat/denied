@@ -73,15 +73,15 @@ const HeroSection = () => {
     <section className="bg-denied-black min-h-screen flex items-center pt-16">
       <div className="container mx-auto px-4 py-20 text-center">
         {/* Logo */}
-        <div className="mb-8 animate-fade-in flex justify-center">
+        <div className="mb-6 animate-fade-in flex justify-center">
           <img 
             src={logo} 
             alt="Denied Logo" 
-            className="w-48 md:w-64 lg:w-80 h-auto [filter:invert(70%)_sepia(60%)_saturate(700%)_hue-rotate(330deg)_brightness(100%)]"
+            className="w-72 md:w-96 lg:w-[500px] h-auto [filter:invert(70%)_sepia(50%)_saturate(1000%)_hue-rotate(330deg)_brightness(105%)]"
           />
         </div>
         
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-secondary mb-6 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
           Fuck Health Insurance.
         </h1>
         
