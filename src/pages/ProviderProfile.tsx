@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star, MapPin, BadgeCheck, ArrowLeft, Globe, MessageSquareQuote, PenLine, ExternalLink } from "lucide-react";
 import { providers } from "@/data/providers";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
@@ -37,8 +38,47 @@ const ProviderProfile = () => {
   const provider = providers.find((p) => p.slug === slug);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "highest" | "lowest" | "helpful">("newest");
+  const [filterRating, setFilterRating] = useState("all");
+  const [filterProcedure, setFilterProcedure] = useState("all");
   const { user } = useAuth();
   const { reviews, loading: reviewsLoading, refetch } = useReviews(slug);
+
+  const sortedReviews = useMemo(() => {
+    let filtered = [...reviews];
+    if (filterRating !== "all") {
+      const min = parseInt(filterRating);
+      filtered = filtered.filter((r) => r.rating >= min);
+    }
+    if (filterProcedure !== "all") {
+      filtered = filtered.filter((r) => r.procedure_name === filterProcedure);
+    }
+    switch (sortBy) {
+      case "oldest": filtered.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()); break;
+      case "highest": filtered.sort((a, b) => b.rating - a.rating); break;
+      case "lowest": filtered.sort((a, b) => a.rating - b.rating); break;
+      case "helpful": filtered.sort((a, b) => b.upvote_count - a.upvote_count); break;
+      default: filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+    return filtered;
+  }, [reviews, sortBy, filterRating, filterProcedure]);
+
+  const filteredSeedReviews = useMemo(() => {
+    if (!provider) return [];
+    let filtered = [...provider.reviewsList];
+    if (filterRating !== "all") {
+      const min = parseInt(filterRating);
+      filtered = filtered.filter((r) => r.rating >= min);
+    }
+    if (filterProcedure !== "all") {
+      filtered = filtered.filter((r) => r.procedure === filterProcedure);
+    }
+    if (sortBy === "oldest") filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    else if (sortBy === "highest") filtered.sort((a, b) => b.rating - a.rating);
+    else if (sortBy === "lowest") filtered.sort((a, b) => a.rating - b.rating);
+    else filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return filtered;
+  }, [provider, sortBy, filterRating, filterProcedure]);
 
   if (!provider) {
     return (
