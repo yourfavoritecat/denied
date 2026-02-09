@@ -14,6 +14,109 @@ export type Database = {
   }
   public: {
     Tables: {
+      booking_messages: {
+        Row: {
+          booking_id: string
+          created_at: string
+          id: string
+          message: string
+          sender_id: string
+        }
+        Insert: {
+          booking_id: string
+          created_at?: string
+          id?: string
+          message: string
+          sender_id: string
+        }
+        Update: {
+          booking_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_messages_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bookings: {
+        Row: {
+          commission_amount: number | null
+          created_at: string
+          deposit_amount: number | null
+          id: string
+          inquiry_message: string | null
+          medical_notes: string | null
+          preferred_dates: Json | null
+          procedures: Json | null
+          provider_estimated_dates: string | null
+          provider_message: string | null
+          provider_slug: string
+          quoted_price: number | null
+          status: string
+          stripe_checkout_session_id: string | null
+          stripe_payment_id: string | null
+          trip_brief_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          commission_amount?: number | null
+          created_at?: string
+          deposit_amount?: number | null
+          id?: string
+          inquiry_message?: string | null
+          medical_notes?: string | null
+          preferred_dates?: Json | null
+          procedures?: Json | null
+          provider_estimated_dates?: string | null
+          provider_message?: string | null
+          provider_slug: string
+          quoted_price?: number | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_id?: string | null
+          trip_brief_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          commission_amount?: number | null
+          created_at?: string
+          deposit_amount?: number | null
+          id?: string
+          inquiry_message?: string | null
+          medical_notes?: string | null
+          preferred_dates?: Json | null
+          procedures?: Json | null
+          provider_estimated_dates?: string | null
+          provider_message?: string | null
+          provider_slug?: string
+          quoted_price?: number | null
+          status?: string
+          stripe_checkout_session_id?: string | null
+          stripe_payment_id?: string | null
+          trip_brief_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_trip_brief_id_fkey"
+            columns: ["trip_brief_id"]
+            isOneToOne: false
+            referencedRelation: "trip_briefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

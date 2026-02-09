@@ -319,7 +319,7 @@ const ProviderProfile = () => {
         </div>
       </div>
 
-      <RequestQuoteModal open={quoteOpen} onOpenChange={setQuoteOpen} providerName={provider.name} />
+      <RequestQuoteModal open={quoteOpen} onOpenChange={setQuoteOpen} providerName={provider.name} providerSlug={provider.slug} />
       <LeaveReviewModal
         open={reviewOpen}
         onOpenChange={setReviewOpen}
