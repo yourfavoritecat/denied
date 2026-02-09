@@ -47,6 +47,69 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_applications: {
+        Row: {
+          business_name: string
+          business_type: string
+          certifications: string | null
+          city: string
+          contact_name: string
+          country: string
+          created_at: string
+          email: string
+          id: string
+          languages: string[] | null
+          phone: string
+          specialties: string[] | null
+          status: string
+          updated_at: string
+          website_url: string | null
+          whatsapp: string | null
+          why_join: string | null
+          years_in_practice: number | null
+        }
+        Insert: {
+          business_name: string
+          business_type: string
+          certifications?: string | null
+          city: string
+          contact_name: string
+          country: string
+          created_at?: string
+          email: string
+          id?: string
+          languages?: string[] | null
+          phone: string
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+          whatsapp?: string | null
+          why_join?: string | null
+          years_in_practice?: number | null
+        }
+        Update: {
+          business_name?: string
+          business_type?: string
+          certifications?: string | null
+          city?: string
+          contact_name?: string
+          country?: string
+          created_at?: string
+          email?: string
+          id?: string
+          languages?: string[] | null
+          phone?: string
+          specialties?: string[] | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+          whatsapp?: string | null
+          why_join?: string | null
+          years_in_practice?: number | null
+        }
+        Relationships: []
+      }
       trip_briefs: {
         Row: {
           budget_max: number | null
