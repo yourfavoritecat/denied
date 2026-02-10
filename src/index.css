@@ -107,6 +107,14 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Bricolage Grotesque', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-transform: lowercase;
+  }
+
+  /* Preserve user-typed capitalization in inputs */
+  input,
+  textarea,
+  [contenteditable="true"] {
+    text-transform: none;
   }
 }
 
