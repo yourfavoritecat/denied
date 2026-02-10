@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Instagram, Facebook } from "lucide-react";
+import { Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -94,14 +94,8 @@ const Launch = () => {
 
         {/* Social icons */}
         <div className="flex gap-6 mb-16">
-          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">
+          <a href="https://instagram.com/denied.care" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">
             <Instagram className="w-5 h-5" />
-          </a>
-          <a href="https://tiktok.com" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">
-            <TikTokIcon className="w-5 h-5" />
-          </a>
-          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">
-            <Facebook className="w-5 h-5" />
           </a>
         </div>
 
