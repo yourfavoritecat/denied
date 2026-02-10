@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Twitter, Instagram, Facebook, Youtube } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Footer = () => {
   return (
@@ -8,8 +9,8 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           {/* Brand */}
           <div>
-            <Link to="/" className="text-2xl font-bold text-secondary mb-4 block">
-              Denied
+            <Link to="/" className="mb-4 block">
+              <img src={logo} alt="Denied Logo" className="h-10 w-auto" />
             </Link>
             <p className="text-white/60 text-sm">
               Fighting back against the broken healthcare system. One procedure at a time.
