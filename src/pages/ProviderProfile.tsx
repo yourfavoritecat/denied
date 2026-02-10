@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
@@ -6,10 +6,9 @@ import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Star, MapPin, BadgeCheck, ArrowLeft, Globe, MessageSquareQuote, PenLine, ExternalLink } from "lucide-react";
+import { Star, MapPin, ArrowLeft, Globe, MessageSquareQuote, PenLine, ExternalLink, Users, Camera } from "lucide-react";
 import VerificationBadge from "@/components/providers/VerificationBadge";
 import { providers } from "@/data/providers";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
@@ -17,6 +16,7 @@ import LeaveReviewModal from "@/components/reviews/LeaveReviewModal";
 import ReviewCard from "@/components/reviews/ReviewCard";
 import { useReviews } from "@/hooks/useReviews";
 import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -34,9 +34,19 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
+interface RealProviderData {
+  business: any | null;
+  team: any[];
+  services: any[];
+  facility: any | null;
+  links: any | null;
+  policies: any | null;
+  tier: string;
+}
+
 const ProviderProfile = () => {
   const { slug } = useParams<{ slug: string }>();
-  const provider = providers.find((p) => p.slug === slug);
+  const seedProvider = providers.find((p) => p.slug === slug);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<any>(null);
@@ -45,6 +55,40 @@ const ProviderProfile = () => {
   const [filterProcedure, setFilterProcedure] = useState("all");
   const { user } = useAuth();
   const { reviews, loading: reviewsLoading, refetch } = useReviews(slug);
+  const [real, setReal] = useState<RealProviderData | null>(null);
+  const [realLoading, setRealLoading] = useState(true);
+
+  useEffect(() => {
+    if (!slug) return;
+    const fetchReal = async () => {
+      const [bizRes, teamRes, servRes, facRes, linksRes, polRes, profileRes] = await Promise.all([
+        supabase.from("provider_business_info").select("*").eq("provider_slug", slug).maybeSingle(),
+        supabase.from("provider_team_members").select("*").eq("provider_slug", slug).order("sort_order"),
+        supabase.from("provider_services").select("*").eq("provider_slug", slug),
+        supabase.from("provider_facility").select("*").eq("provider_slug", slug).maybeSingle(),
+        supabase.from("provider_external_links").select("*").eq("provider_slug", slug).maybeSingle(),
+        supabase.from("provider_policies").select("*").eq("provider_slug", slug).maybeSingle(),
+        supabase.from("profiles").select("verification_tier").eq("provider_slug", slug).maybeSingle(),
+      ]);
+      setReal({
+        business: bizRes.data,
+        team: teamRes.data || [],
+        services: servRes.data || [],
+        facility: facRes.data,
+        links: linksRes.data,
+        policies: polRes.data,
+        tier: (profileRes.data as any)?.verification_tier || "listed",
+      });
+      setRealLoading(false);
+    };
+    fetchReal();
+  }, [slug]);
+
+  // Determine what data to show
+  const hasRealData = real && (real.business || real.services.length > 0);
+  const providerName = real?.business?.dba_name || real?.business?.legal_name || seedProvider?.name || slug || "Provider";
+  const providerCity = real?.business?.city || seedProvider?.city || "";
+  const tier = real?.tier || (seedProvider?.verified ? "verified" : "listed");
 
   const sortedReviews = useMemo(() => {
     let filtered = [...reviews];
@@ -65,24 +109,18 @@ const ProviderProfile = () => {
     return filtered;
   }, [reviews, sortBy, filterRating, filterProcedure]);
 
-  const filteredSeedReviews = useMemo(() => {
-    if (!provider) return [];
-    let filtered = [...provider.reviewsList];
-    if (filterRating !== "all") {
-      const min = parseInt(filterRating);
-      filtered = filtered.filter((r) => r.rating >= min);
-    }
-    if (filterProcedure !== "all") {
-      filtered = filtered.filter((r) => r.procedure === filterProcedure);
-    }
-    if (sortBy === "oldest") filtered.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    else if (sortBy === "highest") filtered.sort((a, b) => b.rating - a.rating);
-    else if (sortBy === "lowest") filtered.sort((a, b) => a.rating - b.rating);
-    else filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    return filtered;
-  }, [provider, sortBy, filterRating, filterProcedure]);
+  if (!seedProvider && realLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="pt-24 flex justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+        </main>
+      </div>
+    );
+  }
 
-  if (!provider) {
+  if (!seedProvider && !hasRealData) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -95,13 +133,23 @@ const ProviderProfile = () => {
     );
   }
 
-  const totalReviews = provider.ratingBreakdown.reduce((a, b) => a + b, 0);
+  const totalReviews = seedProvider ? seedProvider.ratingBreakdown.reduce((a, b) => a + b, 0) : 0;
+  const facilityPhotos = real?.facility?.photos as string[] || [];
+  const externalLinks = real?.links;
 
-  // Placeholder external review URLs
-  const externalReviews = {
-    google: `https://www.google.com/maps/search/${encodeURIComponent(provider.name)}`,
-    yelp: `https://www.yelp.com/search?find_desc=${encodeURIComponent(provider.name)}`,
-  };
+  // Build procedures list from real data or seed
+  const procedures = real && real.services.length > 0
+    ? real.services.map((s: any) => ({
+        name: s.procedure_name,
+        price: `$${Number(s.base_price_usd).toLocaleString()}`,
+        duration: s.estimated_duration || "—",
+        description: s.description,
+        recovery: s.recovery_time,
+        packageDeals: s.package_deals,
+      }))
+    : seedProvider?.procedures || [];
+
+  const languages = real?.policies?.languages_spoken || seedProvider?.languages || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -119,48 +167,87 @@ const ProviderProfile = () => {
             <motion.div className="flex flex-col md:flex-row md:items-end gap-6"
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
               <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                <span className="text-4xl md:text-5xl font-bold text-white/30">{provider.name.charAt(0)}</span>
+                <span className="text-4xl md:text-5xl font-bold text-white/30">{providerName.charAt(0)}</span>
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <h1 className="text-3xl md:text-4xl font-bold text-white">{provider.name}</h1>
-                  {provider.verified && (
-                    <VerificationBadge tier="verified" size="md" />
-                  )}
+                  <h1 className="text-3xl md:text-4xl font-bold text-white">{providerName}</h1>
+                  <VerificationBadge tier={tier as any} size="md" />
                 </div>
                 <div className="flex items-center gap-4 text-white/70 flex-wrap">
-                  <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {provider.city}, Mexico</span>
-                  <span className="flex items-center gap-1"><Star className="w-4 h-4 fill-secondary text-secondary" /> {provider.rating} ({provider.reviews} reviews)</span>
-                  <span className="flex items-center gap-1"><Globe className="w-4 h-4" /> {provider.languages.join(", ")}</span>
+                  {providerCity && <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {providerCity}{real?.business?.state_country ? `, ${real.business.state_country}` : seedProvider ? ", Mexico" : ""}</span>}
+                  {seedProvider && <span className="flex items-center gap-1"><Star className="w-4 h-4 fill-secondary text-secondary" /> {seedProvider.rating} ({seedProvider.reviews} reviews)</span>}
+                  {languages.length > 0 && <span className="flex items-center gap-1"><Globe className="w-4 h-4" /> {languages.join(", ")}</span>}
                 </div>
               </div>
             </motion.div>
           </div>
         </motion.div>
 
-        {/* Photo Gallery Placeholder */}
+        {/* Facility Photos */}
         <motion.div className="container mx-auto px-4 -mt-4 mb-10" initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[1, 2, 3, 4].map((i) => (
-              <motion.div key={i} variants={fadeUp} custom={i * 0.5}
-                className={`rounded-xl bg-gradient-to-br from-denied-mint/10 to-denied-peach/10 border border-border/50 flex items-center justify-center ${i === 1 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-64" : "aspect-square md:h-[7.5rem]"}`}>
-                <p className="text-sm text-muted-foreground">Photo {i}</p>
-              </motion.div>
-            ))}
-          </div>
+          {facilityPhotos.length > 0 ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {facilityPhotos.slice(0, 5).map((url, i) => (
+                <motion.div key={i} variants={fadeUp} custom={i * 0.5}
+                  className={`rounded-xl overflow-hidden border border-border/50 ${i === 0 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-64" : "aspect-square md:h-[7.5rem]"}`}>
+                  <img src={url} alt={`Facility photo ${i + 1}`} className="w-full h-full object-cover" />
+                </motion.div>
+              ))}
+            </div>
+          ) : seedProvider ? (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[1, 2, 3, 4].map((i) => (
+                <motion.div key={i} variants={fadeUp} custom={i * 0.5}
+                  className={`rounded-xl bg-gradient-to-br from-denied-mint/10 to-denied-peach/10 border border-border/50 flex items-center justify-center ${i === 1 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-64" : "aspect-square md:h-[7.5rem]"}`}>
+                  <p className="text-sm text-muted-foreground">Photo {i}</p>
+                </motion.div>
+              ))}
+            </div>
+          ) : null}
         </motion.div>
 
         <div className="container mx-auto px-4 space-y-12">
-          {/* About */}
+          {/* About / Description */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">About</h2>
-            <p className="text-muted-foreground leading-relaxed max-w-3xl">{provider.description}</p>
-            <div className="flex flex-wrap gap-2 mt-4">
-              {provider.specialties.map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
-            </div>
+            <p className="text-muted-foreground leading-relaxed max-w-3xl">
+              {real?.facility?.description || seedProvider?.description || ""}
+            </p>
+            {seedProvider && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {seedProvider.specialties.map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
+              </div>
+            )}
           </motion.section>
 
-          {/* Procedures Table */}
+          {/* Team Members (real data) */}
+          {real && real.team.length > 0 && (
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
+              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><Users className="w-6 h-6" /> Our Team</h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {real.team.map((member: any) => (
+                  <Card key={member.id} className="border border-border/50 shadow-md hover:shadow-lg transition-shadow">
+                    <CardContent className="pt-6 flex gap-4">
+                      <Avatar className="w-16 h-16 shrink-0">
+                        <AvatarImage src={member.headshot_url} alt={member.name} />
+                        <AvatarFallback className="bg-primary text-primary-foreground font-bold">{member.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-bold">{member.name}</p>
+                        <p className="text-sm text-primary">{member.role}</p>
+                        {member.license_number && <p className="text-xs text-muted-foreground">License: {member.license_number}</p>}
+                        {member.bio && <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{member.bio}</p>}
+                        {member.is_lead && <Badge className="mt-2 bg-secondary/10 text-secondary text-xs">Lead</Badge>}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </motion.section>
+          )}
+
+          {/* Procedures & Pricing */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">Procedures & Pricing</h2>
             <Card className="border border-border/50 shadow-lg overflow-hidden">
@@ -169,20 +256,25 @@ const ProviderProfile = () => {
                   <TableRow className="bg-denied-black hover:bg-denied-black">
                     <TableHead className="text-white font-bold">Procedure</TableHead>
                     <TableHead className="text-white font-bold text-right">Price</TableHead>
-                    <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>
-                    <TableHead className="text-white font-bold text-right">Savings</TableHead>
+                    {seedProvider && <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>}
+                    {seedProvider && <TableHead className="text-white font-bold text-right">Savings</TableHead>}
                     <TableHead className="text-white font-bold text-right hidden sm:table-cell">Duration</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {provider.procedures.map((proc) => (
+                  {procedures.map((proc: any) => (
                     <TableRow key={proc.name}>
-                      <TableCell className="font-medium">{proc.name}</TableCell>
-                      <TableCell className="text-right font-bold text-primary">{proc.priceRange}</TableCell>
-                      <TableCell className="text-right text-muted-foreground line-through hidden md:table-cell">${proc.usPrice.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold">{proc.savings}% OFF</Badge>
+                      <TableCell className="font-medium">
+                        {proc.name}
+                        {proc.packageDeals && <p className="text-xs text-secondary mt-0.5">{proc.packageDeals}</p>}
                       </TableCell>
+                      <TableCell className="text-right font-bold text-primary">{proc.price || proc.priceRange}</TableCell>
+                      {seedProvider && <TableCell className="text-right text-muted-foreground line-through hidden md:table-cell">${proc.usPrice?.toLocaleString()}</TableCell>}
+                      {seedProvider && (
+                        <TableCell className="text-right">
+                          {proc.savings && <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold">{proc.savings}% OFF</Badge>}
+                        </TableCell>
+                      )}
                       <TableCell className="text-right text-muted-foreground hidden sm:table-cell">{proc.duration}</TableCell>
                     </TableRow>
                   ))}
@@ -202,53 +294,51 @@ const ProviderProfile = () => {
               )}
             </div>
             <div className="grid md:grid-cols-3 gap-8">
-              {/* Rating Breakdown */}
-              <Card className="border border-border/50 shadow-lg">
-                <CardContent className="pt-6">
-                  <div className="text-center mb-6">
-                    <div className="text-5xl font-bold text-foreground">{provider.rating}</div>
-                    <div className="flex justify-center mt-2 mb-1">
-                      <StarRating rating={Math.round(provider.rating)} />
+              {/* Rating Breakdown (seed data) */}
+              {seedProvider && (
+                <Card className="border border-border/50 shadow-lg">
+                  <CardContent className="pt-6">
+                    <div className="text-center mb-6">
+                      <div className="text-5xl font-bold text-foreground">{seedProvider.rating}</div>
+                      <div className="flex justify-center mt-2 mb-1">
+                        <StarRating rating={Math.round(seedProvider.rating)} />
+                      </div>
+                      <p className="text-sm text-muted-foreground">{seedProvider.reviews} reviews</p>
                     </div>
-                    <p className="text-sm text-muted-foreground">{provider.reviews} reviews</p>
-                  </div>
-                  <div className="space-y-2">
-                    {[5, 4, 3, 2, 1].map((star, idx) => {
-                      const count = provider.ratingBreakdown[idx];
-                      const pct = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
-                      return (
-                        <div key={star} className="flex items-center gap-2 text-sm">
-                          <span className="w-3 text-right">{star}</span>
-                          <Star className="w-3 h-3 fill-secondary text-secondary" />
-                          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                    <div className="space-y-2">
+                      {[5, 4, 3, 2, 1].map((star, idx) => {
+                        const count = seedProvider.ratingBreakdown[idx];
+                        const pct = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                        return (
+                          <div key={star} className="flex items-center gap-2 text-sm">
+                            <span className="w-3 text-right">{star}</span>
+                            <Star className="w-3 h-3 fill-secondary text-secondary" />
+                            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                              <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="w-8 text-right text-muted-foreground">{count}</span>
                           </div>
-                          <span className="w-8 text-right text-muted-foreground">{count}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
-              {/* User Reviews from DB */}
-              <div className="md:col-span-2 space-y-4">
+              {/* Reviews list */}
+              <div className={seedProvider ? "md:col-span-2 space-y-4" : "md:col-span-3 space-y-4"}>
                 {reviewsLoading ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                   </div>
                 ) : reviews.length > 0 ? (
                   reviews.map((review) => (
-                    <ReviewCard
-                      key={review.id}
-                      review={review}
-                      onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }}
-                    />
+                    <ReviewCard key={review.id} review={review} onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }} />
                   ))
                 ) : null}
 
                 {/* Static seed reviews */}
-                {provider.reviewsList.map((review) => (
+                {seedProvider?.reviewsList.map((review) => (
                   <Card key={review.name + review.date} className="border border-border/50 shadow-md hover:shadow-lg transition-shadow">
                     <CardContent className="pt-6">
                       <div className="flex items-start gap-4">
@@ -277,22 +367,68 @@ const ProviderProfile = () => {
             </div>
           </motion.section>
 
-          {/* External Reviews */}
+          {/* External Links (real data or seed fallback) */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
-            <h2 className="text-2xl font-bold mb-4">External Reviews</h2>
+            <h2 className="text-2xl font-bold mb-4">External Reviews & Links</h2>
             <div className="flex flex-wrap gap-3">
-              <a href={externalReviews.google} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="gap-2">
-                  <ExternalLink className="w-4 h-4" /> View on Google Reviews
-                </Button>
-              </a>
-              <a href={externalReviews.yelp} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="gap-2">
-                  <ExternalLink className="w-4 h-4" /> View on Yelp
-                </Button>
-              </a>
+              {externalLinks?.google_business_url && (
+                <a href={externalLinks.google_business_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Google Business</Button>
+                </a>
+              )}
+              {externalLinks?.yelp_url && (
+                <a href={externalLinks.yelp_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Yelp</Button>
+                </a>
+              )}
+              {externalLinks?.website_url && (
+                <a href={externalLinks.website_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="gap-2"><Globe className="w-4 h-4" /> Website</Button>
+                </a>
+              )}
+              {externalLinks?.instagram_url && (
+                <a href={externalLinks.instagram_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Instagram</Button>
+                </a>
+              )}
+              {externalLinks?.facebook_url && (
+                <a href={externalLinks.facebook_url} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Facebook</Button>
+                </a>
+              )}
+              {!externalLinks && seedProvider && (
+                <>
+                  <a href={`https://www.google.com/maps/search/${encodeURIComponent(seedProvider.name)}`} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> View on Google Reviews</Button>
+                  </a>
+                  <a href={`https://www.yelp.com/search?find_desc=${encodeURIComponent(seedProvider.name)}`} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> View on Yelp</Button>
+                  </a>
+                </>
+              )}
             </div>
           </motion.section>
+
+          {/* Policies (real data) */}
+          {real?.policies && (
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
+              <h2 className="text-2xl font-bold mb-4">Policies & Info</h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {real.policies.hours_of_operation && (
+                  <Card className="border border-border/50"><CardContent className="pt-5"><p className="text-sm font-semibold mb-1">Hours</p><p className="text-sm text-muted-foreground whitespace-pre-line">{real.policies.hours_of_operation}</p></CardContent></Card>
+                )}
+                {real.policies.cancellation_policy && (
+                  <Card className="border border-border/50"><CardContent className="pt-5"><p className="text-sm font-semibold mb-1">Cancellation Policy</p><p className="text-sm text-muted-foreground">{real.policies.cancellation_policy}</p></CardContent></Card>
+                )}
+                {real.policies.deposit_requirements && (
+                  <Card className="border border-border/50"><CardContent className="pt-5"><p className="text-sm font-semibold mb-1">Deposit Requirements</p><p className="text-sm text-muted-foreground">{real.policies.deposit_requirements}</p></CardContent></Card>
+                )}
+                {real.policies.accepted_payments?.length > 0 && (
+                  <Card className="border border-border/50"><CardContent className="pt-5"><p className="text-sm font-semibold mb-1">Accepted Payments</p><div className="flex flex-wrap gap-1">{real.policies.accepted_payments.map((p: string) => <Badge key={p} variant="outline" className="text-xs">{p}</Badge>)}</div></CardContent></Card>
+                )}
+              </div>
+            </motion.section>
+          )}
 
           {/* Map Placeholder */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
@@ -300,7 +436,7 @@ const ProviderProfile = () => {
             <div className="rounded-xl bg-muted border border-border/50 h-64 md:h-80 flex items-center justify-center">
               <div className="text-center">
                 <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground font-medium">{provider.city}, Mexico</p>
+                <p className="text-muted-foreground font-medium">{providerCity}{real?.business?.state_country ? `, ${real.business.state_country}` : seedProvider ? ", Mexico" : ""}</p>
                 <p className="text-sm text-muted-foreground">Google Maps embed coming soon</p>
               </div>
             </div>
@@ -313,7 +449,11 @@ const ProviderProfile = () => {
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div>
             <span className="text-sm text-muted-foreground">Starting at </span>
-            <span className="text-2xl font-bold text-primary">${provider.startingPrice}</span>
+            <span className="text-2xl font-bold text-primary">
+              {real && real.services.length > 0
+                ? `$${Math.min(...real.services.map((s: any) => Number(s.base_price_usd))).toLocaleString()}`
+                : seedProvider ? `$${seedProvider.startingPrice}` : "Contact us"}
+            </span>
           </div>
           <Button
             className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-bold h-12 px-8 text-base shadow-lg"
@@ -325,13 +465,13 @@ const ProviderProfile = () => {
         </div>
       </div>
 
-      <RequestQuoteModal open={quoteOpen} onOpenChange={setQuoteOpen} providerName={provider.name} providerSlug={provider.slug} />
+      <RequestQuoteModal open={quoteOpen} onOpenChange={setQuoteOpen} providerName={providerName} providerSlug={slug || ""} />
       <LeaveReviewModal
         open={reviewOpen}
         onOpenChange={(open) => { setReviewOpen(open); if (!open) setEditingReview(null); }}
-        providerSlug={provider.slug}
-        providerName={provider.name}
-        procedures={provider.procedures.map((p) => p.name)}
+        providerSlug={slug || ""}
+        providerName={providerName}
+        procedures={procedures.map((p: any) => p.name)}
         onReviewSubmitted={refetch}
         editReview={editingReview}
       />
