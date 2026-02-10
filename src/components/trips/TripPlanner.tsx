@@ -80,7 +80,7 @@ const TripPlanner = ({ open, onOpenChange, onSaved }: TripPlannerProps) => {
     if (error) {
       toast({ title: "Error saving trip", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Trip brief saved!" });
+      toast({ title: "Trip Brief Saved!", description: "You can attach this brief when requesting a quote." });
       // Reset
       setTripName("");
       setDestination("");

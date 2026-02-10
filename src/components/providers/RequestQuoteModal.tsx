@@ -135,6 +135,10 @@ const RequestQuoteModal = ({ open, onOpenChange, providerName, providerSlug }: R
 
   const formatDate = (d: string | null) => {
     if (!d) return "";
+    if (d.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const [year, month, day] = d.split("-").map(Number);
+      return new Date(year, month - 1, day).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    }
     return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
