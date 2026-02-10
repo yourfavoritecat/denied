@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,12 @@ import { Star, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import type { ReviewData } from "@/components/reviews/ReviewCard";
+
+const PHOTO_ACCEPT = ".jpg,.jpeg,.png,.heic,.heif";
+const VIDEO_ACCEPT = ".mp4,.mov,.webm";
+const MAX_VIDEO_SIZE = 100 * 1024 * 1024; // 100MB
+const MAX_PHOTO_SIZE = 10 * 1024 * 1024; // 10MB
 
 interface LeaveReviewModalProps {
   open: boolean;
@@ -18,10 +24,11 @@ interface LeaveReviewModalProps {
   providerName: string;
   procedures: string[];
   onReviewSubmitted: () => void;
+  editReview?: ReviewData | null;
 }
 
 const LeaveReviewModal = ({
-  open, onOpenChange, providerSlug, providerName, procedures, onReviewSubmitted,
+  open, onOpenChange, providerSlug, providerName, procedures, onReviewSubmitted, editReview,
 }: LeaveReviewModalProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -31,27 +38,67 @@ const LeaveReviewModal = ({
   const [reviewText, setReviewText] = useState("");
   const [procedure, setProcedure] = useState("");
   const [recommend, setRecommend] = useState(true);
-  const [photos, setPhotos] = useState<File[]>([]);
-  const [videos, setVideos] = useState<File[]>([]);
+  const [newPhotos, setNewPhotos] = useState<File[]>([]);
+  const [newVideos, setNewVideos] = useState<File[]>([]);
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
+  const [existingVideos, setExistingVideos] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isEditing = !!editReview;
+
+  // Pre-fill when editing
+  useEffect(() => {
+    if (editReview && open) {
+      setRating(editReview.rating);
+      setTitle(editReview.title);
+      setReviewText(editReview.review_text);
+      setProcedure(editReview.procedure_name);
+      setRecommend(editReview.recommend);
+      setExistingPhotos(editReview.photos || []);
+      setExistingVideos(editReview.videos || []);
+      setNewPhotos([]);
+      setNewVideos([]);
+    } else if (!editReview && open) {
+      setRating(0); setTitle(""); setReviewText(""); setProcedure("");
+      setRecommend(true); setNewPhotos([]); setNewVideos([]);
+      setExistingPhotos([]); setExistingVideos([]);
+    }
+  }, [editReview, open]);
+
+  const totalPhotos = existingPhotos.length + newPhotos.length;
+  const totalVideos = existingVideos.length + newVideos.length;
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setPhotos((prev) => [...prev, ...files].slice(0, 10));
+    const valid = files.filter(f => {
+      if (f.size > MAX_PHOTO_SIZE) {
+        toast({ title: `${f.name} exceeds 10MB limit`, variant: "destructive" });
+        return false;
+      }
+      return true;
+    });
+    const remaining = 10 - totalPhotos;
+    setNewPhotos(prev => [...prev, ...valid.slice(0, remaining)]);
   };
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    setVideos((prev) => [...prev, ...files].slice(0, 2));
+    const valid = files.filter(f => {
+      if (f.size > MAX_VIDEO_SIZE) {
+        toast({ title: `${f.name} exceeds 100MB limit`, variant: "destructive" });
+        return false;
+      }
+      return true;
+    });
+    const remaining = 2 - totalVideos;
+    setNewVideos(prev => [...prev, ...valid.slice(0, remaining)]);
   };
 
   const uploadFiles = async (files: File[], type: "photos" | "videos") => {
     const urls: string[] = [];
     for (const file of files) {
       const path = `${user!.id}/${type}/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage
-        .from("review-media")
-        .upload(path, file);
+      const { error } = await supabase.storage.from("review-media").upload(path, file);
       if (!error) {
         const { data } = supabase.storage.from("review-media").getPublicUrl(path);
         urls.push(data.publicUrl);
@@ -64,31 +111,56 @@ const LeaveReviewModal = ({
     if (!user || rating === 0 || !title || reviewText.length < 50 || !procedure) return;
     setIsSubmitting(true);
 
-    const photoUrls = photos.length > 0 ? await uploadFiles(photos, "photos") : [];
-    const videoUrls = videos.length > 0 ? await uploadFiles(videos, "videos") : [];
+    const uploadedPhotos = newPhotos.length > 0 ? await uploadFiles(newPhotos, "photos") : [];
+    const uploadedVideos = newVideos.length > 0 ? await uploadFiles(newVideos, "videos") : [];
 
-    const { error } = await supabase.from("reviews" as any).insert({
-      user_id: user.id,
-      provider_slug: providerSlug,
-      rating,
-      title: title.trim(),
-      review_text: reviewText.trim(),
-      procedure_name: procedure,
-      recommend,
-      photos: photoUrls,
-      videos: videoUrls,
-    } as any);
+    const allPhotos = [...existingPhotos, ...uploadedPhotos];
+    const allVideos = [...existingVideos, ...uploadedVideos];
 
-    setIsSubmitting(false);
-    if (error) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    if (isEditing && editReview) {
+      const { error } = await supabase.from("reviews" as any).update({
+        rating,
+        title: title.trim(),
+        review_text: reviewText.trim(),
+        procedure_name: procedure,
+        recommend,
+        photos: allPhotos,
+        videos: allVideos,
+        is_edited: true,
+      } as any).eq("id", editReview.id);
+
+      setIsSubmitting(false);
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Review updated!" });
+        onReviewSubmitted();
+        onOpenChange(false);
+      }
     } else {
-      toast({ title: "Review submitted!" });
-      onReviewSubmitted();
-      onOpenChange(false);
-      // Reset
-      setRating(0); setTitle(""); setReviewText(""); setProcedure("");
-      setRecommend(true); setPhotos([]); setVideos([]);
+      const { error } = await supabase.from("reviews" as any).insert({
+        user_id: user.id,
+        provider_slug: providerSlug,
+        rating,
+        title: title.trim(),
+        review_text: reviewText.trim(),
+        procedure_name: procedure,
+        recommend,
+        photos: allPhotos,
+        videos: allVideos,
+      } as any);
+
+      setIsSubmitting(false);
+      if (error) {
+        toast({ title: "Error", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Review submitted!" });
+        onReviewSubmitted();
+        onOpenChange(false);
+        setRating(0); setTitle(""); setReviewText(""); setProcedure("");
+        setRecommend(true); setNewPhotos([]); setNewVideos([]);
+        setExistingPhotos([]); setExistingVideos([]);
+      }
     }
   };
 
@@ -96,7 +168,7 @@ const LeaveReviewModal = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Review {providerName}</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit Review" : `Review ${providerName}`}</DialogTitle>
         </DialogHeader>
         <div className="space-y-5">
           {/* Star rating */}
@@ -113,9 +185,7 @@ const LeaveReviewModal = ({
                 >
                   <Star
                     className={`w-8 h-8 transition-colors ${
-                      s <= (hoverRating || rating)
-                        ? "fill-secondary text-secondary"
-                        : "text-border"
+                      s <= (hoverRating || rating) ? "fill-secondary text-secondary" : "text-border"
                     }`}
                   />
                 </button>
@@ -158,24 +228,36 @@ const LeaveReviewModal = ({
 
           {/* Photos */}
           <div className="space-y-2">
-            <Label>Photos (up to 10)</Label>
+            <Label>Photos ({totalPhotos}/10) — JPG, PNG, HEIC</Label>
             <div className="flex flex-wrap gap-2">
-              {photos.map((f, i) => (
-                <div key={i} className="relative w-16 h-16 rounded-md overflow-hidden bg-muted">
-                  <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+              {existingPhotos.map((url, i) => (
+                <div key={`existing-${i}`} className="relative w-16 h-16 rounded-md overflow-hidden bg-muted">
+                  <img src={url} alt="" className="w-full h-full object-cover" />
                   <button
                     type="button"
                     className="absolute top-0 right-0 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center"
-                    onClick={() => setPhotos((prev) => prev.filter((_, j) => j !== i))}
+                    onClick={() => setExistingPhotos(prev => prev.filter((_, j) => j !== i))}
                   >
                     <X className="w-3 h-3" />
                   </button>
                 </div>
               ))}
-              {photos.length < 10 && (
+              {newPhotos.map((f, i) => (
+                <div key={`new-${i}`} className="relative w-16 h-16 rounded-md overflow-hidden bg-muted">
+                  <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    className="absolute top-0 right-0 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center"
+                    onClick={() => setNewPhotos(prev => prev.filter((_, j) => j !== i))}
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {totalPhotos < 10 && (
                 <label className="w-16 h-16 rounded-md border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary transition-colors">
                   <Upload className="w-5 h-5 text-muted-foreground" />
-                  <input type="file" accept="image/*" multiple className="hidden" onChange={handlePhotoUpload} />
+                  <input type="file" accept={PHOTO_ACCEPT} multiple className="hidden" onChange={handlePhotoUpload} />
                 </label>
               )}
             </div>
@@ -183,24 +265,28 @@ const LeaveReviewModal = ({
 
           {/* Videos */}
           <div className="space-y-2">
-            <Label>Videos (up to 2)</Label>
+            <Label>Videos ({totalVideos}/2) — MP4, MOV, WebM · 100MB max</Label>
             <div className="flex flex-wrap gap-2">
-              {videos.map((f, i) => (
-                <div key={i} className="relative flex items-center gap-2 px-3 py-2 rounded-md bg-muted text-sm">
-                  {f.name.slice(0, 20)}
-                  <button
-                    type="button"
-                    className="text-destructive"
-                    onClick={() => setVideos((prev) => prev.filter((_, j) => j !== i))}
-                  >
+              {existingVideos.map((url, i) => (
+                <div key={`ev-${i}`} className="relative flex items-center gap-2 px-3 py-2 rounded-md bg-muted text-sm">
+                  <span className="truncate max-w-[120px]">Video {i + 1}</span>
+                  <button type="button" className="text-destructive" onClick={() => setExistingVideos(prev => prev.filter((_, j) => j !== i))}>
                     <X className="w-3 h-3" />
                   </button>
                 </div>
               ))}
-              {videos.length < 2 && (
+              {newVideos.map((f, i) => (
+                <div key={`nv-${i}`} className="relative flex items-center gap-2 px-3 py-2 rounded-md bg-muted text-sm">
+                  <span className="truncate max-w-[120px]">{f.name}</span>
+                  <button type="button" className="text-destructive" onClick={() => setNewVideos(prev => prev.filter((_, j) => j !== i))}>
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+              {totalVideos < 2 && (
                 <label className="px-4 py-2 rounded-md border-2 border-dashed border-border flex items-center gap-2 cursor-pointer hover:border-primary transition-colors text-sm text-muted-foreground">
                   <Upload className="w-4 h-4" /> Add Video
-                  <input type="file" accept="video/*" className="hidden" onChange={handleVideoUpload} />
+                  <input type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleVideoUpload} />
                 </label>
               )}
             </div>
@@ -217,7 +303,7 @@ const LeaveReviewModal = ({
             disabled={isSubmitting || rating === 0 || !title || reviewText.length < 50 || !procedure}
             onClick={handleSubmit}
           >
-            {isSubmitting ? "Submitting..." : "Submit Review"}
+            {isSubmitting ? (isEditing ? "Saving..." : "Submitting...") : (isEditing ? "Save Changes" : "Submit Review")}
           </Button>
         </div>
       </DialogContent>

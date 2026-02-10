@@ -38,6 +38,7 @@ const ProviderProfile = () => {
   const provider = providers.find((p) => p.slug === slug);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [editingReview, setEditingReview] = useState<any>(null);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "highest" | "lowest" | "helpful">("newest");
   const [filterRating, setFilterRating] = useState("all");
   const [filterProcedure, setFilterProcedure] = useState("all");
@@ -238,7 +239,13 @@ const ProviderProfile = () => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                   </div>
                 ) : reviews.length > 0 ? (
-                  reviews.map((review) => <ReviewCard key={review.id} review={review} />)
+                  reviews.map((review) => (
+                    <ReviewCard
+                      key={review.id}
+                      review={review}
+                      onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }}
+                    />
+                  ))
                 ) : null}
 
                 {/* Static seed reviews */}
@@ -322,11 +329,12 @@ const ProviderProfile = () => {
       <RequestQuoteModal open={quoteOpen} onOpenChange={setQuoteOpen} providerName={provider.name} providerSlug={provider.slug} />
       <LeaveReviewModal
         open={reviewOpen}
-        onOpenChange={setReviewOpen}
+        onOpenChange={(open) => { setReviewOpen(open); if (!open) setEditingReview(null); }}
         providerSlug={provider.slug}
         providerName={provider.name}
         procedures={provider.procedures.map((p) => p.name)}
         onReviewSubmitted={refetch}
+        editReview={editingReview}
       />
 
       <Footer />
