@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Star, MapPin, BadgeCheck, ArrowLeft, Globe, MessageSquareQuote, PenLine, ExternalLink } from "lucide-react";
+import VerificationBadge from "@/components/providers/VerificationBadge";
 import { providers } from "@/data/providers";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
 import LeaveReviewModal from "@/components/reviews/LeaveReviewModal";
@@ -124,9 +125,7 @@ const ProviderProfile = () => {
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
                   <h1 className="text-3xl md:text-4xl font-bold text-white">{provider.name}</h1>
                   {provider.verified && (
-                    <Badge className="bg-primary text-primary-foreground gap-1">
-                      <BadgeCheck className="w-3.5 h-3.5" /> Verified
-                    </Badge>
+                    <VerificationBadge tier="verified" size="md" />
                   )}
                 </div>
                 <div className="flex items-center gap-4 text-white/70 flex-wrap">

@@ -1,8 +1,9 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuth();
+  const { user, profile, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -14,6 +15,15 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!user) {
     return <Navigate to="/auth" replace />;
+  }
+
+  // Auto-redirect providers who haven't completed onboarding
+  const isProvider = !!(profile as any)?.provider_slug;
+  const onboardingComplete = !!(profile as any)?.onboarding_complete;
+  const isOnboardingPage = location.pathname === "/provider/onboarding";
+
+  if (isProvider && !onboardingComplete && !isOnboardingPage) {
+    return <Navigate to="/provider/onboarding" replace />;
   }
 
   return <>{children}</>;
