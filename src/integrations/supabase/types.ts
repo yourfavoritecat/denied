@@ -741,7 +741,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      profiles_public: {
+        Row: {
+          avatar_url: string | null
+          city: string | null
+          created_at: string | null
+          first_name: string | null
+          last_name: string | null
+          public_profile: boolean | null
+          social_verifications: Json | null
+          user_id: string | null
+          username: string | null
+          verification_tier: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          public_profile?: boolean | null
+          social_verifications?: Json | null
+          user_id?: string | null
+          username?: string | null
+          verification_tier?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          city?: string | null
+          created_at?: string | null
+          first_name?: string | null
+          last_name?: string | null
+          public_profile?: boolean | null
+          social_verifications?: Json | null
+          user_id?: string | null
+          username?: string | null
+          verification_tier?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_admin_user_list: {

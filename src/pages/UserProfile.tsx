@@ -30,10 +30,9 @@ const UserProfile = () => {
   useEffect(() => {
     const fetch = async () => {
       const { data } = await supabase
-        .from("profiles")
+        .from("profiles_public" as any)
         .select("user_id, first_name, city, username, created_at, social_verifications")
         .eq("username", username)
-        .eq("public_profile", true)
         .single();
       setProfile(data as any);
 
