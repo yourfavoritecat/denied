@@ -1,35 +1,54 @@
-import { BadgeCheck, Shield, Award, ShieldCheck } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import pinUnverified from "@/assets/pin-unverified.png";
+import pinVerified from "@/assets/pin-verified.png";
+import pinTrustedTraveler from "@/assets/pin-trusted-traveler.png";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export type UserTrustTier = "unverified" | "verified" | "trusted" | "trusted_traveler";
 
+type BadgeSize = "sm" | "md" | "lg";
+
 interface UserTrustBadgeProps {
   tier: UserTrustTier;
-  size?: "sm" | "md";
-  showLabel?: boolean;
+  size?: BadgeSize;
+  showUpgradePrompt?: boolean;
 }
 
-const tierConfig: Record<UserTrustTier, { label: string; icon: any; className: string }> = {
+const tierConfig: Record<UserTrustTier, { label: string; tooltip: string; upgradePrompt: string; icon: string }> = {
   unverified: {
-    label: "(unverified)",
-    icon: Shield,
-    className: "bg-muted text-muted-foreground",
+    label: "Unverified",
+    tooltip: "Unverified — connect your socials to earn a trust badge",
+    upgradePrompt: "Connect your socials to earn Verified status.",
+    icon: pinUnverified,
   },
   verified: {
     label: "Verified",
-    icon: BadgeCheck,
-    className: "bg-[hsl(160,50%,65%)]/15 text-[hsl(160,50%,45%)] border border-[hsl(160,50%,65%)]/30",
+    tooltip: "Verified — social accounts connected",
+    upgradePrompt: "Complete a trip through Denied to become a Trusted Traveler.",
+    icon: pinVerified,
   },
   trusted: {
     label: "Trusted",
-    icon: ShieldCheck,
-    className: "bg-amber-500/15 text-amber-600 border border-amber-500/30",
+    tooltip: "Verified — social accounts connected",
+    upgradePrompt: "Complete a trip through Denied to become a Trusted Traveler.",
+    icon: pinVerified,
   },
   trusted_traveler: {
     label: "Trusted Traveler",
-    icon: Award,
-    className: "bg-amber-500/15 text-amber-600 border border-amber-500/30",
+    tooltip: "Trusted Traveler — verified member with completed trips",
+    upgradePrompt: "",
+    icon: pinTrustedTraveler,
   },
+};
+
+const sizeMap: Record<BadgeSize, number> = {
+  sm: 20,
+  md: 32,
+  lg: 48,
 };
 
 export const computeUserTrustTier = (
@@ -46,22 +65,35 @@ export const computeUserTrustTier = (
   return "unverified";
 };
 
-const UserTrustBadge = ({ tier, size = "sm", showLabel = true }: UserTrustBadgeProps) => {
-  if (tier === "unverified" && !showLabel) return null;
-
+const UserTrustBadge = ({ tier, size = "sm", showUpgradePrompt = false }: UserTrustBadgeProps) => {
   const config = tierConfig[tier];
-  const Icon = config.icon;
-  const iconSize = size === "sm" ? "w-3 h-3" : "w-4 h-4";
-
-  if (tier === "unverified") {
-    return <span className="text-xs text-muted-foreground italic">{config.label}</span>;
-  }
+  const px = sizeMap[size];
 
   return (
-    <Badge className={`${config.className} gap-1 ${size === "md" ? "text-sm px-3 py-1" : "text-xs"}`}>
-      <Icon className={iconSize} />
-      {showLabel && config.label}
-    </Badge>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="inline-flex items-center gap-1.5 shrink-0">
+            <img
+              src={config.icon}
+              alt={config.label}
+              width={px}
+              height={px}
+              className="inline-block"
+              style={{ width: px, height: px }}
+            />
+            {showUpgradePrompt && config.upgradePrompt && (
+              <span className="text-xs text-muted-foreground italic">
+                {config.upgradePrompt}
+              </span>
+            )}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent side="top" className="text-xs max-w-[240px]">
+          {config.tooltip}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 

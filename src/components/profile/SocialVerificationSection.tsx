@@ -149,16 +149,20 @@ const SocialVerificationSection = () => {
               <Sparkles className="w-5 h-5 text-secondary" />
             </div>
             <div className="flex-1">
-              <p className="font-semibold text-sm mb-1">
-                Connect your socials to earn a trust badge.
-              </p>
+              <div className="flex items-center gap-3 mb-1">
+                <UserTrustBadge tier={trustTier} size="md" />
+                <p className="font-semibold text-sm">
+                  {trustTier === "unverified"
+                    ? "Connect your socials to earn Verified status."
+                    : trustTier === "verified" || trustTier === "trusted"
+                      ? "Complete a trip through Denied to become a Trusted Traveler."
+                      : "You're a Trusted Traveler! 🎉"}
+                </p>
+              </div>
               <p className="text-xs text-muted-foreground mb-3">
                 Verified profiles get more visibility and providers respond faster.
               </p>
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-xs text-muted-foreground">{connectedCount}/5 connected</span>
-                <UserTrustBadge tier={trustTier} size="md" />
-              </div>
+              <span className="text-xs text-muted-foreground">{connectedCount}/5 connected</span>
             </div>
           </div>
         </CardContent>
@@ -175,7 +179,7 @@ const SocialVerificationSection = () => {
         <CardContent>
           <div className="grid gap-3 text-sm">
             <div className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground italic w-28">No badge</span>
+              <UserTrustBadge tier="unverified" />
               <span className="text-muted-foreground">No socials connected</span>
             </div>
             <div className="flex items-center gap-3">
