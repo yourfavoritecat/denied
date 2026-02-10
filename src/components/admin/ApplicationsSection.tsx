@@ -50,7 +50,7 @@ const ApplicationsSection = () => {
   useEffect(() => { load(); }, []);
 
   const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("provider_applications").update({ status } as any).eq("id", id);
+    const { error } = await supabase.from("provider_applications").update({ status }).eq("id", id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
