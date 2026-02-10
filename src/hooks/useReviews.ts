@@ -61,6 +61,7 @@ export const useReviews = (providerSlug?: string, userId?: string) => {
       ...r,
       photos: r.photos || [],
       videos: r.videos || [],
+      is_edited: r.is_edited || false,
       profile: profileMap.get(r.user_id) || null,
       upvote_count: upvoteMap.get(r.id) || 0,
       user_has_upvoted: userUpvoteSet.has(r.id),

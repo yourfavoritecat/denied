@@ -261,6 +261,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_edited: boolean
           photos: string[] | null
           procedure_name: string
           provider_slug: string
@@ -276,6 +277,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_edited?: boolean
           photos?: string[] | null
           procedure_name: string
           provider_slug: string
@@ -291,6 +293,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_edited?: boolean
           photos?: string[] | null
           procedure_name?: string
           provider_slug?: string
