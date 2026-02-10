@@ -98,7 +98,7 @@ const UserProfile = () => {
                     {profile.first_name || "User"}
                     <UserTrustBadge
                       tier={computeUserTrustTier(profile.social_verifications, tripsCount > 0)}
-                      size="md"
+                      size="lg"
                     />
                   </h1>
                   {profile.city && (
