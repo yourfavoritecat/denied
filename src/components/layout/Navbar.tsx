@@ -12,7 +12,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/logo.jpg";
+import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
