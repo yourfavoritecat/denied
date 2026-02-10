@@ -561,6 +561,13 @@ export type Database = {
             referencedRelation: "reviews"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "review_upvotes_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       reviews: {
@@ -777,6 +784,54 @@ export type Database = {
           user_id?: string | null
           username?: string | null
           verification_tier?: string | null
+        }
+        Relationships: []
+      }
+      reviews_public: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          is_edited: boolean | null
+          photos: string[] | null
+          procedure_name: string | null
+          provider_slug: string | null
+          rating: number | null
+          recommend: boolean | null
+          review_text: string | null
+          title: string | null
+          updated_at: string | null
+          verified_trip: boolean | null
+          videos: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          is_edited?: boolean | null
+          photos?: string[] | null
+          procedure_name?: string | null
+          provider_slug?: string | null
+          rating?: number | null
+          recommend?: boolean | null
+          review_text?: string | null
+          title?: string | null
+          updated_at?: string | null
+          verified_trip?: boolean | null
+          videos?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          is_edited?: boolean | null
+          photos?: string[] | null
+          procedure_name?: string | null
+          provider_slug?: string | null
+          rating?: number | null
+          recommend?: boolean | null
+          review_text?: string | null
+          title?: string | null
+          updated_at?: string | null
+          verified_trip?: boolean | null
+          videos?: string[] | null
         }
         Relationships: []
       }
