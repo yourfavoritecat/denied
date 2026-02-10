@@ -126,12 +126,14 @@ export type Database = {
           id: string
           last_name: string | null
           notification_preferences: Json | null
+          onboarding_complete: boolean
           phone: string | null
           provider_slug: string | null
           public_profile: boolean
           updated_at: string
           user_id: string
           username: string | null
+          verification_tier: string
         }
         Insert: {
           avatar_url?: string | null
@@ -141,12 +143,14 @@ export type Database = {
           id?: string
           last_name?: string | null
           notification_preferences?: Json | null
+          onboarding_complete?: boolean
           phone?: string | null
           provider_slug?: string | null
           public_profile?: boolean
           updated_at?: string
           user_id: string
           username?: string | null
+          verification_tier?: string
         }
         Update: {
           avatar_url?: string | null
@@ -156,12 +160,14 @@ export type Database = {
           id?: string
           last_name?: string | null
           notification_preferences?: Json | null
+          onboarding_complete?: boolean
           phone?: string | null
           provider_slug?: string | null
           public_profile?: boolean
           updated_at?: string
           user_id?: string
           username?: string | null
+          verification_tier?: string
         }
         Relationships: []
       }
@@ -225,6 +231,303 @@ export type Database = {
           whatsapp?: string | null
           why_join?: string | null
           years_in_practice?: number | null
+        }
+        Relationships: []
+      }
+      provider_business_info: {
+        Row: {
+          city: string
+          created_at: string
+          dba_name: string | null
+          email: string
+          id: string
+          legal_name: string
+          phone: string
+          provider_slug: string
+          state_country: string
+          street_address: string
+          tax_id: string | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+          years_in_operation: number | null
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          dba_name?: string | null
+          email: string
+          id?: string
+          legal_name: string
+          phone: string
+          provider_slug: string
+          state_country: string
+          street_address: string
+          tax_id?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+          years_in_operation?: number | null
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          dba_name?: string | null
+          email?: string
+          id?: string
+          legal_name?: string
+          phone?: string
+          provider_slug?: string
+          state_country?: string
+          street_address?: string
+          tax_id?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+          years_in_operation?: number | null
+        }
+        Relationships: []
+      }
+      provider_credentials: {
+        Row: {
+          created_at: string
+          credential_type: string
+          file_url: string
+          id: string
+          label: string
+          provider_slug: string
+          review_status: string
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credential_type: string
+          file_url: string
+          id?: string
+          label: string
+          provider_slug: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credential_type?: string
+          file_url?: string
+          id?: string
+          label?: string
+          provider_slug?: string
+          review_status?: string
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      provider_external_links: {
+        Row: {
+          created_at: string
+          facebook_url: string | null
+          google_business_url: string | null
+          id: string
+          instagram_url: string | null
+          provider_slug: string
+          tiktok_url: string | null
+          updated_at: string
+          user_id: string
+          website_url: string | null
+          yelp_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          facebook_url?: string | null
+          google_business_url?: string | null
+          id?: string
+          instagram_url?: string | null
+          provider_slug: string
+          tiktok_url?: string | null
+          updated_at?: string
+          user_id: string
+          website_url?: string | null
+          yelp_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          facebook_url?: string | null
+          google_business_url?: string | null
+          id?: string
+          instagram_url?: string | null
+          provider_slug?: string
+          tiktok_url?: string | null
+          updated_at?: string
+          user_id?: string
+          website_url?: string | null
+          yelp_url?: string | null
+        }
+        Relationships: []
+      }
+      provider_facility: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          photos: Json
+          provider_slug: string
+          updated_at: string
+          user_id: string
+          video_tour_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          photos?: Json
+          provider_slug: string
+          updated_at?: string
+          user_id: string
+          video_tour_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          photos?: Json
+          provider_slug?: string
+          updated_at?: string
+          user_id?: string
+          video_tour_url?: string | null
+        }
+        Relationships: []
+      }
+      provider_policies: {
+        Row: {
+          accepted_payments: string[]
+          cancellation_policy: string | null
+          created_at: string
+          deposit_requirements: string | null
+          hours_of_operation: string | null
+          id: string
+          languages_spoken: string[]
+          provider_slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accepted_payments?: string[]
+          cancellation_policy?: string | null
+          created_at?: string
+          deposit_requirements?: string | null
+          hours_of_operation?: string | null
+          id?: string
+          languages_spoken?: string[]
+          provider_slug: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accepted_payments?: string[]
+          cancellation_policy?: string | null
+          created_at?: string
+          deposit_requirements?: string | null
+          hours_of_operation?: string | null
+          id?: string
+          languages_spoken?: string[]
+          provider_slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      provider_services: {
+        Row: {
+          base_price_usd: number
+          created_at: string
+          description: string | null
+          estimated_duration: string | null
+          id: string
+          package_deals: string | null
+          procedure_name: string
+          provider_slug: string
+          recovery_time: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_price_usd: number
+          created_at?: string
+          description?: string | null
+          estimated_duration?: string | null
+          id?: string
+          package_deals?: string | null
+          procedure_name: string
+          provider_slug: string
+          recovery_time?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_price_usd?: number
+          created_at?: string
+          description?: string | null
+          estimated_duration?: string | null
+          id?: string
+          package_deals?: string | null
+          procedure_name?: string
+          provider_slug?: string
+          recovery_time?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      provider_team_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          headshot_url: string
+          id: string
+          is_lead: boolean
+          license_number: string | null
+          name: string
+          provider_slug: string
+          role: string
+          sort_order: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          headshot_url: string
+          id?: string
+          is_lead?: boolean
+          license_number?: string | null
+          name: string
+          provider_slug: string
+          role: string
+          sort_order?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          headshot_url?: string
+          id?: string
+          is_lead?: boolean
+          license_number?: string | null
+          name?: string
+          provider_slug?: string
+          role?: string
+          sort_order?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

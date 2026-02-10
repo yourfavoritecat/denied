@@ -16,6 +16,7 @@ import UserProfile from "./pages/UserProfile";
 import BookingDetail from "./pages/BookingDetail";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import Admin from "./pages/Admin";
+import ProviderOnboarding from "./pages/ProviderOnboarding";
 import NotFound from "./pages/NotFound";
 import TripAssistantChat from "./components/chat/TripAssistantChat";
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/booking/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
             <Route path="/provider-dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            <Route path="/provider/onboarding" element={<ProtectedRoute><ProviderOnboarding /></ProtectedRoute>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

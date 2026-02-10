@@ -9,6 +9,9 @@ interface Profile {
   last_name: string | null;
   phone: string | null;
   avatar_url: string | null;
+  provider_slug: string | null;
+  verification_tier: string;
+  onboarding_complete: boolean;
 }
 
 interface AuthContextType {
