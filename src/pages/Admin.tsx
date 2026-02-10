@@ -5,6 +5,7 @@ import AdminSidebar, { AdminSection } from "@/components/admin/AdminSidebar";
 import OverviewSection from "@/components/admin/OverviewSection";
 import WaitlistSection from "@/components/admin/WaitlistSection";
 import ApplicationsSection from "@/components/admin/ApplicationsSection";
+import CredentialsReviewSection from "@/components/admin/CredentialsReviewSection";
 import BookingsSection from "@/components/admin/BookingsSection";
 import UsersSection from "@/components/admin/UsersSection";
 
@@ -12,6 +13,7 @@ const SECTIONS: Record<AdminSection, React.ComponentType> = {
   overview: OverviewSection,
   waitlist: WaitlistSection,
   applications: ApplicationsSection,
+  verification: CredentialsReviewSection,
   bookings: BookingsSection,
   users: UsersSection,
 };
