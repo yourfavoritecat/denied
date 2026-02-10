@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useReviews } from "@/hooks/useReviews";
 import ReviewCard from "@/components/reviews/ReviewCard";
 import { providers } from "@/data/providers";
+import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
 
 interface PublicProfile {
   user_id: string;
@@ -17,6 +18,7 @@ interface PublicProfile {
   city: string | null;
   username: string;
   created_at: string;
+  social_verifications?: Record<string, any>;
 }
 
 const UserProfile = () => {
@@ -29,7 +31,7 @@ const UserProfile = () => {
     const fetch = async () => {
       const { data } = await supabase
         .from("profiles")
-        .select("user_id, first_name, city, username, created_at")
+        .select("user_id, first_name, city, username, created_at, social_verifications")
         .eq("username", username)
         .eq("public_profile", true)
         .single();
@@ -92,7 +94,13 @@ const UserProfile = () => {
                   <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="text-center sm:text-left">
-                  <h1 className="text-2xl font-bold mb-1">{profile.first_name || "User"}</h1>
+                  <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
+                    {profile.first_name || "User"}
+                    <UserTrustBadge
+                      tier={computeUserTrustTier(profile.social_verifications, tripsCount > 0)}
+                      size="md"
+                    />
+                  </h1>
                   {profile.city && (
                     <p className="text-muted-foreground flex items-center gap-1 justify-center sm:justify-start mb-3">
                       <MapPin className="w-4 h-4" /> {profile.city}

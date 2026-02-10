@@ -9,12 +9,14 @@ import { Star, ThumbsUp, BadgeCheck, CheckCircle, Play, Pause, PenLine, ChevronL
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
 
 interface ReviewProfile {
   first_name: string | null;
   city: string | null;
   username: string | null;
   public_profile: boolean;
+  social_verifications?: Record<string, any>;
 }
 
 export interface ReviewData {
@@ -194,6 +196,9 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
                 <div className="flex items-center gap-2 flex-wrap">
                   {nameElement}
                   {city && <span className="text-muted-foreground text-sm">{city}</span>}
+                  <UserTrustBadge
+                    tier={computeUserTrustTier(review.profile?.social_verifications, review.verified_trip)}
+                  />
                   {review.verified_trip && (
                     <Badge className="bg-primary/10 text-primary text-xs gap-1">
                       <BadgeCheck className="w-3 h-3" /> Verified Trip
