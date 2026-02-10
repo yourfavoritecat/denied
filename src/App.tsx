@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Search from "./pages/Search";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import MyTrips from "./pages/MyTrips";
 import ProviderProfile from "./pages/ProviderProfile";
 import Apply from "./pages/Apply";
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/provider/:slug" element={<ProviderProfile />} />
             <Route path="/user/:username" element={<UserProfile />} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/my-trips" element={<ProtectedRoute><MyTrips /></ProtectedRoute>} />
             <Route path="/booking/:id" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
             <Route path="/provider-dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
