@@ -130,6 +130,7 @@ export type Database = {
           phone: string | null
           provider_slug: string | null
           public_profile: boolean
+          social_verifications: Json | null
           updated_at: string
           user_id: string
           username: string | null
@@ -147,6 +148,7 @@ export type Database = {
           phone?: string | null
           provider_slug?: string | null
           public_profile?: boolean
+          social_verifications?: Json | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -164,6 +166,7 @@ export type Database = {
           phone?: string | null
           provider_slug?: string | null
           public_profile?: boolean
+          social_verifications?: Json | null
           updated_at?: string
           user_id?: string
           username?: string | null
@@ -750,6 +753,7 @@ export type Database = {
         }[]
       }
       get_my_provider_slug: { Args: never; Returns: string }
+      get_user_trust_tier: { Args: { _user_id: string }; Returns: string }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {

@@ -12,6 +12,7 @@ interface Profile {
   provider_slug: string | null;
   verification_tier: string;
   onboarding_complete: boolean;
+  social_verifications: any;
 }
 
 interface AuthContextType {
