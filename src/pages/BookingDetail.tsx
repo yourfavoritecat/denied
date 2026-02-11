@@ -65,7 +65,7 @@ const getStatusIndex = (status: string) => {
 };
 
 const BookingDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { bookingId: id } = useParams<{ bookingId: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
   const [booking, setBooking] = useState<Booking | null>(null);
