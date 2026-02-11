@@ -534,6 +534,72 @@ export type Database = {
         }
         Relationships: []
       }
+      providers: {
+        Row: {
+          address: string | null
+          admin_email: string | null
+          admin_managed: boolean | null
+          city: string | null
+          country: string | null
+          created_at: string
+          description: string | null
+          established_year: number | null
+          hours_of_operation: string | null
+          id: string
+          languages: string[] | null
+          name: string
+          owner_user_id: string | null
+          phone: string | null
+          slug: string
+          specialties: string[] | null
+          travel_info: string | null
+          updated_at: string
+          verification_tier: string | null
+        }
+        Insert: {
+          address?: string | null
+          admin_email?: string | null
+          admin_managed?: boolean | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          established_year?: number | null
+          hours_of_operation?: string | null
+          id?: string
+          languages?: string[] | null
+          name: string
+          owner_user_id?: string | null
+          phone?: string | null
+          slug: string
+          specialties?: string[] | null
+          travel_info?: string | null
+          updated_at?: string
+          verification_tier?: string | null
+        }
+        Update: {
+          address?: string | null
+          admin_email?: string | null
+          admin_managed?: boolean | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          description?: string | null
+          established_year?: number | null
+          hours_of_operation?: string | null
+          id?: string
+          languages?: string[] | null
+          name?: string
+          owner_user_id?: string | null
+          phone?: string | null
+          slug?: string
+          specialties?: string[] | null
+          travel_info?: string | null
+          updated_at?: string
+          verification_tier?: string | null
+        }
+        Relationships: []
+      }
       review_upvotes: {
         Row: {
           created_at: string
@@ -579,6 +645,12 @@ export type Database = {
           procedure_name: string
           provider_slug: string
           rating: number
+          rating_cleanliness: number | null
+          rating_communication: number | null
+          rating_outcome: number | null
+          rating_safety: number | null
+          rating_value: number | null
+          rating_wait_time: number | null
           recommend: boolean
           review_text: string
           title: string
@@ -595,6 +667,12 @@ export type Database = {
           procedure_name: string
           provider_slug: string
           rating: number
+          rating_cleanliness?: number | null
+          rating_communication?: number | null
+          rating_outcome?: number | null
+          rating_safety?: number | null
+          rating_value?: number | null
+          rating_wait_time?: number | null
           recommend?: boolean
           review_text: string
           title: string
@@ -611,6 +689,12 @@ export type Database = {
           procedure_name?: string
           provider_slug?: string
           rating?: number
+          rating_cleanliness?: number | null
+          rating_communication?: number | null
+          rating_outcome?: number | null
+          rating_safety?: number | null
+          rating_value?: number | null
+          rating_wait_time?: number | null
           recommend?: boolean
           review_text?: string
           title?: string

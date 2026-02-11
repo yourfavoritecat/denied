@@ -32,7 +32,55 @@ export interface Provider {
   ratingBreakdown: number[]; // 5-star to 1-star counts
 }
 
+export const REVIEW_CATEGORIES = [
+  { key: "rating_cleanliness", label: "Facility Cleanliness" },
+  { key: "rating_communication", label: "Communication" },
+  { key: "rating_wait_time", label: "Wait Time & Punctuality" },
+  { key: "rating_outcome", label: "Procedure Outcome" },
+  { key: "rating_safety", label: "Safety & Comfort" },
+  { key: "rating_value", label: "Value for Price" },
+] as const;
+
+export const US_PRICE_MAP: Record<string, number> = {
+  "Zirconia Crown": 1500,
+  "Root Canal": 1800,
+  "Dental Implant": 4000,
+  "Night Guard": 500,
+  "Teeth Whitening": 500,
+  "Veneers": 2000,
+  "Wisdom Tooth Extraction": 600,
+  "Dentures": 1800,
+  "Teeth Cleaning": 200,
+  "Free Consultation": 225,
+};
+
 export const providers: Provider[] = [
+  {
+    slug: "washington-dental-tijuana",
+    name: "Washington Dental Clinic",
+    city: "Tijuana",
+    rating: 4.8,
+    reviews: 1,
+    startingPrice: 50,
+    verified: false,
+    specialties: ["Dental Implants", "Zirconia Crowns", "Full Mouth Rehabilitation", "Root Canals", "Cosmetic Dentistry"],
+    languages: ["English", "Spanish"],
+    description: "For over 30 years, Washington Dental Clinic has been providing high-quality dental care to patients from across the US. With 8 licensed dentists — 6 of whom specialize in implants and root canals — we deliver comprehensive dental care at 50-70% less than US prices. Over 90% of our patients travel from the United States. We are a walk-in clinic with no appointment necessary, and most dental work can be completed in one or two visits. All work comes with a 2-year guarantee.",
+    procedures: [
+      { name: "Zirconia Crown", priceRange: "$350", usPrice: 1500, savings: 77, duration: "2–3 days" },
+      { name: "Root Canal", priceRange: "$250", usPrice: 1800, savings: 86, duration: "1–2 hours" },
+      { name: "Dental Implant", priceRange: "$1,200", usPrice: 4000, savings: 70, duration: "3–6 months" },
+      { name: "Night Guard", priceRange: "$150", usPrice: 500, savings: 70, duration: "1–2 days" },
+      { name: "Teeth Whitening", priceRange: "$150", usPrice: 500, savings: 70, duration: "1 hour" },
+      { name: "Veneers", priceRange: "$450", usPrice: 2000, savings: 78, duration: "2–3 days" },
+      { name: "Wisdom Tooth Extraction", priceRange: "$150", usPrice: 600, savings: 75, duration: "1 hour" },
+      { name: "Dentures", priceRange: "$400", usPrice: 1800, savings: 78, duration: "3–5 days" },
+      { name: "Teeth Cleaning", priceRange: "$50", usPrice: 200, savings: 75, duration: "1 hour" },
+      { name: "Free Consultation", priceRange: "FREE", usPrice: 225, savings: 100, duration: "30 min" },
+    ],
+    reviewsList: [],
+    ratingBreakdown: [1, 0, 0, 0, 0],
+  },
   {
     slug: "dental-excellence-tijuana",
     name: "Dental Excellence Tijuana",

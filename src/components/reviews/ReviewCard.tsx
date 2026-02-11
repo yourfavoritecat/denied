@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
+import { REVIEW_CATEGORIES } from "@/data/providers";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -37,6 +38,12 @@ export interface ReviewData {
   profile?: ReviewProfile;
   upvote_count: number;
   user_has_upvoted: boolean;
+  rating_cleanliness?: number;
+  rating_communication?: number;
+  rating_wait_time?: number;
+  rating_outcome?: number;
+  rating_safety?: number;
+  rating_value?: number;
 }
 
 const StarRating = ({ rating }: { rating: number }) => (
@@ -236,6 +243,22 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
 
               {editedDate && (
                 <p className="text-xs text-muted-foreground mt-1">Edited {editedDate}</p>
+              )}
+
+              {/* Category breakdown */}
+              {review.rating_cleanliness != null && (
+                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
+                  {REVIEW_CATEGORIES.map(({ key, label }) => {
+                    const val = review[key as keyof ReviewData] as number | undefined;
+                    if (val == null) return null;
+                    return (
+                      <div key={key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                        <span className="truncate">{label}</span>
+                        <span className="font-semibold text-foreground">{val}/5</span>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
 
               {/* Photos — horizontal scrollable gallery */}

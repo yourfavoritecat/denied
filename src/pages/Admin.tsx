@@ -6,6 +6,7 @@ import OverviewSection from "@/components/admin/OverviewSection";
 import WaitlistSection from "@/components/admin/WaitlistSection";
 import ApplicationsSection from "@/components/admin/ApplicationsSection";
 import CredentialsReviewSection from "@/components/admin/CredentialsReviewSection";
+import ProvidersSection from "@/components/admin/ProvidersSection";
 import BookingsSection from "@/components/admin/BookingsSection";
 import UsersSection from "@/components/admin/UsersSection";
 
@@ -14,6 +15,7 @@ const SECTIONS: Record<AdminSection, React.ComponentType> = {
   waitlist: WaitlistSection,
   applications: ApplicationsSection,
   verification: CredentialsReviewSection,
+  providers: ProvidersSection,
   bookings: BookingsSection,
   users: UsersSection,
 };
