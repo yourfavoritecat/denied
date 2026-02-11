@@ -27,7 +27,10 @@ const AuthPage = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) navigate("/profile", { replace: true });
+    if (user) {
+      // After login via admin-login flow, go to profile (full app access)
+      navigate("/profile", { replace: true });
+    }
   }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
