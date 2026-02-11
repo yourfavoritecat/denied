@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { useAdmin } from "@/hooks/useAdmin";
+import { supabase } from "@/integrations/supabase/client";
 import AdminSidebar, { AdminSection } from "@/components/admin/AdminSidebar";
 import OverviewSection from "@/components/admin/OverviewSection";
 import WaitlistSection from "@/components/admin/WaitlistSection";
@@ -25,6 +26,24 @@ const SECTIONS: Record<AdminSection, React.ComponentType> = {
 const AdminPage = () => {
   const { isAdmin, loading } = useAdmin();
   const [section, setSection] = useState<AdminSection>("overview");
+  const [inboxCount, setInboxCount] = useState(0);
+
+  useEffect(() => {
+    const loadInboxCount = async () => {
+      const { data: adminProviders } = await supabase
+        .from("providers")
+        .select("slug")
+        .eq("admin_managed", true);
+      if (!adminProviders?.length) return;
+      const { count } = await supabase
+        .from("bookings")
+        .select("id", { count: "exact", head: true })
+        .in("provider_slug", adminProviders.map((p) => p.slug))
+        .eq("status", "inquiry");
+      setInboxCount(count || 0);
+    };
+    if (isAdmin) loadInboxCount();
+  }, [isAdmin, section]);
 
   if (loading) {
     return (
@@ -42,7 +61,7 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <AdminSidebar active={section} onChange={setSection} />
+      <AdminSidebar active={section} onChange={setSection} inboxCount={inboxCount} />
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <ActiveSection />
       </main>
