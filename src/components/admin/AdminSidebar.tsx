@@ -1,10 +1,11 @@
-import { BarChart3, Users, Building2, Plane, Mail, Shield, BadgeCheck, Stethoscope } from "lucide-react";
+import { BarChart3, Users, Building2, Plane, Mail, Shield, BadgeCheck, Stethoscope, Inbox } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type AdminSection = "overview" | "waitlist" | "applications" | "verification" | "providers" | "bookings" | "users";
+export type AdminSection = "overview" | "inbox" | "waitlist" | "applications" | "verification" | "providers" | "bookings" | "users";
 
 const sections: { id: AdminSection; label: string; icon: React.ElementType }[] = [
   { id: "overview", label: "Overview", icon: BarChart3 },
+  { id: "inbox", label: "Inbox", icon: Inbox },
   { id: "waitlist", label: "Waitlist", icon: Mail },
   { id: "applications", label: "Applications", icon: Building2 },
   { id: "verification", label: "Verification", icon: BadgeCheck },

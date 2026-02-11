@@ -8,10 +8,12 @@ import ApplicationsSection from "@/components/admin/ApplicationsSection";
 import CredentialsReviewSection from "@/components/admin/CredentialsReviewSection";
 import ProvidersSection from "@/components/admin/ProvidersSection";
 import BookingsSection from "@/components/admin/BookingsSection";
+import InboxSection from "@/components/admin/InboxSection";
 import UsersSection from "@/components/admin/UsersSection";
 
 const SECTIONS: Record<AdminSection, React.ComponentType> = {
   overview: OverviewSection,
+  inbox: InboxSection,
   waitlist: WaitlistSection,
   applications: ApplicationsSection,
   verification: CredentialsReviewSection,
