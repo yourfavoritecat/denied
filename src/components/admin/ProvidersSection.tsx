@@ -9,8 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import AdminProviderOnboarding from "./AdminProviderOnboarding";
 
 interface ProviderRow {
   id: string;
@@ -26,12 +28,14 @@ interface ProviderRow {
 
 const ProvidersSection = () => {
   const { toast } = useToast();
+  const { user } = useAuth();
   const [providers, setProviders] = useState<ProviderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
   const [selectedProvider, setSelectedProvider] = useState<ProviderRow | null>(null);
   const [transferEmail, setTransferEmail] = useState("");
+  const [onboardingProvider, setOnboardingProvider] = useState<ProviderRow | null>(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -154,6 +158,17 @@ const ProvidersSection = () => {
     fetchProviders();
   };
 
+  if (onboardingProvider && user) {
+    return (
+      <AdminProviderOnboarding
+        userId={user.id}
+        providerSlug={onboardingProvider.slug}
+        providerName={onboardingProvider.name}
+        onBack={() => setOnboardingProvider(null)}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -196,6 +211,9 @@ const ProvidersSection = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-1 justify-end">
+                      <Button variant="ghost" size="sm" onClick={() => setOnboardingProvider(p)} title="Fill Out Profile">
+                        <ClipboardEdit className="w-3.5 h-3.5" />
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={() => openEdit(p)}><Pencil className="w-3.5 h-3.5" /></Button>
                       <Button variant="ghost" size="sm" asChild>
                         <a href={`/provider/${p.slug}`} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3.5 h-3.5" /></a>
