@@ -32,7 +32,12 @@ const AuthPage = () => {
     if (isAdmin) {
       navigate("/admin", { replace: true });
     } else if ((profile as any)?.provider_slug) {
-      navigate("/provider-dashboard", { replace: true });
+      // If provider hasn't completed onboarding, send them there
+      if (!(profile as any)?.onboarding_complete) {
+        navigate("/provider/onboarding", { replace: true });
+      } else {
+        navigate("/provider-dashboard", { replace: true });
+      }
     } else {
       navigate("/dashboard", { replace: true });
     }
