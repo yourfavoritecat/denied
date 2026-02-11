@@ -19,6 +19,7 @@ import Apply from "./pages/Apply";
 import ProviderOnboarding from "./pages/ProviderOnboarding";
 import ProviderDashboard from "./pages/ProviderDashboard";
 import Admin from "./pages/Admin";
+import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/search" element={<Search />} />
             <Route path="/provider/:slug" element={<ProviderProfile />} />
             <Route path="/apply" element={<Apply />} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/user/:userId" element={<UserProfile />} />
             <Route path="/my-trips" element={<ProtectedRoute><MyTrips /></ProtectedRoute>} />

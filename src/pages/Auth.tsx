@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
+import { useAdmin } from "@/hooks/useAdmin";
 import { User, Stethoscope } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -24,14 +24,19 @@ const AuthPage = () => {
   const [signupRole, setSignupRole] = useState<SignupRole>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdmin();
 
   useEffect(() => {
-    if (user) {
-      // After login via admin-login flow, go to profile (full app access)
-      navigate("/profile", { replace: true });
+    if (!user || adminLoading) return;
+    if (isAdmin) {
+      navigate("/admin", { replace: true });
+    } else if ((profile as any)?.provider_slug) {
+      navigate("/provider-dashboard", { replace: true });
+    } else {
+      navigate("/dashboard", { replace: true });
     }
-  }, [user, navigate]);
+  }, [user, profile, isAdmin, adminLoading, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,9 +45,8 @@ const AuthPage = () => {
     setIsLoading(false);
     if (error) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
-    } else {
-      navigate("/profile");
     }
+    // Navigation handled by useEffect above
   };
 
   const handleSignup = async (e: React.FormEvent) => {
