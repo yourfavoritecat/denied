@@ -21,8 +21,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const isProvider = !!(profile as any)?.provider_slug;
   const onboardingComplete = !!(profile as any)?.onboarding_complete;
   const isOnboardingPage = location.pathname === "/provider/onboarding";
+  const isAdminPage = location.pathname === "/admin";
 
-  if (isProvider && !onboardingComplete && !isOnboardingPage) {
+  if (isProvider && !onboardingComplete && !isOnboardingPage && !isAdminPage) {
     return <Navigate to="/provider/onboarding" replace />;
   }
 
