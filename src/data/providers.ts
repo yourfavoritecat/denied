@@ -24,6 +24,7 @@ export interface Provider {
   reviews: number;
   startingPrice: number;
   verified: boolean;
+  verificationTier?: "listed" | "verified" | "premium";
   specialties: string[];
   languages: string[];
   description: string;
@@ -63,6 +64,7 @@ export const providers: Provider[] = [
     reviews: 1,
     startingPrice: 50,
     verified: false,
+    verificationTier: "listed",
     specialties: ["Dental Implants", "Zirconia Crowns", "Full Mouth Rehabilitation", "Root Canals", "Cosmetic Dentistry"],
     languages: ["English", "Spanish"],
     description: "For over 30 years, Washington Dental Clinic has been providing high-quality dental care to patients from across the US. With 8 licensed dentists — 6 of whom specialize in implants and root canals — we deliver comprehensive dental care at 50-70% less than US prices. Over 90% of our patients travel from the United States. We are a walk-in clinic with no appointment necessary, and most dental work can be completed in one or two visits. All work comes with a 2-year guarantee.",
