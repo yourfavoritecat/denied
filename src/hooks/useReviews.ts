@@ -65,6 +65,12 @@ export const useReviews = (providerSlug?: string, userId?: string) => {
       profile: profileMap.get(r.user_id) || null,
       upvote_count: upvoteMap.get(r.id) || 0,
       user_has_upvoted: userUpvoteSet.has(r.id),
+      rating_cleanliness: r.rating_cleanliness,
+      rating_communication: r.rating_communication,
+      rating_wait_time: r.rating_wait_time,
+      rating_outcome: r.rating_outcome,
+      rating_safety: r.rating_safety,
+      rating_value: r.rating_value,
     }));
 
     setReviews(enriched);

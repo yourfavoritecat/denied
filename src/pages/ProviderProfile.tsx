@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Star, MapPin, ArrowLeft, Globe, MessageSquareQuote, PenLine, ExternalLink, Users, Camera } from "lucide-react";
 import VerificationBadge from "@/components/providers/VerificationBadge";
-import { providers } from "@/data/providers";
+import { providers, REVIEW_CATEGORIES, US_PRICE_MAP } from "@/data/providers";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
 import LeaveReviewModal from "@/components/reviews/LeaveReviewModal";
 import ReviewCard from "@/components/reviews/ReviewCard";
@@ -42,6 +42,7 @@ interface RealProviderData {
   links: any | null;
   policies: any | null;
   tier: string;
+  providerRecord: any | null;
 }
 
 const ProviderProfile = () => {
@@ -61,7 +62,7 @@ const ProviderProfile = () => {
   useEffect(() => {
     if (!slug) return;
     const fetchReal = async () => {
-      const [bizRes, teamRes, servRes, facRes, linksRes, polRes, profileRes] = await Promise.all([
+      const [bizRes, teamRes, servRes, facRes, linksRes, polRes, profileRes, providerRes] = await Promise.all([
         supabase.from("provider_business_info").select("*").eq("provider_slug", slug).maybeSingle(),
         supabase.from("provider_team_members").select("*").eq("provider_slug", slug).order("sort_order"),
         supabase.from("provider_services").select("*").eq("provider_slug", slug),
@@ -69,6 +70,7 @@ const ProviderProfile = () => {
         supabase.from("provider_external_links").select("*").eq("provider_slug", slug).maybeSingle(),
         supabase.from("provider_policies").select("*").eq("provider_slug", slug).maybeSingle(),
         supabase.from("profiles").select("verification_tier").eq("provider_slug", slug).maybeSingle(),
+        supabase.from("providers" as any).select("*").eq("slug", slug).maybeSingle(),
       ]);
       setReal({
         business: bizRes.data,
@@ -77,7 +79,8 @@ const ProviderProfile = () => {
         facility: facRes.data,
         links: linksRes.data,
         policies: polRes.data,
-        tier: (profileRes.data as any)?.verification_tier || "listed",
+        tier: (providerRes.data as any)?.verification_tier || (profileRes.data as any)?.verification_tier || "listed",
+        providerRecord: providerRes.data,
       });
       setRealLoading(false);
     };
@@ -85,9 +88,11 @@ const ProviderProfile = () => {
   }, [slug]);
 
   // Determine what data to show
-  const hasRealData = real && (real.business || real.services.length > 0);
-  const providerName = real?.business?.dba_name || real?.business?.legal_name || seedProvider?.name || slug || "Provider";
-  const providerCity = real?.business?.city || seedProvider?.city || "";
+  const pRec = real?.providerRecord;
+  const hasRealData = real && (real.business || real.services.length > 0 || pRec);
+  const providerName = real?.business?.dba_name || real?.business?.legal_name || pRec?.name || seedProvider?.name || slug || "Provider";
+  const providerCity = real?.business?.city || pRec?.city || seedProvider?.city || "";
+  const providerDescription = real?.facility?.description || pRec?.description || seedProvider?.description || "";
   const tier = real?.tier || (seedProvider?.verified ? "verified" : "listed");
 
   const sortedReviews = useMemo(() => {
@@ -108,6 +113,16 @@ const ProviderProfile = () => {
     }
     return filtered;
   }, [reviews, sortBy, filterRating, filterProcedure]);
+
+  // Compute aggregate category ratings from DB reviews (must be before early returns)
+  const categoryAggregates = useMemo(() => {
+    const reviewsWithCategories = reviews.filter((r) => r.rating_cleanliness != null);
+    if (reviewsWithCategories.length === 0) return null;
+    return REVIEW_CATEGORIES.map(({ key, label }) => {
+      const sum = reviewsWithCategories.reduce((acc, r) => acc + ((r as any)[key] || 0), 0);
+      return { key, label, avg: Math.round((sum / reviewsWithCategories.length) * 10) / 10 };
+    });
+  }, [reviews]);
 
   if (!seedProvider && realLoading) {
     return (
@@ -142,6 +157,10 @@ const ProviderProfile = () => {
     ? real.services.map((s: any) => ({
         name: s.procedure_name,
         price: `$${Number(s.base_price_usd).toLocaleString()}`,
+        usPrice: US_PRICE_MAP[s.procedure_name] || null,
+        savings: US_PRICE_MAP[s.procedure_name]
+          ? Math.round((1 - Number(s.base_price_usd) / US_PRICE_MAP[s.procedure_name]) * 100)
+          : null,
         duration: s.estimated_duration || "—",
         description: s.description,
         recovery: s.recovery_time,
@@ -149,7 +168,7 @@ const ProviderProfile = () => {
       }))
     : seedProvider?.procedures || [];
 
-  const languages = real?.policies?.languages_spoken || seedProvider?.languages || [];
+  const languages = real?.policies?.languages_spoken || pRec?.languages || seedProvider?.languages || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -212,11 +231,11 @@ const ProviderProfile = () => {
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">About</h2>
             <p className="text-muted-foreground leading-relaxed max-w-3xl">
-              {real?.facility?.description || seedProvider?.description || ""}
+              {providerDescription}
             </p>
-            {seedProvider && (
+            {(seedProvider?.specialties || pRec?.specialties) && (
               <div className="flex flex-wrap gap-2 mt-4">
-                {seedProvider.specialties.map((s) => <Badge key={s} variant="secondary">{s}</Badge>)}
+                {(pRec?.specialties || seedProvider?.specialties || []).map((s: string) => <Badge key={s} variant="secondary">{s}</Badge>)}
               </div>
             )}
           </motion.section>
@@ -256,8 +275,8 @@ const ProviderProfile = () => {
                   <TableRow className="bg-denied-black hover:bg-denied-black">
                     <TableHead className="text-white font-bold">Procedure</TableHead>
                     <TableHead className="text-white font-bold text-right">Price</TableHead>
-                    {seedProvider && <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>}
-                    {seedProvider && <TableHead className="text-white font-bold text-right">Savings</TableHead>}
+                    <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>
+                    <TableHead className="text-white font-bold text-right">Savings</TableHead>
                     <TableHead className="text-white font-bold text-right hidden sm:table-cell">Duration</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -269,12 +288,14 @@ const ProviderProfile = () => {
                         {proc.packageDeals && <p className="text-xs text-secondary mt-0.5">{proc.packageDeals}</p>}
                       </TableCell>
                       <TableCell className="text-right font-bold text-primary">{proc.price || proc.priceRange}</TableCell>
-                      {seedProvider && <TableCell className="text-right text-muted-foreground line-through hidden md:table-cell">${proc.usPrice?.toLocaleString()}</TableCell>}
-                      {seedProvider && (
-                        <TableCell className="text-right">
-                          {proc.savings && <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold">{proc.savings}% OFF</Badge>}
-                        </TableCell>
-                      )}
+                      <TableCell className="text-right text-muted-foreground line-through hidden md:table-cell">
+                        {proc.usPrice ? `$${proc.usPrice.toLocaleString()}` : "—"}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {proc.savings && proc.savings > 0 ? (
+                          <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold">{proc.savings}% OFF</Badge>
+                        ) : null}
+                      </TableCell>
                       <TableCell className="text-right text-muted-foreground hidden sm:table-cell">{proc.duration}</TableCell>
                     </TableRow>
                   ))}
@@ -294,39 +315,64 @@ const ProviderProfile = () => {
               )}
             </div>
             <div className="grid md:grid-cols-3 gap-8">
-              {/* Rating Breakdown (seed data) */}
-              {seedProvider && (
+              {/* Rating Breakdown + Category Chart */}
+              {(seedProvider || categoryAggregates) && (
                 <Card className="border border-border/50 shadow-lg">
                   <CardContent className="pt-6">
-                    <div className="text-center mb-6">
-                      <div className="text-5xl font-bold text-foreground">{seedProvider.rating}</div>
-                      <div className="flex justify-center mt-2 mb-1">
-                        <StarRating rating={Math.round(seedProvider.rating)} />
-                      </div>
-                      <p className="text-sm text-muted-foreground">{seedProvider.reviews} reviews</p>
-                    </div>
-                    <div className="space-y-2">
-                      {[5, 4, 3, 2, 1].map((star, idx) => {
-                        const count = seedProvider.ratingBreakdown[idx];
-                        const pct = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
-                        return (
-                          <div key={star} className="flex items-center gap-2 text-sm">
-                            <span className="w-3 text-right">{star}</span>
-                            <Star className="w-3 h-3 fill-secondary text-secondary" />
-                            <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                              <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                            </div>
-                            <span className="w-8 text-right text-muted-foreground">{count}</span>
+                    {seedProvider && (
+                      <>
+                        <div className="text-center mb-6">
+                          <div className="text-5xl font-bold text-foreground">{seedProvider.rating}</div>
+                          <div className="flex justify-center mt-2 mb-1">
+                            <StarRating rating={Math.round(seedProvider.rating)} />
                           </div>
-                        );
-                      })}
-                    </div>
+                          <p className="text-sm text-muted-foreground">{seedProvider.reviews} reviews</p>
+                        </div>
+                        <div className="space-y-2 mb-6">
+                          {[5, 4, 3, 2, 1].map((star, idx) => {
+                            const count = seedProvider.ratingBreakdown[idx];
+                            const pct = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+                            return (
+                              <div key={star} className="flex items-center gap-2 text-sm">
+                                <span className="w-3 text-right">{star}</span>
+                                <Star className="w-3 h-3 fill-secondary text-secondary" />
+                                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                                  <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                </div>
+                                <span className="w-8 text-right text-muted-foreground">{count}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Category Aggregate Bar Chart */}
+                    {categoryAggregates && (
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-semibold text-foreground">Category Breakdown</h4>
+                        {categoryAggregates.map(({ key, label, avg }) => (
+                          <div key={key} className="space-y-1">
+                            <div className="flex justify-between text-xs">
+                              <span className="text-muted-foreground">{label}</span>
+                              <span className="font-semibold text-foreground">{avg}/5</span>
+                            </div>
+                            <div className="h-2 bg-muted rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-primary rounded-full transition-all"
+                                style={{ width: `${(avg / 5) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
 
               {/* Reviews list */}
-              <div className={seedProvider ? "md:col-span-2 space-y-4" : "md:col-span-3 space-y-4"}>
+              <div className={seedProvider || categoryAggregates ? "md:col-span-2 space-y-4" : "md:col-span-3 space-y-4"}>
                 {reviewsLoading ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -430,13 +476,27 @@ const ProviderProfile = () => {
             </motion.section>
           )}
 
+          {/* Travel Info */}
+          {pRec?.travel_info && (
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
+              <h2 className="text-2xl font-bold mb-4">Getting There</h2>
+              <Card className="border border-border/50 shadow-lg">
+                <CardContent className="pt-6">
+                  <p className="text-muted-foreground leading-relaxed">{pRec.travel_info}</p>
+                </CardContent>
+              </Card>
+            </motion.section>
+          )}
+
           {/* Map Placeholder */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">Location</h2>
             <div className="rounded-xl bg-muted border border-border/50 h-64 md:h-80 flex items-center justify-center">
               <div className="text-center">
                 <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-                <p className="text-muted-foreground font-medium">{providerCity}{real?.business?.state_country ? `, ${real.business.state_country}` : seedProvider ? ", Mexico" : ""}</p>
+                <p className="text-muted-foreground font-medium">
+                  {pRec?.address || `${providerCity}${real?.business?.state_country ? `, ${real.business.state_country}` : seedProvider ? ", Mexico" : pRec?.country ? `, ${pRec.country}` : ""}`}
+                </p>
                 <p className="text-sm text-muted-foreground">Google Maps embed coming soon</p>
               </div>
             </div>
