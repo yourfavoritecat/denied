@@ -119,11 +119,10 @@ const RequestQuoteModal = ({ open, onOpenChange, providerName, providerSlug }: R
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      // Send notification to provider (non-blocking)
-      try {
-        // We don't know the provider's user_id here, so we'll handle this server-side later
-        // For now just notify the patient's booking was created
-      } catch (e) { /* non-blocking */ }
+      // Send notification (non-blocking) — edge function handles admin-managed forwarding
+      supabase.functions.invoke("send-notification", {
+        body: { type: "inquiry_received", booking_id: (data as any).id },
+      }).catch(() => {});
 
       toast({ title: "Inquiry sent!", description: `Your inquiry has been sent to ${providerName}.` });
       onOpenChange(false);
