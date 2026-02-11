@@ -1,20 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Send, DollarSign, Calendar, FileText, MessageSquare, Clock, CheckCircle, CreditCard, Plane, ArrowLeft, XCircle } from "lucide-react";
+import { Send, DollarSign, Calendar, MessageSquare, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { providers } from "@/data/providers";
+import ProviderSidebar, { type ProviderSection } from "@/components/provider/ProviderSidebar";
+import ProviderHome from "@/components/provider/ProviderHome";
 
 interface PatientProfile {
   first_name: string | null;
@@ -71,6 +70,7 @@ const ProviderDashboard = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [section, setSection] = useState<ProviderSection>("home");
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -91,8 +91,8 @@ const ProviderDashboard = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const providerSlug = (profile as any)?.provider_slug;
-
   const providerData = providers.find((p) => p.slug === providerSlug);
+  const providerName = providerData?.name || "Your Clinic";
 
   useEffect(() => {
     if (!providerSlug) {
@@ -117,14 +117,11 @@ const ProviderDashboard = () => {
       .order("created_at", { ascending: false });
 
     const rawBookings = (data as any[]) || [];
-
-    // Fetch patient profiles for all unique user_ids
     const userIds = [...new Set(rawBookings.map((b) => b.user_id))];
     const { data: profiles } = userIds.length > 0
       ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds)
       : { data: [] };
 
-    // Fetch emails from auth (we'll use user_id mapping)
     const profileMap = new Map((profiles || []).map((p: any) => [p.user_id, p]));
 
     const enriched = rawBookings.map((b) => {
@@ -165,14 +162,12 @@ const ProviderDashboard = () => {
     setChatOpen(true);
     fetchMessages(booking.id);
 
-    const channel = supabase
+    supabase
       .channel(`provider-chat-${booking.id}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "booking_messages", filter: `booking_id=eq.${booking.id}` },
         () => fetchMessages(booking.id)
       )
       .subscribe();
-
-    // Cleanup when chat closes is handled by dialog onOpenChange
   };
 
   const submitQuote = async () => {
@@ -196,17 +191,11 @@ const ProviderDashboard = () => {
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      // Send notification email
       try {
         await supabase.functions.invoke("send-notification", {
-          body: {
-            type: "quote_received",
-            booking_id: selectedBooking.id,
-            recipient_user_id: selectedBooking.user_id,
-          },
+          body: { type: "quote_received", booking_id: selectedBooking.id, recipient_user_id: selectedBooking.user_id },
         });
       } catch (e) { /* non-blocking */ }
-
       toast({ title: "Quote sent!", description: "The patient has been notified." });
       setQuoteOpen(false);
       fetchBookings();
@@ -254,25 +243,20 @@ const ProviderDashboard = () => {
 
   if (!user || loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-24 pb-16 flex justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-        </main>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
   }
 
   if (!providerSlug) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="pt-24 pb-16 text-center container mx-auto px-4">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Provider Access Required</h1>
-          <p className="text-muted-foreground mb-6">Your account is not linked to a provider profile. If you're a provider, please contact support to link your account.</p>
+          <p className="text-muted-foreground mb-6">Your account is not linked to a provider profile.</p>
           <Button variant="outline" onClick={() => navigate("/")}>Go Home</Button>
-        </main>
-        <Footer />
+        </div>
       </div>
     );
   }
@@ -281,6 +265,20 @@ const ProviderDashboard = () => {
   const quoted = bookings.filter((b) => b.status === "quoted");
   const active = bookings.filter((b) => ["deposit_paid", "confirmed"].includes(b.status));
   const past = bookings.filter((b) => ["completed", "cancelled"].includes(b.status));
+
+  const sectionBookings: Record<string, Booking[]> = {
+    inquiries,
+    quoted,
+    active,
+    past,
+  };
+
+  const sectionTitles: Record<string, string> = {
+    inquiries: "new inquiries",
+    quoted: "pending quotes",
+    active: "active trips",
+    past: "past bookings",
+  };
 
   const BookingCard = ({ booking }: { booking: Booking }) => (
     <Card className="hover:shadow-md transition-shadow">
@@ -315,7 +313,7 @@ const ProviderDashboard = () => {
 
         {booking.quoted_price && (
           <p className="text-sm font-bold text-primary mb-3">
-            Quoted: ${Number(booking.quoted_price).toLocaleString()} 
+            Quoted: ${Number(booking.quoted_price).toLocaleString()}
             <span className="text-xs font-normal text-muted-foreground ml-1">
               (${Number(booking.deposit_amount).toLocaleString()} deposit)
             </span>
@@ -356,95 +354,49 @@ const ProviderDashboard = () => {
     </Card>
   );
 
-  return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-5xl">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold">{providerData?.name || "Provider Dashboard"}</h1>
-            <p className="text-muted-foreground">Manage inquiries, quotes, and patient communications</p>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardContent className="py-4 text-center">
-                <p className="text-3xl font-bold text-secondary">{inquiries.length}</p>
-                <p className="text-xs text-muted-foreground">New Inquiries</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="py-4 text-center">
-                <p className="text-3xl font-bold text-primary">{quoted.length}</p>
-                <p className="text-xs text-muted-foreground">Awaiting Response</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="py-4 text-center">
-                <p className="text-3xl font-bold">{active.length}</p>
-                <p className="text-xs text-muted-foreground">Active Trips</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="py-4 text-center">
-                <p className="text-3xl font-bold text-muted-foreground">{past.length}</p>
-                <p className="text-xs text-muted-foreground">Completed</p>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Tabs defaultValue="inquiries">
-            <TabsList className="mb-6">
-              <TabsTrigger value="inquiries">
-                New Inquiries {inquiries.length > 0 && <Badge className="ml-1 bg-secondary text-secondary-foreground text-xs">{inquiries.length}</Badge>}
-              </TabsTrigger>
-              <TabsTrigger value="quoted">Quoted</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="past">Past</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="inquiries">
-              {inquiries.length === 0 ? (
-                <Card><CardContent className="py-12 text-center text-muted-foreground">No new inquiries</CardContent></Card>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-4">
-                  {inquiries.map((b) => <BookingCard key={b.id} booking={b} />)}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="quoted">
-              {quoted.length === 0 ? (
-                <Card><CardContent className="py-12 text-center text-muted-foreground">No pending quotes</CardContent></Card>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-4">
-                  {quoted.map((b) => <BookingCard key={b.id} booking={b} />)}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="active">
-              {active.length === 0 ? (
-                <Card><CardContent className="py-12 text-center text-muted-foreground">No active trips</CardContent></Card>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-4">
-                  {active.map((b) => <BookingCard key={b.id} booking={b} />)}
-                </div>
-              )}
-            </TabsContent>
-
-            <TabsContent value="past">
-              {past.length === 0 ? (
-                <Card><CardContent className="py-12 text-center text-muted-foreground">No past bookings</CardContent></Card>
-              ) : (
-                <div className="grid md:grid-cols-2 gap-4">
-                  {past.map((b) => <BookingCard key={b.id} booking={b} />)}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+  const renderBookingList = (key: string) => {
+    const list = sectionBookings[key] || [];
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">{sectionTitles[key]}</h2>
+          <span className="text-sm text-muted-foreground">{list.length} {list.length === 1 ? "booking" : "bookings"}</span>
         </div>
+        {list.length === 0 ? (
+          <Card><CardContent className="py-12 text-center text-muted-foreground">No bookings here</CardContent></Card>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-4">
+            {list.map((b) => <BookingCard key={b.id} booking={b} />)}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex">
+      <ProviderSidebar
+        active={section}
+        onChange={setSection}
+        counts={{
+          inquiries: inquiries.length,
+          quoted: quoted.length,
+          active: active.length,
+          past: past.length,
+        }}
+        providerName={providerName}
+      />
+
+      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+        {section === "home" && (
+          <ProviderHome
+            providerName={providerName}
+            providerSlug={providerSlug}
+            bookings={bookings}
+            onNavigate={(s) => setSection(s as ProviderSection)}
+          />
+        )}
+        {section !== "home" && renderBookingList(section)}
       </main>
 
       {/* Quote Dialog */}
@@ -528,8 +480,6 @@ const ProviderDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      <Footer />
     </div>
   );
 };
