@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Search, CheckCircle, XCircle } from "lucide-react";
+import { Search, CheckCircle, XCircle, ExternalLink, Loader2 } from "lucide-react";
 
 interface Application {
   id: string;
@@ -39,6 +39,7 @@ const ApplicationsSection = () => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
+  const [approving, setApproving] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
@@ -49,13 +50,96 @@ const ApplicationsSection = () => {
 
   useEffect(() => { load(); }, []);
 
-  const updateStatus = async (id: string, status: string) => {
-    const { error } = await supabase.from("provider_applications").update({ status }).eq("id", id);
+  const approveApplication = async (app: Application) => {
+    setApproving(true);
+    
+    // 1. Generate slug from business name + city
+    const slug = `${app.business_name}-${app.city}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    // 2. Create provider record
+    const { error: providerError } = await supabase.from("providers" as any).insert({
+      name: app.business_name,
+      slug,
+      city: app.city,
+      country: app.country,
+      phone: app.phone,
+      specialties: app.specialties,
+      languages: app.languages,
+      verification_tier: "listed",
+      admin_managed: true,
+      admin_email: app.email,
+    } as any);
+
+    if (providerError) {
+      // If slug conflict, try with a suffix
+      if (providerError.code === "23505") {
+        const slugRetry = `${slug}-${Date.now().toString(36).slice(-4)}`;
+        const { error: retryError } = await supabase.from("providers" as any).insert({
+          name: app.business_name,
+          slug: slugRetry,
+          city: app.city,
+          country: app.country,
+          phone: app.phone,
+          specialties: app.specialties,
+          languages: app.languages,
+          verification_tier: "listed",
+          admin_managed: true,
+          admin_email: app.email,
+        } as any);
+        if (retryError) {
+          toast({ title: "Error creating provider", description: retryError.message, variant: "destructive" });
+          setApproving(false);
+          return;
+        }
+      } else {
+        toast({ title: "Error creating provider", description: providerError.message, variant: "destructive" });
+        setApproving(false);
+        return;
+      }
+    }
+
+    // 3. Try to link to existing user account by email
+    const { data: users } = await supabase.rpc("get_admin_user_list");
+    const matchedUser = (users as any[])?.find((u: any) => u.email === app.email);
+    
+    if (matchedUser) {
+      // Link the provider to their account
+      const finalSlug = slug; // use the slug we created
+      await supabase.from("profiles").update({ provider_slug: finalSlug }).eq("user_id", matchedUser.user_id);
+      // Mark provider as self-managed since they have an account
+      await supabase.from("providers" as any).update({ 
+        owner_user_id: matchedUser.user_id, 
+        admin_managed: false 
+      } as any).eq("slug", finalSlug);
+    }
+
+    // 4. Update application status
+    const { error } = await supabase.from("provider_applications").update({ status: "approved" }).eq("id", app.id);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: `Application ${status}` });
-      setSelected((prev) => prev ? { ...prev, status } : null);
+      toast({ 
+        title: "Application approved ✓", 
+        description: matchedUser 
+          ? `Provider created & linked to ${app.email}. They'll be redirected to onboarding on next login.`
+          : `Provider listing created. When ${app.email} creates an account, you can transfer ownership.`
+      });
+      setSelected((prev) => prev ? { ...prev, status: "approved" } : null);
+      load();
+    }
+    setApproving(false);
+  };
+
+  const rejectApplication = async (id: string) => {
+    const { error } = await supabase.from("provider_applications").update({ status: "rejected" }).eq("id", id);
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Application rejected" });
+      setSelected((prev) => prev ? { ...prev, status: "rejected" } : null);
       load();
     }
   };
@@ -67,7 +151,7 @@ const ApplicationsSection = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Provider Applications</h2>
+        <h2 className="text-2xl font-bold">provider applications</h2>
         <span className="text-sm text-muted-foreground">{filtered.length} applications</span>
       </div>
 
@@ -156,12 +240,24 @@ const ApplicationsSection = () => {
                 <div><p className="text-sm text-muted-foreground mb-1">Why they want to join</p><p className="text-sm">{selected.why_join}</p></div>
               )}
 
+              {selected.status === "approved" && (
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                  <p className="text-sm text-primary font-medium flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4" /> Provider listing created
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    A provider profile was auto-created. View it in the Providers section or visit their public page.
+                  </p>
+                </div>
+              )}
+
               {selected.status === "pending" && (
                 <div className="flex gap-3 pt-2">
-                  <Button onClick={() => updateStatus(selected.id, "approved")} className="gap-1 flex-1">
-                    <CheckCircle className="w-4 h-4" /> Approve
+                  <Button onClick={() => approveApplication(selected)} className="gap-1 flex-1" disabled={approving}>
+                    {approving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />} 
+                    Approve & Create Provider
                   </Button>
-                  <Button variant="outline" onClick={() => updateStatus(selected.id, "rejected")} className="gap-1 flex-1 text-destructive hover:text-destructive">
+                  <Button variant="outline" onClick={() => rejectApplication(selected.id)} className="gap-1 flex-1 text-destructive hover:text-destructive">
                     <XCircle className="w-4 h-4" /> Reject
                   </Button>
                 </div>

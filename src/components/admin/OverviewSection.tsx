@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Users, Building2, Plane, DollarSign } from "lucide-react";
+import { Mail, Users, Building2, Plane, DollarSign, TrendingUp, Clock, ExternalLink, CheckCircle, XCircle, AlertCircle } from "lucide-react";
 
 interface Stats {
   waitlistCount: number;
   userCount: number;
+  providerCount: number;
   applications: { pending: number; approved: number; rejected: number };
   bookings: Record<string, number>;
   totalRevenue: number;
+  recentApplications: any[];
+  recentBookings: any[];
 }
 
 const OverviewSection = () => {
@@ -16,11 +21,14 @@ const OverviewSection = () => {
 
   useEffect(() => {
     const load = async () => {
-      const [waitlist, profiles, applications, bookings] = await Promise.all([
+      const [waitlist, profiles, applications, bookings, providers, recentApps, recentBookings] = await Promise.all([
         supabase.from("waitlist").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("provider_applications").select("status"),
         supabase.from("bookings").select("status, commission_amount"),
+        supabase.from("providers").select("id", { count: "exact", head: true }),
+        supabase.from("provider_applications").select("*").order("created_at", { ascending: false }).limit(5),
+        supabase.from("bookings").select("id, status, provider_slug, created_at, quoted_price").order("created_at", { ascending: false }).limit(5),
       ]);
 
       const appData = applications.data || [];
@@ -38,6 +46,7 @@ const OverviewSection = () => {
       setStats({
         waitlistCount: waitlist.count || 0,
         userCount: profiles.count || 0,
+        providerCount: providers.count || 0,
         applications: {
           pending: appData.filter((a: any) => a.status === "pending").length,
           approved: appData.filter((a: any) => a.status === "approved").length,
@@ -45,6 +54,8 @@ const OverviewSection = () => {
         },
         bookings: bookingsByStatus,
         totalRevenue: revenue,
+        recentApplications: recentApps.data || [],
+        recentBookings: recentBookings.data || [],
       });
     };
     load();
@@ -54,72 +65,160 @@ const OverviewSection = () => {
     return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
 
+  const totalBookings = Object.values(stats.bookings).reduce((a, b) => a + b, 0);
+  const activeBookings = (stats.bookings["confirmed"] || 0) + (stats.bookings["deposit_paid"] || 0);
+  const pendingApps = stats.applications.pending;
+
   const metricCards = [
     { label: "Waitlist Signups", value: stats.waitlistCount, icon: Mail, color: "text-secondary" },
     { label: "Registered Users", value: stats.userCount, icon: Users, color: "text-primary" },
-    { label: "Total Bookings", value: Object.values(stats.bookings).reduce((a, b) => a + b, 0), icon: Plane, color: "text-foreground" },
-    { label: "Total Revenue", value: `$${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-secondary" },
+    { label: "Active Providers", value: stats.providerCount, icon: Building2, color: "text-foreground" },
+    { label: "Total Bookings", value: totalBookings, icon: Plane, color: "text-primary" },
+    { label: "Active Trips", value: activeBookings, icon: TrendingUp, color: "text-secondary" },
+    { label: "Revenue", value: `$${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-primary" },
   ];
+
+  const statusIcon = (status: string) => {
+    if (status === "approved") return <CheckCircle className="w-3.5 h-3.5 text-primary" />;
+    if (status === "rejected") return <XCircle className="w-3.5 h-3.5 text-destructive" />;
+    return <Clock className="w-3.5 h-3.5 text-secondary" />;
+  };
+
+  const bookingStatusColor = (status: string) => {
+    const map: Record<string, string> = {
+      inquiry: "bg-secondary/10 text-secondary",
+      quoted: "bg-primary/10 text-primary",
+      deposit_paid: "bg-primary/20 text-primary",
+      confirmed: "bg-primary/10 text-primary",
+      completed: "bg-muted text-muted-foreground",
+      cancelled: "bg-destructive/10 text-destructive",
+    };
+    return map[status] || "";
+  };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Overview</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold">overview</h2>
+        {pendingApps > 0 && (
+          <Badge className="bg-secondary/10 text-secondary gap-1.5 px-3 py-1">
+            <AlertCircle className="w-3.5 h-3.5" />
+            {pendingApps} pending application{pendingApps > 1 ? "s" : ""}
+          </Badge>
+        )}
+      </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Metric cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {metricCards.map((m) => (
-          <Card key={m.label}>
+          <Card key={m.label} className="hover:shadow-md transition-shadow">
             <CardContent className="py-5 px-4">
-              <div className="flex items-center gap-3 mb-2">
-                <m.icon className={`w-5 h-5 ${m.color}`} />
-                <span className="text-xs text-muted-foreground">{m.label}</span>
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">{m.label}</span>
+                <m.icon className={`w-4 h-4 ${m.color} opacity-60`} />
               </div>
-              <p className={`text-2xl font-bold ${m.color}`}>{m.value}</p>
+              <p className={`text-3xl font-bold ${m.color}`}>{m.value}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Provider Applications breakdown */}
-      <Card>
-        <CardContent className="py-5 px-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Building2 className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold">Provider Applications</h3>
-          </div>
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-2xl font-bold text-secondary">{stats.applications.pending}</p>
-              <p className="text-xs text-muted-foreground">Pending</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-primary">{stats.applications.approved}</p>
-              <p className="text-xs text-muted-foreground">Approved</p>
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-destructive">{stats.applications.rejected}</p>
-              <p className="text-xs text-muted-foreground">Rejected</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Bookings by status */}
-      <Card>
-        <CardContent className="py-5 px-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Plane className="w-5 h-5 text-primary" />
-            <h3 className="font-semibold">Bookings by Status</h3>
-          </div>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 text-center">
-            {["inquiry", "quoted", "deposit_paid", "confirmed", "completed", "cancelled"].map((s) => (
-              <div key={s}>
-                <p className="text-xl font-bold">{stats.bookings[s] || 0}</p>
-                <p className="text-xs text-muted-foreground capitalize">{s.replace("_", " ")}</p>
+      {/* Two-column layout: Applications + Bookings pipeline */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Provider Applications */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-primary" />
+              provider applications
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Summary bar */}
+            <div className="flex gap-4 text-center">
+              <div className="flex-1 bg-secondary/5 rounded-lg p-3">
+                <p className="text-2xl font-bold text-secondary">{stats.applications.pending}</p>
+                <p className="text-[11px] text-muted-foreground">pending</p>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              <div className="flex-1 bg-primary/5 rounded-lg p-3">
+                <p className="text-2xl font-bold text-primary">{stats.applications.approved}</p>
+                <p className="text-[11px] text-muted-foreground">approved</p>
+              </div>
+              <div className="flex-1 bg-destructive/5 rounded-lg p-3">
+                <p className="text-2xl font-bold text-destructive">{stats.applications.rejected}</p>
+                <p className="text-[11px] text-muted-foreground">rejected</p>
+              </div>
+            </div>
+
+            {/* Recent applications */}
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">recent</p>
+              <div className="space-y-2">
+                {stats.recentApplications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">no applications yet</p>
+                ) : (
+                  stats.recentApplications.map((app: any) => (
+                    <div key={app.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      {statusIcon(app.status)}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{app.business_name}</p>
+                        <p className="text-[11px] text-muted-foreground">{app.city}, {app.country}</p>
+                      </div>
+                      <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                        {new Date(app.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Bookings Pipeline */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Plane className="w-4 h-4 text-primary" />
+              booking pipeline
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Pipeline visualization */}
+            <div className="grid grid-cols-3 gap-2">
+              {["inquiry", "quoted", "deposit_paid", "confirmed", "completed", "cancelled"].map((s) => (
+                <div key={s} className={`rounded-lg p-3 text-center ${bookingStatusColor(s)} bg-opacity-50`}>
+                  <p className="text-xl font-bold">{stats.bookings[s] || 0}</p>
+                  <p className="text-[11px] capitalize">{s.replace("_", " ")}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Recent bookings */}
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">recent</p>
+              <div className="space-y-2">
+                {stats.recentBookings.length === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4 text-center">no bookings yet</p>
+                ) : (
+                  stats.recentBookings.map((b: any) => (
+                    <div key={b.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <Badge className={`text-[10px] ${bookingStatusColor(b.status)}`}>{b.status.replace("_", " ")}</Badge>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{b.provider_slug}</p>
+                        {b.quoted_price && <p className="text-[11px] text-muted-foreground">${b.quoted_price.toLocaleString()}</p>}
+                      </div>
+                      <span className="text-[11px] text-muted-foreground whitespace-nowrap">
+                        {new Date(b.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
