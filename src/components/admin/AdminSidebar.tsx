@@ -17,9 +17,10 @@ const sections: { id: AdminSection; label: string; icon: React.ElementType }[] =
 interface Props {
   active: AdminSection;
   onChange: (s: AdminSection) => void;
+  inboxCount?: number;
 }
 
-const AdminSidebar = ({ active, onChange }: Props) => (
+const AdminSidebar = ({ active, onChange, inboxCount = 0 }: Props) => (
   <aside className="w-56 shrink-0 border-r border-border bg-card min-h-[calc(100vh-4rem)]">
     <div className="p-4 border-b border-border flex items-center gap-2">
       <Shield className="w-5 h-5 text-primary" />
@@ -39,6 +40,11 @@ const AdminSidebar = ({ active, onChange }: Props) => (
         >
           <s.icon className="w-4 h-4" />
           {s.label}
+          {s.id === "inbox" && inboxCount > 0 && (
+            <span className="ml-auto bg-secondary text-secondary-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {inboxCount}
+            </span>
+          )}
         </button>
       ))}
     </nav>
