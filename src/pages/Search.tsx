@@ -300,13 +300,19 @@ const SearchPage = () => {
                                   {category === "dental" ? "Dental Clinic" : "Aesthetics & MedSpa"}
                                 </p>
                               </div>
-                              {provider.verified && (
+                              {provider.verified ? (
                                 <div className="absolute top-3 right-3">
                                   <Badge className="bg-primary text-primary-foreground gap-1 shadow-md">
                                     <BadgeCheck className="w-3 h-3" /> Verified
                                   </Badge>
                                 </div>
-                              )}
+                              ) : provider.verificationTier === "listed" ? (
+                                <div className="absolute top-3 right-3">
+                                  <Badge variant="outline" className="bg-muted/80 text-muted-foreground gap-1 shadow-sm border-border">
+                                    <BadgeCheck className="w-3 h-3" /> Listed
+                                  </Badge>
+                                </div>
+                              ) : null}
                             </div>
                             <CardContent className="p-5">
                               <div className="flex items-start justify-between mb-2">
