@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { Camera } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import AvatarCropModal from "./AvatarCropModal";
 
 interface AvatarUploadProps {
   size?: "sm" | "md" | "lg";
@@ -21,6 +21,7 @@ const AvatarUpload = ({ size = "md", onUploaded }: AvatarUploadProps) => {
   const { user, profile, refreshProfile } = useAuth();
   const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const avatarUrl = profile?.avatar_url;
@@ -28,21 +29,32 @@ const AvatarUpload = ({ size = "md", onUploaded }: AvatarUploadProps) => {
     ? `${(profile.first_name || "")[0] || ""}${(profile.last_name || "")[0] || ""}`.toUpperCase() || "U"
     : "U";
 
-  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast({ title: "Image too large", description: "Max 5MB", variant: "destructive" });
+    if (file.size > 10 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Max 10MB", variant: "destructive" });
       return;
     }
 
-    setUploading(true);
-    const ext = file.name.split(".").pop() || "jpg";
-    const path = `${user.id}/avatar/${Date.now()}.${ext}`;
+    const reader = new FileReader();
+    reader.onload = () => setCropSrc(reader.result as string);
+    reader.readAsDataURL(file);
 
-    const { error } = await supabase.storage.from("profile-media").upload(path, file, {
-      contentType: file.type,
+    // Reset input so the same file can be re-selected
+    e.target.value = "";
+  };
+
+  const handleCropConfirm = async (blob: Blob) => {
+    if (!user) return;
+    setCropSrc(null);
+    setUploading(true);
+
+    const path = `${user.id}/avatar/${Date.now()}.jpg`;
+
+    const { error } = await supabase.storage.from("profile-media").upload(path, blob, {
+      contentType: "image/jpeg",
       cacheControl: "3600",
       upsert: true,
     });
@@ -68,31 +80,42 @@ const AvatarUpload = ({ size = "md", onUploaded }: AvatarUploadProps) => {
   };
 
   return (
-    <div className="relative group">
-      <Avatar className={`${sizeClasses[size]} bg-primary text-primary-foreground`}>
-        {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" />}
-        <AvatarFallback className="bg-primary text-primary-foreground">{initials}</AvatarFallback>
-      </Avatar>
-      <button
-        onClick={() => inputRef.current?.click()}
-        disabled={uploading}
-        className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center cursor-pointer"
-      >
-        <Camera className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={handleUpload}
-      />
-      {uploading && (
-        <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
-        </div>
+    <>
+      <div className="relative group">
+        <Avatar className={`${sizeClasses[size]} bg-primary text-primary-foreground`}>
+          {avatarUrl && <AvatarImage src={avatarUrl} alt="Profile" className="object-cover" />}
+          <AvatarFallback className="bg-primary text-primary-foreground">{initials}</AvatarFallback>
+        </Avatar>
+        <button
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center cursor-pointer"
+        >
+          <Camera className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileSelect}
+        />
+        {uploading && (
+          <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white" />
+          </div>
+        )}
+      </div>
+
+      {cropSrc && (
+        <AvatarCropModal
+          open={!!cropSrc}
+          imageSrc={cropSrc}
+          onClose={() => setCropSrc(null)}
+          onConfirm={handleCropConfirm}
+        />
       )}
-    </div>
+    </>
   );
 };
 
