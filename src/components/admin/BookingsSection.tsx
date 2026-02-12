@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search } from "lucide-react";
+import { Search, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface BookingRow {
   id: string;
@@ -34,6 +36,7 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const BookingsSection = () => {
+  const { toast } = useToast();
   const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<BookingRow | null>(null);
@@ -69,11 +72,55 @@ const BookingsSection = () => {
       .some((f) => (f || "").toLowerCase().includes(search.toLowerCase()))
   );
 
+  const escapeCsv = (v: string) => `"${String(v).replace(/"/g, '""')}"`;
+
+  const exportCSV = useCallback(() => {
+    if (filtered.length === 0) {
+      toast({ title: "Nothing to export", description: "No bookings match the current filter." });
+      return;
+    }
+    const rows = filtered.map((b) => ({
+      status: b.status,
+      patient: b.patient_name || "",
+      provider: b.provider_slug,
+      procedures: getProcedures(b.procedures),
+      quoted_price: b.quoted_price ?? "",
+      deposit: b.deposit_amount ?? "",
+      commission: b.commission_amount ?? "",
+      preferred_dates: b.preferred_dates?.text || "",
+      estimated_dates: b.provider_estimated_dates || "",
+      inquiry_message: b.inquiry_message || "",
+      medical_notes: b.medical_notes || "",
+      provider_message: b.provider_message || "",
+      created_at: b.created_at,
+    }));
+
+    const headers = Object.keys(rows[0]);
+    const csv = [
+      headers.join(","),
+      ...rows.map((row) => headers.map((h) => escapeCsv(String((row as any)[h]))).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bookings-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${rows.length} booking(s) exported to CSV.` });
+  }, [filtered, toast]);
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Bookings</h2>
-        <span className="text-sm text-muted-foreground">{filtered.length} bookings</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-muted-foreground">{filtered.length} bookings</span>
+          <Button variant="outline" size="sm" onClick={exportCSV}>
+            <Download className="w-4 h-4 mr-2" /> Export CSV
+          </Button>
+        </div>
       </div>
 
       <div className="relative max-w-sm">
