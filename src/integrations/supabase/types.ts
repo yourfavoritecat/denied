@@ -278,10 +278,10 @@ export type Database = {
           city: string
           created_at: string
           dba_name: string | null
-          email: string
+          email: string | null
           id: string
           legal_name: string
-          phone: string
+          phone: string | null
           provider_slug: string
           state_country: string
           street_address: string
@@ -295,10 +295,10 @@ export type Database = {
           city: string
           created_at?: string
           dba_name?: string | null
-          email: string
+          email?: string | null
           id?: string
           legal_name: string
-          phone: string
+          phone?: string | null
           provider_slug: string
           state_country: string
           street_address: string
@@ -312,10 +312,10 @@ export type Database = {
           city?: string
           created_at?: string
           dba_name?: string | null
-          email?: string
+          email?: string | null
           id?: string
           legal_name?: string
-          phone?: string
+          phone?: string | null
           provider_slug?: string
           state_country?: string
           street_address?: string

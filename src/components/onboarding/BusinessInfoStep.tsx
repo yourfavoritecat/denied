@@ -57,7 +57,7 @@ const BusinessInfoStep = ({ userId, providerSlug, onComplete }: Props) => {
   const update = (field: string, value: string) => setForm((f) => ({ ...f, [field]: value }));
 
   const handleSave = async () => {
-    if (!form.legal_name || !form.street_address || !form.city || !form.state_country || !form.phone || !form.email) {
+    if (!form.legal_name || !form.street_address || !form.city || !form.state_country) {
       toast({ title: "Fill in all required fields", variant: "destructive" });
       return;
     }
@@ -70,9 +70,9 @@ const BusinessInfoStep = ({ userId, providerSlug, onComplete }: Props) => {
       street_address: form.street_address.trim(),
       city: form.city.trim(),
       state_country: form.state_country.trim(),
-      phone: form.phone.trim(),
+      phone: form.phone.trim() || null,
       whatsapp: form.whatsapp.trim() || null,
-      email: form.email.trim(),
+      email: form.email.trim() || null,
       tax_id: form.tax_id.trim() || null,
       years_in_operation: form.years_in_operation ? parseInt(form.years_in_operation) : null,
     };
@@ -122,7 +122,7 @@ const BusinessInfoStep = ({ userId, providerSlug, onComplete }: Props) => {
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Phone *</Label>
+            <Label>Phone</Label>
             <Input value={form.phone} onChange={(e) => update("phone", e.target.value)} />
           </div>
           <div className="space-y-2">
@@ -132,7 +132,7 @@ const BusinessInfoStep = ({ userId, providerSlug, onComplete }: Props) => {
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Email *</Label>
+            <Label>Email</Label>
             <Input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} />
           </div>
           <div className="space-y-2">
