@@ -1,3 +1,7 @@
+import clinicDental from "@/assets/clinic-dental.jpg";
+import clinicMedspa from "@/assets/clinic-medspa.jpg";
+import clinicSurgery from "@/assets/clinic-surgery.jpg";
+
 export interface Procedure {
   name: string;
   priceRange: string;
@@ -31,6 +35,7 @@ export interface Provider {
   procedures: Procedure[];
   reviewsList: Review[];
   ratingBreakdown: number[]; // 5-star to 1-star counts
+  photos?: string[];
 }
 
 export const REVIEW_CATEGORIES = [
@@ -102,6 +107,7 @@ export const providers: Provider[] = [
     ],
     reviewsList: [],
     ratingBreakdown: [1, 0, 0, 0, 0],
+    photos: [clinicDental, clinicSurgery, clinicMedspa],
   },
   {
     slug: "dental-excellence-tijuana",

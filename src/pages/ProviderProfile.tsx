@@ -153,7 +153,9 @@ const ProviderProfile = () => {
   }
 
   const totalReviews = seedProvider ? seedProvider.ratingBreakdown.reduce((a, b) => a + b, 0) : 0;
-  const facilityPhotos = real?.facility?.photos as string[] || [];
+  const facilityPhotos = (real?.facility?.photos as string[] || []).length > 0
+    ? (real?.facility?.photos as string[])
+    : (seedProvider?.photos || []);
   const externalLinks = real?.links;
 
   // Build procedures list from real data or seed
