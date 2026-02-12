@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { REVIEW_CATEGORIES } from "@/data/providers";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -18,6 +18,7 @@ interface ReviewProfile {
   username: string | null;
   public_profile: boolean;
   social_verifications?: Record<string, any>;
+  avatar_url?: string | null;
 }
 
 export interface ReviewData {
@@ -155,10 +156,11 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
-  const firstName = review.profile?.first_name || "Anonymous";
+  const firstName = review.profile?.first_name || "User";
   const city = review.profile?.city || "";
   const initials = firstName.charAt(0).toUpperCase();
-  const isPublic = review.profile?.public_profile && review.profile?.username;
+  const avatarUrl = review.profile?.avatar_url;
+  const username = review.profile?.username;
   const isAuthor = user?.id === review.user_id;
 
   const handleUpvote = async () => {
@@ -179,8 +181,8 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
     setIsUpvoting(false);
   };
 
-  const nameElement = isPublic ? (
-    <Link to={`/user/${review.profile!.username}`} className="font-bold hover:text-primary transition-colors">
+  const nameElement = username ? (
+    <Link to={`/user/${username}`} className="font-bold hover:text-primary transition-colors">
       {firstName}
     </Link>
   ) : (
@@ -197,6 +199,7 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
             <Avatar className="bg-secondary/20 shrink-0">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
               <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-sm">{initials}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
