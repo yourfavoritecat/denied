@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, ArrowRight, X, Plus } from "lucide-react";
+import { Calculator, ArrowRight, X, Plus, Minus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Procedure {
@@ -41,40 +41,45 @@ const useCountUp = (target: number, active: boolean, duration = 800) => {
 };
 
 const parsePrice = (price: string): number => {
-  // Take the first number from price ranges like "$350–$450"
   const match = price.replace(/,/g, "").match(/(\d+)/);
   return match ? parseInt(match[1]) : 0;
 };
 
 const SavingsCalculator = ({ procedures, onRequestQuote }: SavingsCalculatorProps) => {
-  const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<{ name: string; qty: number }[]>([]);
   const [selectValue, setSelectValue] = useState<string>("");
 
   const validProcedures = procedures.filter((p) => p.usPrice && p.usPrice > 0);
-  const availableToAdd = validProcedures.filter((p) => !selectedProcedures.includes(p.name));
+  const selectedNames = selectedItems.map((s) => s.name);
+  const availableToAdd = validProcedures.filter((p) => !selectedNames.includes(p.name));
 
   const handleAdd = (name: string) => {
-    if (selectedProcedures.length >= 10) return;
-    if (!selectedProcedures.includes(name)) {
-      setSelectedProcedures((prev) => [...prev, name]);
+    if (selectedItems.length >= 10) return;
+    if (!selectedNames.includes(name)) {
+      setSelectedItems((prev) => [...prev, { name, qty: 1 }]);
     }
     setSelectValue("");
   };
 
   const handleRemove = (name: string) => {
-    setSelectedProcedures((prev) => prev.filter((n) => n !== name));
+    setSelectedItems((prev) => prev.filter((s) => s.name !== name));
   };
 
-  // Calculate totals
-  const totals = selectedProcedures.reduce(
-    (acc, name) => {
+  const handleQty = (name: string, delta: number) => {
+    setSelectedItems((prev) =>
+      prev.map((s) => s.name === name ? { ...s, qty: Math.max(1, Math.min(20, s.qty + delta)) } : s)
+    );
+  };
+
+  const totals = selectedItems.reduce(
+    (acc, { name, qty }) => {
       const proc = procedures.find((p) => p.name === name);
       if (!proc) return acc;
       const localPrice = parsePrice(proc.price || proc.priceRange || "0");
       const usPrice = proc.usPrice || 0;
       return {
-        usTotal: acc.usTotal + usPrice,
-        localTotal: acc.localTotal + localPrice,
+        usTotal: acc.usTotal + usPrice * qty,
+        localTotal: acc.localTotal + localPrice * qty,
       };
     },
     { usTotal: 0, localTotal: 0 }
@@ -82,7 +87,8 @@ const SavingsCalculator = ({ procedures, onRequestQuote }: SavingsCalculatorProp
 
   const savingsAmount = totals.usTotal - totals.localTotal;
   const savingsPct = totals.usTotal > 0 ? Math.round((savingsAmount / totals.usTotal) * 100) : 0;
-  const isActive = selectedProcedures.length > 0 && totals.usTotal > 0;
+  const isActive = selectedItems.length > 0 && totals.usTotal > 0;
+  const totalUnits = selectedItems.reduce((sum, s) => sum + s.qty, 0);
 
   const animatedUs = useCountUp(totals.usTotal, isActive);
   const animatedLocal = useCountUp(totals.localTotal, isActive);
@@ -103,12 +109,11 @@ const SavingsCalculator = ({ procedures, onRequestQuote }: SavingsCalculatorProp
             <h3 className="text-lg font-bold text-white">Savings Calculator</h3>
           </div>
 
-          {/* Procedure selector */}
           <div className="space-y-3">
-            {availableToAdd.length > 0 && (
+            {availableToAdd.length > 0 && selectedItems.length < 10 && (
               <Select value={selectValue} onValueChange={handleAdd}>
                 <SelectTrigger className="bg-white/10 border-white/20 text-white max-w-sm">
-                  <SelectValue placeholder={selectedProcedures.length === 0 ? "Select a procedure" : "Add another procedure"} />
+                  <SelectValue placeholder={selectedItems.length === 0 ? "Select a procedure" : "Add another procedure"} />
                 </SelectTrigger>
                 <SelectContent>
                   {availableToAdd.map((p) => (
@@ -118,19 +123,35 @@ const SavingsCalculator = ({ procedures, onRequestQuote }: SavingsCalculatorProp
               </Select>
             )}
 
-            {/* Selected procedures as removable badges */}
-            {selectedProcedures.length > 0 && (
+            {selectedItems.length > 0 && (
               <div className="flex flex-wrap gap-2">
-                {selectedProcedures.map((name) => {
+                {selectedItems.map(({ name, qty }) => {
                   const proc = procedures.find((p) => p.name === name);
                   const localPrice = proc ? parsePrice(proc.price || proc.priceRange || "0") : 0;
                   return (
                     <Badge
                       key={name}
-                      className="bg-white/10 text-white border-white/20 gap-1.5 pr-1.5 py-1.5 text-sm"
+                      className="bg-white/10 text-white border-white/20 gap-1 pr-1.5 py-1 text-sm"
                     >
                       <span>{name}</span>
-                      <span className="text-[#5EB298] font-bold">${localPrice.toLocaleString()}</span>
+                      <div className="flex items-center gap-1 ml-1">
+                        <button
+                          onClick={() => handleQty(name, -1)}
+                          className="hover:text-white/80 transition-colors disabled:opacity-30"
+                          disabled={qty <= 1}
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="text-[#5EB298] font-bold min-w-[1.25rem] text-center">×{qty}</span>
+                        <button
+                          onClick={() => handleQty(name, 1)}
+                          className="hover:text-white/80 transition-colors disabled:opacity-30"
+                          disabled={qty >= 20}
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <span className="text-[#5EB298] font-bold">${(localPrice * qty).toLocaleString()}</span>
                       <button
                         onClick={() => handleRemove(name)}
                         className="ml-1 hover:text-red-400 transition-colors"
@@ -152,20 +173,19 @@ const SavingsCalculator = ({ procedures, onRequestQuote }: SavingsCalculatorProp
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
               >
-                {/* Per-procedure breakdown */}
-                {selectedProcedures.length > 1 && (
+                {(selectedItems.length > 1 || selectedItems.some(s => s.qty > 1)) && (
                   <div className="mt-4 space-y-1.5">
-                    {selectedProcedures.map((name) => {
+                    {selectedItems.map(({ name, qty }) => {
                       const proc = procedures.find((p) => p.name === name);
                       if (!proc) return null;
                       const localPrice = parsePrice(proc.price || proc.priceRange || "0");
                       const usPrice = proc.usPrice || 0;
                       return (
                         <div key={name} className="flex items-center justify-between text-sm">
-                          <span className="text-white/60 truncate mr-4">{name}</span>
+                          <span className="text-white/60 truncate mr-4">{name}{qty > 1 ? ` ×${qty}` : ""}</span>
                           <div className="flex items-center gap-4 shrink-0">
-                            <span className="text-white/40 line-through">${usPrice.toLocaleString()}</span>
-                            <span className="text-[#5EB298] font-semibold">${localPrice.toLocaleString()}</span>
+                            <span className="text-white/40 line-through">${(usPrice * qty).toLocaleString()}</span>
+                            <span className="text-[#5EB298] font-semibold">${(localPrice * qty).toLocaleString()}</span>
                           </div>
                         </div>
                       );
@@ -174,11 +194,10 @@ const SavingsCalculator = ({ procedures, onRequestQuote }: SavingsCalculatorProp
                   </div>
                 )}
 
-                {/* Totals */}
                 <div className="grid grid-cols-3 gap-4 mt-4 text-center">
                   <div>
                     <p className="text-xs text-white/50 uppercase tracking-wider mb-1">
-                      US Average{selectedProcedures.length > 1 ? " Total" : ""}
+                      US Average{totalUnits > 1 ? " Total" : ""}
                     </p>
                     <p className="text-2xl sm:text-3xl font-bold text-white/70 line-through">
                       ${animatedUs.toLocaleString()}
@@ -186,7 +205,7 @@ const SavingsCalculator = ({ procedures, onRequestQuote }: SavingsCalculatorProp
                   </div>
                   <div>
                     <p className="text-xs text-[#5EB298] uppercase tracking-wider mb-1">
-                      Price Here{selectedProcedures.length > 1 ? " Total" : ""}
+                      Price Here{totalUnits > 1 ? " Total" : ""}
                     </p>
                     <p className="text-2xl sm:text-3xl font-bold text-[#5EB298]">
                       ${animatedLocal.toLocaleString()}
@@ -204,9 +223,9 @@ const SavingsCalculator = ({ procedures, onRequestQuote }: SavingsCalculatorProp
                 <div className="mt-6 flex justify-center">
                   <Button
                     className="bg-[#5EB298] hover:bg-[#5EB298]/90 text-white font-bold gap-2 px-6"
-                    onClick={() => onRequestQuote(selectedProcedures.join(", "))}
+                    onClick={() => onRequestQuote(selectedItems.map(s => s.qty > 1 ? `${s.name} ×${s.qty}` : s.name).join(", "))}
                   >
-                    Get a quote{selectedProcedures.length > 1 ? ` for ${selectedProcedures.length} procedures` : ""} <ArrowRight className="w-4 h-4" />
+                    Get a quote for {totalUnits} procedure{totalUnits !== 1 ? "s" : ""} <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
               </motion.div>
