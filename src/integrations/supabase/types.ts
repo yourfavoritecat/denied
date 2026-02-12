@@ -529,7 +529,7 @@ export type Database = {
         Row: {
           bio: string | null
           created_at: string
-          headshot_url: string
+          headshot_url: string | null
           id: string
           is_lead: boolean
           license_number: string | null
@@ -543,7 +543,7 @@ export type Database = {
         Insert: {
           bio?: string | null
           created_at?: string
-          headshot_url: string
+          headshot_url?: string | null
           id?: string
           is_lead?: boolean
           license_number?: string | null
@@ -557,7 +557,7 @@ export type Database = {
         Update: {
           bio?: string | null
           created_at?: string
-          headshot_url?: string
+          headshot_url?: string | null
           id?: string
           is_lead?: boolean
           license_number?: string | null

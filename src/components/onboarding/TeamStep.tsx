@@ -95,11 +95,6 @@ const TeamStep = ({ userId, providerSlug, onComplete }: Props) => {
     }
 
     const activeMems = members.filter((m) => m.name.trim());
-    const missing = activeMems.find((m) => !m.headshot_url);
-    if (missing) {
-      toast({ title: `Headshot required for ${missing.name || "all team members"}`, variant: "destructive" });
-      return;
-    }
 
     setSaving(true);
 
@@ -164,7 +159,7 @@ const TeamStep = ({ userId, providerSlug, onComplete }: Props) => {
                 <Input value={member.license_number} onChange={(e) => updateMember(idx, "license_number", e.target.value)} />
               </div>
               <div className="space-y-2">
-                <Label>Headshot *</Label>
+                <Label>Headshot</Label>
                 {member.headshot_url ? (
                   <div className="flex items-center gap-3">
                     <img src={member.headshot_url} alt="" className="w-12 h-12 rounded-full object-cover" />
