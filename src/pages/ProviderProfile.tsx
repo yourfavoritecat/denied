@@ -17,6 +17,9 @@ import ReviewCard from "@/components/reviews/ReviewCard";
 import { useReviews } from "@/hooks/useReviews";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import SavingsCalculator from "@/components/provider/SavingsCalculator";
+import VideoTestimonialGallery from "@/components/provider/VideoTestimonialGallery";
+import VibeTagsDisplay from "@/components/provider/VibeTagsDisplay";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -49,6 +52,7 @@ const ProviderProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const seedProvider = providers.find((p) => p.slug === slug);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [quoteProcedure, setQuoteProcedure] = useState<string>("");
   const [reviewOpen, setReviewOpen] = useState(false);
   const [editingReview, setEditingReview] = useState<any>(null);
   const [sortBy, setSortBy] = useState<"newest" | "oldest" | "highest" | "lowest" | "helpful">("newest");
@@ -200,6 +204,9 @@ const ProviderProfile = () => {
                 </div>
               </div>
             </motion.div>
+
+            {/* Vibe Tags below header */}
+            <VibeTagsDisplay reviews={reviews} />
           </div>
         </motion.div>
 
@@ -227,6 +234,15 @@ const ProviderProfile = () => {
         </motion.div>
 
         <div className="container mx-auto px-4 space-y-12">
+          {/* Savings Calculator */}
+          <SavingsCalculator
+            procedures={procedures}
+            onRequestQuote={(procName) => {
+              setQuoteProcedure(procName);
+              setQuoteOpen(true);
+            }}
+          />
+
           {/* About / Description */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">About</h2>
@@ -314,6 +330,10 @@ const ProviderProfile = () => {
                 </Button>
               )}
             </div>
+
+            {/* Video Testimonials */}
+            <VideoTestimonialGallery reviews={reviews} />
+
             <div className="grid md:grid-cols-3 gap-8">
               {/* Rating Breakdown + Category Chart */}
               {(seedProvider || categoryAggregates) && (

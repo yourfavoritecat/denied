@@ -13,6 +13,23 @@ import { useToast } from "@/hooks/use-toast";
 import { REVIEW_CATEGORIES } from "@/data/providers";
 import type { ReviewData } from "@/components/reviews/ReviewCard";
 
+const VIBE_TAGS = [
+  "Feels like a US office",
+  "Walk-in friendly",
+  "Great for nervous patients",
+  "Family-run feel",
+  "High-tech equipment",
+  "Fast turnaround",
+  "Bilingual staff",
+  "Clean and modern",
+  "No pressure sales",
+  "Great with kids",
+  "Luxury experience",
+  "No-frills but solid",
+  "Easy border crossing",
+  "Good follow-up care",
+];
+
 const PHOTO_ACCEPT = ".jpg,.jpeg,.png,.heic,.heif";
 const VIDEO_ACCEPT = ".mp4,.mov,.webm";
 const MAX_VIDEO_SIZE = 100 * 1024 * 1024;
@@ -79,6 +96,7 @@ const LeaveReviewModal = ({
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
   const [existingVideos, setExistingVideos] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [vibeTags, setVibeTags] = useState<string[]>([]);
 
   const isEditing = !!editReview;
 
@@ -100,11 +118,13 @@ const LeaveReviewModal = ({
       setExistingVideos(editReview.videos || []);
       setNewPhotos([]);
       setNewVideos([]);
+      setVibeTags((editReview as any).vibe_tags || []);
     } else if (!editReview && open) {
       setCategoryRatings({});
       setTitle(""); setReviewText(""); setProcedure("");
       setRecommend(true); setNewPhotos([]); setNewVideos([]);
       setExistingPhotos([]); setExistingVideos([]);
+      setVibeTags([]);
     }
   }, [editReview, open]);
 
@@ -176,6 +196,7 @@ const LeaveReviewModal = ({
       rating_outcome: categoryRatings.rating_outcome,
       rating_safety: categoryRatings.rating_safety,
       rating_value: categoryRatings.rating_value,
+      vibe_tags: vibeTags,
     };
 
     if (isEditing && editReview) {
@@ -192,8 +213,15 @@ const LeaveReviewModal = ({
         setCategoryRatings({}); setTitle(""); setReviewText(""); setProcedure("");
         setRecommend(true); setNewPhotos([]); setNewVideos([]);
         setExistingPhotos([]); setExistingVideos([]);
+        setVibeTags([]);
       }
     }
+  };
+
+  const toggleVibeTag = (tag: string) => {
+    setVibeTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : prev.length < 5 ? [...prev, tag] : prev
+    );
   };
 
   return (
@@ -298,6 +326,30 @@ const LeaveReviewModal = ({
                   <input type="file" accept={VIDEO_ACCEPT} className="hidden" onChange={handleVideoUpload} />
                 </label>
               )}
+            </div>
+          </div>
+
+          {/* Vibe Tags */}
+          <div className="space-y-2">
+            <Label>Describe the vibe (up to 5)</Label>
+            <div className="flex flex-wrap gap-2">
+              {VIBE_TAGS.map((tag) => {
+                const isSelected = vibeTags.includes(tag);
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => toggleVibeTag(tag)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                      isSelected
+                        ? "bg-[#5EB298] text-white border-[#5EB298]"
+                        : "bg-transparent text-[#5EB298] border-[#5EB298]/50 hover:border-[#5EB298]"
+                    }`}
+                  >
+                    {tag}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
