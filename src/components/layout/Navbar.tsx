@@ -10,8 +10,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info } from "lucide-react";
+import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { useAdmin } from "@/hooks/useAdmin";
+import { useViewAs } from "@/hooks/useViewAs";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import logo from "@/assets/logo.png";
 
@@ -19,6 +21,8 @@ const Navbar = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isAdmin } = useAdmin();
+  const { viewAs } = useViewAs();
 
   const initials = profile
     ? `${(profile.first_name || "")[0] || ""}${(profile.last_name || "")[0] || ""}`.toUpperCase() || "U"
@@ -28,13 +32,15 @@ const Navbar = () => {
     ? [profile.first_name, profile.last_name].filter(Boolean).join(" ") || user?.email
     : user?.email;
 
-  const isProvider = !!(profile as any)?.provider_slug;
+  const isProvider = !!(profile as any)?.provider_slug || (isAdmin && viewAs === "provider");
+  const showAdminLink = isAdmin && viewAs === "admin";
 
   const navLinks = [
     { to: "/search", icon: Search, label: "Search" },
     { to: "/about", icon: Info, label: "About" },
     { to: "/my-trips", icon: Plane, label: "My Trips" },
-    ...(isProvider ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Dashboard" }] : []),
+    ...(isProvider ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Provider Dashboard" }] : []),
+    ...(showAdminLink ? [{ to: "/admin", icon: Shield, label: "Admin" }] : []),
     { to: "/profile", icon: User, label: "Profile" },
   ];
 

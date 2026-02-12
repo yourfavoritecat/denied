@@ -1,10 +1,12 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useViewAs } from "@/hooks/useViewAs";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, profile, loading } = useAuth();
   const { isAdmin } = useAdmin();
+  const { viewAs } = useViewAs();
   const location = useLocation();
 
   if (loading) {
@@ -24,7 +26,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const onboardingComplete = !!(profile as any)?.onboarding_complete;
   const isOnboardingPage = location.pathname === "/provider/onboarding";
 
-  if (isProvider && !onboardingComplete && !isOnboardingPage && !isAdmin) {
+  // Admins viewing as non-provider roles skip the onboarding redirect
+  if (isProvider && !onboardingComplete && !isOnboardingPage && !isAdmin && viewAs !== "traveler") {
     return <Navigate to="/provider/onboarding" replace />;
   }
 

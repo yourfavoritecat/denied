@@ -4,7 +4,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
+import { ViewAsProvider } from "@/hooks/useViewAs";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ViewAsSwitcher from "@/components/admin/ViewAsSwitcher";
 import Launch from "./pages/Launch";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -29,6 +31,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <ViewAsProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -54,8 +57,10 @@ const App = () => (
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <ViewAsSwitcher />
         </BrowserRouter>
       </TooltipProvider>
+      </ViewAsProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
