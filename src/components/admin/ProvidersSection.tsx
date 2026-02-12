@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star, ShieldCheck } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star, ShieldCheck, Download } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -248,6 +248,46 @@ const ProvidersSection = () => {
     fetchProviders();
   };
 
+  const exportCSV = useCallback(() => {
+    const rows = filteredAndSortedProviders.map(p => {
+      const sections = onboardingStatus[p.slug] ?? [];
+      const completed = sections.filter(Boolean).length;
+      const rating = providerRatings[p.slug];
+      return {
+        name: p.name,
+        slug: p.slug,
+        city: p.city ?? "",
+        country: p.country ?? "",
+        verification_tier: p.verification_tier,
+        type: p.admin_managed ? "admin_managed" : "self_managed",
+        specialties: (p.specialties ?? []).join("; "),
+        rating: rating != null ? rating.toString() : "",
+        onboarding: `${completed}/${ONBOARDING_SECTIONS.length}`,
+        created_at: p.created_at,
+      };
+    });
+
+    const headers = Object.keys(rows[0] ?? {});
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row =>
+        headers.map(h => {
+          const val = String((row as any)[h]);
+          return val.includes(",") || val.includes('"') ? `"${val.replace(/"/g, '""')}"` : val;
+        }).join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `providers-export-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "Exported", description: `${rows.length} provider(s) exported to CSV.` });
+  }, [filteredAndSortedProviders, onboardingStatus, providerRatings, toast]);
+
   const openCreate = () => {
     setSelectedProvider(null);
     setForm({
@@ -382,6 +422,9 @@ const ProvidersSection = () => {
           >
             <ArrowUpDown className="w-4 h-4" />
             {sortByIncomplete ? "Incomplete First" : "Sort by Onboarding"}
+          </Button>
+          <Button variant="outline" onClick={exportCSV} className="gap-2">
+            <Download className="w-4 h-4" /> Export CSV
           </Button>
           <Button onClick={openCreate} className="gap-2"><Plus className="w-4 h-4" /> Create Provider</Button>
         </div>
