@@ -65,12 +65,6 @@ const FacilityStep = ({ userId, providerSlug, onComplete }: Props) => {
   };
 
   const handleSave = async () => {
-    const totalPhotos = photos.length + newPhotos.length;
-    if (totalPhotos < 5) {
-      toast({ title: "Upload at least 5 facility photos", variant: "destructive" });
-      return;
-    }
-
     setSaving(true);
 
     // Upload new photos
@@ -173,7 +167,7 @@ const FacilityStep = ({ userId, providerSlug, onComplete }: Props) => {
         </div>
 
         <div className="space-y-2">
-          <Label>Photos (min 5 — lobby, treatment rooms, equipment, sterilization, exterior)</Label>
+          <Label>Photos (lobby, treatment rooms, equipment, sterilization, exterior)</Label>
           <div className="flex flex-wrap gap-3">
             {photos.map((url, i) => (
               <div key={`ex-${i}`} className="relative w-24 h-24 rounded-lg overflow-hidden border border-border/50">
