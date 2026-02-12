@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2 } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import AdminProviderOnboarding from "./AdminProviderOnboarding";
@@ -26,10 +27,15 @@ interface ProviderRow {
   created_at: string;
 }
 
+interface OnboardingStatus {
+  [slug: string]: { completed: number; total: number };
+}
+
 const ProvidersSection = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [providers, setProviders] = useState<ProviderRow[]>([]);
+  const [onboardingStatus, setOnboardingStatus] = useState<OnboardingStatus>({});
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
@@ -61,8 +67,40 @@ const ProvidersSection = () => {
   const fetchProviders = async () => {
     setLoading(true);
     const { data } = await supabase.from("providers" as any).select("*").order("created_at", { ascending: false });
-    setProviders((data as any[]) || []);
+    const providerList = (data as any[]) || [];
+    setProviders(providerList);
     setLoading(false);
+
+    // Fetch onboarding completion status for all providers
+    if (providerList.length > 0) {
+      const slugs = providerList.map(p => p.slug);
+      const tables = [
+        "provider_business_info",
+        "provider_team_members",
+        "provider_credentials",
+        "provider_services",
+        "provider_facility",
+        "provider_external_links",
+        "provider_policies",
+      ] as const;
+
+      const results = await Promise.all(
+        tables.map(table =>
+          supabase.from(table as any).select("provider_slug").in("provider_slug", slugs)
+        )
+      );
+
+      const statusMap: OnboardingStatus = {};
+      for (const slug of slugs) {
+        let completed = 0;
+        for (const result of results) {
+          const rows = (result.data as any[]) || [];
+          if (rows.some(r => r.provider_slug === slug)) completed++;
+        }
+        statusMap[slug] = { completed, total: 7 };
+      }
+      setOnboardingStatus(statusMap);
+    }
   };
 
   useEffect(() => { fetchProviders(); }, []);
@@ -238,6 +276,7 @@ const ProvidersSection = () => {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Location</TableHead>
+                <TableHead>Onboarding</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
@@ -248,6 +287,26 @@ const ProvidersSection = () => {
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">{p.name}</TableCell>
                   <TableCell className="text-muted-foreground">{p.city}{p.country ? `, ${p.country}` : ""}</TableCell>
+                  <TableCell>
+                    {(() => {
+                      const status = onboardingStatus[p.slug];
+                      const completed = status?.completed ?? 0;
+                      const total = status?.total ?? 7;
+                      const pct = Math.round((completed / total) * 100);
+                      return (
+                        <div className="flex items-center gap-2 min-w-[120px]">
+                          <Progress value={pct} className="h-2 flex-1" />
+                          <span className={`text-xs font-medium whitespace-nowrap ${completed === total ? 'text-primary' : 'text-muted-foreground'}`}>
+                            {completed === total ? (
+                              <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Done</span>
+                            ) : (
+                              `${completed}/${total}`
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })()}
+                  </TableCell>
                   <TableCell>
                     <Badge variant={p.verification_tier === "verified" ? "default" : "secondary"} className="text-xs">
                       {p.verification_tier}
