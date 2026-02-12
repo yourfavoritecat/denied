@@ -191,10 +191,6 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
               </label>
             )}
           </div>
-          <Button onClick={addCredential} disabled={saving} variant="outline">
-            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
-            Upload Credential
-          </Button>
         </div>
 
         <Button onClick={handleComplete} disabled={saving}>
