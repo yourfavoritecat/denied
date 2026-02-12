@@ -250,9 +250,13 @@ const ProvidersSection = () => {
 
   const exportCSV = useCallback(() => {
     const rows = filteredAndSortedProviders.map(p => {
-      const sections = onboardingStatus[p.slug] ?? [];
+      const sections = onboardingStatus[p.slug] ?? Array(ONBOARDING_SECTIONS.length).fill(false);
       const completed = sections.filter(Boolean).length;
       const rating = providerRatings[p.slug];
+      const sectionColumns: Record<string, string> = {};
+      ONBOARDING_SECTIONS.forEach((s, i) => {
+        sectionColumns[`onboarding_${s.label.toLowerCase().replace(/\s+/g, "_")}`] = sections[i] ? "complete" : "incomplete";
+      });
       return {
         name: p.name,
         slug: p.slug,
@@ -262,7 +266,8 @@ const ProvidersSection = () => {
         type: p.admin_managed ? "admin_managed" : "self_managed",
         specialties: (p.specialties ?? []).join("; "),
         rating: rating != null ? rating.toString() : "",
-        onboarding: `${completed}/${ONBOARDING_SECTIONS.length}`,
+        onboarding_total: `${completed}/${ONBOARDING_SECTIONS.length}`,
+        ...sectionColumns,
         created_at: p.created_at,
       };
     });
