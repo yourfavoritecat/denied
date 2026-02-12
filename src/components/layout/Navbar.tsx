@@ -12,6 +12,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import logo from "@/assets/logo.png";
 
 const Navbar = () => {
@@ -69,6 +70,9 @@ const Navbar = () => {
               <PlusCircle className="w-4 h-4" />
               Plan a Trip
             </Button>
+
+            {/* Notification bell - visible on all sizes when logged in */}
+            {user && <NotificationBell />}
 
             {/* Desktop auth */}
             <div className="hidden md:flex items-center gap-3">
