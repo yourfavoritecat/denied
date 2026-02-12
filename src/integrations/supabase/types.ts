@@ -696,6 +696,7 @@ export type Database = {
           updated_at: string
           user_id: string
           verified_trip: boolean
+          vibe_tags: Json | null
           videos: string[] | null
         }
         Insert: {
@@ -718,6 +719,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           verified_trip?: boolean
+          vibe_tags?: Json | null
           videos?: string[] | null
         }
         Update: {
@@ -740,6 +742,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           verified_trip?: boolean
+          vibe_tags?: Json | null
           videos?: string[] | null
         }
         Relationships: []

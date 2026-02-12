@@ -44,6 +44,7 @@ export interface ReviewData {
   rating_outcome?: number;
   rating_safety?: number;
   rating_value?: number;
+  vibe_tags?: string[];
 }
 
 const StarRating = ({ rating }: { rating: number }) => (
@@ -258,6 +259,17 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
                       </div>
                     );
                   })}
+                </div>
+              )}
+
+              {/* Vibe tags */}
+              {review.vibe_tags && review.vibe_tags.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {review.vibe_tags.map((tag) => (
+                    <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#5EB298]/10 text-[#5EB298] border border-[#5EB298]/20">
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               )}
 
