@@ -3,8 +3,10 @@ import Footer from "@/components/landing/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Heart, Calendar, Syringe, Stethoscope, Sparkles, ShieldCheck, Camera, User } from "lucide-react";
+import { Settings, Heart, Calendar, Syringe, Stethoscope, Sparkles, ShieldCheck, Camera, User, ExternalLink } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import SettingsTab from "@/components/profile/SettingsTab";
 import SocialVerificationSection from "@/components/profile/SocialVerificationSection";
 import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
@@ -36,12 +38,23 @@ const ProfilePage = () => {
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <AvatarUpload size="lg" />
-                <div className="text-center sm:text-left">
-                  <h1 className="text-2xl font-bold mb-1">{displayName}</h1>
+                <div className="text-center sm:text-left flex-1">
+                  <div className="flex items-center gap-3 justify-center sm:justify-start mb-1">
+                    <h1 className="text-2xl font-bold">{displayName}</h1>
+                    <Badge variant="outline" className="text-xs">Private View</Badge>
+                  </div>
                   <p className="text-muted-foreground mb-3">{user?.email}</p>
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                     <Badge variant="secondary">Member since {new Date(user?.created_at || "").getFullYear()}</Badge>
                     <UserTrustBadge tier={trustTier} size="md" />
+                    {(profile as any)?.username && (profile as any)?.public_profile && (
+                      <Button variant="outline" size="sm" asChild className="gap-1.5">
+                        <Link to={`/user/${(profile as any).username}`}>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          View Public Profile
+                        </Link>
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

@@ -51,18 +51,20 @@ const FacilityStep = ({ userId, providerSlug, onComplete }: Props) => {
   }, [providerSlug]);
 
   const uploadFile = async (file: File, folder: string): Promise<string | null> => {
-    const ext = file.name.split('.').pop() || 'bin';
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
     const path = `${userId}/${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+    console.log(`[FacilityStep] Uploading ${file.name} (${file.size} bytes) to provider-onboarding/${path}`);
     const { error } = await supabase.storage.from("provider-onboarding").upload(path, file, {
       contentType: file.type,
       cacheControl: "3600",
     });
     if (error) {
-      console.error(`Upload failed for ${file.name}:`, error);
+      console.error(`[FacilityStep] Upload failed for ${file.name}:`, error);
       toast({ title: `Failed to upload ${file.name}`, description: error.message, variant: "destructive" });
       return null;
     }
     const { data } = supabase.storage.from("provider-onboarding").getPublicUrl(path);
+    console.log(`[FacilityStep] Upload success: ${data.publicUrl}`);
     return data.publicUrl;
   };
 
@@ -97,6 +99,7 @@ const FacilityStep = ({ userId, providerSlug, onComplete }: Props) => {
     }
 
     const allPhotos = [...photos, ...uploadedUrls];
+    console.log(`[FacilityStep] Saving: ${allPhotos.length} photos, coverUrl: ${finalCoverUrl ? 'set' : 'empty'}`);
 
     const payload = {
       user_id: userId,
@@ -110,12 +113,20 @@ const FacilityStep = ({ userId, providerSlug, onComplete }: Props) => {
       .from("provider_facility" as any)
       .upsert(payload as any, { onConflict: "provider_slug" });
 
+    if (error) {
+      console.error("[FacilityStep] Upsert error:", error);
+    }
+
     // Save cover photo URL to providers table
     if (!error && finalCoverUrl !== coverPhotoUrl) {
-      await supabase
+      const { error: coverError } = await supabase
         .from("providers")
         .update({ cover_photo_url: finalCoverUrl || null } as any)
         .eq("slug", providerSlug);
+      if (coverError) {
+        console.error("[FacilityStep] Cover photo save error:", coverError);
+        toast({ title: "Cover photo failed to save", description: coverError.message, variant: "destructive" });
+      }
     }
 
     setSaving(false);
