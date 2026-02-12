@@ -163,9 +163,16 @@ const LeaveReviewModal = ({
   const uploadFiles = async (files: File[], type: "photos" | "videos") => {
     const urls: string[] = [];
     for (const file of files) {
-      const path = `${user!.id}/${type}/${Date.now()}-${file.name}`;
-      const { error } = await supabase.storage.from("review-media").upload(path, file);
-      if (!error) {
+      const ext = file.name.split('.').pop() || 'bin';
+      const path = `${user!.id}/${type}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("review-media").upload(path, file, {
+        contentType: file.type,
+        cacheControl: "3600",
+      });
+      if (error) {
+        console.error(`Upload failed for ${file.name}:`, error);
+        toast({ title: `Failed to upload ${file.name}`, description: error.message, variant: "destructive" });
+      } else {
         const { data } = supabase.storage.from("review-media").getPublicUrl(path);
         urls.push(data.publicUrl);
       }
