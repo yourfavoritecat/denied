@@ -541,6 +541,7 @@ export type Database = {
           admin_managed: boolean | null
           city: string | null
           country: string | null
+          cover_photo_url: string | null
           created_at: string
           description: string | null
           established_year: number | null
@@ -562,6 +563,7 @@ export type Database = {
           admin_managed?: boolean | null
           city?: string | null
           country?: string | null
+          cover_photo_url?: string | null
           created_at?: string
           description?: string | null
           established_year?: number | null
@@ -583,6 +585,7 @@ export type Database = {
           admin_managed?: boolean | null
           city?: string | null
           country?: string | null
+          cover_photo_url?: string | null
           created_at?: string
           description?: string | null
           established_year?: number | null
