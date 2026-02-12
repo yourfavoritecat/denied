@@ -11,6 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
+import FlagContentButton from "@/components/reviews/FlagContentButton";
 
 interface ReviewProfile {
   first_name: string | null;
@@ -302,8 +303,8 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
                 </div>
               )}
 
-              {/* Upvote */}
-              <div className="mt-3">
+              {/* Upvote & Flag */}
+              <div className="mt-3 flex items-center gap-1">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -316,6 +317,7 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
                     ? `${upvoteCount} ${upvoteCount === 1 ? "person" : "people"} found this helpful`
                     : "Helpful"}
                 </Button>
+                {!isAuthor && <FlagContentButton reviewId={review.id} contentType="review" />}
               </div>
             </div>
           </div>

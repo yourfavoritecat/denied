@@ -10,6 +10,7 @@ import CredentialsReviewSection from "@/components/admin/CredentialsReviewSectio
 import ProvidersSection from "@/components/admin/ProvidersSection";
 import BookingsSection from "@/components/admin/BookingsSection";
 import ReviewsSection from "@/components/admin/ReviewsSection";
+import FlagsSection from "@/components/admin/FlagsSection";
 import InboxSection from "@/components/admin/InboxSection";
 import UsersSection from "@/components/admin/UsersSection";
 
@@ -22,6 +23,7 @@ const SECTIONS: Record<AdminSection, React.ComponentType> = {
   providers: ProvidersSection,
   bookings: BookingsSection,
   reviews: ReviewsSection,
+  flags: FlagsSection,
   users: UsersSection,
 };
 
