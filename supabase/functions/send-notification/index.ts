@@ -137,6 +137,24 @@ serve(async (req) => {
         });
         console.log("Admin notification sent:", adminEmailRes);
         emailsSent.push(adminTo);
+
+        // Also create an in-app notification for all admin users
+        const { data: adminRoles } = await supabaseAdmin
+          .from("user_roles")
+          .select("user_id")
+          .eq("role", "admin");
+
+        if (adminRoles && adminRoles.length > 0) {
+          for (const adminRole of adminRoles) {
+            await supabaseAdmin.rpc("create_notification", {
+              _user_id: adminRole.user_id,
+              _type: "inquiry_received",
+              _title: `New inquiry: ${displayName}`,
+              _body: `${patientName} inquired about ${procedures}`,
+              _link: `/admin?section=inbox`,
+            });
+          }
+        }
       }
     }
 

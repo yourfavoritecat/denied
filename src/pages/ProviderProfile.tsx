@@ -433,47 +433,34 @@ const ProviderProfile = () => {
             </div>
           </motion.section>
 
-          {/* External Links (real data or seed fallback) */}
-          <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
-            <h2 className="text-2xl font-bold mb-4">External Reviews & Links</h2>
-            <div className="flex flex-wrap gap-3">
-              {externalLinks?.google_business_url && (
-                <a href={externalLinks.google_business_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Google Business</Button>
-                </a>
-              )}
-              {externalLinks?.yelp_url && (
-                <a href={externalLinks.yelp_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Yelp</Button>
-                </a>
-              )}
-              {externalLinks?.website_url && (
-                <a href={externalLinks.website_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="gap-2"><Globe className="w-4 h-4" /> Website</Button>
-                </a>
-              )}
-              {externalLinks?.instagram_url && (
-                <a href={externalLinks.instagram_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Instagram</Button>
-                </a>
-              )}
-              {externalLinks?.facebook_url && (
-                <a href={externalLinks.facebook_url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Facebook</Button>
-                </a>
-              )}
-              {!externalLinks && seedProvider && (
-                <>
-                  <a href={`https://www.google.com/maps/search/${encodeURIComponent(seedProvider.name)}`} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> View on Google Reviews</Button>
+          {/* External Reviews (no direct contact info — users book through platform) */}
+          {(externalLinks?.google_business_url || externalLinks?.yelp_url || (!externalLinks && seedProvider)) && (
+            <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
+              <h2 className="text-2xl font-bold mb-4">External Reviews</h2>
+              <div className="flex flex-wrap gap-3">
+                {externalLinks?.google_business_url && (
+                  <a href={externalLinks.google_business_url} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Google Reviews</Button>
                   </a>
-                  <a href={`https://www.yelp.com/search?find_desc=${encodeURIComponent(seedProvider.name)}`} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> View on Yelp</Button>
+                )}
+                {externalLinks?.yelp_url && (
+                  <a href={externalLinks.yelp_url} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Yelp</Button>
                   </a>
-                </>
-              )}
-            </div>
-          </motion.section>
+                )}
+                {!externalLinks && seedProvider && (
+                  <>
+                    <a href={`https://www.google.com/maps/search/${encodeURIComponent(seedProvider.name)}`} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Google Reviews</Button>
+                    </a>
+                    <a href={`https://www.yelp.com/search?find_desc=${encodeURIComponent(seedProvider.name)}`} target="_blank" rel="noopener noreferrer">
+                      <Button variant="outline" className="gap-2"><ExternalLink className="w-4 h-4" /> Yelp</Button>
+                    </a>
+                  </>
+                )}
+              </div>
+            </motion.section>
+          )}
 
           {/* Policies (real data) */}
           {real?.policies && (
@@ -508,16 +495,16 @@ const ProviderProfile = () => {
             </motion.section>
           )}
 
-          {/* Map Placeholder */}
+          {/* Location — city only, no exact address */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">Location</h2>
-            <div className="rounded-xl bg-muted border border-border/50 h-64 md:h-80 flex items-center justify-center">
+            <div className="rounded-xl bg-muted border border-border/50 h-48 flex items-center justify-center">
               <div className="text-center">
                 <MapPin className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
                 <p className="text-muted-foreground font-medium">
-                  {pRec?.address || `${providerCity}${real?.business?.state_country ? `, ${real.business.state_country}` : seedProvider ? ", Mexico" : pRec?.country ? `, ${pRec.country}` : ""}`}
+                  {providerCity}{real?.business?.state_country ? `, ${real.business.state_country}` : seedProvider ? ", Mexico" : pRec?.country ? `, ${pRec.country}` : ""}
                 </p>
-                <p className="text-sm text-muted-foreground">Google Maps embed coming soon</p>
+                <p className="text-sm text-muted-foreground mt-1">Exact address provided after booking</p>
               </div>
             </div>
           </motion.section>
