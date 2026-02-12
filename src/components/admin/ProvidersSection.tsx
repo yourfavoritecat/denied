@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2 } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import AdminProviderOnboarding from "./AdminProviderOnboarding";
@@ -28,8 +29,18 @@ interface ProviderRow {
 }
 
 interface OnboardingStatus {
-  [slug: string]: { completed: number; total: number };
+  [slug: string]: boolean[]; // index matches ONBOARDING_SECTIONS order
 }
+
+const ONBOARDING_SECTIONS = [
+  { table: "provider_business_info", label: "Business Info" },
+  { table: "provider_team_members", label: "Team" },
+  { table: "provider_credentials", label: "Credentials" },
+  { table: "provider_services", label: "Services" },
+  { table: "provider_facility", label: "Facility" },
+  { table: "provider_external_links", label: "Links" },
+  { table: "provider_policies", label: "Policies" },
+] as const;
 
 const ProvidersSection = () => {
   const { toast } = useToast();
@@ -74,30 +85,18 @@ const ProvidersSection = () => {
     // Fetch onboarding completion status for all providers
     if (providerList.length > 0) {
       const slugs = providerList.map(p => p.slug);
-      const tables = [
-        "provider_business_info",
-        "provider_team_members",
-        "provider_credentials",
-        "provider_services",
-        "provider_facility",
-        "provider_external_links",
-        "provider_policies",
-      ] as const;
-
       const results = await Promise.all(
-        tables.map(table =>
-          supabase.from(table as any).select("provider_slug").in("provider_slug", slugs)
+        ONBOARDING_SECTIONS.map(s =>
+          supabase.from(s.table as any).select("provider_slug").in("provider_slug", slugs)
         )
       );
 
       const statusMap: OnboardingStatus = {};
       for (const slug of slugs) {
-        let completed = 0;
-        for (const result of results) {
+        statusMap[slug] = results.map(result => {
           const rows = (result.data as any[]) || [];
-          if (rows.some(r => r.provider_slug === slug)) completed++;
-        }
-        statusMap[slug] = { completed, total: 7 };
+          return rows.some(r => r.provider_slug === slug);
+        });
       }
       setOnboardingStatus(statusMap);
     }
@@ -289,21 +288,41 @@ const ProvidersSection = () => {
                   <TableCell className="text-muted-foreground">{p.city}{p.country ? `, ${p.country}` : ""}</TableCell>
                   <TableCell>
                     {(() => {
-                      const status = onboardingStatus[p.slug];
-                      const completed = status?.completed ?? 0;
-                      const total = status?.total ?? 7;
+                      const sections = onboardingStatus[p.slug] ?? Array(7).fill(false);
+                      const completed = sections.filter(Boolean).length;
+                      const total = ONBOARDING_SECTIONS.length;
                       const pct = Math.round((completed / total) * 100);
                       return (
-                        <div className="flex items-center gap-2 min-w-[120px]">
-                          <Progress value={pct} className="h-2 flex-1" />
-                          <span className={`text-xs font-medium whitespace-nowrap ${completed === total ? 'text-primary' : 'text-muted-foreground'}`}>
-                            {completed === total ? (
-                              <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Done</span>
-                            ) : (
-                              `${completed}/${total}`
-                            )}
-                          </span>
-                        </div>
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center gap-2 min-w-[120px] cursor-default">
+                                <Progress value={pct} className="h-2 flex-1" />
+                                <span className={`text-xs font-medium whitespace-nowrap ${completed === total ? 'text-primary' : 'text-muted-foreground'}`}>
+                                  {completed === total ? (
+                                    <span className="flex items-center gap-1"><CheckCircle2 className="w-3.5 h-3.5" /> Done</span>
+                                  ) : (
+                                    `${completed}/${total}`
+                                  )}
+                                </span>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="bottom" className="p-3 max-w-[200px]">
+                              <ul className="space-y-1">
+                                {ONBOARDING_SECTIONS.map((s, i) => (
+                                  <li key={s.table} className="flex items-center gap-2 text-xs">
+                                    {sections[i] ? (
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                                    ) : (
+                                      <Circle className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                                    )}
+                                    <span className={sections[i] ? '' : 'text-muted-foreground'}>{s.label}</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
                       );
                     })()}
                   </TableCell>
