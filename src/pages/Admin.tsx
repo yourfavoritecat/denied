@@ -31,22 +31,30 @@ const AdminPage = () => {
   const { isAdmin, loading } = useAdmin();
   const [section, setSection] = useState<AdminSection>("overview");
   const [inboxCount, setInboxCount] = useState(0);
+  const [flagCount, setFlagCount] = useState(0);
 
   useEffect(() => {
-    const loadInboxCount = async () => {
+    const loadCounts = async () => {
       const { data: adminProviders } = await supabase
         .from("providers")
         .select("slug")
         .eq("admin_managed", true);
-      if (!adminProviders?.length) return;
-      const { count } = await supabase
-        .from("bookings")
+      if (adminProviders?.length) {
+        const { count } = await supabase
+          .from("bookings")
+          .select("id", { count: "exact", head: true })
+          .in("provider_slug", adminProviders.map((p) => p.slug))
+          .eq("status", "inquiry");
+        setInboxCount(count || 0);
+      }
+
+      const { count: flags } = await supabase
+        .from("content_flags" as any)
         .select("id", { count: "exact", head: true })
-        .in("provider_slug", adminProviders.map((p) => p.slug))
-        .eq("status", "inquiry");
-      setInboxCount(count || 0);
+        .eq("status", "pending");
+      setFlagCount(flags || 0);
     };
-    if (isAdmin) loadInboxCount();
+    if (isAdmin) loadCounts();
   }, [isAdmin, section]);
 
   if (loading) {
@@ -65,7 +73,7 @@ const AdminPage = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <AdminSidebar active={section} onChange={setSection} inboxCount={inboxCount} />
+      <AdminSidebar active={section} onChange={setSection} inboxCount={inboxCount} flagCount={flagCount} />
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <ActiveSection />
       </main>
