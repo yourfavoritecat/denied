@@ -130,11 +130,13 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
     <Card>
       <CardHeader>
         <CardTitle>Credentials & Licenses</CardTitle>
+        <p className="text-sm text-muted-foreground">Upload all relevant licenses, certifications, and credentials. You can add multiple.</p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Existing credentials */}
         {credentials.length > 0 && (
           <div className="space-y-3">
+            <p className="text-sm font-medium text-muted-foreground">{credentials.length} credential{credentials.length !== 1 ? "s" : ""} uploaded</p>
             {credentials.map((cred, idx) => (
               <div key={idx} className="flex items-center justify-between gap-3 p-3 rounded-lg border border-border/50 bg-muted/30">
                 <div className="flex items-center gap-3 min-w-0">
@@ -159,7 +161,7 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
 
         {/* Add new */}
         <div className="border border-dashed border-border rounded-lg p-4 space-y-4">
-          <p className="font-medium text-sm">Add Credential</p>
+          <p className="font-medium text-sm">{credentials.length > 0 ? "Add Another Credential" : "Add Credential"}</p>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Type <span className="text-destructive">*</span></Label>
@@ -191,11 +193,21 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
               </label>
             )}
           </div>
+          {/* Add Another button - uploads and resets form for next credential */}
+          <Button
+            onClick={addCredential}
+            disabled={saving || !newType || !newLabel || !newFile}
+            variant="outline"
+            className="w-full"
+          >
+            {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+            {credentials.length > 0 ? "Upload & Add Another" : "Upload Credential"}
+          </Button>
         </div>
 
-        <Button onClick={handleComplete} disabled={saving}>
+        <Button onClick={handleComplete} disabled={saving} className="w-full">
           {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          {newFile && newType && newLabel ? "Upload & Continue" : "Continue"}
+          {newFile && newType && newLabel ? "Upload & Continue" : `Continue${credentials.length > 0 ? ` (${credentials.length} uploaded)` : ""}`}
         </Button>
       </CardContent>
     </Card>
