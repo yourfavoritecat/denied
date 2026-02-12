@@ -43,15 +43,30 @@ export const REVIEW_CATEGORIES = [
 ] as const;
 
 export const US_PRICE_MAP: Record<string, number> = {
-  "Zirconia Crown": 1500,
-  "Root Canal": 1800,
-  "Dental Implant": 4000,
+  "Teeth Cleaning": 90,
+  "Filling (per surface)": 100,
+  "Extraction (regular)": 150,
+  "Wisdom Tooth Extraction": 475,
+  "Bone Graft": 1125,
+  "Complete Acrylic Dentures (set)": 1400,
+  "Complete Comfort Dentures (set)": 2750,
+  "Removable Partial Plate": 900,
+  "Cast Metal Removable Partial Plate": 975,
+  "Porcelain Fused-to-Metal Crown": 750,
+  "Metal-Free Crown": 1125,
+  "Zirconia Crown": 1125,
+  "Gold Crown or Gold Porcelain Crown": 1400,
+  "Root Canal (regular)": 750,
+  "Core Build-up": 250,
+  "Pre-fabricated Post": 250,
+  "Implant": 4500,
+  // Legacy names for other providers
+  "Root Canal": 750,
+  "Dental Implant": 4500,
   "Night Guard": 500,
   "Teeth Whitening": 500,
   "Veneers": 2000,
-  "Wisdom Tooth Extraction": 600,
   "Dentures": 1800,
-  "Teeth Cleaning": 200,
   "Free Consultation": 225,
 };
 
