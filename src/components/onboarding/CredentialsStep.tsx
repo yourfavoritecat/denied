@@ -63,14 +63,14 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
     return data.publicUrl;
   };
 
-  const addCredential = async () => {
+  const addCredential = async (): Promise<boolean> => {
     if (!newType || !newLabel || !newFile) {
       toast({ title: "Select type, label, and file", variant: "destructive" });
-      return;
+      return false;
     }
     if (newFile.size > 20 * 1024 * 1024) {
       toast({ title: "File must be under 20MB", variant: "destructive" });
-      return;
+      return false;
     }
 
     setSaving(true);
@@ -78,7 +78,7 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
     if (!url) {
       toast({ title: "Upload failed", variant: "destructive" });
       setSaving(false);
-      return;
+      return false;
     }
 
     const { data, error } = await supabase.from("provider_credentials" as any).insert({
@@ -92,10 +92,12 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
     setSaving(false);
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
+      return false;
     } else {
       setCredentials((prev) => [...prev, { ...(data as any), review_status: "pending" }]);
       setNewType(""); setNewLabel(""); setNewFile(null);
       toast({ title: "Credential uploaded!" });
+      return true;
     }
   };
 
@@ -107,7 +109,16 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
     setCredentials((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
+    // If user has filled in a credential but hasn't clicked upload, do it for them
+    if (newType && newLabel && newFile) {
+      const success = await addCredential();
+      if (success) {
+        onComplete();
+      }
+      return;
+    }
+
     if (credentials.length === 0) {
       toast({ title: "Upload at least one credential", variant: "destructive" });
       return;
@@ -151,7 +162,7 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
           <p className="font-medium text-sm">Add Credential</p>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Type</Label>
+              <Label>Type <span className="text-destructive">*</span></Label>
               <Select value={newType} onValueChange={setNewType}>
                 <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                 <SelectContent>
@@ -162,12 +173,12 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Label</Label>
+              <Label>Label <span className="text-destructive">*</span></Label>
               <Input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="e.g., Dr. Garcia's dental license" />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>File (PDF, JPG, PNG — max 20MB)</Label>
+            <Label>File <span className="text-destructive">*</span> <span className="text-muted-foreground font-normal">(PDF, JPG, PNG — max 20MB)</span></Label>
             {newFile ? (
               <div className="flex items-center gap-2 text-sm">
                 <span className="truncate">{newFile.name}</span>
@@ -186,8 +197,9 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
           </Button>
         </div>
 
-        <Button onClick={handleComplete}>
-          Continue
+        <Button onClick={handleComplete} disabled={saving}>
+          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+          {newFile && newType && newLabel ? "Upload & Continue" : "Continue"}
         </Button>
       </CardContent>
     </Card>
