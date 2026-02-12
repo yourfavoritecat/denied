@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
@@ -12,6 +12,7 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Star, Filter, BadgeCheck, X, Syringe, ArrowUpDown } from "lucide-react";
 import { providers, procedureTypes, locations, type Provider } from "@/data/providers";
+import { supabase } from "@/integrations/supabase/client";
 import clinicDental from "@/assets/clinic-dental.jpg";
 import clinicMedspa from "@/assets/clinic-medspa.jpg";
 import clinicSurgery from "@/assets/clinic-surgery.jpg";
@@ -46,6 +47,24 @@ const SearchPage = () => {
   const [minRating, setMinRating] = useState<number>(0);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [coverPhotos, setCoverPhotos] = useState<Record<string, string>>({});
+
+  // Fetch cover photos from DB for all providers
+  useEffect(() => {
+    supabase
+      .from("providers")
+      .select("slug, cover_photo_url")
+      .not("cover_photo_url", "is", null)
+      .then(({ data }) => {
+        if (data) {
+          const map: Record<string, string> = {};
+          data.forEach((p) => {
+            if (p.cover_photo_url) map[p.slug] = p.cover_photo_url;
+          });
+          setCoverPhotos(map);
+        }
+      });
+  }, []);
 
   const toggleLanguage = (lang: string) => {
     setSelectedLanguages((prev) =>
@@ -294,7 +313,7 @@ const SearchPage = () => {
                           <Card className="overflow-hidden border border-border/50 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full group">
                             <div className="aspect-[16/10] relative overflow-hidden">
                               <img
-                                src={CATEGORY_IMAGES[category] || clinicDental}
+                                src={coverPhotos[provider.slug] || CATEGORY_IMAGES[category] || clinicDental}
                                 alt={`${provider.name} clinic`}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 loading="lazy"
