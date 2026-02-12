@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star, ShieldCheck, Download } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star, ShieldCheck, Download, Upload, Image } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -70,6 +70,9 @@ const ProvidersSection = () => {
   const [bulkTierValue, setBulkTierValue] = useState("listed");
   const [bulkTierUpdating, setBulkTierUpdating] = useState(false);
   const [providerRatings, setProviderRatings] = useState<ProviderRatings>({});
+  const [coverPhotoUrl, setCoverPhotoUrl] = useState("");
+  const [newCoverPhoto, setNewCoverPhoto] = useState<File | null>(null);
+  const [uploadingCover, setUploadingCover] = useState(false);
 
   // Filter state
   const [filterName, setFilterName] = useState("");
@@ -295,6 +298,8 @@ const ProvidersSection = () => {
 
   const openCreate = () => {
     setSelectedProvider(null);
+    setCoverPhotoUrl("");
+    setNewCoverPhoto(null);
     setForm({
       name: "", slug: "", city: "", country: "Mexico", address: "", phone: "",
       description: "", specialties: "", languages: "English, Spanish",
@@ -306,6 +311,8 @@ const ProvidersSection = () => {
 
   const openEdit = (p: ProviderRow) => {
     setSelectedProvider(p);
+    setCoverPhotoUrl("");
+    setNewCoverPhoto(null);
     // Fetch full data
     supabase.from("providers" as any).select("*").eq("id", p.id).single().then(({ data }: any) => {
       if (data) {
@@ -325,12 +332,26 @@ const ProvidersSection = () => {
           verification_tier: data.verification_tier || "listed",
           travel_info: data.travel_info || "",
         });
+        setCoverPhotoUrl(data.cover_photo_url || "");
       }
     });
     setEditOpen(true);
   };
 
   const handleSave = async () => {
+    setUploadingCover(true);
+
+    // Upload cover photo if new one selected
+    let finalCoverUrl = coverPhotoUrl;
+    if (newCoverPhoto) {
+      const path = `admin/${Date.now()}-${newCoverPhoto.name}`;
+      const { error: uploadErr } = await supabase.storage.from("provider-onboarding").upload(path, newCoverPhoto);
+      if (!uploadErr) {
+        const { data: urlData } = supabase.storage.from("provider-onboarding").getPublicUrl(path);
+        finalCoverUrl = urlData.publicUrl;
+      }
+    }
+
     const payload = {
       name: form.name,
       slug: form.slug.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
@@ -347,17 +368,19 @@ const ProvidersSection = () => {
       admin_email: form.admin_email || "cat@denied.care",
       verification_tier: form.verification_tier,
       travel_info: form.travel_info || null,
+      cover_photo_url: finalCoverUrl || null,
     };
 
     if (selectedProvider) {
       const { error } = await supabase.from("providers" as any).update(payload as any).eq("id", selectedProvider.id);
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+      if (error) { setUploadingCover(false); toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Provider updated" });
     } else {
       const { error } = await supabase.from("providers" as any).insert(payload as any);
-      if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+      if (error) { setUploadingCover(false); toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
       toast({ title: "Provider created" });
     }
+    setUploadingCover(false);
     setEditOpen(false);
     fetchProviders();
   };
@@ -719,9 +742,34 @@ const ProvidersSection = () => {
               <Label>Travel Info</Label>
               <Textarea value={form.travel_info} onChange={(e) => setForm(f => ({ ...f, travel_info: e.target.value }))} rows={2} />
             </div>
+            <div className="space-y-2 sm:col-span-2">
+              <Label>Cover Photo (shown on search card)</Label>
+              <p className="text-xs text-muted-foreground">Upload a wide photo (16:9 recommended) that represents the clinic.</p>
+              {(coverPhotoUrl && !newCoverPhoto) ? (
+                <div className="relative rounded-lg overflow-hidden border border-border/50 max-w-md">
+                  <img src={coverPhotoUrl} alt="Cover" className="w-full aspect-[16/10] object-cover" />
+                  <button onClick={() => setCoverPhotoUrl("")} className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : newCoverPhoto ? (
+                <div className="relative rounded-lg overflow-hidden border border-border/50 max-w-md">
+                  <img src={URL.createObjectURL(newCoverPhoto)} alt="Cover preview" className="w-full aspect-[16/10] object-cover" />
+                  <button onClick={() => setNewCoverPhoto(null)} className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center w-full max-w-md aspect-[16/10] rounded-lg border-2 border-dashed border-border cursor-pointer hover:border-primary transition-colors">
+                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
+                  <span className="text-sm text-muted-foreground">Upload cover photo</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => setNewCoverPhoto(e.target.files?.[0] || null)} />
+                </label>
+              )}
+            </div>
           </div>
-          <Button onClick={handleSave} className="w-full mt-4" disabled={!form.name || !form.slug}>
-            {selectedProvider ? "Save Changes" : "Create Provider"}
+          <Button onClick={handleSave} className="w-full mt-4" disabled={!form.name || !form.slug || uploadingCover}>
+            {uploadingCover ? "Uploading..." : selectedProvider ? "Save Changes" : "Create Provider"}
           </Button>
         </DialogContent>
       </Dialog>
