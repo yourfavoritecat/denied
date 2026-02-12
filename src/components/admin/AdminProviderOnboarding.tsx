@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Check, ArrowLeft } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import BusinessInfoStep from "@/components/onboarding/BusinessInfoStep";
 import TeamStep from "@/components/onboarding/TeamStep";
 import CredentialsStep from "@/components/onboarding/CredentialsStep";
@@ -31,6 +32,34 @@ interface Props {
 const AdminProviderOnboarding = ({ userId, providerSlug, providerName, onBack }: Props) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+
+  // Load completion state from DB on mount
+  useEffect(() => {
+    const checkCompletion = async () => {
+      const [biz, team, creds, services, facility, links, policies] = await Promise.all([
+        supabase.from("provider_business_info").select("id").eq("provider_slug", providerSlug).maybeSingle(),
+        supabase.from("provider_team_members").select("id").eq("provider_slug", providerSlug).limit(1),
+        supabase.from("provider_credentials").select("id").eq("provider_slug", providerSlug).limit(1),
+        supabase.from("provider_services").select("id").eq("provider_slug", providerSlug).limit(1),
+        supabase.from("provider_facility").select("id").eq("provider_slug", providerSlug).maybeSingle(),
+        supabase.from("provider_external_links").select("id").eq("provider_slug", providerSlug).maybeSingle(),
+        supabase.from("provider_policies").select("id").eq("provider_slug", providerSlug).maybeSingle(),
+      ]);
+      const done = new Set<number>();
+      if (biz.data) done.add(0);
+      if (team.data && team.data.length > 0) done.add(1);
+      if (creds.data && creds.data.length > 0) done.add(2);
+      if (services.data && services.data.length > 0) done.add(3);
+      if (facility.data) done.add(4);
+      if (links.data) done.add(5);
+      if (policies.data) done.add(6);
+      setCompletedSteps(done);
+      // Jump to first incomplete step
+      const firstIncomplete = STEPS.findIndex((_, i) => !done.has(i));
+      if (firstIncomplete >= 0) setCurrentStep(firstIncomplete);
+    };
+    checkCompletion();
+  }, [providerSlug]);
 
   const markStepComplete = (step: number) => {
     setCompletedSteps((prev) => new Set([...prev, step]));
