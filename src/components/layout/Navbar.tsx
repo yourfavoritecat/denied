@@ -32,7 +32,8 @@ const Navbar = () => {
     ? [profile.first_name, profile.last_name].filter(Boolean).join(" ") || user?.email
     : user?.email;
 
-  const isProvider = !!(profile as any)?.provider_slug || (isAdmin && viewAs === "provider");
+  const actualProvider = !!(profile as any)?.provider_slug;
+  const isProvider = (actualProvider && viewAs !== "traveler") || (isAdmin && viewAs === "provider");
   const showAdminLink = isAdmin && viewAs === "admin";
 
   const navLinks = [
