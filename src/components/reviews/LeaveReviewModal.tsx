@@ -60,11 +60,12 @@ const CategoryStarPicker = ({
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-sm text-muted-foreground min-w-0 truncate">{label}</span>
-      <div className="flex gap-0.5 shrink-0">
+      <div className="flex shrink-0">
         {[1, 2, 3, 4, 5].map((s) => (
           <button
             key={s}
             type="button"
+            className="p-1.5 -mx-0.5 touch-manipulation"
             onMouseEnter={() => setHover(s)}
             onMouseLeave={() => setHover(0)}
             onClick={() => onChange(s)}
