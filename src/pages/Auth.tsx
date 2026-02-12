@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useViewAs } from "@/hooks/useViewAs";
 import { User, Stethoscope } from "lucide-react";
 import logo from "@/assets/logo.png";
 
@@ -26,13 +27,20 @@ const AuthPage = () => {
   const { toast } = useToast();
   const { user, profile } = useAuth();
   const { isAdmin, loading: adminLoading } = useAdmin();
+  const { viewAs } = useViewAs();
 
   useEffect(() => {
     if (!user || adminLoading) return;
     if (isAdmin) {
-      navigate("/admin", { replace: true });
+      // Respect viewAs selection for admins
+      if (viewAs === "traveler") {
+        navigate("/dashboard", { replace: true });
+      } else if (viewAs === "provider") {
+        navigate("/provider-dashboard", { replace: true });
+      } else {
+        navigate("/admin", { replace: true });
+      }
     } else if ((profile as any)?.provider_slug) {
-      // If provider hasn't completed onboarding, send them there
       if (!(profile as any)?.onboarding_complete) {
         navigate("/provider/onboarding", { replace: true });
       } else {
@@ -41,7 +49,7 @@ const AuthPage = () => {
     } else {
       navigate("/dashboard", { replace: true });
     }
-  }, [user, profile, isAdmin, adminLoading, navigate]);
+  }, [user, profile, isAdmin, adminLoading, navigate, viewAs]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
