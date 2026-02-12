@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import heic2any from "heic2any";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -161,13 +162,56 @@ const LeaveReviewModal = ({
     setNewVideos(prev => [...prev, ...valid.slice(0, 2 - totalVideos)]);
   };
 
+  const convertToJpeg = async (file: File): Promise<File> => {
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) return file;
+    
+    // HEIC/HEIF conversion
+    if (['heic', 'heif'].includes(ext)) {
+      try {
+        const blob = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.9 });
+        const result = Array.isArray(blob) ? blob[0] : blob;
+        return new File([result], file.name.replace(/\.[^.]+$/, '.jpeg'), { type: 'image/jpeg' });
+      } catch (err) {
+        console.error('HEIC conversion failed:', err);
+        toast({ title: 'Photo format not supported', description: 'Please upload JPG or PNG instead.', variant: 'destructive' });
+        throw err;
+      }
+    }
+
+    // Other formats — try canvas conversion
+    return new Promise((resolve) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(file); return; }
+        ctx.drawImage(img, 0, 0);
+        canvas.toBlob((b) => {
+          URL.revokeObjectURL(url);
+          if (!b) { resolve(file); return; }
+          resolve(new File([b], file.name.replace(/\.[^.]+$/, '.jpeg'), { type: 'image/jpeg' }));
+        }, 'image/jpeg', 0.9);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  };
+
   const uploadFiles = async (files: File[], type: "photos" | "videos") => {
     const urls: string[] = [];
-    for (const file of files) {
-      const ext = file.name.split('.').pop() || 'bin';
+    for (let file of files) {
+      // Convert non-standard image formats to JPEG
+      if (type === "photos") {
+        file = await convertToJpeg(file);
+      }
+      const ext = file.name.split('.').pop() || 'jpeg';
       const path = `${user!.id}/${type}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
       const { error } = await supabase.storage.from("review-media").upload(path, file, {
-        contentType: file.type,
+        contentType: file.type || 'image/jpeg',
         cacheControl: "3600",
       });
       if (error) {

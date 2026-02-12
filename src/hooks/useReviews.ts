@@ -35,7 +35,7 @@ export const useReviews = (providerSlug?: string, userId?: string) => {
     // Fetch profiles for all review users
     const userIds = [...new Set(typedReviews.map((r: any) => r.user_id))];
     const { data: profiles } = await supabase
-      .from("profiles_public" as any)
+      .from("review_author_profiles" as any)
       .select("user_id, first_name, city, username, public_profile, social_verifications, avatar_url")
       .in("user_id", userIds);
 
