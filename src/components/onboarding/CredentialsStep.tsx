@@ -119,10 +119,7 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
       return;
     }
 
-    if (credentials.length === 0) {
-      toast({ title: "Upload at least one credential", variant: "destructive" });
-      return;
-    }
+    // Credentials are optional — allow continuing without any
     onComplete();
   };
 
@@ -130,7 +127,7 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
     <Card>
       <CardHeader>
         <CardTitle>Credentials & Licenses</CardTitle>
-        <p className="text-sm text-muted-foreground">Upload all relevant licenses, certifications, and credentials. You can add multiple.</p>
+        <p className="text-sm text-muted-foreground">Upload licenses, certifications, and credentials to earn a "Verified" badge. This step is optional — you can add them later.</p>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Existing credentials */}
@@ -206,8 +203,7 @@ const CredentialsStep = ({ userId, providerSlug, onComplete }: Props) => {
         </div>
 
         <Button onClick={handleComplete} disabled={saving} className="w-full">
-          {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-          {newFile && newType && newLabel ? "Upload & Continue" : `Continue${credentials.length > 0 ? ` (${credentials.length} uploaded)` : ""}`}
+          {newFile && newType && newLabel ? "Upload & Continue" : credentials.length > 0 ? `Continue (${credentials.length} uploaded)` : "Skip for Now"}
         </Button>
       </CardContent>
     </Card>
