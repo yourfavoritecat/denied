@@ -51,9 +51,17 @@ const FacilityStep = ({ userId, providerSlug, onComplete }: Props) => {
   }, [providerSlug]);
 
   const uploadFile = async (file: File, folder: string): Promise<string | null> => {
-    const path = `${userId}/${folder}/${Date.now()}-${file.name}`;
-    const { error } = await supabase.storage.from("provider-onboarding").upload(path, file);
-    if (error) return null;
+    const ext = file.name.split('.').pop() || 'bin';
+    const path = `${userId}/${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage.from("provider-onboarding").upload(path, file, {
+      contentType: file.type,
+      cacheControl: "3600",
+    });
+    if (error) {
+      console.error(`Upload failed for ${file.name}:`, error);
+      toast({ title: `Failed to upload ${file.name}`, description: error.message, variant: "destructive" });
+      return null;
+    }
     const { data } = supabase.storage.from("provider-onboarding").getPublicUrl(path);
     return data.publicUrl;
   };
