@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star, ShieldCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import AdminProviderOnboarding from "./AdminProviderOnboarding";
@@ -62,6 +63,12 @@ const ProvidersSection = () => {
   const [deleteTarget, setDeleteTarget] = useState<ProviderRow | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [sortByIncomplete, setSortByIncomplete] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkDeleteStep, setBulkDeleteStep] = useState<0 | 1 | 2>(0);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkTierOpen, setBulkTierOpen] = useState(false);
+  const [bulkTierValue, setBulkTierValue] = useState("listed");
+  const [bulkTierUpdating, setBulkTierUpdating] = useState(false);
   const [providerRatings, setProviderRatings] = useState<ProviderRatings>({});
 
   // Filter state
@@ -174,6 +181,73 @@ const ProvidersSection = () => {
     setFilterTier("all");
   };
 
+  const toggleSelect = useCallback((id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    const visibleIds = filteredAndSortedProviders.map(p => p.id);
+    const allSelected = visibleIds.every(id => selectedIds.has(id));
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(visibleIds));
+    }
+  }, [filteredAndSortedProviders, selectedIds]);
+
+  const selectedProviders = useMemo(
+    () => providers.filter(p => selectedIds.has(p.id)),
+    [providers, selectedIds]
+  );
+
+  const deleteProviderBySlug = async (slug: string) => {
+    const tables = [
+      "provider_policies", "provider_external_links", "provider_services",
+      "provider_facility", "provider_credentials", "provider_team_members",
+      "provider_business_info",
+    ];
+    for (const table of tables) {
+      await supabase.from(table as any).delete().eq("provider_slug", slug);
+    }
+    const { data: bookingIds } = await supabase.from("bookings").select("id").eq("provider_slug", slug);
+    if (bookingIds?.length) {
+      for (const b of bookingIds) {
+        await supabase.from("booking_messages").delete().eq("booking_id", b.id);
+      }
+    }
+    await supabase.from("bookings").delete().eq("provider_slug", slug);
+    await supabase.from("reviews").delete().eq("provider_slug", slug);
+    await supabase.from("providers" as any).delete().eq("slug", slug);
+  };
+
+  const handleBulkDelete = async () => {
+    setBulkDeleting(true);
+    for (const p of selectedProviders) {
+      await deleteProviderBySlug(p.slug);
+    }
+    setBulkDeleting(false);
+    setBulkDeleteStep(0);
+    setSelectedIds(new Set());
+    toast({ title: "Bulk delete complete", description: `${selectedProviders.length} provider(s) deleted.` });
+    fetchProviders();
+  };
+
+  const handleBulkTierChange = async () => {
+    setBulkTierUpdating(true);
+    for (const p of selectedProviders) {
+      await supabase.from("providers" as any).update({ verification_tier: bulkTierValue } as any).eq("id", p.id);
+    }
+    setBulkTierUpdating(false);
+    setBulkTierOpen(false);
+    setSelectedIds(new Set());
+    toast({ title: "Tier updated", description: `${selectedProviders.length} provider(s) set to "${bulkTierValue}".` });
+    fetchProviders();
+  };
+
   const openCreate = () => {
     setSelectedProvider(null);
     setForm({
@@ -276,44 +350,13 @@ const ProvidersSection = () => {
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-    const slug = deleteTarget.slug;
-    // Delete all related onboarding data first, then the provider
-    const tables = [
-      "provider_policies", "provider_external_links", "provider_services",
-      "provider_facility", "provider_credentials", "provider_team_members",
-      "provider_business_info", "bookings", "booking_messages",
-    ];
-    for (const table of tables) {
-      if (table === "booking_messages") {
-        // Delete messages for bookings belonging to this provider
-        const { data: bookingIds } = await supabase
-          .from("bookings")
-          .select("id")
-          .eq("provider_slug", slug);
-        if (bookingIds?.length) {
-          for (const b of bookingIds) {
-            await supabase.from("booking_messages").delete().eq("booking_id", b.id);
-          }
-        }
-      } else if (table === "bookings") {
-        await supabase.from(table).delete().eq("provider_slug", slug);
-      } else {
-        await supabase.from(table as any).delete().eq("provider_slug", slug);
-      }
-    }
-    // Delete reviews
-    await supabase.from("reviews").delete().eq("provider_slug", slug);
-    // Finally delete the provider
-    const { error } = await supabase.from("providers" as any).delete().eq("slug", slug);
+    await deleteProviderBySlug(deleteTarget.slug);
     setDeleting(false);
     setDeleteStep(0);
+    const name = deleteTarget.name;
     setDeleteTarget(null);
-    if (error) {
-      toast({ title: "Error deleting provider", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Provider deleted", description: `${deleteTarget.name} and all related data removed.` });
-      fetchProviders();
-    }
+    toast({ title: "Provider deleted", description: `${name} and all related data removed.` });
+    fetchProviders();
   };
 
   if (onboardingProvider && user) {
@@ -424,9 +467,30 @@ const ProvidersSection = () => {
         <Card><CardContent className="py-12 text-center text-muted-foreground">No providers yet. Create one above.</CardContent></Card>
       ) : (
         <Card className="border border-border/50 shadow-lg overflow-hidden">
+          {/* Bulk action bar */}
+          {selectedIds.size > 0 && (
+            <div className="flex items-center gap-3 px-4 py-3 bg-muted/50 border-b border-border/50">
+              <span className="text-sm font-medium">{selectedIds.size} selected</span>
+              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setBulkTierOpen(true)}>
+                <ShieldCheck className="w-3.5 h-3.5" /> Change Tier
+              </Button>
+              <Button variant="destructive" size="sm" className="gap-1.5" onClick={() => setBulkDeleteStep(1)}>
+                <Trash2 className="w-3.5 h-3.5" /> Delete Selected
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())} className="ml-auto text-muted-foreground">
+                Deselect All
+              </Button>
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-10">
+                  <Checkbox
+                    checked={filteredAndSortedProviders.length > 0 && filteredAndSortedProviders.every(p => selectedIds.has(p.id))}
+                    onCheckedChange={toggleSelectAll}
+                  />
+                </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Location</TableHead>
                 <TableHead>Rating</TableHead>
@@ -438,9 +502,15 @@ const ProvidersSection = () => {
             </TableHeader>
             <TableBody>
               {filteredAndSortedProviders.length === 0 ? (
-                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No providers match your filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No providers match your filters.</TableCell></TableRow>
               ) : filteredAndSortedProviders.map((p) => (
-                <TableRow key={p.id}>
+                <TableRow key={p.id} className={selectedIds.has(p.id) ? "bg-muted/30" : ""}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedIds.has(p.id)}
+                      onCheckedChange={() => toggleSelect(p.id)}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{p.name}</TableCell>
                   <TableCell className="text-muted-foreground">{p.city}{p.country ? `, ${p.country}` : ""}</TableCell>
                   <TableCell>
@@ -658,6 +728,71 @@ const ProvidersSection = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Delete Two-Step Dialog */}
+      <Dialog open={bulkDeleteStep > 0} onOpenChange={(open) => { if (!open) setBulkDeleteStep(0); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {bulkDeleteStep === 1 ? `Delete ${selectedIds.size} Provider(s)?` : "Are you REALLY sure? 😬"}
+            </DialogTitle>
+          </DialogHeader>
+          {bulkDeleteStep === 1 ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                You're about to delete <strong>{selectedIds.size} provider(s)</strong> and all their associated data (services, team, credentials, bookings, reviews, etc).
+              </p>
+              <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
+                {selectedProviders.map(p => <li key={p.id}>{p.name}</li>)}
+              </ul>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setBulkDeleteStep(0)}>Cancel</Button>
+                <Button variant="destructive" onClick={() => setBulkDeleteStep(2)}>Yes, Delete All</Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                This is your last chance! <strong>{selectedIds.size} provider(s)</strong> and ALL associated data will be gone forever. There is no undo.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setBulkDeleteStep(0)}>Nevermind</Button>
+                <Button variant="destructive" onClick={handleBulkDelete} disabled={bulkDeleting}>
+                  {bulkDeleting ? "Deleting..." : "I'm sure — Delete All Forever"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk Change Tier Dialog */}
+      <Dialog open={bulkTierOpen} onOpenChange={setBulkTierOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Change Verification Tier — {selectedIds.size} Provider(s)</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Set the verification tier for: {selectedProviders.map(p => p.name).join(", ")}
+            </p>
+            <div className="space-y-2">
+              <Label>New Tier</Label>
+              <Select value={bulkTierValue} onValueChange={setBulkTierValue}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="listed">Listed</SelectItem>
+                  <SelectItem value="verified">Verified</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button onClick={handleBulkTierChange} className="w-full" disabled={bulkTierUpdating}>
+              {bulkTierUpdating ? "Updating..." : `Set to "${bulkTierValue}"`}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
