@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import AdminProviderOnboarding from "./AdminProviderOnboarding";
@@ -36,6 +36,9 @@ const ProvidersSection = () => {
   const [selectedProvider, setSelectedProvider] = useState<ProviderRow | null>(null);
   const [transferEmail, setTransferEmail] = useState("");
   const [onboardingProvider, setOnboardingProvider] = useState<ProviderRow | null>(null);
+  const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0); // 0=closed, 1=first confirm, 2=second confirm
+  const [deleteTarget, setDeleteTarget] = useState<ProviderRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -158,6 +161,54 @@ const ProvidersSection = () => {
     fetchProviders();
   };
 
+  const startDelete = (p: ProviderRow) => {
+    setDeleteTarget(p);
+    setDeleteStep(1);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const slug = deleteTarget.slug;
+    // Delete all related onboarding data first, then the provider
+    const tables = [
+      "provider_policies", "provider_external_links", "provider_services",
+      "provider_facility", "provider_credentials", "provider_team_members",
+      "provider_business_info", "bookings", "booking_messages",
+    ];
+    for (const table of tables) {
+      if (table === "booking_messages") {
+        // Delete messages for bookings belonging to this provider
+        const { data: bookingIds } = await supabase
+          .from("bookings")
+          .select("id")
+          .eq("provider_slug", slug);
+        if (bookingIds?.length) {
+          for (const b of bookingIds) {
+            await supabase.from("booking_messages").delete().eq("booking_id", b.id);
+          }
+        }
+      } else if (table === "bookings") {
+        await supabase.from(table).delete().eq("provider_slug", slug);
+      } else {
+        await supabase.from(table as any).delete().eq("provider_slug", slug);
+      }
+    }
+    // Delete reviews
+    await supabase.from("reviews").delete().eq("provider_slug", slug);
+    // Finally delete the provider
+    const { error } = await supabase.from("providers" as any).delete().eq("slug", slug);
+    setDeleting(false);
+    setDeleteStep(0);
+    setDeleteTarget(null);
+    if (error) {
+      toast({ title: "Error deleting provider", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Provider deleted", description: `${deleteTarget.name} and all related data removed.` });
+      fetchProviders();
+    }
+  };
+
   if (onboardingProvider && user) {
     return (
       <AdminProviderOnboarding
@@ -223,6 +274,9 @@ const ProvidersSection = () => {
                           <ArrowRightLeft className="w-3.5 h-3.5" />
                         </Button>
                       )}
+                      <Button variant="ghost" size="sm" onClick={() => startDelete(p)} title="Delete Provider" className="text-destructive hover:text-destructive">
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -325,6 +379,40 @@ const ProvidersSection = () => {
             </div>
             <Button onClick={handleTransfer} className="w-full" disabled={!transferEmail}>Transfer Ownership</Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Two-Step Delete Confirmation Dialog */}
+      <Dialog open={deleteStep > 0} onOpenChange={(open) => { if (!open) { setDeleteStep(0); setDeleteTarget(null); } }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {deleteStep === 1 ? "Delete Provider?" : "Are you REALLY sure? 😬"}
+            </DialogTitle>
+          </DialogHeader>
+          {deleteStep === 1 ? (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                You're about to delete <strong>{deleteTarget?.name}</strong>. This will permanently remove the provider and all their data including services, team members, credentials, facility info, bookings, and reviews.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => { setDeleteStep(0); setDeleteTarget(null); }}>Cancel</Button>
+                <Button variant="destructive" onClick={() => setDeleteStep(2)}>Yes, Delete</Button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                This is your last chance! <strong>{deleteTarget?.name}</strong> and ALL associated data will be gone forever. There is no undo.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => { setDeleteStep(0); setDeleteTarget(null); }}>Nevermind</Button>
+                <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+                  {deleting ? "Deleting..." : "I'm sure — Delete Forever"}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
