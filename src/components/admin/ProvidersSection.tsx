@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -26,6 +26,11 @@ interface ProviderRow {
   verification_tier: string;
   owner_user_id: string | null;
   created_at: string;
+  specialties: string[] | null;
+}
+
+interface ProviderRatings {
+  [slug: string]: number; // average rating
 }
 
 interface OnboardingStatus {
@@ -57,6 +62,16 @@ const ProvidersSection = () => {
   const [deleteTarget, setDeleteTarget] = useState<ProviderRow | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [sortByIncomplete, setSortByIncomplete] = useState(false);
+  const [providerRatings, setProviderRatings] = useState<ProviderRatings>({});
+
+  // Filter state
+  const [filterName, setFilterName] = useState("");
+  const [filterLocation, setFilterLocation] = useState("");
+  const [filterSpecialty, setFilterSpecialty] = useState("");
+  const [filterMinRating, setFilterMinRating] = useState("");
+  const [filterTier, setFilterTier] = useState("all");
+
+  const hasActiveFilters = filterName || filterLocation || filterSpecialty || filterMinRating || filterTier !== "all";
 
   // Form state
   const [form, setForm] = useState({
@@ -101,18 +116,63 @@ const ProvidersSection = () => {
       }
       setOnboardingStatus(statusMap);
     }
+
+    // Fetch average ratings per provider
+    const { data: reviewData } = await supabase
+      .from("reviews")
+      .select("provider_slug, rating");
+    if (reviewData?.length) {
+      const ratingMap: Record<string, { sum: number; count: number }> = {};
+      for (const r of reviewData) {
+        if (!ratingMap[r.provider_slug]) ratingMap[r.provider_slug] = { sum: 0, count: 0 };
+        ratingMap[r.provider_slug].sum += r.rating;
+        ratingMap[r.provider_slug].count += 1;
+      }
+      const avgMap: ProviderRatings = {};
+      for (const [slug, { sum, count }] of Object.entries(ratingMap)) {
+        avgMap[slug] = Math.round((sum / count) * 10) / 10;
+      }
+      setProviderRatings(avgMap);
+    }
   };
 
   useEffect(() => { fetchProviders(); }, []);
 
-  const sortedProviders = useMemo(() => {
-    if (!sortByIncomplete) return providers;
-    return [...providers].sort((a, b) => {
-      const aCompleted = (onboardingStatus[a.slug] ?? []).filter(Boolean).length;
-      const bCompleted = (onboardingStatus[b.slug] ?? []).filter(Boolean).length;
-      return aCompleted - bCompleted; // least complete first
+  // Apply filters (AND logic) then sort
+  const filteredAndSortedProviders = useMemo(() => {
+    let list = providers.filter(p => {
+      if (filterName && !p.name.toLowerCase().includes(filterName.toLowerCase())) return false;
+      const loc = `${p.city ?? ""} ${p.country ?? ""}`.toLowerCase();
+      if (filterLocation && !loc.includes(filterLocation.toLowerCase())) return false;
+      if (filterSpecialty) {
+        const specs = (p.specialties ?? []).map(s => s.toLowerCase());
+        if (!specs.some(s => s.includes(filterSpecialty.toLowerCase()))) return false;
+      }
+      if (filterMinRating) {
+        const min = parseFloat(filterMinRating);
+        if (!isNaN(min) && (providerRatings[p.slug] ?? 0) < min) return false;
+      }
+      if (filterTier !== "all" && p.verification_tier !== filterTier) return false;
+      return true;
     });
-  }, [providers, onboardingStatus, sortByIncomplete]);
+
+    if (sortByIncomplete) {
+      list = [...list].sort((a, b) => {
+        const aCompleted = (onboardingStatus[a.slug] ?? []).filter(Boolean).length;
+        const bCompleted = (onboardingStatus[b.slug] ?? []).filter(Boolean).length;
+        return aCompleted - bCompleted;
+      });
+    }
+    return list;
+  }, [providers, onboardingStatus, sortByIncomplete, filterName, filterLocation, filterSpecialty, filterMinRating, filterTier, providerRatings]);
+
+  const clearFilters = () => {
+    setFilterName("");
+    setFilterLocation("");
+    setFilterSpecialty("");
+    setFilterMinRating("");
+    setFilterTier("all");
+  };
 
   const openCreate = () => {
     setSelectedProvider(null);
@@ -284,6 +344,80 @@ const ProvidersSection = () => {
         </div>
       </div>
 
+      {/* Filter bar */}
+      <Card className="border border-border/50 p-4">
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1 flex-1 min-w-[140px]">
+            <Label className="text-xs text-muted-foreground">Name</Label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                value={filterName}
+                onChange={e => setFilterName(e.target.value)}
+                placeholder="Search name..."
+                className="pl-8 h-9 text-sm"
+              />
+            </div>
+          </div>
+          <div className="space-y-1 flex-1 min-w-[140px]">
+            <Label className="text-xs text-muted-foreground">Location</Label>
+            <Input
+              value={filterLocation}
+              onChange={e => setFilterLocation(e.target.value)}
+              placeholder="City or country..."
+              className="h-9 text-sm"
+            />
+          </div>
+          <div className="space-y-1 flex-1 min-w-[140px]">
+            <Label className="text-xs text-muted-foreground">Specialty</Label>
+            <Input
+              value={filterSpecialty}
+              onChange={e => setFilterSpecialty(e.target.value)}
+              placeholder="e.g. dental, cosmetic..."
+              className="h-9 text-sm"
+            />
+          </div>
+          <div className="space-y-1 min-w-[100px]">
+            <Label className="text-xs text-muted-foreground">Min Rating</Label>
+            <div className="relative">
+              <Star className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+              <Input
+                value={filterMinRating}
+                onChange={e => setFilterMinRating(e.target.value)}
+                placeholder="e.g. 4"
+                className="pl-8 h-9 text-sm w-[100px]"
+                type="number"
+                min="0"
+                max="5"
+                step="0.5"
+              />
+            </div>
+          </div>
+          <div className="space-y-1 min-w-[120px]">
+            <Label className="text-xs text-muted-foreground">Verification</Label>
+            <Select value={filterTier} onValueChange={setFilterTier}>
+              <SelectTrigger className="h-9 text-sm w-[120px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="listed">Listed</SelectItem>
+                <SelectItem value="verified">Verified</SelectItem>
+                <SelectItem value="premium">Premium</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {hasActiveFilters && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1 text-muted-foreground h-9">
+              <X className="w-3.5 h-3.5" /> Clear
+            </Button>
+          )}
+        </div>
+        {hasActiveFilters && (
+          <p className="text-xs text-muted-foreground mt-2">
+            Showing {filteredAndSortedProviders.length} of {providers.length} providers
+          </p>
+        )}
+      </Card>
+
       {loading ? (
         <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>
       ) : providers.length === 0 ? (
@@ -295,6 +429,7 @@ const ProvidersSection = () => {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Location</TableHead>
+                <TableHead>Rating</TableHead>
                 <TableHead>Onboarding</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Type</TableHead>
@@ -302,10 +437,22 @@ const ProvidersSection = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedProviders.map((p) => (
+              {filteredAndSortedProviders.length === 0 ? (
+                <TableRow><TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No providers match your filters.</TableCell></TableRow>
+              ) : filteredAndSortedProviders.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">{p.name}</TableCell>
                   <TableCell className="text-muted-foreground">{p.city}{p.country ? `, ${p.country}` : ""}</TableCell>
+                  <TableCell>
+                    {providerRatings[p.slug] != null ? (
+                      <span className="flex items-center gap-1 text-sm">
+                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        {providerRatings[p.slug]}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
                   <TableCell>
                     {(() => {
                       const sections = onboardingStatus[p.slug] ?? Array(7).fill(false);
