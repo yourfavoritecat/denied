@@ -53,36 +53,54 @@ const FacilityStep = ({ userId, providerSlug, onComplete }: Props) => {
   const uploadFile = async (file: File, folder: string): Promise<string | null> => {
     const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
     const path = `${userId}/${folder}/${Date.now()}-${crypto.randomUUID()}.${ext}`;
-    console.log(`[FacilityStep] Uploading ${file.name} (${file.size} bytes) to provider-onboarding/${path}`);
-    const { error } = await supabase.storage.from("provider-onboarding").upload(path, file, {
-      contentType: file.type,
+    console.log(`[FacilityStep] Uploading ${file.name} (${file.size} bytes, type: ${file.type}) to provider-onboarding/${path}`);
+    console.log(`[FacilityStep] userId used for path: ${userId}`);
+    
+    // Check auth state
+    const { data: sessionData } = await supabase.auth.getSession();
+    console.log(`[FacilityStep] Auth session exists: ${!!sessionData?.session}, user: ${sessionData?.session?.user?.id}`);
+    
+    const { error, data: uploadData } = await supabase.storage.from("provider-onboarding").upload(path, file, {
+      contentType: file.type || 'application/octet-stream',
       cacheControl: "3600",
     });
     if (error) {
-      console.error(`[FacilityStep] Upload failed for ${file.name}:`, error);
-      toast({ title: `Failed to upload ${file.name}`, description: error.message, variant: "destructive" });
+      console.error(`[FacilityStep] Upload FAILED for ${file.name}:`, JSON.stringify(error));
+      toast({ 
+        title: `Upload failed: ${file.name}`, 
+        description: `${error.message}. Check console for details.`, 
+        variant: "destructive" 
+      });
       return null;
     }
     const { data } = supabase.storage.from("provider-onboarding").getPublicUrl(path);
-    console.log(`[FacilityStep] Upload success: ${data.publicUrl}`);
+    console.log(`[FacilityStep] Upload SUCCESS: ${data.publicUrl}`);
     return data.publicUrl;
   };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+    console.log(`[FacilityStep] Photo input changed: ${files.length} file(s) selected`, files.map(f => `${f.name} (${f.size})`));
+    if (files.length === 0) return;
     const remaining = 20 - photos.length - newPhotos.length;
-    setNewPhotos((prev) => [...prev, ...files.slice(0, remaining)]);
+    const toAdd = files.slice(0, remaining);
+    setNewPhotos((prev) => [...prev, ...toAdd]);
+    toast({ title: `${toAdd.length} photo(s) queued`, description: "Click Save & Continue to upload." });
   };
 
   const handleSave = async () => {
     setSaving(true);
+    console.log(`[FacilityStep] Save started. newPhotos: ${newPhotos.length}, newCoverPhoto: ${!!newCoverPhoto}, newVideo: ${!!newVideo}`);
+    console.log(`[FacilityStep] Existing photos: ${photos.length}, coverPhotoUrl: ${coverPhotoUrl ? 'set' : 'empty'}`);
 
     // Upload new photos
     const uploadedUrls: string[] = [];
     for (const file of newPhotos) {
+      console.log(`[FacilityStep] Uploading photo: ${file.name} (${file.size} bytes)`);
       const url = await uploadFile(file, "facility");
       if (url) uploadedUrls.push(url);
     }
+    console.log(`[FacilityStep] Successfully uploaded ${uploadedUrls.length} of ${newPhotos.length} photos`);
 
     // Upload video if any
     let videoTourUrl = videoUrl;
@@ -175,7 +193,14 @@ const FacilityStep = ({ userId, providerSlug, onComplete }: Props) => {
             <label className="flex flex-col items-center justify-center w-full max-w-md aspect-[16/10] rounded-lg border-2 border-dashed border-border cursor-pointer hover:border-primary transition-colors">
               <Upload className="w-8 h-8 text-muted-foreground mb-2" />
               <span className="text-sm text-muted-foreground">Upload cover photo</span>
-              <input type="file" accept="image/*" className="hidden" onChange={(e) => setNewCoverPhoto(e.target.files?.[0] || null)} />
+              <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                console.log(`[FacilityStep] Cover photo selected:`, file ? `${file.name} (${file.size} bytes)` : 'none');
+                if (file) {
+                  setNewCoverPhoto(file);
+                  toast({ title: "Cover photo selected", description: `${file.name} — click Save & Continue to upload.` });
+                }
+              }} />
             </label>
           )}
         </div>
