@@ -215,14 +215,38 @@ const ProviderProfile = () => {
         {/* Facility Photos */}
         <motion.div className="container mx-auto px-4 -mt-4 mb-10" initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }}>
           {facilityPhotos.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {facilityPhotos.slice(0, 5).map((url, i) => (
-                <motion.div key={i} variants={fadeUp} custom={i * 0.5}
-                  className={`rounded-xl overflow-hidden border border-border/50 ${i === 0 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-64" : "aspect-square md:h-[7.5rem]"}`}>
-                  <img src={url} alt={`Facility photo ${i + 1}`} className="w-full h-full object-cover" />
+            facilityPhotos.length === 1 ? (
+              <div className="max-w-2xl mx-auto">
+                <motion.div variants={fadeUp} custom={0} className="rounded-xl overflow-hidden border border-border/50 aspect-video">
+                  <img src={facilityPhotos[0]} alt="Facility photo" className="w-full h-full object-cover" />
                 </motion.div>
-              ))}
-            </div>
+              </div>
+            ) : facilityPhotos.length === 2 ? (
+              <div className="grid grid-cols-2 gap-3 max-w-3xl mx-auto">
+                {facilityPhotos.map((url, i) => (
+                  <motion.div key={i} variants={fadeUp} custom={i * 0.5} className="rounded-xl overflow-hidden border border-border/50 aspect-[4/3]">
+                    <img src={url} alt={`Facility photo ${i + 1}`} className="w-full h-full object-cover" />
+                  </motion.div>
+                ))}
+              </div>
+            ) : facilityPhotos.length === 3 ? (
+              <div className="grid grid-cols-3 gap-3">
+                {facilityPhotos.map((url, i) => (
+                  <motion.div key={i} variants={fadeUp} custom={i * 0.5} className="rounded-xl overflow-hidden border border-border/50 aspect-[4/3]">
+                    <img src={url} alt={`Facility photo ${i + 1}`} className="w-full h-full object-cover" />
+                  </motion.div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {facilityPhotos.slice(0, 5).map((url, i) => (
+                  <motion.div key={i} variants={fadeUp} custom={i * 0.5}
+                    className={`rounded-xl overflow-hidden border border-border/50 ${i === 0 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-64" : "aspect-square md:h-[7.5rem]"}`}>
+                    <img src={url} alt={`Facility photo ${i + 1}`} className="w-full h-full object-cover" />
+                  </motion.div>
+                ))}
+              </div>
+            )
           ) : seedProvider ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[1, 2, 3, 4].map((i) => (

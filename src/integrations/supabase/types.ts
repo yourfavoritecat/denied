@@ -117,6 +117,63 @@ export type Database = {
           },
         ]
       }
+      content_flags: {
+        Row: {
+          admin_notes: string | null
+          content_type: string
+          created_at: string
+          details: string | null
+          flagger_user_id: string
+          id: string
+          photo_url: string | null
+          reason: string
+          resolved_at: string | null
+          review_id: string | null
+          status: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          content_type: string
+          created_at?: string
+          details?: string | null
+          flagger_user_id: string
+          id?: string
+          photo_url?: string | null
+          reason: string
+          resolved_at?: string | null
+          review_id?: string | null
+          status?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          content_type?: string
+          created_at?: string
+          details?: string | null
+          flagger_user_id?: string
+          id?: string
+          photo_url?: string | null
+          reason?: string
+          resolved_at?: string | null
+          review_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_flags_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_flags_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
