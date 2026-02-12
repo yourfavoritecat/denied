@@ -42,15 +42,20 @@ const TeamStep = ({ userId, providerSlug, onComplete }: Props) => {
       .order("sort_order")
       .then(({ data }) => {
         if (data && (data as any[]).length > 0) {
-          setMembers((data as any[]).map((d: any) => ({
+          const loaded = (data as any[]).map((d: any) => ({
             id: d.id,
             name: d.name,
             role: d.role,
-            headshot_url: d.headshot_url,
+            headshot_url: d.headshot_url || "",
             bio: d.bio || "",
             license_number: d.license_number || "",
             is_lead: d.is_lead,
-          })));
+          }));
+          // Ensure at least one member is marked as lead
+          if (!loaded.some((m) => m.is_lead) && loaded.length > 0) {
+            loaded[0].is_lead = true;
+          }
+          setMembers(loaded);
         }
       });
   }, [providerSlug]);
