@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ViewAsProvider } from "@/hooks/useViewAs";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ViewAsSwitcher from "@/components/admin/ViewAsSwitcher";
+import ViewAsBanner from "@/components/admin/ViewAsBanner";
 import Launch from "./pages/Launch";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -57,6 +58,7 @@ const App = () => (
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <ViewAsBanner />
           <ViewAsSwitcher />
         </BrowserRouter>
       </TooltipProvider>
