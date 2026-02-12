@@ -85,7 +85,7 @@ const CategoryStarPicker = ({
 const LeaveReviewModal = ({
   open, onOpenChange, providerSlug, providerName, procedures, onReviewSubmitted, editReview,
 }: LeaveReviewModalProps) => {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { toast } = useToast();
   const [categoryRatings, setCategoryRatings] = useState<CategoryRatings>({});
   const [title, setTitle] = useState("");
@@ -181,8 +181,20 @@ const LeaveReviewModal = ({
     return urls;
   };
 
+  const hasAvatar = !!(profile as any)?.avatar_url;
+  const hasName = !!(profile as any)?.first_name;
+  const missingProfileInfo = !hasAvatar || !hasName;
+
   const handleSubmit = async () => {
     if (!user || !allCategoriesRated || !title || reviewText.length < 50 || !procedure) return;
+    if (missingProfileInfo) {
+      toast({
+        title: "Complete your profile first",
+        description: "You need a profile photo and name to leave a review. Go to your profile to add them.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsSubmitting(true);
 
     const uploadedPhotos = newPhotos.length > 0 ? await uploadFiles(newPhotos, "photos") : [];
@@ -239,7 +251,19 @@ const LeaveReviewModal = ({
           <DialogTitle>{isEditing ? "Edit Review" : `Review ${providerName}`}</DialogTitle>
         </DialogHeader>
         <div className="space-y-5">
-          {/* Category ratings */}
+          {/* Profile requirement notice */}
+          {missingProfileInfo && (
+            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-3 text-sm text-destructive">
+              <p className="font-medium">Complete your profile to leave a review</p>
+              <p className="text-xs mt-1">
+                {!hasAvatar && "📸 Add a profile photo"}
+                {!hasAvatar && !hasName && " • "}
+                {!hasName && "✏️ Add your name"}
+                {" — "}
+                <a href="/profile" className="underline font-medium">Go to profile</a>
+              </p>
+            </div>
+          )}
           <div className="space-y-3">
             <Label>Rate each category *</Label>
             <div className="space-y-2 bg-muted/50 rounded-lg p-3">
@@ -369,7 +393,7 @@ const LeaveReviewModal = ({
 
           <Button
             className="w-full"
-            disabled={isSubmitting || !allCategoriesRated || !title || reviewText.length < 50 || !procedure}
+            disabled={isSubmitting || !allCategoriesRated || !title || reviewText.length < 50 || !procedure || missingProfileInfo}
             onClick={handleSubmit}
           >
             {isSubmitting ? (isEditing ? "Saving..." : "Submitting...") : (isEditing ? "Save Changes" : "Submit Review")}

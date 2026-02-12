@@ -833,6 +833,87 @@ export type Database = {
           },
         ]
       }
+      user_feed_posts: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          media_type: string
+          media_url: string
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: string
+          media_url: string
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          media_type?: string
+          media_url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_profile_extras: {
+        Row: {
+          beauty_goals: string | null
+          bio: string | null
+          bucket_list_procedures: string[] | null
+          created_at: string
+          favorite_destinations: string[] | null
+          favorite_emoji: string | null
+          favorite_treatments: string[] | null
+          fun_facts: string[] | null
+          hair_type: string | null
+          hobbies: string[] | null
+          id: string
+          skin_type: string | null
+          travel_style: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          beauty_goals?: string | null
+          bio?: string | null
+          bucket_list_procedures?: string[] | null
+          created_at?: string
+          favorite_destinations?: string[] | null
+          favorite_emoji?: string | null
+          favorite_treatments?: string[] | null
+          fun_facts?: string[] | null
+          hair_type?: string | null
+          hobbies?: string[] | null
+          id?: string
+          skin_type?: string | null
+          travel_style?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          beauty_goals?: string | null
+          bio?: string | null
+          bucket_list_procedures?: string[] | null
+          created_at?: string
+          favorite_destinations?: string[] | null
+          favorite_emoji?: string | null
+          favorite_treatments?: string[] | null
+          fun_facts?: string[] | null
+          hair_type?: string | null
+          hobbies?: string[] | null
+          id?: string
+          skin_type?: string | null
+          travel_style?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
