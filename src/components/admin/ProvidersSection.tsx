@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -56,6 +56,7 @@ const ProvidersSection = () => {
   const [deleteStep, setDeleteStep] = useState<0 | 1 | 2>(0); // 0=closed, 1=first confirm, 2=second confirm
   const [deleteTarget, setDeleteTarget] = useState<ProviderRow | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [sortByIncomplete, setSortByIncomplete] = useState(false);
 
   // Form state
   const [form, setForm] = useState({
@@ -103,6 +104,15 @@ const ProvidersSection = () => {
   };
 
   useEffect(() => { fetchProviders(); }, []);
+
+  const sortedProviders = useMemo(() => {
+    if (!sortByIncomplete) return providers;
+    return [...providers].sort((a, b) => {
+      const aCompleted = (onboardingStatus[a.slug] ?? []).filter(Boolean).length;
+      const bCompleted = (onboardingStatus[b.slug] ?? []).filter(Boolean).length;
+      return aCompleted - bCompleted; // least complete first
+    });
+  }, [providers, onboardingStatus, sortByIncomplete]);
 
   const openCreate = () => {
     setSelectedProvider(null);
@@ -261,7 +271,17 @@ const ProvidersSection = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Manage Providers</h2>
-        <Button onClick={openCreate} className="gap-2"><Plus className="w-4 h-4" /> Create Provider</Button>
+        <div className="flex gap-2">
+          <Button
+            variant={sortByIncomplete ? "default" : "outline"}
+            onClick={() => setSortByIncomplete(v => !v)}
+            className="gap-2"
+          >
+            <ArrowUpDown className="w-4 h-4" />
+            {sortByIncomplete ? "Incomplete First" : "Sort by Onboarding"}
+          </Button>
+          <Button onClick={openCreate} className="gap-2"><Plus className="w-4 h-4" /> Create Provider</Button>
+        </div>
       </div>
 
       {loading ? (
@@ -282,7 +302,7 @@ const ProvidersSection = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {providers.map((p) => (
+              {sortedProviders.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell className="font-medium">{p.name}</TableCell>
                   <TableCell className="text-muted-foreground">{p.city}{p.country ? `, ${p.country}` : ""}</TableCell>
