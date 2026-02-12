@@ -12,24 +12,27 @@ import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, MapPin, Star, Filter, BadgeCheck, X, Syringe, ArrowUpDown } from "lucide-react";
 import { providers, procedureTypes, locations, type Provider } from "@/data/providers";
-
-// Tooth SVG icon component
-const ToothIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 2C9.5 2 7.6 3.1 6.5 4.5C5.4 5.9 5 7.7 5 9.5C5 11.3 5.3 12.8 5.5 14.2C5.7 15.6 5.8 16.9 5.5 18C5.2 19.1 5.3 20.1 5.8 20.8C6.3 21.5 7 22 8 22C9 22 9.5 21.3 9.8 20.3C10.1 19.3 10.2 18 10.5 16.8C10.8 15.6 11.3 14.5 12 14.5C12.7 14.5 13.2 15.6 13.5 16.8C13.8 18 13.9 19.3 14.2 20.3C14.5 21.3 15 22 16 22C17 22 17.7 21.5 18.2 20.8C18.7 20.1 18.8 19.1 18.5 18C18.2 16.9 18.3 15.6 18.5 14.2C18.7 12.8 19 11.3 19 9.5C19 7.7 18.6 5.9 17.5 4.5C16.4 3.1 14.5 2 12 2Z" />
-  </svg>
-);
+import clinicDental from "@/assets/clinic-dental.jpg";
+import clinicMedspa from "@/assets/clinic-medspa.jpg";
+import clinicSurgery from "@/assets/clinic-surgery.jpg";
 
 const dentalKeywords = ["dental", "crown", "implant", "all-on-4", "veneer", "root canal", "cleaning", "whitening", "denture"];
 const aestheticKeywords = ["botox", "syringe", "chemical peel", "microneedling", "prp", "liposuction", "rhinoplasty", "tummy tuck", "facelift", "medspa", "aesthetics", "cosmetic surgery", "breast"];
 
-const getClinicCategory = (provider: Provider): "dental" | "aesthetic" | "mixed" => {
+const getClinicCategory = (provider: Provider): "dental" | "aesthetic" | "surgery" => {
   const allText = [...provider.specialties, provider.name].join(" ").toLowerCase();
   const isDental = dentalKeywords.some((k) => allText.includes(k));
+  const isSurgery = ["rhinoplasty", "liposuction", "tummy tuck", "facelift", "breast", "plastic surgery"].some((k) => allText.includes(k));
   const isAesthetic = aestheticKeywords.some((k) => allText.includes(k));
+  if (isSurgery) return "surgery";
   if (isDental && !isAesthetic) return "dental";
-  if (isAesthetic && !isDental) return "aesthetic";
-  return isDental ? "dental" : "aesthetic";
+  return isAesthetic ? "aesthetic" : "dental";
+};
+
+const CATEGORY_IMAGES: Record<string, string> = {
+  dental: clinicDental,
+  aesthetic: clinicMedspa,
+  surgery: clinicSurgery,
 };
 
 type SortOption = "default" | "price-low" | "price-high" | "rating" | "reviews";
@@ -288,18 +291,15 @@ const SearchPage = () => {
                         transition={{ duration: 0.4, delay: index * 0.06 }}
                       >
                         <Link to={`/provider/${provider.slug}`}>
-                          <Card className="overflow-hidden border border-border/50 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full">
-                            <div className="aspect-[16/10] bg-gradient-to-br from-denied-mint/20 to-denied-peach/20 relative flex items-center justify-center">
-                              <div className="text-center p-4">
-                                {category === "dental" ? (
-                                  <ToothIcon className="w-16 h-16 mx-auto mb-2 text-foreground/15" />
-                                ) : (
-                                  <Syringe className="w-16 h-16 mx-auto mb-2 text-foreground/15" strokeWidth={1} />
-                                )}
-                                <p className="text-xs text-muted-foreground/60 uppercase tracking-wider font-medium">
-                                  {category === "dental" ? "Dental Clinic" : "Aesthetics & MedSpa"}
-                                </p>
-                              </div>
+                          <Card className="overflow-hidden border border-border/50 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full group">
+                            <div className="aspect-[16/10] relative overflow-hidden">
+                              <img
+                                src={CATEGORY_IMAGES[category] || clinicDental}
+                                alt={`${provider.name} clinic`}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                               {provider.verified ? (
                                 <div className="absolute top-3 right-3">
                                   <Badge className="bg-primary text-primary-foreground gap-1 shadow-md">
@@ -313,6 +313,11 @@ const SearchPage = () => {
                                   </Badge>
                                 </div>
                               ) : null}
+                              <div className="absolute bottom-3 left-4">
+                                <span className="text-white/90 text-xs uppercase tracking-wider font-medium drop-shadow-md">
+                                  {category === "dental" ? "Dental Clinic" : category === "surgery" ? "Surgery Center" : "Aesthetics & MedSpa"}
+                                </span>
+                              </div>
                             </div>
                             <CardContent className="p-5">
                               <div className="flex items-start justify-between mb-2">
