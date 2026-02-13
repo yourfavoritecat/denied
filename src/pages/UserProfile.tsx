@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ThumbsUp, Calendar, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,7 @@ import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserT
 interface PublicProfile {
   user_id: string;
   first_name: string | null;
+  avatar_url: string | null;
   city: string | null;
   username: string;
   created_at: string;
@@ -32,7 +33,7 @@ const UserProfile = () => {
       // Try lookup by username first, then by user_id
       let { data } = await supabase
         .from("profiles_public" as any)
-        .select("user_id, first_name, city, username, created_at, social_verifications")
+        .select("user_id, first_name, avatar_url, city, username, created_at, social_verifications")
         .eq("username", userId)
         .maybeSingle();
       setProfile(data as any);
@@ -91,6 +92,7 @@ const UserProfile = () => {
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <Avatar className="w-20 h-20 text-xl bg-primary text-primary-foreground">
+                  {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.first_name || "User"} />}
                   <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
                 </Avatar>
                 <div className="text-center sm:text-left">
