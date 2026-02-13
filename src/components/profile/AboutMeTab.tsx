@@ -233,14 +233,14 @@ const AboutMeTab = () => {
             <p className="text-xs text-muted-foreground">{extras.bio.length}/500</p>
           </div>
 
-          <div className="space-y-2">
-            <Label>Favorite Emoji</Label>
+          <div className="flex items-center gap-2">
+            <Label className="mb-0">Favorite Emoji</Label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
-                  className="w-20 h-12 text-2xl text-center"
+                  className="w-10 h-10 text-lg p-0"
                 >
                   {extras.favorite_emoji || "✨"}
                 </Button>
