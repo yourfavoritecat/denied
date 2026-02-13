@@ -37,13 +37,14 @@ const Navbar = () => {
 
   const actualProvider = !!(profile as any)?.provider_slug;
   const isProvider = (actualProvider && viewAs !== "traveler") || (isAdmin && viewAs === "provider");
+  const showProviderDashboard = isProvider || (isAdmin && viewAs === "admin");
   const showAdminLink = isAdmin && viewAs === "admin";
 
   const navLinks = [
     { to: "/search", icon: Search, label: "Search" },
     { to: "/about", icon: Info, label: "About" },
     { to: "/my-trips", icon: Plane, label: "My Trips" },
-    ...(isProvider ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Provider Dashboard" }] : []),
+    ...(showProviderDashboard ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Provider Dashboard" }] : []),
     ...(showAdminLink ? [{ to: "/admin", icon: Shield, label: "Admin" }] : []),
     { to: "/profile", icon: User, label: "Profile" },
   ];
@@ -116,7 +117,7 @@ const Navbar = () => {
                     <DropdownMenuItem onClick={() => navigate("/profile?tab=patient-history")}>
                       <ClipboardList className="w-4 h-4 mr-2" /> Patient History
                     </DropdownMenuItem>
-                    {isProvider && (
+                    {showProviderDashboard && (
                       <DropdownMenuItem onClick={() => navigate("/provider-dashboard")}>
                         <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
                       </DropdownMenuItem>
