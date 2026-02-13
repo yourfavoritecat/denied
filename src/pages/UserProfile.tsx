@@ -222,7 +222,16 @@ const UserProfile = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {extras.travel_style && <p className="text-sm"><span className="text-muted-foreground">travel style:</span> {extras.travel_style}</p>}
+                    {extras.travel_style && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">travel style</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {extras.travel_style.split(",").filter(Boolean).map(s => (
+                            <Badge key={s} variant="outline">{s}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {extras.favorite_destinations && extras.favorite_destinations.length > 0 && (
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">favorite destinations</p>
