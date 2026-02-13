@@ -11,8 +11,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
-const SKIN_TYPES = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];
-const HAIR_TYPES = ["Straight", "Wavy", "Curly", "Coily", "Thinning"];
+const MEDSPA_TREATMENTS = [
+  "Botox", "Lip fillers", "Microneedling", "Chemical peel", "Hydrafacial",
+  "Laser hair removal", "PRP therapy", "Dermal fillers", "Coolsculpting",
+  "IPL photofacial", "Microdermabrasion", "LED light therapy", "Kybella",
+  "Thread lift", "Vampire facial", "Body contouring", "Skin tightening",
+  "Teeth whitening",
+];
 const TRAVEL_STYLES = [
   "Budget-conscious", "Luxury traveler", "Solo adventurer", "With family",
   "With friends", "First-timer", "Spontaneous", "Planner", "Wellness-focused",
@@ -281,67 +286,39 @@ const AboutMeTab = () => {
         </CardContent>
       </Card>
 
-      {/* Beauty & Wellness */}
+      {/* MedSpa Regulars */}
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-secondary" />
-              Beauty & Wellness
-            </CardTitle>
-          </div>
-          
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-secondary" />
+            My MedSpa Regulars
+          </CardTitle>
+          <CardDescription>Select the treatments you love (select all that apply)</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Skin Type</Label>
-              <div className="flex flex-wrap gap-2">
-                {SKIN_TYPES.map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => updateField("skin_type", extras.skin_type === type ? "" : type)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                      extras.skin_type === type
-                        ? "bg-secondary text-secondary-foreground border-secondary"
-                        : "bg-transparent text-muted-foreground border-border hover:border-secondary"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Hair Type</Label>
-              <div className="flex flex-wrap gap-2">
-                {HAIR_TYPES.map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => updateField("hair_type", extras.hair_type === type ? "" : type)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                      extras.hair_type === type
-                        ? "bg-secondary text-secondary-foreground border-secondary"
-                        : "bg-transparent text-muted-foreground border-border hover:border-secondary"
-                    }`}
-                  >
-                    {type}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Favorite Treatments</Label>
-            <TagInput
-              tags={extras.favorite_treatments}
-              onAdd={(t) => updateField("favorite_treatments", [...extras.favorite_treatments, t])}
-              onRemove={(t) => updateField("favorite_treatments", extras.favorite_treatments.filter((h) => h !== t))}
-              placeholder="e.g. teeth whitening, facials, botox..."
-            />
+          <div className="flex flex-wrap gap-2">
+            {MEDSPA_TREATMENTS.map((treatment) => {
+              const isSelected = extras.favorite_treatments.includes(treatment);
+              return (
+                <button
+                  key={treatment}
+                  type="button"
+                  onClick={() => {
+                    const next = isSelected
+                      ? extras.favorite_treatments.filter((t) => t !== treatment)
+                      : [...extras.favorite_treatments, treatment];
+                    updateField("favorite_treatments", next);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                    isSelected
+                      ? "bg-secondary text-secondary-foreground border-secondary"
+                      : "bg-transparent text-muted-foreground border-border hover:border-secondary"
+                  }`}
+                >
+                  {treatment}
+                </button>
+              );
+            })}
           </div>
 
           <div className="space-y-2">
