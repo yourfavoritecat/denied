@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Sparkles, Plane, Heart, X, Plus, Eye, EyeOff } from "lucide-react";
+import { Sparkles, Plane, Heart, X, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -55,18 +55,8 @@ const defaultExtras: ProfileExtras = {
   bucket_list_procedures: [],
 };
 
-const PublicToggle = ({ isPublic, onToggle }: { isPublic: boolean; onToggle: () => void }) => (
-  <Button
-    type="button"
-    variant={isPublic ? "default" : "outline"}
-    size="sm"
-    className="gap-1.5 text-xs"
-    onClick={onToggle}
-  >
-    {isPublic ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-    {isPublic ? "On public profile" : "Add to public profile"}
-  </Button>
-);
+
+
 
 
 const TagInput = ({
@@ -126,7 +116,6 @@ const AboutMeTab = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [extras, setExtras] = useState<ProfileExtras>(defaultExtras);
-  const [publicFields, setPublicFields] = useState<Record<SectionKey, boolean>>({ about: false, beauty: false, travel: false });
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -153,7 +142,7 @@ const AboutMeTab = () => {
           favorite_destinations: d.favorite_destinations || [],
           bucket_list_procedures: d.bucket_list_procedures || [],
         });
-        setPublicFields(d.public_fields || { about: false, beauty: false, travel: false });
+        // public_fields no longer needed
       }
       setLoaded(true);
     };
@@ -167,7 +156,6 @@ const AboutMeTab = () => {
     const payload = {
       user_id: user.id,
       ...extras,
-      public_fields: publicFields,
     };
 
     // Upsert
@@ -181,7 +169,7 @@ const AboutMeTab = () => {
     if (existing) {
       ({ error } = await supabase
         .from("user_profile_extras" as any)
-        .update({ ...extras, public_fields: publicFields } as any)
+        .update({ ...extras } as any)
         .eq("user_id", user.id));
     } else {
       ({ error } = await supabase
@@ -201,9 +189,8 @@ const AboutMeTab = () => {
     setExtras((prev) => ({ ...prev, [key]: value }));
   };
 
-  const togglePublicField = (key: SectionKey) => {
-    setPublicFields((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+
+
 
   if (!loaded) {
     return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
@@ -221,7 +208,7 @@ const AboutMeTab = () => {
             </CardTitle>
             <CardDescription>Tell the community about yourself</CardDescription>
           </div>
-          <PublicToggle isPublic={publicFields.about} onToggle={() => togglePublicField("about")} />
+          
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -298,7 +285,7 @@ const AboutMeTab = () => {
               Beauty & Wellness
             </CardTitle>
           </div>
-          <PublicToggle isPublic={publicFields.beauty} onToggle={() => togglePublicField("beauty")} />
+          
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
@@ -374,7 +361,7 @@ const AboutMeTab = () => {
               Travel Personality
             </CardTitle>
           </div>
-          <PublicToggle isPublic={publicFields.travel} onToggle={() => togglePublicField("travel")} />
+          
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">

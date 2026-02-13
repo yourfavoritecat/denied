@@ -34,7 +34,7 @@ interface ProfileExtras {
   travel_style?: string;
   favorite_destinations?: string[];
   bucket_list_procedures?: string[];
-  public_fields?: Record<string, boolean>;
+  
 }
 
 const UserProfile = () => {
@@ -165,9 +165,9 @@ const UserProfile = () => {
           </Card>
 
           {/* Public About Me Sections */}
-          {extras && extras.public_fields && (
+          {extras && (
             <>
-              {extras.public_fields.about && hasAboutContent(extras) && (
+              {hasAboutContent(extras) && (
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -193,7 +193,7 @@ const UserProfile = () => {
                 </Card>
               )}
 
-              {extras.public_fields.beauty && hasBeautyContent(extras) && (
+              {hasBeautyContent(extras) && (
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -214,7 +214,7 @@ const UserProfile = () => {
                 </Card>
               )}
 
-              {extras.public_fields.travel && hasTravelContent(extras) && (
+              {hasTravelContent(extras) && (
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
