@@ -60,10 +60,10 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-2 lg:gap-6 xl:gap-8 min-w-0">
             {navLinks.map((link) => (
-              <Link key={link.to} to={link.to} className="flex items-center gap-2 text-white/80 hover:text-white transition-colors">
-                <link.icon className="w-4 h-4" />
+              <Link key={link.to} to={link.to} className="flex items-center gap-1 lg:gap-2 text-white/80 hover:text-white transition-colors whitespace-nowrap text-xs lg:text-sm">
+                <link.icon className="w-4 h-4 shrink-0" />
                 {link.label}
               </Link>
             ))}
@@ -72,10 +72,10 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <Button
               size="sm"
-              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold hidden sm:flex items-center gap-2"
+              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold hidden sm:flex items-center gap-1.5 whitespace-nowrap text-xs lg:text-sm px-2.5 lg:px-3"
               onClick={() => navigate(user ? "/my-trips?plan=new" : "/auth")}
             >
-              <PlusCircle className="w-4 h-4" />
+              <PlusCircle className="w-4 h-4 shrink-0" />
               Plan a Trip
             </Button>
 
