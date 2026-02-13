@@ -213,7 +213,7 @@ const UserProfile = () => {
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Plane className="w-5 h-5 text-secondary" /> travel personality
+                      <Plane className="w-5 h-5 text-secondary" /> medical & dental tourism personality
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
