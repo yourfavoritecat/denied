@@ -229,7 +229,7 @@ const UserProfile = () => {
                     )}
                     {extras.favorite_destinations && extras.favorite_destinations.length > 0 && (
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">favorite destinations</p>
+                        <p className="text-sm text-muted-foreground mb-1">favorite destinations for budget friendly procedures & care</p>
                         <div className="flex flex-wrap gap-1.5">{extras.favorite_destinations.map(d => <Badge key={d} variant="outline">{d}</Badge>)}</div>
                       </div>
                     )}

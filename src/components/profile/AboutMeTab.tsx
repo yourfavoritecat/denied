@@ -85,7 +85,7 @@ const TagInput = ({
   const [input, setInput] = useState("");
 
   const handleAdd = () => {
-    const trimmed = input.trim();
+    const trimmed = input.trim().toLowerCase();
     if (trimmed && !tags.includes(trimmed) && tags.length < max) {
       onAdd(trimmed);
       setInput("");
@@ -402,7 +402,7 @@ const AboutMeTab = () => {
           </div>
 
           <div className="space-y-2">
-            <Label>Favorite Destinations</Label>
+            <Label>Favorite Destinations for Budget Friendly Procedures & Care</Label>
             <TagInput
               tags={extras.favorite_destinations}
               onAdd={(t) => updateField("favorite_destinations", [...extras.favorite_destinations, t])}
