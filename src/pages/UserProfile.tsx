@@ -77,7 +77,7 @@ const UserProfile = () => {
     fetch();
   }, [userId]);
 
-  const { reviews, loading: reviewsLoading } = useReviews(undefined, profile?.user_id);
+  const { reviews, loading: reviewsLoading } = useReviews(undefined, profile?.user_id || "__none__");
 
   const totalHelpfulness = reviews.reduce((sum, r) => sum + r.upvote_count, 0);
   const procedureTags = [...new Set(reviews.map((r) => r.procedure_name))];
