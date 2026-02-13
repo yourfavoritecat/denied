@@ -13,7 +13,12 @@ import { useToast } from "@/hooks/use-toast";
 
 const SKIN_TYPES = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];
 const HAIR_TYPES = ["Straight", "Wavy", "Curly", "Coily", "Thinning"];
-const TRAVEL_STYLES = ["Budget-conscious", "Luxury traveler", "Solo adventurer", "With family", "With friends", "First-timer"];
+const TRAVEL_STYLES = [
+  "Budget-conscious", "Luxury traveler", "Solo adventurer", "With family",
+  "With friends", "First-timer", "Spontaneous", "Planner", "Wellness-focused",
+  "Foodie traveler", "Culture seeker", "Beach lover", "City explorer",
+  "Off the beaten path", "Digital nomad", "Weekend warrior",
+];
 const EMOJI_OPTIONS = [
   "✨","💖","🦷","💉","🌸","🌊","✈️","🏖️",
   "💅","👑","🔥","💫","🌺","🧖","💎","🪷",
@@ -365,22 +370,32 @@ const AboutMeTab = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Travel Style</Label>
+            <Label>Travel Style <span className="text-xs text-muted-foreground font-normal">(select all that apply)</span></Label>
             <div className="flex flex-wrap gap-2">
-              {TRAVEL_STYLES.map((style) => (
-                <button
-                  key={style}
-                  type="button"
-                  onClick={() => updateField("travel_style", extras.travel_style === style ? "" : style)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                    extras.travel_style === style
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "bg-transparent text-muted-foreground border-border hover:border-primary"
-                  }`}
-                >
-                  {style}
-                </button>
-              ))}
+              {TRAVEL_STYLES.map((style) => {
+                const selected = extras.travel_style.split(",").filter(Boolean);
+                const isSelected = selected.includes(style);
+                return (
+                  <button
+                    key={style}
+                    type="button"
+                    onClick={() => {
+                      const current = extras.travel_style.split(",").filter(Boolean);
+                      const next = isSelected
+                        ? current.filter((s) => s !== style)
+                        : [...current, style];
+                      updateField("travel_style", next.join(","));
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-transparent text-muted-foreground border-border hover:border-primary"
+                    }`}
+                  >
+                    {style}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
