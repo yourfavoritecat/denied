@@ -319,10 +319,17 @@ const BookingDetail = () => {
                       <p className="text-center text-muted-foreground text-sm py-8">No messages yet. Start the conversation!</p>
                     ) : (
                       messages.map((msg) => {
-                        const isMe = msg.sender_id === user?.id;
+                        const isPatientSide = msg.sender_id === booking.user_id;
+                        const viewerIsPatient = user?.id === booking.user_id;
+                        const isMe = viewerIsPatient ? isPatientSide : !isPatientSide;
                         return (
                           <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"}`}>
                             <div className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${isMe ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+                              {!isMe && (
+                                <p className="text-xs font-medium mb-1 opacity-70">
+                                  {isPatientSide ? "Patient" : "Provider"}
+                                </p>
+                              )}
                               <p>{msg.message}</p>
                               <p className={`text-xs mt-1 ${isMe ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                                 {new Date(msg.created_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
