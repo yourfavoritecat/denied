@@ -16,7 +16,7 @@ interface Stats {
   recentBookings: any[];
 }
 
-const OverviewSection = () => {
+const OverviewSection = ({ onNavigate }: { onNavigate?: (section: string) => void }) => {
   const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
@@ -70,12 +70,12 @@ const OverviewSection = () => {
   const pendingApps = stats.applications.pending;
 
   const metricCards = [
-    { label: "Waitlist Signups", value: stats.waitlistCount, icon: Mail, color: "text-secondary" },
-    { label: "Registered Users", value: stats.userCount, icon: Users, color: "text-primary" },
-    { label: "Active Providers", value: stats.providerCount, icon: Building2, color: "text-foreground" },
-    { label: "Total Bookings", value: totalBookings, icon: Plane, color: "text-primary" },
-    { label: "Active Trips", value: activeBookings, icon: TrendingUp, color: "text-secondary" },
-    { label: "Revenue", value: `$${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-primary" },
+    { label: "Waitlist Signups", value: stats.waitlistCount, icon: Mail, color: "text-secondary", action: () => onNavigate?.("waitlist") },
+    { label: "Registered Users", value: stats.userCount, icon: Users, color: "text-primary", action: () => onNavigate?.("users") },
+    { label: "Active Providers", value: stats.providerCount, icon: Building2, color: "text-foreground", action: () => onNavigate?.("providers") },
+    { label: "Total Bookings", value: totalBookings, icon: Plane, color: "text-primary", action: () => onNavigate?.("bookings") },
+    { label: "Active Trips", value: activeBookings, icon: TrendingUp, color: "text-secondary", action: () => onNavigate?.("bookings") },
+    { label: "Revenue", value: `$${stats.totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-primary", action: () => onNavigate?.("bookings") },
   ];
 
   const statusIcon = (status: string) => {
@@ -111,7 +111,7 @@ const OverviewSection = () => {
       {/* Metric cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
         {metricCards.map((m) => (
-          <Card key={m.label} className="hover:shadow-md transition-shadow">
+          <Card key={m.label} className="hover:shadow-md transition-shadow cursor-pointer" onClick={m.action}>
             <CardContent className="py-5 px-4">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-xs text-muted-foreground uppercase tracking-wider">{m.label}</span>
@@ -136,15 +136,15 @@ const OverviewSection = () => {
           <CardContent className="space-y-4">
             {/* Summary bar */}
             <div className="flex gap-4 text-center">
-              <div className="flex-1 bg-secondary/5 rounded-lg p-3">
+              <div className="flex-1 bg-secondary/5 rounded-lg p-3 cursor-pointer hover:bg-secondary/10 transition-colors" onClick={() => onNavigate?.("applications")}>
                 <p className="text-2xl font-bold text-secondary">{stats.applications.pending}</p>
                 <p className="text-[11px] text-muted-foreground">pending</p>
               </div>
-              <div className="flex-1 bg-primary/5 rounded-lg p-3">
+              <div className="flex-1 bg-primary/5 rounded-lg p-3 cursor-pointer hover:bg-primary/10 transition-colors" onClick={() => onNavigate?.("applications")}>
                 <p className="text-2xl font-bold text-primary">{stats.applications.approved}</p>
                 <p className="text-[11px] text-muted-foreground">approved</p>
               </div>
-              <div className="flex-1 bg-destructive/5 rounded-lg p-3">
+              <div className="flex-1 bg-destructive/5 rounded-lg p-3 cursor-pointer hover:bg-destructive/10 transition-colors" onClick={() => onNavigate?.("applications")}>
                 <p className="text-2xl font-bold text-destructive">{stats.applications.rejected}</p>
                 <p className="text-[11px] text-muted-foreground">rejected</p>
               </div>
@@ -187,7 +187,11 @@ const OverviewSection = () => {
             {/* Pipeline visualization */}
             <div className="grid grid-cols-3 gap-2">
               {["inquiry", "quoted", "deposit_paid", "confirmed", "completed", "cancelled"].map((s) => (
-                <div key={s} className={`rounded-lg p-3 text-center ${bookingStatusColor(s)} bg-opacity-50`}>
+                <div 
+                  key={s} 
+                  className={`rounded-lg p-3 text-center cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all ${bookingStatusColor(s)} bg-opacity-50`}
+                  onClick={() => onNavigate?.("bookings")}
+                >
                   <p className="text-xl font-bold">{stats.bookings[s] || 0}</p>
                   <p className="text-[11px] capitalize">{s.replace("_", " ")}</p>
                 </div>

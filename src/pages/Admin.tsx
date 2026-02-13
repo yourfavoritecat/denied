@@ -14,7 +14,7 @@ import FlagsSection from "@/components/admin/FlagsSection";
 import InboxSection from "@/components/admin/InboxSection";
 import UsersSection from "@/components/admin/UsersSection";
 
-const SECTIONS: Record<AdminSection, React.ComponentType> = {
+const SECTIONS: Record<AdminSection, React.ComponentType<any>> = {
   overview: OverviewSection,
   inbox: InboxSection,
   waitlist: WaitlistSection,
@@ -75,7 +75,11 @@ const AdminPage = () => {
     <div className="min-h-screen bg-background flex">
       <AdminSidebar active={section} onChange={setSection} inboxCount={inboxCount} flagCount={flagCount} />
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
-        <ActiveSection />
+        {section === "overview" ? (
+          <OverviewSection onNavigate={(s: string) => setSection(s as AdminSection)} />
+        ) : (
+          <ActiveSection />
+        )}
       </main>
     </div>
   );

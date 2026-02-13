@@ -275,11 +275,17 @@ const Dashboard = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="text-center p-3 rounded-lg bg-muted/50">
+                    <div 
+                      className="text-center p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                      onClick={() => navigate("/my-trips")}
+                    >
                       <p className="text-2xl font-bold text-foreground">{bookings.length}</p>
                       <p className="text-[11px] text-muted-foreground">Bookings</p>
                     </div>
-                    <div className="text-center p-3 rounded-lg bg-muted/50">
+                    <div 
+                      className="text-center p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                      onClick={() => navigate("/my-trips")}
+                    >
                       <p className="text-2xl font-bold text-foreground">{tripBriefs.length}</p>
                       <p className="text-[11px] text-muted-foreground">Trip Briefs</p>
                     </div>
