@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { MapPin, Calendar, FileText, MessageSquare } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { MapPin, Calendar, FileText, MessageSquare, Stethoscope } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +42,8 @@ const RequestQuoteModal = ({ open, onOpenChange, providerName, providerSlug }: R
   const [mode, setMode] = useState<"select" | "brief-form" | "new">("select");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [attachHistory, setAttachHistory] = useState(false);
+  const [hasHistory, setHasHistory] = useState(false);
 
   // Form fields (editable, pre-filled from trip brief)
   const [procedures, setProcedures] = useState("");
@@ -51,16 +54,23 @@ const RequestQuoteModal = ({ open, onOpenChange, providerName, providerSlug }: R
 
   useEffect(() => {
     if (open && user) {
-      supabase
-        .from("trip_briefs")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .then(({ data }) => {
-          setTripBriefs((data as unknown as TripBrief[]) || []);
-          setLoading(false);
-          if (!data || data.length === 0) setMode("new");
-        });
+      Promise.all([
+        supabase
+          .from("trip_briefs")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("patient_history" as any)
+          .select("id")
+          .eq("user_id", user.id)
+          .maybeSingle(),
+      ]).then(([briefsResult, historyResult]) => {
+        setTripBriefs((briefsResult.data as unknown as TripBrief[]) || []);
+        setHasHistory(!!(historyResult.data as any));
+        setLoading(false);
+        if (!briefsResult.data || briefsResult.data.length === 0) setMode("new");
+      });
     }
   }, [open, user]);
 
@@ -97,6 +107,33 @@ const RequestQuoteModal = ({ open, onOpenChange, providerName, providerSlug }: R
     if (!user) return;
     setSubmitting(true);
 
+    // Fetch patient history if attached
+    let fullMedicalNotes = medicalNotes;
+    if (attachHistory) {
+      const { data: history } = await supabase
+        .from("patient_history" as any)
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (history) {
+        const h = history as any;
+        const parts: string[] = [];
+        if (h.allergies) parts.push(`Allergies: ${h.allergies}`);
+        if (h.blood_type) parts.push(`Blood Type: ${h.blood_type}`);
+        if (h.medications) parts.push(`Medications: ${h.medications}`);
+        if (h.conditions) parts.push(`Conditions: ${h.conditions}`);
+        if (h.surgeries) parts.push(`Previous Surgeries: ${h.surgeries}`);
+        if (h.dental_issues?.length) parts.push(`Dental Issues: ${h.dental_issues.join(", ")}`);
+        if (h.current_dentist) parts.push(`Current Dentist: ${h.current_dentist}`);
+        if (h.pasted_history) parts.push(`Additional History: ${h.pasted_history}`);
+        if (parts.length) {
+          fullMedicalNotes = fullMedicalNotes
+            ? `${fullMedicalNotes}\n\n--- Patient History ---\n${parts.join("\n")}`
+            : `--- Patient History ---\n${parts.join("\n")}`;
+        }
+      }
+    }
+
     const brief = tripBriefs.find((b) => b.id === selectedBrief);
     const bookingData = {
       user_id: user.id,
@@ -104,7 +141,7 @@ const RequestQuoteModal = ({ open, onOpenChange, providerName, providerSlug }: R
       procedures: brief?.procedures || [{ name: procedures, quantity: 1 }],
       preferred_dates: { text: preferredDates, start: brief?.travel_start, end: brief?.travel_end },
       inquiry_message: message,
-      medical_notes: medicalNotes,
+      medical_notes: fullMedicalNotes,
       trip_brief_id: selectedBrief || null,
       status: "inquiry",
     };
@@ -185,6 +222,16 @@ const RequestQuoteModal = ({ open, onOpenChange, providerName, providerSlug }: R
         <Label>Medical Notes (optional)</Label>
         <Textarea value={medicalNotes} onChange={(e) => setMedicalNotes(e.target.value)} placeholder="Allergies, medications, medical history..." />
       </div>
+      {hasHistory && (
+        <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+          <Stethoscope className="w-5 h-5 text-primary shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium">Attach Patient History</p>
+            <p className="text-xs text-muted-foreground">Include your saved medical & dental records with this inquiry</p>
+          </div>
+          <Switch checked={attachHistory} onCheckedChange={setAttachHistory} />
+        </div>
+      )}
       <Button className="w-full" onClick={handleSubmit} disabled={submitting || (!message.trim() && !procedures.trim())}>
         {submitting ? "Sending..." : "Send Inquiry"}
       </Button>

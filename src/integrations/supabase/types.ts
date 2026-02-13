@@ -210,6 +210,54 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_history: {
+        Row: {
+          allergies: string | null
+          blood_type: string | null
+          conditions: string | null
+          created_at: string
+          current_dentist: string | null
+          dental_issues: string[] | null
+          id: string
+          last_dental_cleaning: string | null
+          medications: string | null
+          pasted_history: string | null
+          surgeries: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          allergies?: string | null
+          blood_type?: string | null
+          conditions?: string | null
+          created_at?: string
+          current_dentist?: string | null
+          dental_issues?: string[] | null
+          id?: string
+          last_dental_cleaning?: string | null
+          medications?: string | null
+          pasted_history?: string | null
+          surgeries?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          allergies?: string | null
+          blood_type?: string | null
+          conditions?: string | null
+          created_at?: string
+          current_dentist?: string | null
+          dental_issues?: string[] | null
+          id?: string
+          last_dental_cleaning?: string | null
+          medications?: string | null
+          pasted_history?: string | null
+          surgeries?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
