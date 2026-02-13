@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Plane, Heart, X, Plus } from "lucide-react";
+import { Sparkles, Plane, Heart, X, Plus, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,8 @@ interface ProfileExtras {
   bucket_list_procedures: string[];
 }
 
+type SectionKey = "about" | "beauty" | "travel";
+
 const defaultExtras: ProfileExtras = {
   bio: "",
   hobbies: [],
@@ -41,6 +43,20 @@ const defaultExtras: ProfileExtras = {
   favorite_destinations: [],
   bucket_list_procedures: [],
 };
+
+const PublicToggle = ({ isPublic, onToggle }: { isPublic: boolean; onToggle: () => void }) => (
+  <Button
+    type="button"
+    variant={isPublic ? "default" : "outline"}
+    size="sm"
+    className="gap-1.5 text-xs"
+    onClick={onToggle}
+  >
+    {isPublic ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+    {isPublic ? "On public profile" : "Add to public profile"}
+  </Button>
+);
+
 
 const TagInput = ({
   tags,
@@ -99,6 +115,7 @@ const AboutMeTab = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [extras, setExtras] = useState<ProfileExtras>(defaultExtras);
+  const [publicFields, setPublicFields] = useState<Record<SectionKey, boolean>>({ about: false, beauty: false, travel: false });
   const [saving, setSaving] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
@@ -125,6 +142,7 @@ const AboutMeTab = () => {
           favorite_destinations: d.favorite_destinations || [],
           bucket_list_procedures: d.bucket_list_procedures || [],
         });
+        setPublicFields(d.public_fields || { about: false, beauty: false, travel: false });
       }
       setLoaded(true);
     };
@@ -138,6 +156,7 @@ const AboutMeTab = () => {
     const payload = {
       user_id: user.id,
       ...extras,
+      public_fields: publicFields,
     };
 
     // Upsert
@@ -151,7 +170,7 @@ const AboutMeTab = () => {
     if (existing) {
       ({ error } = await supabase
         .from("user_profile_extras" as any)
-        .update(extras as any)
+        .update({ ...extras, public_fields: publicFields } as any)
         .eq("user_id", user.id));
     } else {
       ({ error } = await supabase
@@ -171,6 +190,10 @@ const AboutMeTab = () => {
     setExtras((prev) => ({ ...prev, [key]: value }));
   };
 
+  const togglePublicField = (key: SectionKey) => {
+    setPublicFields((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   if (!loaded) {
     return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
@@ -179,12 +202,15 @@ const AboutMeTab = () => {
     <div className="space-y-6">
       {/* Bio & Personality */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="w-5 h-5 text-pink-500" />
-            About Me
-          </CardTitle>
-          <CardDescription>Tell the community about yourself</CardDescription>
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Heart className="w-5 h-5 text-destructive" />
+              About Me
+            </CardTitle>
+            <CardDescription>Tell the community about yourself</CardDescription>
+          </div>
+          <PublicToggle isPublic={publicFields.about} onToggle={() => togglePublicField("about")} />
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -235,11 +261,14 @@ const AboutMeTab = () => {
 
       {/* Beauty & Wellness */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-secondary" />
-            Beauty & Wellness
-          </CardTitle>
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-secondary" />
+              Beauty & Wellness
+            </CardTitle>
+          </div>
+          <PublicToggle isPublic={publicFields.beauty} onToggle={() => togglePublicField("beauty")} />
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid sm:grid-cols-2 gap-4">
@@ -308,11 +337,14 @@ const AboutMeTab = () => {
 
       {/* Travel */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Plane className="w-5 h-5 text-primary" />
-            Travel Personality
-          </CardTitle>
+        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Plane className="w-5 h-5 text-primary" />
+              Travel Personality
+            </CardTitle>
+          </div>
+          <PublicToggle isPublic={publicFields.travel} onToggle={() => togglePublicField("travel")} />
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">

@@ -930,6 +930,7 @@ export type Database = {
           hair_type: string | null
           hobbies: string[] | null
           id: string
+          public_fields: Json
           skin_type: string | null
           travel_style: string | null
           updated_at: string
@@ -947,6 +948,7 @@ export type Database = {
           hair_type?: string | null
           hobbies?: string[] | null
           id?: string
+          public_fields?: Json
           skin_type?: string | null
           travel_style?: string | null
           updated_at?: string
@@ -964,6 +966,7 @@ export type Database = {
           hair_type?: string | null
           hobbies?: string[] | null
           id?: string
+          public_fields?: Json
           skin_type?: string | null
           travel_style?: string | null
           updated_at?: string
