@@ -22,18 +22,19 @@ interface PublicProfile {
 }
 
 const UserProfile = () => {
-  const { username } = useParams<{ username: string }>();
+  const { userId } = useParams<{ userId: string }>();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [tripsCount, setTripsCount] = useState(0);
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase
+      // Try lookup by username first, then by user_id
+      let { data } = await supabase
         .from("profiles_public" as any)
         .select("user_id, first_name, city, username, created_at, social_verifications")
-        .eq("username", username)
-        .single();
+        .eq("username", userId)
+        .maybeSingle();
       setProfile(data as any);
 
       if (data) {
@@ -47,7 +48,7 @@ const UserProfile = () => {
       setLoading(false);
     };
     fetch();
-  }, [username]);
+  }, [userId]);
 
   const { reviews, loading: reviewsLoading } = useReviews(undefined, profile?.user_id);
 
