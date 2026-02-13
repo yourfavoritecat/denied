@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,31 +9,41 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+const defaultNotifPrefs = {
+  inquiry_received: true,
+  quote_received: true,
+  deposit_paid: true,
+  trip_confirmed: true,
+  new_message: true,
+  marketing: true,
+};
+
 const SettingsTab = () => {
   const { profile, refreshProfile } = useAuth();
   const { toast } = useToast();
-  const [firstName, setFirstName] = useState(profile?.first_name || "");
-  const [lastName, setLastName] = useState(profile?.last_name || "");
-  const [phone, setPhone] = useState(profile?.phone || "");
-  const [username, setUsername] = useState((profile as any)?.username || "");
-  const [city, setCity] = useState((profile as any)?.city || "");
-  const [publicProfile, setPublicProfile] = useState((profile as any)?.public_profile || false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [username, setUsername] = useState("");
+  const [city, setCity] = useState("");
+  const [publicProfile, setPublicProfile] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(defaultNotifPrefs);
+
+  // Sync form state whenever profile loads or changes
+  useEffect(() => {
+    if (!profile) return;
+    setFirstName(profile.first_name || "");
+    setLastName(profile.last_name || "");
+    setPhone(profile.phone || "");
+    setUsername((profile as any)?.username || "");
+    setCity((profile as any)?.city || "");
+    setPublicProfile((profile as any)?.public_profile || false);
+    setNotifPrefs((profile as any)?.notification_preferences || defaultNotifPrefs);
+  }, [profile]);
 
   const existingUsername = (profile as any)?.username;
   const isUsernameLocked = !!existingUsername;
-
-  const defaultNotifPrefs = {
-    inquiry_received: true,
-    quote_received: true,
-    deposit_paid: true,
-    trip_confirmed: true,
-    new_message: true,
-    marketing: true,
-  };
-  const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(
-    (profile as any)?.notification_preferences || defaultNotifPrefs
-  );
 
   const toggleNotif = (key: string) => {
     setNotifPrefs((prev) => ({ ...prev, [key]: !prev[key] }));
