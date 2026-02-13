@@ -18,11 +18,11 @@ const MEDSPA_TREATMENTS = [
   "Thread lift", "Vampire facial", "Body contouring", "Skin tightening",
   "Teeth whitening",
 ];
-const TRAVEL_STYLES = [
-  "Budget-conscious", "Luxury traveler", "Solo adventurer", "With family",
-  "With friends", "First-timer", "Spontaneous", "Planner", "Wellness-focused",
-  "Foodie traveler", "Culture seeker", "Beach lover", "City explorer",
-  "Off the beaten path", "Digital nomad", "Weekend warrior",
+const TOURISM_STYLES = [
+  "Budget-conscious", "Luxury medical traveler", "Solo patient", "Traveling with support person",
+  "First-time medical tourist", "Repeat medical tourist", "Research-obsessed planner", "Spontaneous booker",
+  "Dental tourism regular", "Cosmetic surgery seeker", "Wellness retreat lover", "Recovery vacation planner",
+  "Border hopper (day trips)", "International flyer", "Combo: procedure + vacation", "Insurance refugee",
 ];
 const EMOJI_OPTIONS = [
   "✨","💖","🦷","💉","🌸","🌊","✈️","🏖️",
@@ -322,6 +322,16 @@ const AboutMeTab = () => {
           </div>
 
           <div className="space-y-2">
+            <Label>Add your own</Label>
+            <TagInput
+              tags={extras.favorite_treatments.filter((t) => !MEDSPA_TREATMENTS.includes(t))}
+              onAdd={(t) => updateField("favorite_treatments", [...extras.favorite_treatments, t])}
+              onRemove={(t) => updateField("favorite_treatments", extras.favorite_treatments.filter((h) => h !== t))}
+              placeholder="e.g. scar revision, PRP hair..."
+              max={10}
+            />
+          </div>
+          <div className="space-y-2">
             <Label>Beauty Goals</Label>
             <Textarea
               value={extras.beauty_goals}
@@ -334,22 +344,20 @@ const AboutMeTab = () => {
         </CardContent>
       </Card>
 
-      {/* Travel */}
+      {/* Medical & Dental Tourism Personality */}
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4 space-y-0">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Plane className="w-5 h-5 text-primary" />
-              Travel Personality
-            </CardTitle>
-          </div>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plane className="w-5 h-5 text-primary" />
+            Medical & Dental Tourism Personality
+          </CardTitle>
           
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label>Travel Style <span className="text-xs text-muted-foreground font-normal">(select all that apply)</span></Label>
+            <Label>My Style <span className="text-xs text-muted-foreground font-normal">(select all that apply)</span></Label>
             <div className="flex flex-wrap gap-2">
-              {TRAVEL_STYLES.map((style) => {
+              {TOURISM_STYLES.map((style) => {
                 const selected = extras.travel_style.split(",").filter(Boolean);
                 const isSelected = selected.includes(style);
                 return (
@@ -374,6 +382,23 @@ const AboutMeTab = () => {
                 );
               })}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Add your own</Label>
+            <TagInput
+              tags={extras.travel_style.split(",").filter((s) => s && !TOURISM_STYLES.includes(s))}
+              onAdd={(t) => {
+                const current = extras.travel_style.split(",").filter(Boolean);
+                updateField("travel_style", [...current, t].join(","));
+              }}
+              onRemove={(t) => {
+                const current = extras.travel_style.split(",").filter(Boolean);
+                updateField("travel_style", current.filter((s) => s !== t).join(","));
+              }}
+              placeholder="e.g. medical nomad, group trip organizer..."
+              max={5}
+            />
           </div>
 
           <div className="space-y-2">
