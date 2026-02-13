@@ -68,9 +68,9 @@ const ProviderHome = ({ providerName, providerSlug, bookings, onNavigate }: Prop
     { label: "New Inquiries", value: inquiries.length, icon: MessageSquare, color: "text-secondary", action: () => onNavigate("inquiries") },
     { label: "Quotes Pending", value: quoted.length, icon: DollarSign, color: "text-primary", action: () => onNavigate("quoted") },
     { label: "Active Trips", value: active.length, icon: Plane, color: "text-foreground", action: () => onNavigate("active") },
-    { label: "Total Completed", value: completed.length, icon: CheckCircle, color: "text-primary" },
+    { label: "Total Completed", value: completed.length, icon: CheckCircle, color: "text-primary", action: () => onNavigate("past") },
     { label: "Conversion Rate", value: `${conversionRate}%`, icon: TrendingUp, color: "text-secondary" },
-    { label: "Revenue", value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-primary" },
+    { label: "Revenue", value: `$${totalRevenue.toLocaleString()}`, icon: DollarSign, color: "text-primary", action: () => onNavigate("past") },
   ];
 
   return (
@@ -143,13 +143,17 @@ const ProviderHome = ({ providerName, providerSlug, bookings, onNavigate }: Prop
           <CardContent className="space-y-4">
             <div className="space-y-3">
               {[
-                { label: "Inquiries", count: inquiries.length, total: bookings.length, color: "bg-secondary" },
-                { label: "Quoted", count: quoted.length, total: bookings.length, color: "bg-primary/60" },
-                { label: "Active", count: active.length, total: bookings.length, color: "bg-primary" },
-                { label: "Completed", count: completed.length, total: bookings.length, color: "bg-primary/80" },
-                { label: "Cancelled", count: cancelled.length, total: bookings.length, color: "bg-destructive/60" },
+                { label: "Inquiries", count: inquiries.length, total: bookings.length, color: "bg-secondary", section: "inquiries" },
+                { label: "Quoted", count: quoted.length, total: bookings.length, color: "bg-primary/60", section: "quoted" },
+                { label: "Active", count: active.length, total: bookings.length, color: "bg-primary", section: "active" },
+                { label: "Completed", count: completed.length, total: bookings.length, color: "bg-primary/80", section: "past" },
+                { label: "Cancelled", count: cancelled.length, total: bookings.length, color: "bg-destructive/60", section: "past" },
               ].map((stage) => (
-                <div key={stage.label} className="flex items-center gap-3">
+                <div 
+                  key={stage.label} 
+                  className="flex items-center gap-3 cursor-pointer hover:bg-muted/50 rounded-lg p-1 -mx-1 transition-colors"
+                  onClick={() => onNavigate(stage.section)}
+                >
                   <span className="text-xs text-muted-foreground w-20">{stage.label}</span>
                   <div className="flex-1 bg-muted rounded-full h-2">
                     <div
