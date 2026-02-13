@@ -25,6 +25,8 @@ import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
 import Notifications from "./pages/Notifications";
+import MyBugReports from "./pages/MyBugReports";
+import BugReportButton from "./components/beta/BugReportButton";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -52,6 +54,7 @@ const App = () => (
             <Route path="/my-trips" element={<ProtectedRoute><MyTrips /></ProtectedRoute>} />
             <Route path="/booking/:bookingId" element={<ProtectedRoute><BookingDetail /></ProtectedRoute>} />
             <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+            <Route path="/my-bugs" element={<ProtectedRoute><MyBugReports /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="/provider/onboarding" element={<ProtectedRoute><ProviderOnboarding /></ProtectedRoute>} />
             <Route path="/provider-dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
@@ -60,6 +63,7 @@ const App = () => (
           </Routes>
           <ViewAsBanner />
           <ViewAsSwitcher />
+          <BugReportButton />
         </BrowserRouter>
       </TooltipProvider>
       </ViewAsProvider>

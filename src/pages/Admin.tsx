@@ -13,6 +13,7 @@ import ReviewsSection from "@/components/admin/ReviewsSection";
 import FlagsSection from "@/components/admin/FlagsSection";
 import InboxSection from "@/components/admin/InboxSection";
 import UsersSection from "@/components/admin/UsersSection";
+import BugReportsSection from "@/components/admin/BugReportsSection";
 
 const SECTIONS: Record<AdminSection, React.ComponentType<any>> = {
   overview: OverviewSection,
@@ -25,6 +26,7 @@ const SECTIONS: Record<AdminSection, React.ComponentType<any>> = {
   reviews: ReviewsSection,
   flags: FlagsSection,
   users: UsersSection,
+  bugs: BugReportsSection,
 };
 
 const AdminPage = () => {
