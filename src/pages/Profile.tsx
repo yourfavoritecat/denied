@@ -3,16 +3,14 @@ import Footer from "@/components/landing/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Heart, Calendar, Syringe, Stethoscope, Sparkles, ShieldCheck, Camera, User, ExternalLink } from "lucide-react";
+import { Settings, Heart, Calendar, ShieldCheck, Camera, User, ExternalLink, ClipboardList } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SettingsTab from "@/components/profile/SettingsTab";
 import SocialVerificationSection from "@/components/profile/SocialVerificationSection";
 import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
-import ProceduresTab from "@/components/profile/ProceduresTab";
-import MedicalHistoryTab from "@/components/profile/MedicalHistoryTab";
-import SkincareTab from "@/components/profile/SkincareTab";
+import PatientHistoryTab from "@/components/profile/PatientHistoryTab";
 import SavedProvidersTab from "@/components/profile/SavedProvidersTab";
 import TripsTab from "@/components/profile/TripsTab";
 import ProfileFeedTab from "@/components/profile/ProfileFeedTab";
@@ -47,7 +45,7 @@ const ProfilePage = () => {
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                     <Badge variant="secondary">Member since {new Date(user?.created_at || "").getFullYear()}</Badge>
                     <UserTrustBadge tier={trustTier} size="md" />
-                    {(profile as any)?.username && (profile as any)?.public_profile && (
+                    {(profile as any)?.username && (
                       <Button variant="outline" size="sm" asChild className="gap-1.5">
                         <Link to={`/user/${(profile as any).username}`}>
                           <ExternalLink className="w-3.5 h-3.5" />
@@ -72,21 +70,13 @@ const ProfilePage = () => {
                 <Camera className="w-4 h-4" />
                 <span className="hidden sm:inline">My Journey</span>
               </TabsTrigger>
+              <TabsTrigger value="history" className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <ClipboardList className="w-4 h-4" />
+                <span className="hidden sm:inline">Patient History</span>
+              </TabsTrigger>
               <TabsTrigger value="settings" className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <Settings className="w-4 h-4" />
                 <span className="hidden sm:inline">Settings</span>
-              </TabsTrigger>
-              <TabsTrigger value="procedures" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <Syringe className="w-4 h-4" />
-                <span className="hidden sm:inline">Procedures</span>
-              </TabsTrigger>
-              <TabsTrigger value="medical" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <Stethoscope className="w-4 h-4" />
-                <span className="hidden sm:inline">Medical</span>
-              </TabsTrigger>
-              <TabsTrigger value="skincare" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <Sparkles className="w-4 h-4" />
-                <span className="hidden sm:inline">Skincare</span>
               </TabsTrigger>
               <TabsTrigger value="verification" className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <ShieldCheck className="w-4 h-4" />
@@ -104,10 +94,8 @@ const ProfilePage = () => {
 
             <TabsContent value="about"><AboutMeTab /></TabsContent>
             <TabsContent value="feed"><ProfileFeedTab /></TabsContent>
+            <TabsContent value="history"><PatientHistoryTab /></TabsContent>
             <TabsContent value="settings"><SettingsTab /></TabsContent>
-            <TabsContent value="procedures"><ProceduresTab /></TabsContent>
-            <TabsContent value="medical"><MedicalHistoryTab /></TabsContent>
-            <TabsContent value="skincare"><SkincareTab /></TabsContent>
             <TabsContent value="verification"><SocialVerificationSection /></TabsContent>
             <TabsContent value="saved"><SavedProvidersTab /></TabsContent>
             <TabsContent value="trips"><TripsTab /></TabsContent>
