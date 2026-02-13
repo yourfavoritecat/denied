@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sparkles, Plane, Heart, X, Plus, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,6 +14,16 @@ import { useToast } from "@/hooks/use-toast";
 const SKIN_TYPES = ["Oily", "Dry", "Combination", "Sensitive", "Normal"];
 const HAIR_TYPES = ["Straight", "Wavy", "Curly", "Coily", "Thinning"];
 const TRAVEL_STYLES = ["Budget-conscious", "Luxury traveler", "Solo adventurer", "With family", "With friends", "First-timer"];
+const EMOJI_OPTIONS = [
+  "✨","💖","🦷","💉","🌸","🌊","✈️","🏖️",
+  "💅","👑","🔥","💫","🌺","🧖","💎","🪷",
+  "😍","🥰","😎","🤩","💪","🙌","👏","🎉",
+  "🌈","☀️","🌙","⭐","🍀","🦋","🐚","🌻",
+  "❤️","🧡","💛","💚","💙","💜","🤍","🖤",
+  "🍓","🍑","🥥","🍋","🌿","🌴","🏝️","🗺️",
+  "💄","👄","💇","🩺","🏥","💊","🧴","🪥",
+  "🎯","🚀","💡","🎨","📸","🎵","🧘","🏋️",
+];
 
 interface ProfileExtras {
   bio: string;
@@ -227,13 +238,32 @@ const AboutMeTab = () => {
 
           <div className="space-y-2">
             <Label>Favorite Emoji</Label>
-            <Input
-              value={extras.favorite_emoji}
-              onChange={(e) => updateField("favorite_emoji", e.target.value)}
-              placeholder="✨"
-              maxLength={4}
-              className="w-20 text-2xl text-center"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-20 h-12 text-2xl text-center"
+                >
+                  {extras.favorite_emoji || "✨"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-72 p-3 bg-popover z-[60]" align="start">
+                <p className="text-xs text-muted-foreground mb-2">pick your favorite</p>
+                <div className="grid grid-cols-8 gap-1">
+                  {EMOJI_OPTIONS.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => updateField("favorite_emoji", emoji)}
+                      className={`w-8 h-8 rounded text-lg hover:bg-muted flex items-center justify-center transition-colors ${extras.favorite_emoji === emoji ? "bg-primary/20 ring-1 ring-primary" : ""}`}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">
