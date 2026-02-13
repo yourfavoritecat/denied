@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Stethoscope, ClipboardPaste, Upload } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+
+const DENTAL_ISSUES = ["Cavities", "Missing teeth", "Crowns", "Implants", "Root canals", "Gum disease", "TMJ", "Braces/Orthodontics"];
 
 const MedicalHistoryTab = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [saving, setSaving] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
   const [allergies, setAllergies] = useState("");
   const [medications, setMedications] = useState("");
   const [conditions, setConditions] = useState("");
@@ -18,17 +27,86 @@ const MedicalHistoryTab = () => {
   const [pastedHistory, setPastedHistory] = useState("");
   const [pasteDialogOpen, setPasteDialogOpen] = useState(false);
 
-  // Dental
   const [lastCleaning, setLastCleaning] = useState("");
   const [currentDentist, setCurrentDentist] = useState("");
-  const dentalIssues = ["Cavities", "Missing teeth", "Crowns", "Implants", "Root canals", "Gum disease", "TMJ", "Braces/Orthodontics"];
   const [selectedDentalIssues, setSelectedDentalIssues] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("patient_history" as any)
+      .select("*")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          const d = data as any;
+          setAllergies(d.allergies || "");
+          setMedications(d.medications || "");
+          setConditions(d.conditions || "");
+          setBloodType(d.blood_type || "");
+          setSurgeries(d.surgeries || "");
+          setPastedHistory(d.pasted_history || "");
+          setLastCleaning(d.last_dental_cleaning || "");
+          setCurrentDentist(d.current_dentist || "");
+          setSelectedDentalIssues(d.dental_issues || []);
+        }
+        setLoaded(true);
+      });
+  }, [user]);
 
   const toggleDentalIssue = (issue: string) => {
     setSelectedDentalIssues((prev) =>
       prev.includes(issue) ? prev.filter((i) => i !== issue) : [...prev, issue]
     );
   };
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+
+    const payload = {
+      user_id: user.id,
+      allergies,
+      blood_type: bloodType,
+      medications,
+      conditions,
+      surgeries,
+      pasted_history: pastedHistory,
+      last_dental_cleaning: lastCleaning,
+      current_dentist: currentDentist,
+      dental_issues: selectedDentalIssues,
+    };
+
+    const { data: existing } = await supabase
+      .from("patient_history" as any)
+      .select("id")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    let error;
+    if (existing) {
+      ({ error } = await supabase
+        .from("patient_history" as any)
+        .update(payload as any)
+        .eq("user_id", user.id));
+    } else {
+      ({ error } = await supabase
+        .from("patient_history" as any)
+        .insert(payload as any));
+    }
+
+    setSaving(false);
+    if (error) {
+      toast({ title: "Error saving", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Patient history saved! 🩺" });
+    }
+  };
+
+  if (!loaded) {
+    return <div className="flex justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -125,7 +203,7 @@ const MedicalHistoryTab = () => {
           <div className="space-y-2">
             <Label>Known Dental Issues</Label>
             <div className="flex flex-wrap gap-2">
-              {dentalIssues.map((issue) => (
+              {DENTAL_ISSUES.map((issue) => (
                 <label key={issue} className="flex items-center gap-2 cursor-pointer">
                   <Checkbox
                     checked={selectedDentalIssues.includes(issue)}
@@ -146,6 +224,10 @@ const MedicalHistoryTab = () => {
           </div>
         </CardContent>
       </Card>
+
+      <Button onClick={handleSave} disabled={saving} className="w-full">
+        {saving ? "Saving..." : "Save Patient History 🩺"}
+      </Button>
     </div>
   );
 };
