@@ -95,7 +95,7 @@ const UserProfile = () => {
   const hasAboutContent = (e: ProfileExtras) =>
     !!(e.bio || (e.hobbies?.length) || (e.fun_facts?.length) || e.favorite_emoji);
   const hasBeautyContent = (e: ProfileExtras) =>
-    !!(e.skin_type || e.hair_type || e.beauty_goals || (e.favorite_treatments?.length));
+    !!(e.beauty_goals || (e.favorite_treatments?.length));
   const hasTravelContent = (e: ProfileExtras) =>
     !!(e.travel_style || (e.favorite_destinations?.length) || (e.bucket_list_procedures?.length));
 
@@ -197,19 +197,14 @@ const UserProfile = () => {
                 <Card className="mb-6">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
-                      <Sparkles className="w-5 h-5 text-secondary" /> beauty & wellness
+                      <Sparkles className="w-5 h-5 text-secondary" /> medspa regulars
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {extras.skin_type && <p className="text-sm"><span className="text-muted-foreground">skin type:</span> {extras.skin_type}</p>}
-                    {extras.hair_type && <p className="text-sm"><span className="text-muted-foreground">hair type:</span> {extras.hair_type}</p>}
-                    {extras.beauty_goals && <p className="text-sm"><span className="text-muted-foreground">goals:</span> {extras.beauty_goals}</p>}
                     {extras.favorite_treatments && extras.favorite_treatments.length > 0 && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">favorite treatments</p>
-                        <div className="flex flex-wrap gap-1.5">{extras.favorite_treatments.map(t => <Badge key={t} variant="outline">{t}</Badge>)}</div>
-                      </div>
+                      <div className="flex flex-wrap gap-1.5">{extras.favorite_treatments.map(t => <Badge key={t} variant="outline">{t}</Badge>)}</div>
                     )}
+                    {extras.beauty_goals && <p className="text-sm"><span className="text-muted-foreground">goals:</span> {extras.beauty_goals}</p>}
                   </CardContent>
                 </Card>
               )}
