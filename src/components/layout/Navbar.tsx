@@ -10,10 +10,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield, ClipboardList, FileText } from "lucide-react";
+import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield, ClipboardList, FileText, Bug } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useViewAs } from "@/hooks/useViewAs";
+import { useBetaTester } from "@/hooks/useBetaTester";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import logo from "@/assets/logo.png";
 
@@ -23,6 +24,7 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAdmin } = useAdmin();
   const { viewAs } = useViewAs();
+  const { isBetaTester } = useBetaTester();
   const showBanner = isAdmin && viewAs !== "admin";
 
   const initials = profile
@@ -117,6 +119,11 @@ const Navbar = () => {
                     {isProvider && (
                       <DropdownMenuItem onClick={() => navigate("/provider-dashboard")}>
                         <LayoutDashboard className="w-4 h-4 mr-2" /> Dashboard
+                      </DropdownMenuItem>
+                    )}
+                    {isBetaTester && (
+                      <DropdownMenuItem onClick={() => navigate("/my-bugs")}>
+                        <Bug className="w-4 h-4 mr-2" /> My Bug Reports
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />

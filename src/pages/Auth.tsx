@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useViewAs } from "@/hooks/useViewAs";
-import { User, Stethoscope } from "lucide-react";
+import { User, Stethoscope, KeyRound } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 type SignupRole = null | "patient" | "provider";
@@ -21,6 +21,7 @@ const AuthPage = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [betaCode, setBetaCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [signupRole, setSignupRole] = useState<SignupRole>(null);
   const navigate = useNavigate();
@@ -65,7 +66,20 @@ const AuthPage = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const { error } = await supabase.auth.signUp({
+
+    // Validate beta code if provided
+    let hasBetaCode = false;
+    if (betaCode.trim()) {
+      const { data: valid } = await supabase.rpc("validate_beta_code", { _code: betaCode.trim() });
+      if (!valid) {
+        setIsLoading(false);
+        toast({ title: "Invalid beta code", description: "The access code is invalid or expired.", variant: "destructive" });
+        return;
+      }
+      hasBetaCode = true;
+    }
+
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -77,6 +91,10 @@ const AuthPage = () => {
     if (error) {
       toast({ title: "Signup failed", description: error.message, variant: "destructive" });
     } else {
+      // Assign beta_tester role if code was valid
+      if (hasBetaCode && signUpData.user) {
+        await supabase.rpc("assign_beta_role", { _user_id: signUpData.user.id });
+      }
       toast({
         title: "Check your email",
         description: "We sent you a confirmation link. Please verify your email to continue.",
@@ -216,6 +234,19 @@ const AuthPage = () => {
                     <div className="space-y-2">
                       <Label htmlFor="signup-password">Password</Label>
                       <Input id="signup-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={6} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="beta-code" className="flex items-center gap-1.5">
+                        <KeyRound className="w-3.5 h-3.5" />
+                        Beta Access Code
+                        <span className="text-xs text-muted-foreground font-normal">(optional)</span>
+                      </Label>
+                      <Input
+                        id="beta-code"
+                        value={betaCode}
+                        onChange={(e) => setBetaCode(e.target.value)}
+                        placeholder="Enter your beta access code"
+                      />
                     </div>
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? "Creating account..." : "Sign Up"}

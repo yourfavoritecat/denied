@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      beta_access_codes: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          max_uses: number
+          times_used: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          times_used?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          max_uses?: number
+          times_used?: number
+        }
+        Relationships: []
+      }
       booking_messages: {
         Row: {
           booking_id: string
@@ -116,6 +143,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      bug_reports: {
+        Row: {
+          admin_notes: string | null
+          ai_guess: string | null
+          created_at: string
+          description: string
+          id: string
+          page_url: string
+          resolved_at: string | null
+          screenshot_url: string | null
+          severity: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          ai_guess?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          page_url: string
+          resolved_at?: string | null
+          screenshot_url?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          ai_guess?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          page_url?: string
+          resolved_at?: string | null
+          screenshot_url?: string | null
+          severity?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       content_flags: {
         Row: {
@@ -1185,6 +1257,7 @@ export type Database = {
       }
     }
     Functions: {
+      assign_beta_role: { Args: { _user_id: string }; Returns: undefined }
       create_notification: {
         Args: {
           _body?: string
@@ -1207,6 +1280,7 @@ export type Database = {
       get_my_provider_slug: { Args: never; Returns: string }
       get_user_trust_tier: { Args: { _user_id: string }; Returns: string }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      validate_beta_code: { Args: { _code: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
