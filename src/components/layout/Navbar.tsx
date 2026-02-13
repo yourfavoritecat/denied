@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield } from "lucide-react";
+import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield, ClipboardList, FileText } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useViewAs } from "@/hooks/useViewAs";
@@ -107,6 +107,12 @@ const Navbar = () => {
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/my-trips")}>
                       <Plane className="w-4 h-4 mr-2" /> My Trips
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/my-trips?tab=briefs")}>
+                      <FileText className="w-4 h-4 mr-2" /> Trip Briefs
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/profile?tab=patient-history")}>
+                      <ClipboardList className="w-4 h-4 mr-2" /> Patient History
                     </DropdownMenuItem>
                     {isProvider && (
                       <DropdownMenuItem onClick={() => navigate("/provider-dashboard")}>
