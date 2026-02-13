@@ -6,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Star, ThumbsUp, BadgeCheck, CheckCircle, Play, Pause, PenLine, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Star, ThumbsUp, BadgeCheck, CheckCircle, Play, Pause, PenLine, ChevronLeft, ChevronRight, X, Lock, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -156,6 +156,8 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
   const [isUpvoting, setIsUpvoting] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [privateProfileOpen, setPrivateProfileOpen] = useState(false);
+  const [memberSince, setMemberSince] = useState<string | null>(null);
 
   const firstName = review.profile?.first_name || "User";
   const city = review.profile?.city || "";
@@ -164,10 +166,20 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
   const username = review.profile?.username;
   const isPublic = review.profile?.public_profile !== false;
   const isAuthor = user?.id === review.user_id;
+  const trustTier = computeUserTrustTier(review.profile?.social_verifications, review.verified_trip);
 
-  const handleProfileClick = () => {
+  const handleProfileClick = async () => {
     if (!isPublic) {
-      toast({ title: "Private profile", description: "This user's profile is private." });
+      setPrivateProfileOpen(true);
+      // Fetch member since date
+      if (!memberSince) {
+        const { data } = await supabase
+          .from("profiles_public" as any)
+          .select("created_at")
+          .eq("user_id", review.user_id)
+          .single();
+        if (data) setMemberSince((data as any).created_at);
+      }
     }
   };
 
@@ -355,6 +367,34 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
           onClose={() => setLightboxOpen(false)}
         />
       )}
+
+      {/* Private Profile Mini Card */}
+      <Dialog open={privateProfileOpen} onOpenChange={setPrivateProfileOpen}>
+        <DialogContent className="max-w-sm">
+          <div className="flex flex-col items-center text-center gap-4 py-2">
+            <Avatar className="w-16 h-16">
+              {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
+              <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-lg">{initials}</AvatarFallback>
+            </Avatar>
+            <div>
+              <h3 className="text-lg font-bold flex items-center justify-center gap-2">
+                {firstName}
+                <UserTrustBadge tier={trustTier} size="md" />
+              </h3>
+              {memberSince && (
+                <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
+                  <Calendar className="w-3.5 h-3.5" />
+                  Member since {new Date(memberSince).getFullYear()}
+                </p>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded-full">
+              <Lock className="w-3 h-3" />
+              This profile is private
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
