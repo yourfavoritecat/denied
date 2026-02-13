@@ -162,7 +162,14 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
   const initials = firstName.charAt(0).toUpperCase();
   const avatarUrl = review.profile?.avatar_url;
   const username = review.profile?.username;
+  const isPublic = review.profile?.public_profile !== false;
   const isAuthor = user?.id === review.user_id;
+
+  const handleProfileClick = () => {
+    if (!isPublic) {
+      toast({ title: "Private profile", description: "This user's profile is private." });
+    }
+  };
 
   const handleUpvote = async () => {
     if (!user) {
@@ -182,12 +189,16 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
     setIsUpvoting(false);
   };
 
-  const nameElement = username ? (
-    <Link to={`/user/${username}`} className="font-bold hover:text-primary transition-colors">
+  const profileLink = isPublic && username ? `/user/${username}` : null;
+
+  const nameElement = profileLink ? (
+    <Link to={profileLink} className="font-bold hover:text-primary transition-colors">
       {firstName}
     </Link>
   ) : (
-    <span className="font-bold">{firstName}</span>
+    <button onClick={handleProfileClick} className="font-bold hover:text-primary transition-colors text-left">
+      {firstName}
+    </button>
   );
 
   const editedDate = review.is_edited && review.updated_at
@@ -199,10 +210,21 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
       <Card className="border border-border/50 shadow-md hover:shadow-lg transition-shadow">
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
-            <Avatar className="bg-secondary/20 shrink-0">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
-              <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-sm">{initials}</AvatarFallback>
-            </Avatar>
+            {profileLink ? (
+              <Link to={profileLink}>
+                <Avatar className="bg-secondary/20 shrink-0 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
+                  <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-sm">{initials}</AvatarFallback>
+                </Avatar>
+              </Link>
+            ) : (
+              <button onClick={handleProfileClick}>
+                <Avatar className="bg-secondary/20 shrink-0 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                  {avatarUrl && <AvatarImage src={avatarUrl} alt={firstName} />}
+                  <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-sm">{initials}</AvatarFallback>
+                </Avatar>
+              </button>
+            )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between flex-wrap gap-2 mb-1">
                 <div className="flex items-center gap-2 flex-wrap">
