@@ -45,12 +45,12 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Launch />} />
             <Route path="/admin-login" element={<Launch showLogin />} />
-            <Route path="/home" element={<Index />} />
+            <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/provider/:slug" element={<ProviderProfile />} />
+            <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+            <Route path="/provider/:slug" element={<ProtectedRoute><ProviderProfile /></ProtectedRoute>} />
             <Route path="/about" element={<About />} />
-            <Route path="/apply" element={<Apply />} />
+            <Route path="/apply" element={<ProtectedRoute><Apply /></ProtectedRoute>} />
             <Route path="/join/:code" element={<CreatorJoin />} />
             <Route path="/c/:handle" element={<CreatorProfile />} />
             <Route path="/creator/edit" element={<ProtectedRoute><CreatorEdit /></ProtectedRoute>} />

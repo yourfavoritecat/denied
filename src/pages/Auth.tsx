@@ -30,10 +30,20 @@ const AuthPage = () => {
   const { isAdmin, loading: adminLoading } = useAdmin();
   const { viewAs } = useViewAs();
 
+  // Get redirect URL from query params
+  const searchParams = new URLSearchParams(window.location.search);
+  const redirectTo = searchParams.get("redirect");
+
   useEffect(() => {
     if (!user || adminLoading) return;
+
+    // If there's a redirect URL, go there first
+    if (redirectTo) {
+      navigate(redirectTo, { replace: true });
+      return;
+    }
+
     if (isAdmin) {
-      // Respect viewAs selection for admins
       if (viewAs === "traveler") {
         navigate("/dashboard", { replace: true });
       } else if (viewAs === "provider") {
@@ -50,7 +60,7 @@ const AuthPage = () => {
     } else {
       navigate("/dashboard", { replace: true });
     }
-  }, [user, profile, isAdmin, adminLoading, navigate, viewAs]);
+  }, [user, profile, isAdmin, adminLoading, navigate, viewAs, redirectTo]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
