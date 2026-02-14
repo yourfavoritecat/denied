@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star, ShieldCheck, Download, Upload, Image } from "lucide-react";
+import { Plus, Pencil, ArrowRightLeft, ExternalLink, Mail, ClipboardEdit, Trash2, CheckCircle2, Circle, ArrowUpDown, Search, X, Star, ShieldCheck, Download, Upload, Image, Globe, Loader2, Check } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -73,6 +74,13 @@ const ProvidersSection = () => {
   const [coverPhotoUrl, setCoverPhotoUrl] = useState("");
   const [newCoverPhoto, setNewCoverPhoto] = useState<File | null>(null);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importSource, setImportSource] = useState<string | null>(null);
+  const [scrapedPhotos, setScrapedPhotos] = useState<string[]>([]);
+  const [selectedScrapedPhoto, setSelectedScrapedPhoto] = useState<string | null>(null);
+  const [navigateToOnboarding, setNavigateToOnboarding] = useState(false);
 
   // Filter state
   const [filterName, setFilterName] = useState("");
@@ -300,6 +308,10 @@ const ProvidersSection = () => {
     setSelectedProvider(null);
     setCoverPhotoUrl("");
     setNewCoverPhoto(null);
+    setImportSource(null);
+    setScrapedPhotos([]);
+    setSelectedScrapedPhoto(null);
+    setNavigateToOnboarding(false);
     setForm({
       name: "", slug: "", city: "", country: "Mexico", address: "", phone: "",
       description: "", specialties: "", languages: "English, Spanish",
@@ -307,6 +319,53 @@ const ProvidersSection = () => {
       verification_tier: "listed", travel_info: "",
     });
     setEditOpen(true);
+  };
+
+  const handleImportFromUrl = async () => {
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-provider', {
+        body: { url: importUrl.trim() },
+      });
+      if (error || !data?.success) {
+        toast({ title: "Import failed", description: data?.error || error?.message || "Could not scrape that URL.", variant: "destructive" });
+        setImporting(false);
+        return;
+      }
+      const d = data.data;
+      setImportOpen(false);
+      setImportSource(importUrl.trim());
+      setScrapedPhotos(d.photos || []);
+      setSelectedScrapedPhoto(null);
+      setNavigateToOnboarding(true);
+      setSelectedProvider(null);
+      setCoverPhotoUrl("");
+      setNewCoverPhoto(null);
+      setForm({
+        name: d.name || "",
+        slug: d.slug || "",
+        city: d.city || "",
+        country: d.country || "Mexico",
+        address: d.address || "",
+        phone: d.phone || "",
+        description: d.description || "",
+        specialties: (d.specialties || []).join(", "),
+        languages: (d.languages || []).join(", ") || "English, Spanish",
+        hours_of_operation: d.hours_of_operation || "",
+        established_year: "",
+        admin_email: "cat@denied.care",
+        verification_tier: "listed",
+        travel_info: "",
+      });
+      // If scraped social links, store them for later use in external links step
+      setEditOpen(true);
+      toast({ title: "Data imported!", description: `Extracted info from ${new URL(importUrl.trim()).hostname}. Review and save.` });
+    } catch (err) {
+      toast({ title: "Import error", description: "Something went wrong during import.", variant: "destructive" });
+    }
+    setImporting(false);
+    setImportUrl("");
   };
 
   const openEdit = (p: ProviderRow) => {
@@ -350,6 +409,19 @@ const ProvidersSection = () => {
         const { data: urlData } = supabase.storage.from("provider-onboarding").getPublicUrl(path);
         finalCoverUrl = urlData.publicUrl;
       }
+    } else if (selectedScrapedPhoto && !finalCoverUrl) {
+      // Download scraped photo to storage
+      try {
+        const res = await fetch(selectedScrapedPhoto);
+        const blob = await res.blob();
+        const ext = selectedScrapedPhoto.split('.').pop()?.split('?')[0] || 'jpg';
+        const path = `admin/${Date.now()}-scraped-cover.${ext}`;
+        const { error: uploadErr } = await supabase.storage.from("provider-onboarding").upload(path, blob);
+        if (!uploadErr) {
+          const { data: urlData } = supabase.storage.from("provider-onboarding").getPublicUrl(path);
+          finalCoverUrl = urlData.publicUrl;
+        }
+      } catch { /* ignore, cover photo is optional */ }
     }
 
     const payload = {
@@ -371,6 +443,8 @@ const ProvidersSection = () => {
       cover_photo_url: finalCoverUrl || null,
     };
 
+    const createdSlug = payload.slug;
+
     if (selectedProvider) {
       const { error } = await supabase.from("providers" as any).update(payload as any).eq("id", selectedProvider.id);
       if (error) { setUploadingCover(false); toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
@@ -382,7 +456,22 @@ const ProvidersSection = () => {
     }
     setUploadingCover(false);
     setEditOpen(false);
-    fetchProviders();
+
+    // If imported, navigate to onboarding
+    if (navigateToOnboarding && !selectedProvider) {
+      await fetchProviders();
+      // Find the newly created provider
+      const { data: newProviders } = await supabase.from("providers" as any).select("*").eq("slug", createdSlug).maybeSingle();
+      if (newProviders) {
+        setOnboardingProvider(newProviders as any);
+      }
+      setNavigateToOnboarding(false);
+      setImportSource(null);
+      setScrapedPhotos([]);
+      setSelectedScrapedPhoto(null);
+    } else {
+      fetchProviders();
+    }
   };
 
   const handleTransfer = async () => {
@@ -453,6 +542,9 @@ const ProvidersSection = () => {
           </Button>
           <Button variant="outline" onClick={exportCSV} className="gap-2">
             <Download className="w-4 h-4" /> Export CSV
+          </Button>
+          <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
+            <Globe className="w-4 h-4" /> Import from URL
           </Button>
           <Button onClick={openCreate} className="gap-2"><Plus className="w-4 h-4" /> Create Provider</Button>
         </div>
@@ -678,6 +770,14 @@ const ProvidersSection = () => {
           <DialogHeader>
             <DialogTitle>{selectedProvider ? "Edit Provider" : "Create Provider"}</DialogTitle>
           </DialogHeader>
+          {importSource && !selectedProvider && (
+            <Alert className="bg-accent/50 border-accent">
+              <Globe className="w-4 h-4" />
+              <AlertDescription>
+                Auto-imported from <a href={importSource} target="_blank" rel="noopener noreferrer" className="underline font-medium">{new URL(importSource).hostname}</a> — review and edit before saving.
+              </AlertDescription>
+            </Alert>
+          )}
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label>Clinic Name *</Label>
@@ -767,6 +867,35 @@ const ProvidersSection = () => {
                 </label>
               )}
             </div>
+            {/* Scraped photos grid */}
+            {scrapedPhotos.length > 0 && !selectedProvider && (
+              <div className="space-y-2 sm:col-span-2">
+                <Label>Scraped Images (click to set as cover)</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {scrapedPhotos.map((photo, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setSelectedScrapedPhoto(photo);
+                        setCoverPhotoUrl(photo);
+                        setNewCoverPhoto(null);
+                      }}
+                      className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-video ${
+                        selectedScrapedPhoto === photo ? 'border-primary ring-2 ring-primary/30' : 'border-border/50 hover:border-primary/50'
+                      }`}
+                    >
+                      <img src={photo} alt={`Scraped ${i + 1}`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      {selectedScrapedPhoto === photo && (
+                        <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
+                          <Check className="w-3 h-3" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           <Button onClick={handleSave} className="w-full mt-4" disabled={!form.name || !form.slug || uploadingCover}>
             {uploadingCover ? "Uploading..." : selectedProvider ? "Save Changes" : "Create Provider"}
@@ -887,6 +1016,37 @@ const ProvidersSection = () => {
             </div>
             <Button onClick={handleBulkTierChange} className="w-full" disabled={bulkTierUpdating}>
               {bulkTierUpdating ? "Updating..." : `Set to "${bulkTierValue}"`}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import from URL Dialog */}
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Import Provider from URL</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Paste a clinic's website, Google Maps listing, Yelp page, or any public page. We'll extract whatever info we can find.
+            </p>
+            <div className="space-y-2">
+              <Label>URL</Label>
+              <Input
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                placeholder="https://example-clinic.com or Google Maps link..."
+                type="url"
+                onKeyDown={(e) => { if (e.key === 'Enter') handleImportFromUrl(); }}
+              />
+            </div>
+            <Button onClick={handleImportFromUrl} className="w-full" disabled={importing || !importUrl.trim()}>
+              {importing ? (
+                <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Scanning website...</>
+              ) : (
+                <><Globe className="w-4 h-4 mr-2" /> Import</>
+              )}
             </Button>
           </div>
         </DialogContent>
