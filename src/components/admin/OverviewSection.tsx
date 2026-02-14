@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Users, Building2, Plane, DollarSign, TrendingUp, Clock, ExternalLink, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import { Mail, Users, Building2, Plane, DollarSign, TrendingUp, Clock, ExternalLink, CheckCircle, XCircle, AlertCircle, Plus, Settings, BadgeCheck, ArrowRight } from "lucide-react";
 
 interface Stats {
   waitlistCount: number;
@@ -14,6 +14,7 @@ interface Stats {
   totalRevenue: number;
   recentApplications: any[];
   recentBookings: any[];
+  recentProviders: any[];
 }
 
 const OverviewSection = ({ onNavigate }: { onNavigate?: (section: string) => void }) => {
@@ -21,7 +22,7 @@ const OverviewSection = ({ onNavigate }: { onNavigate?: (section: string) => voi
 
   useEffect(() => {
     const load = async () => {
-      const [waitlist, profiles, applications, bookings, providers, recentApps, recentBookings] = await Promise.all([
+      const [waitlist, profiles, applications, bookings, providers, recentApps, recentBookings, recentProviders] = await Promise.all([
         supabase.from("waitlist").select("id", { count: "exact", head: true }),
         supabase.from("profiles").select("id", { count: "exact", head: true }),
         supabase.from("provider_applications").select("status"),
@@ -29,6 +30,7 @@ const OverviewSection = ({ onNavigate }: { onNavigate?: (section: string) => voi
         supabase.from("providers").select("id", { count: "exact", head: true }),
         supabase.from("provider_applications").select("*").order("created_at", { ascending: false }).limit(5),
         supabase.from("bookings").select("id, status, provider_slug, created_at, quoted_price").order("created_at", { ascending: false }).limit(5),
+        supabase.from("providers").select("slug, name, city, country, verification_tier, admin_managed, created_at").order("created_at", { ascending: false }).limit(5),
       ]);
 
       const appData = applications.data || [];
@@ -56,6 +58,7 @@ const OverviewSection = ({ onNavigate }: { onNavigate?: (section: string) => voi
         totalRevenue: revenue,
         recentApplications: recentApps.data || [],
         recentBookings: recentBookings.data || [],
+        recentProviders: recentProviders.data || [],
       });
     };
     load();
@@ -223,6 +226,77 @@ const OverviewSection = ({ onNavigate }: { onNavigate?: (section: string) => voi
           </CardContent>
         </Card>
       </div>
+
+      {/* Provider Management Quick Access */}
+      <Card>
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-primary" />
+              provider management
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" className="text-xs gap-1.5" onClick={() => onNavigate?.("providers")}>
+                <Settings className="w-3.5 h-3.5" /> manage all
+              </Button>
+              <Button size="sm" className="text-xs gap-1.5" onClick={() => onNavigate?.("providers")}>
+                <Plus className="w-3.5 h-3.5" /> add provider
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Quick action cards */}
+          <div className="grid grid-cols-3 gap-3">
+            <div
+              className="rounded-lg border border-border p-4 hover:bg-muted/50 cursor-pointer transition-colors text-center"
+              onClick={() => onNavigate?.("applications")}
+            >
+              <BadgeCheck className="w-5 h-5 mx-auto mb-2 text-secondary" />
+              <p className="text-xs font-medium">review applications</p>
+              {pendingApps > 0 && <p className="text-lg font-bold text-secondary mt-1">{pendingApps}</p>}
+            </div>
+            <div
+              className="rounded-lg border border-border p-4 hover:bg-muted/50 cursor-pointer transition-colors text-center"
+              onClick={() => onNavigate?.("verification")}
+            >
+              <BadgeCheck className="w-5 h-5 mx-auto mb-2 text-primary" />
+              <p className="text-xs font-medium">verify credentials</p>
+            </div>
+            <div
+              className="rounded-lg border border-border p-4 hover:bg-muted/50 cursor-pointer transition-colors text-center"
+              onClick={() => onNavigate?.("inbox")}
+            >
+              <Mail className="w-5 h-5 mx-auto mb-2 text-primary" />
+              <p className="text-xs font-medium">inbox</p>
+            </div>
+          </div>
+
+          {/* Recent providers */}
+          {stats.recentProviders.length > 0 && (
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider mb-2">active providers</p>
+              <div className="space-y-2">
+                {stats.recentProviders.map((p: any) => (
+                  <div key={p.slug} className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                    <Building2 className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{p.name}</p>
+                      <p className="text-[11px] text-muted-foreground">{p.city}, {p.country}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {p.admin_managed && (
+                        <Badge variant="outline" className="text-[10px] border-secondary/30 text-secondary">admin</Badge>
+                      )}
+                      <Badge className="text-[10px] bg-primary/10 text-primary capitalize">{p.verification_tier || "listed"}</Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
