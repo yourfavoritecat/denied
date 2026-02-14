@@ -16,10 +16,11 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Camera, Instagram, Globe, Star, Plus, X, GripVertical, ArrowUp, ArrowDown,
-  ExternalLink, Eye, EyeOff, Trash2, Play, Image as ImageIcon, Save, Check
+  ExternalLink, Eye, EyeOff, Trash2, Play, Image as ImageIcon, Save, Check, Clock, Lightbulb
 } from "lucide-react";
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
 import ReviewCard, { type ReviewData } from "@/components/reviews/ReviewCard";
+import SuggestProviderModal from "@/components/creator/SuggestProviderModal";
 
 interface CreatorProfile {
   id: string;
@@ -91,6 +92,10 @@ const CreatorEdit = () => {
 
   // Lightbox
   const [lightboxItem, setLightboxItem] = useState<CreatorContentItem | null>(null);
+
+  // Suggestions
+  const [suggestOpen, setSuggestOpen] = useState(false);
+  const [pendingSuggestions, setPendingSuggestions] = useState<any[]>([]);
 
   // Load everything
   useEffect(() => {
@@ -167,6 +172,15 @@ const CreatorEdit = () => {
         }))
       );
     }
+
+    // Load pending suggestions
+    const { data: sugData } = await supabase
+      .from("provider_suggestions" as any)
+      .select("*")
+      .eq("creator_id", profile.id)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false });
+    setPendingSuggestions(sugData || []);
 
     setLoading(false);
   };
@@ -485,12 +499,16 @@ const CreatorEdit = () => {
         <section className="space-y-4">
           <div className="flex items-center justify-between">
             <Label className="text-base font-semibold">My Favorite Providers</Label>
-            <Popover open={providerSearchOpen} onOpenChange={setProviderSearchOpen}>
-              <PopoverTrigger asChild>
-                <Button size="sm" variant="outline" className="gap-1.5">
-                  <Plus className="w-4 h-4" /> Add Provider
-                </Button>
-              </PopoverTrigger>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setSuggestOpen(true)}>
+                <Lightbulb className="w-4 h-4" /> Suggest New
+              </Button>
+              <Popover open={providerSearchOpen} onOpenChange={setProviderSearchOpen}>
+                <PopoverTrigger asChild>
+                  <Button size="sm" variant="outline" className="gap-1.5">
+                    <Plus className="w-4 h-4" /> Add Provider
+                  </Button>
+                </PopoverTrigger>
               <PopoverContent className="p-0 w-[300px]" align="end">
                 <Command>
                   <CommandInput placeholder="Search providers..." />
@@ -511,8 +529,30 @@ const CreatorEdit = () => {
                   </CommandList>
                 </Command>
               </PopoverContent>
-            </Popover>
+              </Popover>
+            </div>
           </div>
+
+          {/* Pending Suggestions */}
+          {pendingSuggestions.length > 0 && (
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Pending Suggestions</Label>
+              {pendingSuggestions.map((s: any) => (
+                <Card key={s.id} className="border-border/50 bg-muted/30">
+                  <CardContent className="py-3 flex items-center gap-3">
+                    <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate text-sm">{s.name}</div>
+                      {s.city && <div className="text-xs text-muted-foreground">{s.city}</div>}
+                    </div>
+                    <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+                      Awaiting review
+                    </Badge>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {featuredProviders.length === 0 ? (
             <Card className="border-dashed">
@@ -708,6 +748,14 @@ const CreatorEdit = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Suggest Provider Modal */}
+      <SuggestProviderModal
+        open={suggestOpen}
+        onOpenChange={setSuggestOpen}
+        creatorId={creatorProfile.id}
+        onSubmitted={loadData}
+      />
     </div>
   );
 };
