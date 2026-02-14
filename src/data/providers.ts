@@ -1,3 +1,17 @@
+/**
+ * @deprecated The `providers` array below is no longer used by any page.
+ * Search.tsx and ProviderProfile.tsx now fetch all provider data from the database.
+ * This file is kept temporarily for reference. The `providers` array can be safely
+ * deleted once confirmed that no other component references it.
+ *
+ * Still-active exports (used by other pages):
+ *   - US_PRICE_MAP — US price benchmarks for savings calculations
+ *   - REVIEW_CATEGORIES — category rating labels
+ *   - procedureTypes — filter option list for Search page
+ *   - locations — filter option list for Search page
+ *   - Provider interface — type definition
+ */
+
 import clinicDental from "@/assets/clinic-dental.jpg";
 import clinicMedspa from "@/assets/clinic-medspa.jpg";
 import clinicSurgery from "@/assets/clinic-surgery.jpg";
