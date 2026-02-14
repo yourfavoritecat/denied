@@ -52,13 +52,17 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative" style={{ backgroundColor: "#1A1A1A" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-denied-black">
+      {/* Ambient glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(160_50%_65%/0.05)_0%,_transparent_60%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_hsl(15_100%_71%/0.04)_0%,_transparent_50%)]" />
+
       {showLogin && (
-        <div className="absolute top-6 right-6">
+        <div className="absolute top-6 right-6 z-20">
           <Button
             variant="outline"
             size="sm"
-            className="border-white/20 text-white hover:bg-white/10"
+            className="border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
             onClick={() => navigate("/auth")}
           >
             Log In
@@ -66,34 +70,39 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
         </div>
       )}
 
-      <div className="w-full max-w-xl flex flex-col items-center text-center">
-        <img src={logo} alt="Denied" className="w-64 md:w-80 lg:w-96 h-auto mb-10" />
+      <div className="w-full max-w-xl flex flex-col items-center text-center relative z-10">
+        <img 
+          src={logo} 
+          alt="Denied" 
+          className="w-64 md:w-80 lg:w-96 h-auto mb-10 drop-shadow-[0_8px_32px_hsl(15_100%_71%/0.12)]" 
+        />
 
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-white mb-6 leading-tight">
           Say yes, because health insurance said no.
         </h1>
 
-        <p className="text-base md:text-lg leading-relaxed mb-8 max-w-[600px]" style={{ color: "#B0B0B0" }}>
+        <p className="text-base md:text-lg leading-relaxed mb-8 max-w-[600px] text-white/60 font-light">
           We're building a marketplace that connects you with verified doctors, dentists, and practitioners abroad — saving you up to 75% on procedures your insurance denied or priced out of reach.
         </p>
 
-        <p className="text-lg md:text-xl font-bold mb-8" style={{ color: "#F8B4A0" }}>
+        <p className="text-lg md:text-xl font-bold mb-8 text-secondary">
           Be the first to know when we launch.
         </p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-12">
+        {/* Elevated form container */}
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-12 bg-white/[0.04] backdrop-blur-sm border border-white/[0.08] rounded-2xl p-2 shadow-hero">
           <Input
             type="email"
             placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 bg-white/10 border-white/20 text-white placeholder:text-white/50 flex-1"
+            className="h-12 bg-white/10 border-white/15 text-white placeholder:text-white/40 flex-1 rounded-xl shadow-none focus-visible:ring-primary/50"
             disabled={isLoading}
           />
           <Button
             type="submit"
-            className="h-12 px-8 font-semibold text-white whitespace-nowrap"
-            style={{ backgroundColor: "#5EB298" }}
+            size="lg"
+            className="h-12 px-8 font-bold whitespace-nowrap rounded-xl shadow-floating hover:shadow-hero"
             disabled={isLoading}
           >
             {isLoading ? "Joining..." : "Join the Waitlist"}
@@ -101,12 +110,12 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
         </form>
 
         <div className="flex gap-6 mb-16">
-          <a href="https://instagram.com/denied.care" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white transition-colors">
+          <a href="https://instagram.com/denied.care" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-secondary transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10">
             <Instagram className="w-5 h-5" />
           </a>
         </div>
 
-        <p className="text-xs" style={{ color: "#555" }}>
+        <p className="text-xs text-white/20">
           © 2026 Denied.care. All rights reserved.
         </p>
       </div>
