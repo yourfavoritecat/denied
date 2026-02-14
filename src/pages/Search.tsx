@@ -10,8 +10,9 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, MapPin, Star, Filter, BadgeCheck, X, Syringe, ArrowUpDown } from "lucide-react";
-import { providers, procedureTypes, locations, type Provider } from "@/data/providers";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Search, MapPin, Star, Filter, BadgeCheck, X, ArrowUpDown } from "lucide-react";
+import { procedureTypes, locations } from "@/data/providers";
 import { supabase } from "@/integrations/supabase/client";
 import clinicDental from "@/assets/clinic-dental.jpg";
 import clinicMedspa from "@/assets/clinic-medspa.jpg";
@@ -20,8 +21,22 @@ import clinicSurgery from "@/assets/clinic-surgery.jpg";
 const dentalKeywords = ["dental", "crown", "implant", "all-on-4", "veneer", "root canal", "cleaning", "whitening", "denture"];
 const aestheticKeywords = ["botox", "syringe", "chemical peel", "microneedling", "prp", "liposuction", "rhinoplasty", "tummy tuck", "facelift", "medspa", "aesthetics", "cosmetic surgery", "breast"];
 
-const getClinicCategory = (provider: Provider): "dental" | "aesthetic" | "surgery" => {
-  const allText = [...provider.specialties, provider.name].join(" ").toLowerCase();
+interface DBProvider {
+  slug: string;
+  name: string;
+  city: string | null;
+  specialties: string[] | null;
+  languages: string[] | null;
+  verification_tier: string | null;
+  cover_photo_url: string | null;
+  description: string | null;
+  startingPrice: number;
+  rating: number;
+  reviews: number;
+}
+
+const getClinicCategory = (provider: DBProvider): "dental" | "aesthetic" | "surgery" => {
+  const allText = [...(provider.specialties || []), provider.name].join(" ").toLowerCase();
   const isDental = dentalKeywords.some((k) => allText.includes(k));
   const isSurgery = ["rhinoplasty", "liposuction", "tummy tuck", "facelift", "breast", "plastic surgery"].some((k) => allText.includes(k));
   const isAesthetic = aestheticKeywords.some((k) => allText.includes(k));
@@ -47,23 +62,82 @@ const SearchPage = () => {
   const [minRating, setMinRating] = useState<number>(0);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [sortBy, setSortBy] = useState<SortOption>("default");
-  const [coverPhotos, setCoverPhotos] = useState<Record<string, string>>({});
 
-  // Fetch cover photos from DB for all providers
+  const [dbProviders, setDbProviders] = useState<DBProvider[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch providers, services (for min price), and reviews (for avg rating + count)
   useEffect(() => {
-    supabase
-      .from("providers")
-      .select("slug, cover_photo_url")
-      .not("cover_photo_url", "is", null)
-      .then(({ data }) => {
-        if (data) {
-          const map: Record<string, string> = {};
-          data.forEach((p) => {
-            if (p.cover_photo_url) map[p.slug] = p.cover_photo_url;
-          });
-          setCoverPhotos(map);
+    const fetchProviders = async () => {
+      setLoading(true);
+      try {
+        // Fetch providers
+        const { data: providerRows, error: pErr } = await supabase
+          .from("providers")
+          .select("slug, name, city, specialties, languages, verification_tier, cover_photo_url, description");
+
+        if (pErr) throw pErr;
+        if (!providerRows || providerRows.length === 0) {
+          setDbProviders([]);
+          setLoading(false);
+          return;
         }
-      });
+
+        // Fetch all services for min price per provider
+        const { data: serviceRows } = await supabase
+          .from("provider_services")
+          .select("provider_slug, base_price_usd");
+
+        // Fetch all reviews for avg rating + count per provider
+        const { data: reviewRows } = await supabase
+          .from("reviews")
+          .select("provider_slug, rating");
+
+        // Build price map: provider_slug → min price
+        const priceMap: Record<string, number> = {};
+        (serviceRows || []).forEach((s) => {
+          const current = priceMap[s.provider_slug];
+          if (current === undefined || s.base_price_usd < current) {
+            priceMap[s.provider_slug] = s.base_price_usd;
+          }
+        });
+
+        // Build review map: provider_slug → { avg, count }
+        const reviewMap: Record<string, { sum: number; count: number }> = {};
+        (reviewRows || []).forEach((r) => {
+          if (!reviewMap[r.provider_slug]) {
+            reviewMap[r.provider_slug] = { sum: 0, count: 0 };
+          }
+          reviewMap[r.provider_slug].sum += r.rating;
+          reviewMap[r.provider_slug].count += 1;
+        });
+
+        const merged: DBProvider[] = providerRows.map((p) => {
+          const rev = reviewMap[p.slug];
+          return {
+            slug: p.slug,
+            name: p.name,
+            city: p.city,
+            specialties: p.specialties,
+            languages: p.languages,
+            verification_tier: p.verification_tier,
+            cover_photo_url: p.cover_photo_url,
+            description: p.description,
+            startingPrice: priceMap[p.slug] ?? 0,
+            rating: rev ? Math.round((rev.sum / rev.count) * 10) / 10 : 0,
+            reviews: rev?.count ?? 0,
+          };
+        });
+
+        setDbProviders(merged);
+      } catch (err) {
+        console.error("Error fetching providers:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProviders();
   }, []);
 
   const toggleLanguage = (lang: string) => {
@@ -73,12 +147,17 @@ const SearchPage = () => {
   };
 
   const filtered = useMemo(() => {
-    let results = providers.filter((p) => {
-      if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.specialties.some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))) return false;
+    let results = dbProviders.filter((p) => {
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const nameMatch = p.name.toLowerCase().includes(q);
+        const specMatch = (p.specialties || []).some(s => s.toLowerCase().includes(q));
+        if (!nameMatch && !specMatch) return false;
+      }
       if (selectedLocation && selectedLocation !== "all" && p.city !== selectedLocation) return false;
-      if (selectedProcedure && !p.specialties.some(s => s.toLowerCase().includes(selectedProcedure.toLowerCase()))) return false;
+      if (selectedProcedure && selectedProcedure !== "all" && !(p.specialties || []).some(s => s.toLowerCase().includes(selectedProcedure.toLowerCase()))) return false;
       if (p.startingPrice > priceRange[0]) return false;
-      if (selectedLanguages.length > 0 && !selectedLanguages.every(l => p.languages.includes(l))) return false;
+      if (selectedLanguages.length > 0 && !selectedLanguages.every(l => (p.languages || []).includes(l))) return false;
       if (minRating > 0 && p.rating < minRating) return false;
       return true;
     });
@@ -99,7 +178,7 @@ const SearchPage = () => {
     }
 
     return results;
-  }, [searchQuery, selectedLocation, selectedProcedure, priceRange, selectedLanguages, minRating, sortBy]);
+  }, [dbProviders, searchQuery, selectedLocation, selectedProcedure, priceRange, selectedLanguages, minRating, sortBy]);
 
   const clearFilters = () => {
     setSearchQuery("");
@@ -207,6 +286,40 @@ const SearchPage = () => {
     </div>
   );
 
+  const LoadingSkeleton = () => (
+    <div className="grid sm:grid-cols-2 gap-6">
+      {[1, 2, 3, 4].map((i) => (
+        <Card key={i} className="overflow-hidden border border-border/50 shadow-elevated bg-card">
+          <Skeleton className="aspect-[16/10] w-full" />
+          <CardContent className="p-5 space-y-3">
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-1/2" />
+            <Skeleton className="h-4 w-1/3" />
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-16 rounded-full" />
+              <Skeleton className="h-5 w-20 rounded-full" />
+            </div>
+            <Skeleton className="h-6 w-24 mt-2" />
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
+  const EmptyState = () => (
+    <div className="text-center py-20">
+      <div className="max-w-md mx-auto">
+        <p className="text-2xl font-bold text-foreground mb-2">We're onboarding providers now</p>
+        <p className="text-muted-foreground mb-6">
+          Check back soon or join the waitlist to be the first to know when new clinics are available.
+        </p>
+        <Button asChild>
+          <Link to="/">Join the Waitlist</Link>
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-muted">
       <Navbar />
@@ -275,7 +388,13 @@ const SearchPage = () => {
             <div className="flex-1">
               <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <p className="text-muted-foreground">
-                  <span className="font-bold text-foreground">{filtered.length}</span> provider{filtered.length !== 1 ? "s" : ""} found
+                  {loading ? (
+                    <Skeleton className="h-5 w-32 inline-block" />
+                  ) : (
+                    <>
+                      <span className="font-bold text-foreground">{filtered.length}</span> provider{filtered.length !== 1 ? "s" : ""} found
+                    </>
+                  )}
                 </p>
                 <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
                   <SelectTrigger className="w-48 bg-background">
@@ -292,7 +411,11 @@ const SearchPage = () => {
                 </Select>
               </div>
 
-              {filtered.length === 0 ? (
+              {loading ? (
+                <LoadingSkeleton />
+              ) : dbProviders.length === 0 ? (
+                <EmptyState />
+              ) : filtered.length === 0 ? (
                 <div className="text-center py-20">
                   <p className="text-2xl font-bold text-foreground mb-2">No providers found</p>
                   <p className="text-muted-foreground mb-4">Try adjusting your filters or search terms</p>
@@ -302,6 +425,8 @@ const SearchPage = () => {
                 <div className="grid sm:grid-cols-2 gap-6">
                   {filtered.map((provider, index) => {
                     const category = getClinicCategory(provider);
+                    const isVerified = provider.verification_tier === "verified" || provider.verification_tier === "premium";
+                    const isListed = provider.verification_tier === "listed";
                     return (
                       <motion.div
                         key={provider.slug}
@@ -314,19 +439,19 @@ const SearchPage = () => {
                           <Card className="overflow-hidden border border-border/50 shadow-elevated hover:shadow-floating tactile-lift cursor-pointer h-full group bg-card">
                             <div className="aspect-[16/10] relative overflow-hidden">
                               <img
-                                src={coverPhotos[provider.slug] || CATEGORY_IMAGES[category] || clinicDental}
+                                src={provider.cover_photo_url || CATEGORY_IMAGES[category] || clinicDental}
                                 alt={`${provider.name} clinic`}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 loading="lazy"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                              {provider.verified ? (
+                              {isVerified ? (
                                 <div className="absolute top-3 right-3">
                                   <Badge className="bg-primary text-primary-foreground gap-1 shadow-floating">
                                     <BadgeCheck className="w-3 h-3" /> Verified
                                   </Badge>
                                 </div>
-                              ) : provider.verificationTier === "listed" ? (
+                              ) : isListed ? (
                                 <div className="absolute top-3 right-3">
                                   <Badge variant="outline" className="bg-card/90 text-muted-foreground gap-1 shadow-elevated border-border backdrop-blur-sm">
                                     <BadgeCheck className="w-3 h-3" /> Listed
@@ -345,24 +470,34 @@ const SearchPage = () => {
                               </div>
                               <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
                                 <MapPin className="w-4 h-4 shrink-0" />
-                                {provider.city}, Mexico
+                                {provider.city || "Mexico"}, Mexico
                               </div>
-                              <div className="flex items-center gap-2 mb-3">
-                                <Star className="w-4 h-4 fill-secondary text-secondary" />
-                                <span className="font-bold">{provider.rating}</span>
-                                <span className="text-muted-foreground text-sm">({provider.reviews} reviews)</span>
-                              </div>
-                              <div className="flex flex-wrap gap-1.5 mb-4">
-                                {provider.specialties.slice(0, 3).map((specialty) => (
-                                  <Badge key={specialty} variant="secondary" className="text-xs font-medium">
-                                    {specialty}
-                                  </Badge>
-                                ))}
-                              </div>
+                              {provider.reviews > 0 && (
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Star className="w-4 h-4 fill-secondary text-secondary" />
+                                  <span className="font-bold">{provider.rating}</span>
+                                  <span className="text-muted-foreground text-sm">({provider.reviews} review{provider.reviews !== 1 ? "s" : ""})</span>
+                                </div>
+                              )}
+                              {(provider.specialties || []).length > 0 && (
+                                <div className="flex flex-wrap gap-1.5 mb-4">
+                                  {(provider.specialties || []).slice(0, 3).map((specialty) => (
+                                    <Badge key={specialty} variant="secondary" className="text-xs font-medium">
+                                      {specialty}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
                               <div className="border-t border-border/50 pt-3 flex items-center justify-between">
                                 <div>
-                                  <span className="text-sm text-muted-foreground">From </span>
-                                  <span className="text-xl font-bold text-primary">${provider.startingPrice}</span>
+                                  {provider.startingPrice > 0 ? (
+                                    <>
+                                      <span className="text-sm text-muted-foreground">From </span>
+                                      <span className="text-xl font-bold text-primary">${provider.startingPrice.toLocaleString()}</span>
+                                    </>
+                                  ) : (
+                                    <span className="text-sm text-muted-foreground">Contact for pricing</span>
+                                  )}
                                 </div>
                                 <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
                               </div>
