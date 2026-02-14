@@ -28,12 +28,15 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <section className="bg-denied-black py-20">
-      <div className="container mx-auto px-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-center text-secondary mb-4">
+    <section className="bg-denied-black py-24 relative overflow-hidden">
+      {/* Subtle texture overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(15_100%_71%/0.04)_0%,_transparent_50%)]" />
+      
+      <div className="container mx-auto px-4 relative z-10">
+        <h2 className="text-4xl md:text-5xl font-black text-center text-secondary mb-4">
           Real People. Real Savings.
         </h2>
-        <p className="text-xl text-white/70 text-center max-w-2xl mx-auto mb-12">
+        <p className="text-xl text-white/60 text-center max-w-2xl mx-auto mb-14 font-light">
           Join thousands who've escaped the insurance trap
         </p>
 
@@ -41,24 +44,26 @@ const TestimonialsSection = () => {
           {testimonials.map((testimonial, index) => (
             <Card 
               key={testimonial.name}
-              className="bg-white/5 border border-white/10 backdrop-blur shadow-lg shadow-black/20 hover:bg-white/10 hover:-translate-y-1 transition-all duration-300 animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              className="bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm shadow-floating hover:bg-white/[0.1] tactile-lift animate-fade-in-up rounded-2xl"
+              style={{ animationDelay: `${index * 0.12}s` }}
             >
-              <CardContent className="pt-6">
-                <Quote className="w-8 h-8 text-secondary/50 mb-4" />
-                <p className="text-white/90 mb-6 leading-relaxed">
+              <CardContent className="pt-8 pb-8">
+                <div className="bg-secondary/10 rounded-xl w-10 h-10 flex items-center justify-center mb-5">
+                  <Quote className="w-5 h-5 text-secondary" />
+                </div>
+                <p className="text-white/85 mb-8 leading-relaxed text-[15px]">
                   "{testimonial.quote}"
                 </p>
-                <div className="flex items-center gap-3">
-                  <Avatar className="bg-secondary text-secondary-foreground">
-                    <AvatarFallback className="bg-secondary text-secondary-foreground font-bold">
+                <div className="flex items-center gap-3 pt-4 border-t border-white/[0.06]">
+                  <Avatar className="bg-secondary text-secondary-foreground shadow-elevated w-11 h-11">
+                    <AvatarFallback className="bg-secondary text-secondary-foreground font-bold text-sm">
                       {testimonial.initials}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-semibold text-white">{testimonial.name}</div>
-                    <div className="text-sm text-white/60">{testimonial.location}</div>
-                    <div className="text-sm text-primary">{testimonial.procedure}</div>
+                    <div className="font-bold text-white text-sm">{testimonial.name}</div>
+                    <div className="text-xs text-white/50">{testimonial.location}</div>
+                    <div className="text-xs text-primary font-medium mt-0.5">{testimonial.procedure}</div>
                   </div>
                 </div>
               </CardContent>

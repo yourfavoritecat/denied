@@ -27,16 +27,16 @@ const formatCurrency = (amount: number) => {
 
 const PriceComparisonSection = () => {
   return (
-    <section className="bg-card py-20">
+    <section className="bg-muted py-24">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-center text-foreground mb-4">
+        <h2 className="text-4xl md:text-5xl font-black text-center text-foreground mb-4">
           See the Difference
         </h2>
-        <p className="text-xl text-muted-foreground text-center max-w-2xl mx-auto mb-12">
+        <p className="text-xl text-muted-foreground text-center max-w-2xl mx-auto mb-14 font-light">
           Real prices. Real savings. No insurance games.
         </p>
 
-        <div className="max-w-4xl mx-auto overflow-hidden rounded-xl border border-border/50 shadow-2xl">
+        <div className="max-w-4xl mx-auto overflow-hidden rounded-2xl border border-border bg-card shadow-floating">
           <Table>
             <TableHeader>
               <TableRow className="bg-denied-black hover:bg-denied-black">
@@ -50,18 +50,18 @@ const PriceComparisonSection = () => {
               {procedures.map((procedure, index) => (
                 <TableRow 
                   key={procedure.name}
-                  className="animate-fade-in"
+                  className="animate-fade-in hover:bg-muted/50 transition-colors"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <TableCell className="font-medium">{procedure.name}</TableCell>
+                  <TableCell className="font-semibold">{procedure.name}</TableCell>
                   <TableCell className="text-right text-muted-foreground line-through">
                     {formatCurrency(procedure.usPrice)}
                   </TableCell>
-                  <TableCell className="text-right font-bold text-primary">
+                  <TableCell className="text-right font-bold text-primary text-lg">
                     {formatCurrency(procedure.mxPrice)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold">
+                    <Badge className="bg-primary/15 text-primary hover:bg-primary/25 font-bold shadow-sm">
                       {procedure.savings}% OFF
                     </Badge>
                   </TableCell>
@@ -71,7 +71,7 @@ const PriceComparisonSection = () => {
           </Table>
         </div>
 
-        <p className="text-center text-muted-foreground mt-6 text-sm">
+        <p className="text-center text-muted-foreground mt-8 text-sm">
           * Prices are estimates based on average costs. Actual prices may vary by provider.
         </p>
       </div>

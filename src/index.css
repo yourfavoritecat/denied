@@ -5,12 +5,13 @@
 /* Denied.care Design System
    Colors: Peach (#F8B4A0), Mint Green (#5EB298), Black (#1A1A1A), Cream (#FFF5F0)
    Vibe: Protest energy meets premium travel app
+   Depth: Layered, tactile, boutique-hotel feel
 */
 
 @layer base {
   :root {
     /* Core brand colors */
-    --background: 13 100% 97%; /* Cream #FFF5F0 */
+    --background: 20 30% 95%; /* Warm light gray — page canvas */
     --foreground: 0 0% 10%; /* Black #1A1A1A */
 
     --card: 0 0% 100%;
@@ -27,7 +28,7 @@
     --secondary: 15 100% 71%;
     --secondary-foreground: 0 0% 10%;
 
-    --muted: 13 100% 97%;
+    --muted: 20 20% 93%;
     --muted-foreground: 0 0% 45%;
 
     /* Accent: Bold Peach for headlines */
@@ -37,17 +38,25 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 85%;
-    --input: 0 0% 85%;
+    --border: 20 15% 88%;
+    --input: 20 15% 88%;
     --ring: 160 50% 65%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     /* Custom tokens for Denied brand */
     --denied-black: 0 0% 10%;
     --denied-peach: 15 100% 71%;
     --denied-mint: 160 50% 65%;
     --denied-cream: 13 100% 97%;
+
+    /* Elevation shadows */
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.04), 0 1px 3px 0 hsl(0 0% 0% / 0.06);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.06), 0 2px 4px -2px hsl(0 0% 0% / 0.04), 0 0 0 1px hsl(0 0% 0% / 0.03);
+    --shadow-lg: 0 10px 25px -5px hsl(0 0% 0% / 0.08), 0 4px 10px -3px hsl(0 0% 0% / 0.04), 0 0 0 1px hsl(0 0% 0% / 0.02);
+    --shadow-xl: 0 20px 40px -8px hsl(0 0% 0% / 0.1), 0 8px 16px -4px hsl(0 0% 0% / 0.05), 0 0 0 1px hsl(0 0% 0% / 0.02);
+    --shadow-float: 0 24px 48px -12px hsl(0 0% 0% / 0.15), 0 12px 24px -8px hsl(0 0% 0% / 0.08);
+    --shadow-inset: inset 0 2px 4px 0 hsl(0 0% 0% / 0.05);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -60,13 +69,13 @@
   }
 
   .dark {
-    --background: 0 0% 10%;
+    --background: 0 0% 8%;
     --foreground: 13 100% 97%;
 
-    --card: 0 0% 10%;
+    --card: 0 0% 12%;
     --card-foreground: 13 100% 97%;
 
-    --popover: 0 0% 10%;
+    --popover: 0 0% 12%;
     --popover-foreground: 13 100% 97%;
 
     --primary: 160 50% 65%;
@@ -75,7 +84,7 @@
     --secondary: 15 100% 71%;
     --secondary-foreground: 0 0% 10%;
 
-    --muted: 0 0% 20%;
+    --muted: 0 0% 18%;
     --muted-foreground: 0 0% 65%;
 
     --accent: 15 100% 71%;
@@ -84,9 +93,16 @@
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 25%;
-    --input: 0 0% 25%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
     --ring: 160 50% 65%;
+
+    --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
+    --shadow-lg: 0 10px 25px -5px hsl(0 0% 0% / 0.4), 0 4px 10px -3px hsl(0 0% 0% / 0.2);
+    --shadow-xl: 0 20px 40px -8px hsl(0 0% 0% / 0.5), 0 8px 16px -4px hsl(0 0% 0% / 0.3);
+    --shadow-float: 0 24px 48px -12px hsl(0 0% 0% / 0.6);
+    --shadow-inset: inset 0 2px 4px 0 hsl(0 0% 0% / 0.2);
 
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
@@ -108,6 +124,8 @@
     @apply bg-background text-foreground;
     font-family: 'Bricolage Grotesque', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-transform: lowercase;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Preserve user-typed capitalization in inputs */
@@ -122,5 +140,57 @@
 @layer utilities {
   .text-gradient-peach {
     @apply bg-gradient-to-r from-secondary to-secondary/80 bg-clip-text text-transparent;
+  }
+
+  /* Elevation utilities */
+  .shadow-elevated {
+    box-shadow: var(--shadow-md);
+  }
+  .shadow-lifted {
+    box-shadow: var(--shadow-lg);
+  }
+  .shadow-floating {
+    box-shadow: var(--shadow-xl);
+  }
+  .shadow-hero {
+    box-shadow: var(--shadow-float);
+  }
+  .shadow-inner-subtle {
+    box-shadow: var(--shadow-inset);
+  }
+
+  /* Tactile interaction classes */
+  .tactile-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  .tactile-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+  }
+  .tactile-lift:active {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .tactile-press {
+    @apply transition-all duration-150 ease-out;
+  }
+  .tactile-press:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+  .tactile-press:active {
+    transform: translateY(1px);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* Section panel styling */
+  .section-panel {
+    @apply relative;
+  }
+  .section-panel::before {
+    content: '';
+    @apply absolute inset-0 pointer-events-none;
+    box-shadow: inset 0 1px 0 0 hsl(0 0% 100% / 0.1);
   }
 }
