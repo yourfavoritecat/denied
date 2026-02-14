@@ -16,7 +16,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import AdminProviderOnboarding from "./AdminProviderOnboarding";
+import AdminProviderForm from "./AdminProviderForm";
 
 interface ProviderRow {
   id: string;
@@ -57,6 +57,10 @@ const ProvidersSection = () => {
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
+  const [formMode, setFormMode] = useState<null | "create" | "edit">(null);
+  const [formSlug, setFormSlug] = useState<string | undefined>();
+  const [formName, setFormName] = useState<string | undefined>();
+  const [formInitialData, setFormInitialData] = useState<any>(null);
   const [selectedProvider, setSelectedProvider] = useState<ProviderRow | null>(null);
   const [transferEmail, setTransferEmail] = useState("");
   const [onboardingProvider, setOnboardingProvider] = useState<ProviderRow | null>(null);
@@ -304,21 +308,11 @@ const ProvidersSection = () => {
     toast({ title: "Exported", description: `${rows.length} provider(s) exported to CSV.` });
   }, [filteredAndSortedProviders, onboardingStatus, providerRatings, toast]);
 
-  const openCreate = () => {
-    setSelectedProvider(null);
-    setCoverPhotoUrl("");
-    setNewCoverPhoto(null);
-    setImportSource(null);
-    setScrapedPhotos([]);
-    setSelectedScrapedPhoto(null);
-    setNavigateToOnboarding(false);
-    setForm({
-      name: "", slug: "", city: "", country: "Mexico", address: "", phone: "",
-      description: "", specialties: "", languages: "English, Spanish",
-      hours_of_operation: "", established_year: "", admin_email: "cat@denied.care",
-      verification_tier: "listed", travel_info: "",
-    });
-    setEditOpen(true);
+  const openCreate = (initialData?: any) => {
+    setFormMode("create");
+    setFormSlug(undefined);
+    setFormName(undefined);
+    setFormInitialData(initialData || null);
   };
 
   const handleImportFromUrl = async () => {
@@ -335,14 +329,9 @@ const ProvidersSection = () => {
       }
       const d = data.data;
       setImportOpen(false);
-      setImportSource(importUrl.trim());
-      setScrapedPhotos(d.photos || []);
-      setSelectedScrapedPhoto(null);
-      setNavigateToOnboarding(true);
-      setSelectedProvider(null);
-      setCoverPhotoUrl("");
-      setNewCoverPhoto(null);
-      setForm({
+      // Go straight to the create form with scraped data
+      const socialLinks = d.social_links || {};
+      openCreate({
         name: d.name || "",
         slug: d.slug || "",
         city: d.city || "",
@@ -353,13 +342,13 @@ const ProvidersSection = () => {
         specialties: (d.specialties || []).join(", "),
         languages: (d.languages || []).join(", ") || "English, Spanish",
         hours_of_operation: d.hours_of_operation || "",
-        established_year: "",
-        admin_email: "cat@denied.care",
-        verification_tier: "listed",
-        travel_info: "",
+        cover_photo_url: (d.photos && d.photos[0]) || "",
+        website_url: socialLinks.website || "",
+        instagram_url: socialLinks.instagram || "",
+        facebook_url: socialLinks.facebook || "",
+        google_business_url: socialLinks.google_maps || "",
+        tiktok_url: socialLinks.tiktok || "",
       });
-      // If scraped social links, store them for later use in external links step
-      setEditOpen(true);
       toast({ title: "Data imported!", description: `Extracted info from ${new URL(importUrl.trim()).hostname}. Review and save.` });
     } catch (err) {
       toast({ title: "Import error", description: "Something went wrong during import.", variant: "destructive" });
@@ -369,110 +358,13 @@ const ProvidersSection = () => {
   };
 
   const openEdit = (p: ProviderRow) => {
-    setSelectedProvider(p);
-    setCoverPhotoUrl("");
-    setNewCoverPhoto(null);
-    // Fetch full data
-    supabase.from("providers" as any).select("*").eq("id", p.id).single().then(({ data }: any) => {
-      if (data) {
-        setForm({
-          name: data.name || "",
-          slug: data.slug || "",
-          city: data.city || "",
-          country: data.country || "Mexico",
-          address: data.address || "",
-          phone: data.phone || "",
-          description: data.description || "",
-          specialties: (data.specialties || []).join(", "),
-          languages: (data.languages || []).join(", "),
-          hours_of_operation: data.hours_of_operation || "",
-          established_year: data.established_year?.toString() || "",
-          admin_email: data.admin_email || "cat@denied.care",
-          verification_tier: data.verification_tier || "listed",
-          travel_info: data.travel_info || "",
-        });
-        setCoverPhotoUrl(data.cover_photo_url || "");
-      }
-    });
-    setEditOpen(true);
+    setFormMode("edit");
+    setFormSlug(p.slug);
+    setFormName(p.name);
+    setFormInitialData(null);
   };
 
-  const handleSave = async () => {
-    setUploadingCover(true);
-
-    // Upload cover photo if new one selected
-    let finalCoverUrl = coverPhotoUrl;
-    if (newCoverPhoto) {
-      const path = `admin/${Date.now()}-${newCoverPhoto.name}`;
-      const { error: uploadErr } = await supabase.storage.from("provider-onboarding").upload(path, newCoverPhoto);
-      if (!uploadErr) {
-        const { data: urlData } = supabase.storage.from("provider-onboarding").getPublicUrl(path);
-        finalCoverUrl = urlData.publicUrl;
-      }
-    } else if (selectedScrapedPhoto && !finalCoverUrl) {
-      // Download scraped photo to storage
-      try {
-        const res = await fetch(selectedScrapedPhoto);
-        const blob = await res.blob();
-        const ext = selectedScrapedPhoto.split('.').pop()?.split('?')[0] || 'jpg';
-        const path = `admin/${Date.now()}-scraped-cover.${ext}`;
-        const { error: uploadErr } = await supabase.storage.from("provider-onboarding").upload(path, blob);
-        if (!uploadErr) {
-          const { data: urlData } = supabase.storage.from("provider-onboarding").getPublicUrl(path);
-          finalCoverUrl = urlData.publicUrl;
-        }
-      } catch { /* ignore, cover photo is optional */ }
-    }
-
-    const payload = {
-      name: form.name,
-      slug: form.slug.toLowerCase().replace(/[^a-z0-9-]/g, "-"),
-      city: form.city || null,
-      country: form.country || "Mexico",
-      address: form.address || null,
-      phone: form.phone || null,
-      description: form.description || null,
-      specialties: form.specialties.split(",").map(s => s.trim()).filter(Boolean),
-      languages: form.languages.split(",").map(s => s.trim()).filter(Boolean),
-      hours_of_operation: form.hours_of_operation || null,
-      established_year: form.established_year ? parseInt(form.established_year) : null,
-      admin_managed: true,
-      admin_email: form.admin_email || "cat@denied.care",
-      verification_tier: form.verification_tier,
-      travel_info: form.travel_info || null,
-      cover_photo_url: finalCoverUrl || null,
-    };
-
-    const createdSlug = payload.slug;
-
-    if (selectedProvider) {
-      const { error } = await supabase.from("providers" as any).update(payload as any).eq("id", selectedProvider.id);
-      if (error) { setUploadingCover(false); toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-      toast({ title: "Provider updated" });
-    } else {
-      const { error } = await supabase.from("providers" as any).insert(payload as any);
-      if (error) { setUploadingCover(false); toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-      toast({ title: "Provider created" });
-    }
-    setUploadingCover(false);
-    setEditOpen(false);
-
-    // If imported, navigate to onboarding
-    if (navigateToOnboarding && !selectedProvider) {
-      await fetchProviders();
-      // Find the newly created provider
-      const { data: newProviders } = await supabase.from("providers" as any).select("*").eq("slug", createdSlug).maybeSingle();
-      if (newProviders) {
-        setOnboardingProvider(newProviders as any);
-      }
-      setNavigateToOnboarding(false);
-      setImportSource(null);
-      setScrapedPhotos([]);
-      setSelectedScrapedPhoto(null);
-    } else {
-      fetchProviders();
-    }
-  };
+  // handleSave is now handled by AdminProviderForm
 
   const handleTransfer = async () => {
     if (!selectedProvider || !transferEmail) return;
@@ -516,13 +408,29 @@ const ProvidersSection = () => {
     fetchProviders();
   };
 
-  if (onboardingProvider && user) {
+  // Show form for create/edit/onboarding
+  if ((formMode && user) || (onboardingProvider && user)) {
+    const isCreating = formMode === "create";
+    const editSlug = formMode === "edit" ? formSlug : onboardingProvider?.slug;
+    const editName = formMode === "edit" ? formName : onboardingProvider?.name;
     return (
-      <AdminProviderOnboarding
+      <AdminProviderForm
         userId={user.id}
-        providerSlug={onboardingProvider.slug}
-        providerName={onboardingProvider.name}
-        onBack={() => setOnboardingProvider(null)}
+        providerSlug={editSlug}
+        providerName={editName}
+        isNew={isCreating}
+        initialData={isCreating ? formInitialData : undefined}
+        onBack={() => { setFormMode(null); setOnboardingProvider(null); fetchProviders(); }}
+        onSaved={(slug) => {
+          if (isCreating) {
+            // After creating, switch to edit mode for same provider
+            setFormMode("edit");
+            setFormSlug(slug);
+            setFormName(undefined);
+            setFormInitialData(null);
+          }
+          fetchProviders();
+        }}
       />
     );
   }
@@ -740,10 +648,9 @@ const ProvidersSection = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-1 justify-end">
-                      <Button variant="ghost" size="sm" onClick={() => setOnboardingProvider(p)} title="Fill Out Profile">
-                        <ClipboardEdit className="w-3.5 h-3.5" />
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(p)} title="Edit Provider">
+                        <Pencil className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => openEdit(p)}><Pencil className="w-3.5 h-3.5" /></Button>
                       <Button variant="ghost" size="sm" asChild>
                         <a href={`/provider/${p.slug}`} target="_blank" rel="noopener noreferrer"><ExternalLink className="w-3.5 h-3.5" /></a>
                       </Button>
@@ -764,144 +671,7 @@ const ProvidersSection = () => {
         </Card>
       )}
 
-      {/* Create/Edit Dialog */}
-      <Dialog open={editOpen} onOpenChange={setEditOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{selectedProvider ? "Edit Provider" : "Create Provider"}</DialogTitle>
-          </DialogHeader>
-          {importSource && !selectedProvider && (
-            <Alert className="bg-accent/50 border-accent">
-              <Globe className="w-4 h-4" />
-              <AlertDescription>
-                Auto-imported from <a href={importSource} target="_blank" rel="noopener noreferrer" className="underline font-medium">{new URL(importSource).hostname}</a> — review and edit before saving.
-              </AlertDescription>
-            </Alert>
-          )}
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Clinic Name *</Label>
-              <Input value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Slug *</Label>
-              <Input value={form.slug} onChange={(e) => setForm(f => ({ ...f, slug: e.target.value }))} placeholder="clinic-name-city" />
-            </div>
-            <div className="space-y-2">
-              <Label>City</Label>
-              <Input value={form.city} onChange={(e) => setForm(f => ({ ...f, city: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Country</Label>
-              <Input value={form.country} onChange={(e) => setForm(f => ({ ...f, country: e.target.value }))} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Address</Label>
-              <Input value={form.address} onChange={(e) => setForm(f => ({ ...f, address: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone</Label>
-              <Input value={form.phone} onChange={(e) => setForm(f => ({ ...f, phone: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Established Year</Label>
-              <Input value={form.established_year} onChange={(e) => setForm(f => ({ ...f, established_year: e.target.value }))} type="number" />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Description</Label>
-              <Textarea value={form.description} onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
-            </div>
-            <div className="space-y-2">
-              <Label>Specialties (comma-separated)</Label>
-              <Input value={form.specialties} onChange={(e) => setForm(f => ({ ...f, specialties: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Languages (comma-separated)</Label>
-              <Input value={form.languages} onChange={(e) => setForm(f => ({ ...f, languages: e.target.value }))} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Hours of Operation</Label>
-              <Input value={form.hours_of_operation} onChange={(e) => setForm(f => ({ ...f, hours_of_operation: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Admin Email</Label>
-              <Input value={form.admin_email} onChange={(e) => setForm(f => ({ ...f, admin_email: e.target.value }))} />
-            </div>
-            <div className="space-y-2">
-              <Label>Verification Tier</Label>
-              <Select value={form.verification_tier} onValueChange={(v) => setForm(f => ({ ...f, verification_tier: v }))}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="listed">Listed</SelectItem>
-                  <SelectItem value="verified">Verified</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Travel Info</Label>
-              <Textarea value={form.travel_info} onChange={(e) => setForm(f => ({ ...f, travel_info: e.target.value }))} rows={2} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Cover Photo (shown on search card)</Label>
-              <p className="text-xs text-muted-foreground">Upload a wide photo (16:9 recommended) that represents the clinic.</p>
-              {(coverPhotoUrl && !newCoverPhoto) ? (
-                <div className="relative rounded-lg overflow-hidden border border-border/50 max-w-md">
-                  <img src={coverPhotoUrl} alt="Cover" className="w-full aspect-[16/10] object-cover" />
-                  <button onClick={() => setCoverPhotoUrl("")} className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : newCoverPhoto ? (
-                <div className="relative rounded-lg overflow-hidden border border-border/50 max-w-md">
-                  <img src={URL.createObjectURL(newCoverPhoto)} alt="Cover preview" className="w-full aspect-[16/10] object-cover" />
-                  <button onClick={() => setNewCoverPhoto(null)} className="absolute top-2 right-2 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center w-full max-w-md aspect-[16/10] rounded-lg border-2 border-dashed border-border cursor-pointer hover:border-primary transition-colors">
-                  <Upload className="w-8 h-8 text-muted-foreground mb-2" />
-                  <span className="text-sm text-muted-foreground">Upload cover photo</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={(e) => setNewCoverPhoto(e.target.files?.[0] || null)} />
-                </label>
-              )}
-            </div>
-            {/* Scraped photos grid */}
-            {scrapedPhotos.length > 0 && !selectedProvider && (
-              <div className="space-y-2 sm:col-span-2">
-                <Label>Scraped Images (click to set as cover)</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  {scrapedPhotos.map((photo, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => {
-                        setSelectedScrapedPhoto(photo);
-                        setCoverPhotoUrl(photo);
-                        setNewCoverPhoto(null);
-                      }}
-                      className={`relative rounded-lg overflow-hidden border-2 transition-all aspect-video ${
-                        selectedScrapedPhoto === photo ? 'border-primary ring-2 ring-primary/30' : 'border-border/50 hover:border-primary/50'
-                      }`}
-                    >
-                      <img src={photo} alt={`Scraped ${i + 1}`} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                      {selectedScrapedPhoto === photo && (
-                        <div className="absolute top-1 right-1 bg-primary text-primary-foreground rounded-full w-5 h-5 flex items-center justify-center">
-                          <Check className="w-3 h-3" />
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <Button onClick={handleSave} className="w-full mt-4" disabled={!form.name || !form.slug || uploadingCover}>
-            {uploadingCover ? "Uploading..." : selectedProvider ? "Save Changes" : "Create Provider"}
-          </Button>
-        </DialogContent>
-      </Dialog>
+      {/* Old Create/Edit Dialog removed — now using AdminProviderForm */}
 
       {/* Transfer Ownership Dialog */}
       <Dialog open={transferOpen} onOpenChange={setTransferOpen}>

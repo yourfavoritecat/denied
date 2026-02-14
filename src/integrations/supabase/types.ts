@@ -387,6 +387,36 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_admin_reviews: {
+        Row: {
+          created_at: string
+          id: string
+          personally_visited: boolean
+          provider_slug: string
+          rating: number
+          review_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          personally_visited?: boolean
+          provider_slug: string
+          rating?: number
+          review_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          personally_visited?: boolean
+          provider_slug?: string
+          rating?: number
+          review_text?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       provider_applications: {
         Row: {
           business_name: string
