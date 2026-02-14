@@ -93,7 +93,7 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted">
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
@@ -135,7 +135,7 @@ const Dashboard = () => {
             ].map((action) => (
               <motion.div key={action.label} variants={item}>
                 <Card
-                  className="cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 border-border/50"
+                  className="cursor-pointer tactile-press border-border/50 bg-card"
                   onClick={() => navigate(action.to)}
                 >
                   <CardContent className="flex flex-col items-center gap-2 py-5 px-3">
@@ -155,7 +155,7 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <Card>
+              <Card className="shadow-lifted bg-card">
                 <CardHeader className="flex flex-row items-center justify-between pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Stethoscope className="w-5 h-5 text-primary" />
@@ -229,7 +229,7 @@ const Dashboard = () => {
               transition={{ delay: 0.35, duration: 0.5 }}
             >
               {/* Trip Briefs */}
-              <Card>
+              <Card className="shadow-elevated bg-card">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <CalendarDays className="w-5 h-5 text-secondary" />
@@ -266,7 +266,7 @@ const Dashboard = () => {
               </Card>
 
               {/* Quick Stats */}
-              <Card>
+              <Card className="shadow-elevated bg-card">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Star className="w-5 h-5 text-amber-400" />

@@ -281,7 +281,7 @@ const ProviderDashboard = () => {
   };
 
   const BookingCard = ({ booking }: { booking: Booking }) => (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-lifted tactile-press bg-card">
       <CardContent className="py-4 px-5">
         <div className="flex items-start justify-between gap-3 mb-2">
           <div className="min-w-0">
@@ -374,7 +374,7 @@ const ProviderDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-muted flex">
       <ProviderSidebar
         active={section}
         onChange={setSection}
