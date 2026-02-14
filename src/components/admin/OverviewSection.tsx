@@ -112,7 +112,7 @@ const OverviewSection = ({ onNavigate }: { onNavigate?: (section: string) => voi
       </div>
 
       {/* Metric cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 lg:gap-4">
         {metricCards.map((m) => (
           <Card key={m.label} className="hover:shadow-md transition-shadow cursor-pointer" onClick={m.action}>
             <CardContent className="py-5 px-4">
@@ -230,7 +230,7 @@ const OverviewSection = ({ onNavigate }: { onNavigate?: (section: string) => voi
       {/* Provider Management Quick Access */}
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Building2 className="w-4 h-4 text-primary" />
               provider management
