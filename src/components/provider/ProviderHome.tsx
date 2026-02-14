@@ -116,7 +116,7 @@ const ProviderHome = ({ providerName, providerSlug, bookings, onNavigate }: Prop
         {metrics.map((m) => (
           <Card 
             key={m.label} 
-            className={`hover:shadow-md transition-shadow ${m.action ? "cursor-pointer" : ""}`}
+            className={`tactile-press bg-card ${m.action ? "cursor-pointer" : ""}`}
             onClick={m.action}
           >
             <CardContent className="py-5 px-4">
