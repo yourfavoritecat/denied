@@ -208,7 +208,7 @@ const SearchPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted">
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4">
@@ -247,7 +247,7 @@ const SearchPage = () => {
           <div className="flex flex-col lg:flex-row gap-8">
             {/* Desktop Filters */}
             <aside className="hidden lg:block lg:w-72 shrink-0">
-              <Card className="sticky top-24 border border-border/50 shadow-lg">
+              <Card className="sticky top-24 border border-border/50 shadow-lifted bg-card">
                 <CardHeader className="pb-4">
                   <div className="flex items-center gap-2 font-bold text-lg">
                     <Filter className="w-5 h-5" />
@@ -306,11 +306,12 @@ const SearchPage = () => {
                       <motion.div
                         key={provider.slug}
                         initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, delay: index * 0.06 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-40px" }}
+                        transition={{ duration: 0.45, delay: (index % 4) * 0.08 }}
                       >
                         <Link to={`/provider/${provider.slug}`}>
-                          <Card className="overflow-hidden border border-border/50 shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer h-full group">
+                          <Card className="overflow-hidden border border-border/50 shadow-elevated hover:shadow-floating tactile-lift cursor-pointer h-full group bg-card">
                             <div className="aspect-[16/10] relative overflow-hidden">
                               <img
                                 src={coverPhotos[provider.slug] || CATEGORY_IMAGES[category] || clinicDental}
@@ -318,22 +319,22 @@ const SearchPage = () => {
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 loading="lazy"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                               {provider.verified ? (
                                 <div className="absolute top-3 right-3">
-                                  <Badge className="bg-primary text-primary-foreground gap-1 shadow-md">
+                                  <Badge className="bg-primary text-primary-foreground gap-1 shadow-floating">
                                     <BadgeCheck className="w-3 h-3" /> Verified
                                   </Badge>
                                 </div>
                               ) : provider.verificationTier === "listed" ? (
                                 <div className="absolute top-3 right-3">
-                                  <Badge variant="outline" className="bg-muted/80 text-muted-foreground gap-1 shadow-sm border-border">
+                                  <Badge variant="outline" className="bg-card/90 text-muted-foreground gap-1 shadow-elevated border-border backdrop-blur-sm">
                                     <BadgeCheck className="w-3 h-3" /> Listed
                                   </Badge>
                                 </div>
                               ) : null}
                               <div className="absolute bottom-3 left-4">
-                                <span className="text-white/90 text-xs uppercase tracking-wider font-medium drop-shadow-md">
+                                <span className="bg-black/50 backdrop-blur-sm text-white text-xs uppercase tracking-wider font-medium px-2.5 py-1 rounded-full shadow-elevated">
                                   {category === "dental" ? "Dental Clinic" : category === "surgery" ? "Surgery Center" : "Aesthetics & MedSpa"}
                                 </span>
                               </div>
@@ -358,9 +359,12 @@ const SearchPage = () => {
                                   </Badge>
                                 ))}
                               </div>
-                              <div className="border-t pt-3">
-                                <span className="text-sm text-muted-foreground">From </span>
-                                <span className="text-xl font-bold text-primary">${provider.startingPrice}</span>
+                              <div className="border-t border-border/50 pt-3 flex items-center justify-between">
+                                <div>
+                                  <span className="text-sm text-muted-foreground">From </span>
+                                  <span className="text-xl font-bold text-primary">${provider.startingPrice}</span>
+                                </div>
+                                <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
                               </div>
                             </CardContent>
                           </Card>
