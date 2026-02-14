@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { User, Bell, Eye, Lock, Mail } from "lucide-react";
+import { User, Bell, Eye, Lock, Mail, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -173,6 +173,38 @@ const SettingsTab = () => {
           <Button onClick={handleSave} disabled={saving || (publicProfile && !usernameValid)}>
             {saving ? "Saving..." : "Save Changes"}
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Chat Assistant */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5" />
+            Chat Assistant
+          </CardTitle>
+          <CardDescription>Control the trip assistant chat bubble</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium">Show trip assistant chat bubble</p>
+              <p className="text-xs text-muted-foreground">
+                The floating chat bubble in the bottom-left corner
+              </p>
+            </div>
+            <Switch
+              checked={!((profile as any)?.chat_hidden)}
+              onCheckedChange={async (checked) => {
+                if (!profile) return;
+                await supabase
+                  .from("profiles")
+                  .update({ chat_hidden: !checked } as any)
+                  .eq("user_id", profile.user_id);
+                await refreshProfile();
+              }}
+            />
+          </div>
         </CardContent>
       </Card>
 
