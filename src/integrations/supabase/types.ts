@@ -246,6 +246,125 @@ export type Database = {
           },
         ]
       }
+      creator_content: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          creator_id: string
+          id: string
+          media_type: string
+          media_url: string
+          procedure_tags: string[] | null
+          provider_slug: string | null
+          sort_order: number | null
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          creator_id: string
+          id?: string
+          media_type: string
+          media_url: string
+          procedure_tags?: string[] | null
+          provider_slug?: string | null
+          sort_order?: number | null
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          creator_id?: string
+          id?: string
+          media_type?: string
+          media_url?: string
+          procedure_tags?: string[] | null
+          provider_slug?: string | null
+          sort_order?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "creator_content_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      creator_invite_codes: {
+        Row: {
+          claimed_by: string | null
+          code: string
+          created_at: string | null
+          created_by: string | null
+          handle: string | null
+          id: string
+          is_active: boolean | null
+        }
+        Insert: {
+          claimed_by?: string | null
+          code: string
+          created_at?: string | null
+          created_by?: string | null
+          handle?: string | null
+          id?: string
+          is_active?: boolean | null
+        }
+        Update: {
+          claimed_by?: string | null
+          code?: string
+          created_at?: string | null
+          created_by?: string | null
+          handle?: string | null
+          id?: string
+          is_active?: boolean | null
+        }
+        Relationships: []
+      }
+      creator_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          cover_photo_url: string | null
+          created_at: string | null
+          display_name: string
+          featured_providers: string[] | null
+          handle: string
+          id: string
+          is_published: boolean | null
+          social_links: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          cover_photo_url?: string | null
+          created_at?: string | null
+          display_name: string
+          featured_providers?: string[] | null
+          handle: string
+          id?: string
+          is_published?: boolean | null
+          social_links?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          cover_photo_url?: string | null
+          created_at?: string | null
+          display_name?: string
+          featured_providers?: string[] | null
+          handle?: string
+          id?: string
+          is_published?: boolean | null
+          social_links?: Json | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string | null
