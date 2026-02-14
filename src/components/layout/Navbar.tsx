@@ -10,11 +10,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield, ClipboardList, FileText, Bug } from "lucide-react";
+import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield, ClipboardList, FileText, Bug, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useViewAs } from "@/hooks/useViewAs";
 import { useBetaTester } from "@/hooks/useBetaTester";
+import { useCreator } from "@/hooks/useCreator";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import logo from "@/assets/logo.png";
 
@@ -25,6 +26,7 @@ const Navbar = () => {
   const { isAdmin } = useAdmin();
   const { viewAs } = useViewAs();
   const { isBetaTester } = useBetaTester();
+  const { isCreator } = useCreator();
   const showBanner = isAdmin && viewAs !== "admin";
 
   const initials = profile
@@ -46,6 +48,7 @@ const Navbar = () => {
     { to: "/my-trips", icon: Plane, label: "My Trips" },
     ...(showProviderDashboard ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Provider Dashboard" }] : []),
     ...(showAdminLink ? [{ to: "/admin", icon: Shield, label: "Admin" }] : []),
+    ...(isCreator ? [{ to: "/creator/edit", icon: Sparkles, label: "My Creator Page" }] : []),
     { to: "/profile", icon: User, label: "Profile" },
   ];
 
