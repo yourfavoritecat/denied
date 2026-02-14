@@ -10,12 +10,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield, ClipboardList, FileText, Bug, Sparkles } from "lucide-react";
+import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Info, Shield, ClipboardList, FileText, Bug, Sparkles, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useViewAs } from "@/hooks/useViewAs";
 import { useBetaTester } from "@/hooks/useBetaTester";
 import { useCreator } from "@/hooks/useCreator";
+import { useChat } from "@/hooks/useChatContext";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import logo from "@/assets/logo.png";
 
@@ -27,6 +28,7 @@ const Navbar = () => {
   const { viewAs } = useViewAs();
   const { isBetaTester } = useBetaTester();
   const { isCreator } = useCreator();
+  const { setIsOpen: openChat } = useChat();
   const showBanner = isAdmin && viewAs !== "admin";
 
   const initials = profile
@@ -130,6 +132,9 @@ const Navbar = () => {
                         <Bug className="w-4 h-4 mr-2" /> My Bug Reports
                       </DropdownMenuItem>
                     )}
+                    <DropdownMenuItem onClick={() => openChat(true)}>
+                      <MessageCircle className="w-4 h-4 mr-2" /> Trip Assistant
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut} className="text-destructive">
                       <LogOut className="w-4 h-4 mr-2" /> Log Out

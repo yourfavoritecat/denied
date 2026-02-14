@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ViewAsProvider } from "@/hooks/useViewAs";
+import { ChatProvider } from "@/hooks/useChatContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ViewAsSwitcher from "@/components/admin/ViewAsSwitcher";
 import ViewAsBanner from "@/components/admin/ViewAsBanner";
@@ -30,6 +31,7 @@ import CreatorJoin from "./pages/CreatorJoin";
 import CreatorEdit from "./pages/CreatorEdit";
 import CreatorProfile from "./pages/CreatorProfile";
 import BugReportButton from "./components/beta/BugReportButton";
+import TripAssistantWrapper from "./components/chat/TripAssistantWrapper";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,6 +40,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <ViewAsProvider>
+      <ChatProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -70,8 +73,10 @@ const App = () => (
           <ViewAsBanner />
           <ViewAsSwitcher />
           <BugReportButton />
+          <TripAssistantWrapper />
         </BrowserRouter>
       </TooltipProvider>
+      </ChatProvider>
       </ViewAsProvider>
     </AuthProvider>
   </QueryClientProvider>

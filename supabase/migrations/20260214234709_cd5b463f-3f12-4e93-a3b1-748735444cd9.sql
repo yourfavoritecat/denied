@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN chat_hidden boolean NOT NULL DEFAULT false;

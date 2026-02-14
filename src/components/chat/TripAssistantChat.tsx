@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { MessageCircle, X, Send, Loader2 } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, EyeOff } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useChat } from "@/hooks/useChatContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,7 +42,7 @@ function getSuggestions(pathname: string): string[] {
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-chat`;
 
 export default function TripAssistantChat() {
-  const [open, setOpen] = useState(false);
+  const { isOpen: open, setIsOpen: setOpen } = useChat();
   const [messages, setMessages] = useState<Msg[]>([
     { role: "assistant", content: GREETING },
   ]);
@@ -50,7 +51,9 @@ export default function TripAssistantChat() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { pathname } = useLocation();
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
+
+  const chatHidden = (profile as any)?.chat_hidden === true;
 
   const suggestions = getSuggestions(pathname);
 
@@ -61,6 +64,16 @@ export default function TripAssistantChat() {
   useEffect(() => {
     if (open) inputRef.current?.focus();
   }, [open]);
+
+  const hideChat = async () => {
+    if (!profile) return;
+    setOpen(false);
+    await supabase
+      .from("profiles")
+      .update({ chat_hidden: true } as any)
+      .eq("user_id", profile.user_id);
+    await refreshProfile();
+  };
 
   const getUserContext = useCallback(async () => {
     if (!user) return { currentPage: pathname };
@@ -149,15 +162,15 @@ export default function TripAssistantChat() {
 
   return (
     <>
-      {/* Floating button */}
+      {/* Floating button — hidden if user dismissed */}
       <AnimatePresence>
-        {!open && (
+        {!open && !chatHidden && (
           <motion.button
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+            className="fixed bottom-6 left-6 z-50 h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
             style={{ backgroundColor: "#5EB298" }}
             aria-label="Open trip assistant"
           >
@@ -174,7 +187,7 @@ export default function TripAssistantChat() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-4 right-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed bottom-4 left-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl overflow-hidden"
             style={{ backgroundColor: "#1A1A1A" }}
           >
             {/* Header */}
@@ -188,9 +201,18 @@ export default function TripAssistantChat() {
                   <p className="text-xs text-white/50">by Denied</p>
                 </div>
               </div>
-              <button onClick={() => setOpen(false)} className="text-white/60 hover:text-white transition-colors">
-                <X className="h-5 w-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={hideChat}
+                  className="text-white/40 hover:text-white/70 transition-colors p-1"
+                  title="Hide chat bubble"
+                >
+                  <EyeOff className="h-4 w-4" />
+                </button>
+                <button onClick={() => setOpen(false)} className="text-white/60 hover:text-white transition-colors p-1">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
