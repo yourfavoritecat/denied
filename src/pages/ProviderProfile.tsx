@@ -179,7 +179,7 @@ const ProviderProfile = () => {
   const languages = real?.policies?.languages_spoken || pRec?.languages || seedProvider?.languages || [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted">
       <Navbar />
       <main className="pt-16 pb-24">
         {/* Hero */}
@@ -273,15 +273,19 @@ const ProviderProfile = () => {
 
           {/* About / Description */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
-            <h2 className="text-2xl font-bold mb-4">About</h2>
-            <p className="text-muted-foreground leading-relaxed max-w-3xl">
-              {providerDescription}
-            </p>
-            {(seedProvider?.specialties || pRec?.specialties) && (
-              <div className="flex flex-wrap gap-2 mt-4">
-                {(pRec?.specialties || seedProvider?.specialties || []).map((s: string) => <Badge key={s} variant="secondary">{s}</Badge>)}
-              </div>
-            )}
+            <Card className="shadow-lifted bg-card">
+              <CardContent className="pt-6">
+                <h2 className="text-2xl font-bold mb-4">About</h2>
+                <p className="text-muted-foreground leading-relaxed max-w-3xl">
+                  {providerDescription}
+                </p>
+                {(seedProvider?.specialties || pRec?.specialties) && (
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    {(pRec?.specialties || seedProvider?.specialties || []).map((s: string) => <Badge key={s} variant="secondary">{s}</Badge>)}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </motion.section>
 
           {/* Team Members (real data) */}
@@ -289,8 +293,9 @@ const ProviderProfile = () => {
             <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
               <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><Users className="w-6 h-6" /> Our Team</h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {real.team.map((member: any) => (
-                  <Card key={member.id} className="border border-border/50 shadow-md hover:shadow-lg transition-shadow">
+                {real.team.map((member: any, i: number) => (
+                  <motion.div key={member.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
+                  <Card className="border border-border/50 shadow-elevated hover:shadow-floating tactile-lift bg-card">
                     <CardContent className="pt-6 flex gap-4">
                       <Avatar className="w-16 h-16 shrink-0">
                         <AvatarImage src={member.headshot_url} alt={member.name} />
@@ -305,6 +310,7 @@ const ProviderProfile = () => {
                       </div>
                     </CardContent>
                   </Card>
+                  </motion.div>
                 ))}
               </div>
             </motion.section>
@@ -313,7 +319,7 @@ const ProviderProfile = () => {
           {/* Procedures & Pricing */}
           <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
             <h2 className="text-2xl font-bold mb-4">Procedures & Pricing</h2>
-            <Card className="border border-border/50 shadow-lg overflow-hidden">
+            <Card className="border border-border/50 shadow-floating overflow-hidden bg-card">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-denied-black hover:bg-denied-black">
@@ -365,7 +371,7 @@ const ProviderProfile = () => {
             <div className="grid md:grid-cols-3 gap-8">
               {/* Rating Breakdown + Category Chart */}
               {(seedProvider || categoryAggregates) && (
-                <Card className="border border-border/50 shadow-lg">
+                <Card className="border border-border/50 shadow-lifted bg-card">
                   <CardContent className="pt-6">
                     {seedProvider && (
                       <>
@@ -433,7 +439,7 @@ const ProviderProfile = () => {
 
                 {/* Static seed reviews */}
                 {seedProvider?.reviewsList.map((review) => (
-                  <Card key={review.name + review.date} className="border border-border/50 shadow-md hover:shadow-lg transition-shadow">
+                  <Card key={review.name + review.date} className="border border-border/50 shadow-elevated hover:shadow-lifted tactile-press bg-card">
                     <CardContent className="pt-6">
                       <div className="flex items-start gap-4">
                         <Avatar className="bg-secondary/20 shrink-0">
@@ -515,7 +521,7 @@ const ProviderProfile = () => {
           {pRec?.travel_info && (
             <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
               <h2 className="text-2xl font-bold mb-4">Getting There</h2>
-              <Card className="border border-border/50 shadow-lg">
+              <Card className="border border-border/50 shadow-lifted bg-card">
                 <CardContent className="pt-6">
                   <p className="text-muted-foreground leading-relaxed">{pRec.travel_info}</p>
                 </CardContent>
@@ -540,7 +546,7 @@ const ProviderProfile = () => {
       </main>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur border-t border-border shadow-2xl z-40">
+      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border shadow-floating z-40">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div>
             <span className="text-sm text-muted-foreground">Starting at </span>
