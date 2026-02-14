@@ -76,7 +76,7 @@ const AdminPage = () => {
   return (
     <div className="min-h-screen bg-background flex">
       <AdminSidebar active={section} onChange={setSection} inboxCount={inboxCount} flagCount={flagCount} />
-      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+      <main className="flex-1 p-4 pt-16 lg:pt-6 lg:p-8 overflow-y-auto">
         {section === "overview" ? (
           <OverviewSection onNavigate={(s: string) => setSection(s as AdminSection)} />
         ) : (
