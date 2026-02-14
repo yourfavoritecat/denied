@@ -854,6 +854,71 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_suggestions: {
+        Row: {
+          admin_notes: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          creator_id: string
+          creator_notes: string | null
+          description: string | null
+          id: string
+          name: string
+          photos: string[] | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          specialties: string[] | null
+          status: string
+          videos: string[] | null
+          website_url: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          creator_id: string
+          creator_notes?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          photos?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          specialties?: string[] | null
+          status?: string
+          videos?: string[] | null
+          website_url?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          creator_id?: string
+          creator_notes?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          photos?: string[] | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          specialties?: string[] | null
+          status?: string
+          videos?: string[] | null
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_suggestions_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "creator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       provider_team_members: {
         Row: {
           bio: string | null
