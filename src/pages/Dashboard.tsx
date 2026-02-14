@@ -135,7 +135,7 @@ const Dashboard = () => {
             ].map((action) => (
               <motion.div key={action.label} variants={item}>
                 <Card
-                  className="cursor-pointer tactile-press border-border/50 bg-card"
+                  className="cursor-pointer tactile-press border-border/50 bg-card shadow-elevated"
                   onClick={() => navigate(action.to)}
                 >
                   <CardContent className="flex flex-col items-center gap-2 py-5 px-3">
@@ -207,7 +207,7 @@ const Dashboard = () => {
                           <div className="flex items-center gap-2 shrink-0">
                             <Badge
                               variant="outline"
-                              className={`text-[10px] capitalize ${statusColors[booking.status] || ""}`}
+                              className={`text-[10px] capitalize shadow-elevated ${statusColors[booking.status] || ""}`}
                             >
                               {booking.status.replace(/_/g, " ")}
                             </Badge>

@@ -107,7 +107,7 @@ const MyTripsPage = () => {
 
     return (
       <Link to={`/booking/${booking.id}`}>
-        <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+        <Card className="tactile-lift cursor-pointer shadow-elevated border-border/50">
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
@@ -148,7 +148,7 @@ const MyTripsPage = () => {
         {items.map((b) => <BookingCard key={b.id} booking={b} />)}
       </div>
     ) : (
-      <Card><CardContent className="py-12 text-center">
+      <Card className="shadow-elevated border-border/50"><CardContent className="py-12 text-center">
         <Icon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
         <h3 className="text-lg font-semibold mb-2">{emptyTitle}</h3>
         <p className="text-muted-foreground mb-4">{emptyDesc}</p>
@@ -157,7 +157,7 @@ const MyTripsPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted">
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
@@ -203,7 +203,7 @@ const MyTripsPage = () => {
                 <div className="text-center py-12 text-muted-foreground">Loading...</div>
               ) : tripBriefs.length > 0 ? (
                 tripBriefs.map((brief) => (
-                  <Card key={brief.id}>
+                  <Card key={brief.id} className="shadow-elevated border-border/50 tactile-lift cursor-pointer">
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
                         <div>
@@ -240,7 +240,7 @@ const MyTripsPage = () => {
                   </Card>
                 ))
               ) : (
-                <Card><CardContent className="py-12 text-center">
+                <Card className="shadow-elevated border-border/50"><CardContent className="py-12 text-center">
                   <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No trip briefs yet</h3>
                   <p className="text-muted-foreground mb-4">Plan your first trip to get started</p>

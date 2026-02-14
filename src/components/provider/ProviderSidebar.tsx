@@ -19,7 +19,7 @@ interface Props {
 }
 
 const ProviderSidebar = ({ active, onChange, counts, providerName }: Props) => (
-  <aside className="w-56 shrink-0 border-r border-border bg-card min-h-[calc(100vh-4rem)]">
+  <aside className="w-56 shrink-0 border-r border-border bg-card min-h-[calc(100vh-4rem)] shadow-lifted">
     <div className="p-4 border-b border-border flex items-center gap-2">
       <Building2 className="w-5 h-5 text-primary" />
       <span className="font-bold text-sm truncate">{providerName || "Provider"}</span>
