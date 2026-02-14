@@ -28,6 +28,7 @@ import Notifications from "./pages/Notifications";
 import MyBugReports from "./pages/MyBugReports";
 import CreatorJoin from "./pages/CreatorJoin";
 import CreatorEdit from "./pages/CreatorEdit";
+import CreatorProfile from "./pages/CreatorProfile";
 import BugReportButton from "./components/beta/BugReportButton";
 import NotFound from "./pages/NotFound";
 
@@ -51,6 +52,7 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/apply" element={<Apply />} />
             <Route path="/join/:code" element={<CreatorJoin />} />
+            <Route path="/c/:handle" element={<CreatorProfile />} />
             <Route path="/creator/edit" element={<ProtectedRoute><CreatorEdit /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
