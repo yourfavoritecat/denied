@@ -121,13 +121,13 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+    <div className="min-h-screen bg-muted flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <img src={logo} alt="Denied" className="h-12" />
         </div>
 
-        <Card>
+        <Card className="shadow-hero border-border/50">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Welcome</CardTitle>
             <CardDescription>Sign in to manage your trips and profile</CardDescription>

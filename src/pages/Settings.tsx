@@ -6,13 +6,13 @@ import { Shield, KeyRound, Trash2 } from "lucide-react";
 
 const SettingsPage = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted">
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-2xl">
           <h1 className="text-2xl font-bold mb-6">Settings</h1>
 
-          <Card>
+          <Card className="shadow-elevated border-border/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />

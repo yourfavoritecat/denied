@@ -84,7 +84,7 @@ const AdminSidebar = ({ active, onChange, inboxCount = 0, flagCount = 0 }: Props
       </div>
 
       {/* Desktop: fixed sidebar */}
-      <aside className="hidden lg:block w-56 shrink-0 border-r border-border bg-card min-h-[calc(100vh-4rem)]">
+      <aside className="hidden lg:block w-56 shrink-0 border-r border-border bg-card min-h-[calc(100vh-4rem)] shadow-lifted">
         <div className="p-4 border-b border-border flex items-center gap-2">
           <Shield className="w-5 h-5 text-primary" />
           <span className="font-bold text-sm">Admin</span>

@@ -76,7 +76,7 @@ const About = () => {
         </section>
 
         {/* Section 2: My Story */}
-        <section className="pb-16">
+        <section className="pb-16 section-panel">
           <h2 className="text-2xl md:text-3xl font-bold mb-6" style={{ color: "#F8B4A0" }}>
             the short version
           </h2>
@@ -97,7 +97,7 @@ const About = () => {
         </section>
 
         {/* Section 3: What I Do */}
-        <section className="pb-16">
+        <section className="pb-16 section-panel">
           <h2 className="text-2xl md:text-3xl font-bold mb-6" style={{ color: "#F8B4A0" }}>
             how this works right now
           </h2>
@@ -118,10 +118,10 @@ const About = () => {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {credentials.map((cred) => (
-              <div
-                key={cred}
-                className="rounded-lg border border-white/10 bg-white/[0.03] px-5 py-4 text-sm md:text-base"
-                style={{ color: "#E8E0DB" }}
+                <div
+                  key={cred}
+                  className="rounded-lg border border-white/10 bg-white/[0.03] px-5 py-4 text-sm md:text-base shadow-elevated"
+                  style={{ color: "#E8E0DB" }}
               >
                 {cred}
               </div>

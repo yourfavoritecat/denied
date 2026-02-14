@@ -155,7 +155,7 @@ const BookingDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-muted">
         <Navbar />
         <main className="pt-24 pb-16 flex justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -166,7 +166,7 @@ const BookingDetail = () => {
 
   if (!booking) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-muted">
         <Navbar />
         <main className="pt-24 pb-16 text-center">
           <h1 className="text-2xl font-bold mb-2">Booking Not Found</h1>
@@ -184,7 +184,7 @@ const BookingDetail = () => {
     : JSON.stringify(booking.procedures);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted">
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
@@ -197,13 +197,13 @@ const BookingDetail = () => {
               <h1 className="text-2xl font-bold">{provider?.name || booking.provider_slug}</h1>
               <p className="text-muted-foreground text-sm">{procedures}</p>
             </div>
-            <Badge className={`text-sm ${booking.status === "completed" ? "bg-primary/10 text-primary" : booking.status === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-secondary/10 text-secondary"}`}>
+            <Badge className={`text-sm shadow-elevated ${booking.status === "completed" ? "bg-primary/10 text-primary" : booking.status === "cancelled" ? "bg-destructive/10 text-destructive" : "bg-secondary/10 text-secondary"}`}>
               {STATUS_STEPS.find((s) => s.key === booking.status)?.label || booking.status}
             </Badge>
           </div>
 
           {/* Status Tracker */}
-          <Card className="mb-8">
+          <Card className="mb-8 shadow-elevated border-border/50">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between relative">
                 {/* Progress line */}
@@ -244,7 +244,7 @@ const BookingDetail = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Booking Details */}
                 <div className="space-y-4">
-                  <Card>
+                  <Card className="shadow-elevated border-border/50">
                     <CardHeader><CardTitle className="text-lg">Inquiry Details</CardTitle></CardHeader>
                     <CardContent className="space-y-3 text-sm">
                       <div>
@@ -273,7 +273,7 @@ const BookingDetail = () => {
                   </Card>
 
                   {booking.quoted_price && (
-                    <Card className="border-primary/30">
+                    <Card className="border-primary/30 shadow-lifted">
                       <CardHeader><CardTitle className="text-lg">Quote</CardTitle></CardHeader>
                       <CardContent className="space-y-3 text-sm">
                         <div className="flex justify-between">
@@ -310,7 +310,7 @@ const BookingDetail = () => {
                 </div>
 
                 {/* Messages Thread */}
-                <Card className="flex flex-col h-[500px]">
+                <Card className="flex flex-col h-[500px] shadow-elevated border-border/50">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">Messages</CardTitle>
                   </CardHeader>

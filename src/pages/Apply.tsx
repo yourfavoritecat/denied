@@ -99,8 +99,8 @@ const Apply = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
-        <Card className="max-w-lg w-full text-center">
+      <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+        <Card className="max-w-lg w-full text-center shadow-floating border-border/50">
           <CardContent className="pt-10 pb-10 space-y-6">
             <CheckCircle className="w-16 h-16 text-primary mx-auto" />
             <h2 className="text-2xl font-bold">Thanks for applying.</h2>
@@ -122,7 +122,7 @@ const Apply = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
+    <div className="min-h-screen bg-muted py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-center mb-8">
           <Link to="/">
@@ -130,7 +130,7 @@ const Apply = () => {
           </Link>
         </div>
 
-        <Card>
+        <Card className="shadow-floating border-border/50">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Provider Application</CardTitle>
             <CardDescription>

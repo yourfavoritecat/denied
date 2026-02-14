@@ -363,7 +363,7 @@ const ProviderDashboard = () => {
           <span className="text-sm text-muted-foreground">{list.length} {list.length === 1 ? "booking" : "bookings"}</span>
         </div>
         {list.length === 0 ? (
-          <Card><CardContent className="py-12 text-center text-muted-foreground">No bookings here</CardContent></Card>
+          <Card className="shadow-elevated border-border/50"><CardContent className="py-12 text-center text-muted-foreground">No bookings here</CardContent></Card>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
             {list.map((b) => <BookingCard key={b.id} booking={b} />)}
@@ -401,7 +401,7 @@ const ProviderDashboard = () => {
 
       {/* Quote Dialog */}
       <Dialog open={quoteOpen} onOpenChange={setQuoteOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md shadow-hero">
           <DialogHeader>
             <DialogTitle>Submit Quote</DialogTitle>
           </DialogHeader>
@@ -443,7 +443,7 @@ const ProviderDashboard = () => {
         setChatOpen(open);
         if (!open) setMessages([]);
       }}>
-        <DialogContent className="max-w-lg max-h-[80vh] flex flex-col">
+        <DialogContent className="max-w-lg max-h-[80vh] flex flex-col shadow-hero">
           <DialogHeader>
             <DialogTitle>Messages</DialogTitle>
           </DialogHeader>
