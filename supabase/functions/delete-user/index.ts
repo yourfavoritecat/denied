@@ -88,6 +88,7 @@ Deno.serve(async (req) => {
       await adminClient.from("creator_content").delete().in("creator_id", creatorIds);
     }
     await adminClient.from("creator_profiles").delete().eq("user_id", user_id);
+    await adminClient.from("creator_invite_codes").update({ claimed_by: null }).eq("claimed_by", user_id);
     await adminClient.from("user_roles").delete().eq("user_id", user_id);
     await adminClient.from("user_feed_posts").delete().eq("user_id", user_id);
     await adminClient.from("user_profile_extras").delete().eq("user_id", user_id);
