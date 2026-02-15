@@ -1,6 +1,6 @@
 import { useViewAs, ViewAsRole } from "@/hooks/useViewAs";
 import { useAdmin } from "@/hooks/useAdmin";
-import { Shield, Stethoscope, User, ChevronDown } from "lucide-react";
+import { Shield, Stethoscope, User, ChevronDown, Sparkles, Eye } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +13,8 @@ const roles: { value: ViewAsRole; label: string; icon: typeof Shield; descriptio
   { value: "admin", label: "Admin", icon: Shield, description: "Full platform access" },
   { value: "provider", label: "Provider", icon: Stethoscope, description: "Clinic dashboard view" },
   { value: "traveler", label: "Traveler", icon: User, description: "Patient experience" },
+  { value: "creator", label: "Creator", icon: Sparkles, description: "Creator page experience" },
+  { value: "visitor", label: "Visitor", icon: Eye, description: "Logged-out experience" },
 ];
 
 const ViewAsSwitcher = () => {

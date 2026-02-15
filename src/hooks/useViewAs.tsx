@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
-export type ViewAsRole = "admin" | "provider" | "traveler";
+export type ViewAsRole = "admin" | "provider" | "traveler" | "creator" | "visitor";
 
 interface ViewAsContextType {
   viewAs: ViewAsRole;
@@ -14,7 +14,7 @@ const ViewAsContext = createContext<ViewAsContextType | undefined>(undefined);
 const getInitialRole = (): ViewAsRole => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "admin" || stored === "provider" || stored === "traveler") return stored;
+    if (stored === "admin" || stored === "provider" || stored === "traveler" || stored === "creator" || stored === "visitor") return stored;
   } catch {}
   return "admin";
 };
