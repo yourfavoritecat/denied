@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Copy, Check, ExternalLink, Eye, Lightbulb, Image as ImageIcon, Play } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Plus, Copy, Check, ExternalLink, Eye, Lightbulb, Image as ImageIcon, Play, Trash2 } from "lucide-react";
 
 interface InviteCode {
   id: string;
@@ -64,6 +65,10 @@ const CreatorsSection = () => {
   const [newHandle, setNewHandle] = useState("");
   const [creating, setCreating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  // Delete creator
+  const [deleteCreator, setDeleteCreator] = useState<CreatorRow | null>(null);
+  const [deletingCreator, setDeletingCreator] = useState(false);
 
   // Review dialog
   const [reviewItem, setReviewItem] = useState<Suggestion | null>(null);
@@ -205,6 +210,23 @@ const CreatorsSection = () => {
     loadData();
   };
 
+  const handleDeleteCreator = async () => {
+    if (!deleteCreator) return;
+    setDeletingCreator(true);
+    try {
+      await supabase.from("creator_content").delete().eq("creator_id", deleteCreator.id);
+      await supabase.from("creator_profiles").delete().eq("id", deleteCreator.id);
+      await supabase.from("user_roles").delete().eq("user_id", deleteCreator.user_id).eq("role", "creator");
+      toast({ title: "Creator deleted" });
+      setDeleteCreator(null);
+      loadData();
+    } catch (err: any) {
+      toast({ title: "Delete failed", description: err.message, variant: "destructive" });
+    } finally {
+      setDeletingCreator(false);
+    }
+  };
+
   const statusBadge = (status: string) => {
     switch (status) {
       case "pending": return <Badge className="bg-amber-100 text-amber-800 border-amber-300 text-xs">Pending</Badge>;
@@ -339,7 +361,7 @@ const CreatorsSection = () => {
                     <TableCell className="text-xs text-muted-foreground">
                       {new Date(c.created_at).toLocaleDateString()}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="flex gap-1">
                       {c.is_published && (
                         <Button variant="ghost" size="sm" asChild>
                           <a href={`/c/${c.handle}`} target="_blank" rel="noopener">
@@ -347,6 +369,14 @@ const CreatorsSection = () => {
                           </a>
                         </Button>
                       )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setDeleteCreator(c)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -582,6 +612,28 @@ const CreatorsSection = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Creator Dialog */}
+      <AlertDialog open={!!deleteCreator} onOpenChange={(v) => !v && setDeleteCreator(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {deleteCreator?.display_name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove this creator profile and all their content. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deletingCreator}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteCreator}
+              disabled={deletingCreator}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingCreator ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
