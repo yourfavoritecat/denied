@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Star, MapPin, Instagram, ExternalLink, Play, X, ChevronLeft, ChevronRight, BadgeCheck, ArrowUp } from "lucide-react";
+import { Star, MapPin, Instagram, ExternalLink, Play, X, ChevronLeft, ChevronRight, BadgeCheck, ArrowUp, Pencil } from "lucide-react";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
 import ReviewCard, { type ReviewData } from "@/components/reviews/ReviewCard";
 import logoSvg from "@/assets/logo.svg";
@@ -63,6 +64,7 @@ const YouTubeIcon = ({ className }: { className?: string }) => (
 
 const CreatorProfile = () => {
   const { handle } = useParams<{ handle: string }>();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<CreatorProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -184,8 +186,25 @@ const CreatorProfile = () => {
   const socialLinks = profile.social_links || {};
   const hasSocials = socialLinks.instagram || socialLinks.tiktok || socialLinks.youtube;
 
+  const isOwner = user && profile.user_id === user.id;
+
   return (
     <div className="min-h-screen bg-background">
+      {/* Owner Edit Banner */}
+      {isOwner && (
+        <div className="sticky top-0 z-40 bg-primary/10 border-b border-primary/20">
+          <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm text-primary">
+              <Pencil className="w-4 h-4" />
+              <span>This is your creator page</span>
+            </div>
+            <Button size="sm" variant="outline" asChild className="border-primary/30 text-primary hover:bg-primary/10">
+              <Link to="/creator/edit">Edit Profile</Link>
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Cover Photo */}
       <div className="relative w-full h-[40vh] min-h-[280px] overflow-hidden">
         {profile.cover_photo_url ? (
@@ -407,6 +426,16 @@ const CreatorProfile = () => {
           providerName={quoteProvider.name}
           providerSlug={quoteProvider.slug}
         />
+      )}
+
+      {/* Floating Edit Button for owner */}
+      {isOwner && (
+        <Link
+          to="/creator/edit"
+          className="fixed bottom-24 right-6 z-40 bg-primary text-primary-foreground rounded-full p-3 shadow-elevated hover:shadow-lifted hover:-translate-y-0.5 transition-all"
+        >
+          <Pencil className="w-5 h-5" />
+        </Link>
       )}
     </div>
   );

@@ -77,7 +77,7 @@ const CreatorJoin = () => {
         if (!chosenHandle) return; // need handle input
         await setupCreatorProfile(user.id, chosenHandle, profile?.first_name || "Creator");
         toast({ title: "Welcome, creator! 🎉", description: "Your creator profile is ready." });
-        navigate("/creator/edit", { replace: true });
+        navigate(`/c/${chosenHandle}`, { replace: true });
       } catch (err: any) {
         toast({ title: "Setup failed", description: err.message, variant: "destructive" });
       } finally {
@@ -188,7 +188,7 @@ const CreatorJoin = () => {
       if (signInError) throw signInError;
 
       toast({ title: "Welcome, creator! 🎉", description: "Your creator profile is ready." });
-      navigate("/creator/edit", { replace: true });
+      navigate(`/c/${handle}`, { replace: true });
     } catch (err: any) {
       toast({ title: "Signup failed", description: err.message, variant: "destructive" });
     } finally {
@@ -207,7 +207,7 @@ const CreatorJoin = () => {
     try {
       await setupCreatorProfile(user!.id, handle, profile?.first_name || "Creator");
       toast({ title: "Welcome, creator! 🎉" });
-      navigate("/creator/edit", { replace: true });
+      navigate(`/c/${handle}`, { replace: true });
     } catch (err: any) {
       toast({ title: "Setup failed", description: err.message, variant: "destructive" });
     } finally {
