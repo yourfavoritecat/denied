@@ -205,10 +205,12 @@ const CreatorEdit = () => {
 
     if (error) {
       toast({ title: "Save failed", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Profile saved! ✨" });
+      setSaving(false);
+      return;
     }
+    toast({ title: "Profile saved! ✨" });
     setSaving(false);
+    navigate(`/c/${handle}`);
   };
 
   // Avatar upload
