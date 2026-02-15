@@ -183,10 +183,12 @@ const CreatorJoin = () => {
         .update({ claimed_by: userId } as any)
         .eq("id", invite!.id);
 
-      toast({
-        title: "Account created! 🎉",
-        description: "Check your email for a confirmation link, then come back to build your profile.",
-      });
+      // Auto sign-in and redirect
+      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError) throw signInError;
+
+      toast({ title: "Welcome, creator! 🎉", description: "Your creator profile is ready." });
+      navigate("/creator/edit", { replace: true });
     } catch (err: any) {
       toast({ title: "Signup failed", description: err.message, variant: "destructive" });
     } finally {
