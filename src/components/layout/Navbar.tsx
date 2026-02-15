@@ -40,19 +40,27 @@ const Navbar = () => {
     : user?.email;
 
   const actualProvider = !!(profile as any)?.provider_slug;
-  const isProvider = (actualProvider && viewAs !== "traveler") || (isAdmin && viewAs === "provider");
+  const isProvider = (actualProvider && viewAs !== "traveler" && viewAs !== "creator" && viewAs !== "visitor") || (isAdmin && viewAs === "provider");
   const showProviderDashboard = isProvider || (isAdmin && viewAs === "admin");
   const showAdminLink = isAdmin && viewAs === "admin";
+  const showCreatorLink = isCreator || (isAdmin && (viewAs === "admin" || viewAs === "creator"));
 
-  const navLinks = [
-    { to: "/search", icon: Search, label: "Search" },
-    { to: "/about", icon: Info, label: "About" },
-    { to: "/my-trips", icon: Plane, label: "My Trips" },
-    ...(showProviderDashboard ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Provider Dashboard" }] : []),
-    ...(showAdminLink ? [{ to: "/admin", icon: Shield, label: "Admin" }] : []),
-    ...(isCreator ? [{ to: "/creator/edit", icon: Sparkles, label: "My Creator Page" }] : []),
-    { to: "/profile", icon: User, label: "Profile" },
-  ];
+  const visitorMode = isAdmin && viewAs === "visitor";
+
+  const navLinks = visitorMode
+    ? [
+        { to: "/search", icon: Search, label: "Search" },
+        { to: "/about", icon: Info, label: "About" },
+      ]
+    : [
+        { to: "/search", icon: Search, label: "Search" },
+        { to: "/about", icon: Info, label: "About" },
+        { to: "/my-trips", icon: Plane, label: "My Trips" },
+        ...(showProviderDashboard ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Provider Dashboard" }] : []),
+        ...(showAdminLink ? [{ to: "/admin", icon: Shield, label: "Admin" }] : []),
+        ...(showCreatorLink ? [{ to: "/creator/edit", icon: Sparkles, label: "My Creator Page" }] : []),
+        { to: "/profile", icon: User, label: "Profile" },
+      ];
 
   const handleMobileNav = (to: string) => {
     setMobileOpen(false);
@@ -88,11 +96,11 @@ const Navbar = () => {
             </Button>
 
             {/* Notification bell - visible on all sizes when logged in */}
-            {user && <NotificationBell />}
+            {user && !visitorMode && <NotificationBell />}
 
             {/* Desktop auth */}
             <div className="hidden md:flex items-center gap-3">
-              {user ? (
+              {user && !visitorMode ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">

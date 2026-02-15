@@ -8,7 +8,8 @@ const ViewAsBanner = () => {
 
   if (loading || !isAdmin || viewAs === "admin") return null;
 
-  const label = viewAs === "provider" ? "Provider" : "Traveler";
+  const labelMap: Record<string, string> = { provider: "Provider", traveler: "Traveler", creator: "Creator", visitor: "Visitor" };
+  const label = labelMap[viewAs] || viewAs;
 
   return (
     <div className="fixed top-0 left-0 right-0 z-[110] bg-amber-500 text-black text-center text-xs font-semibold py-1 flex items-center justify-center gap-2">
