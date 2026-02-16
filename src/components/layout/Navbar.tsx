@@ -88,7 +88,8 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <Button
               size="sm"
-              className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold hidden sm:flex items-center gap-1.5 whitespace-nowrap text-xs lg:text-sm px-2.5 lg:px-3"
+              variant="secondary"
+              className="hidden sm:flex items-center gap-1.5 whitespace-nowrap text-xs lg:text-sm"
               onClick={() => navigate(user ? "/my-trips?plan=new" : "/auth")}
             >
               <PlusCircle className="w-4 h-4 shrink-0" />

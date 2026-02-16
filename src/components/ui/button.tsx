@@ -10,13 +10,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "btn-glossy-mint text-primary-foreground",
+          "btn-glossy-mint text-white",
         destructive:
-          "btn-glossy-destructive text-destructive-foreground",
+          "btn-glossy-destructive text-white",
         outline:
           "btn-glossy-outline text-foreground",
         secondary:
-          "btn-glossy-peach text-secondary-foreground",
+          "btn-glossy-peach text-white",
         ghost: "hover:bg-white/5 hover:text-foreground text-muted-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
