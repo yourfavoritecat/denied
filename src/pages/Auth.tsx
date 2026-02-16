@@ -131,7 +131,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <img src={logo} alt="Denied" className="h-12" />

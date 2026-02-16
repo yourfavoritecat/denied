@@ -243,7 +243,7 @@ const ProviderDashboard = () => {
 
   if (!user || loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
@@ -251,7 +251,7 @@ const ProviderDashboard = () => {
 
   if (!providerSlug) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-2">Provider Access Required</h1>
           <p className="text-muted-foreground mb-6">Your account is not linked to a provider profile.</p>
@@ -374,7 +374,7 @@ const ProviderDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-muted flex">
+    <div className="min-h-screen flex">
       <ProviderSidebar
         active={section}
         onChange={setSection}

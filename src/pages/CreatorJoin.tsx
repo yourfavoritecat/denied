@@ -217,7 +217,7 @@ const CreatorJoin = () => {
 
   if (inviteStatus === "loading") {
     return (
-      <div className="min-h-screen bg-muted flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
@@ -225,7 +225,7 @@ const CreatorJoin = () => {
 
   if (inviteStatus === "invalid") {
     return (
-      <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
           <img src={logo} alt="Denied" className="h-12 mx-auto mb-8" />
           <Card className="shadow-hero border-border/50">
@@ -248,7 +248,7 @@ const CreatorJoin = () => {
   // Logged in user, needs handle input
   if (user && invite && !invite.handle) {
     return (
-      <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md">
           <img src={logo} alt="Denied" className="h-12 mx-auto mb-8" />
           <Card className="shadow-hero border-border/50">
@@ -289,7 +289,7 @@ const CreatorJoin = () => {
   // Logged in user with pre-assigned handle — auto-claiming (shown above in useEffect)
   if (user && invite?.handle) {
     return (
-      <div className="min-h-screen bg-muted flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
@@ -297,7 +297,7 @@ const CreatorJoin = () => {
 
   // New user signup form
   return (
-    <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
           <img src={logo} alt="Denied" className="h-12" />

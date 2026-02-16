@@ -84,7 +84,7 @@ const UserProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Navbar />
         <main className="pt-24 pb-16 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
@@ -101,7 +101,7 @@ const UserProfile = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <Navbar />
         <main className="pt-24 pb-16 text-center">
           <h1 className="text-2xl font-bold mb-2">Profile Not Found</h1>
@@ -115,7 +115,7 @@ const UserProfile = () => {
   const initials = (profile.first_name || "U").charAt(0).toUpperCase();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-3xl">

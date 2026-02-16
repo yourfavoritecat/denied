@@ -155,7 +155,7 @@ const BookingDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className="min-h-screen">
         <Navbar />
         <main className="pt-24 pb-16 flex justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -166,7 +166,7 @@ const BookingDetail = () => {
 
   if (!booking) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className="min-h-screen">
         <Navbar />
         <main className="pt-24 pb-16 text-center">
           <h1 className="text-2xl font-bold mb-2">Booking Not Found</h1>
@@ -184,7 +184,7 @@ const BookingDetail = () => {
     : JSON.stringify(booking.procedures);
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen">
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-4xl">
