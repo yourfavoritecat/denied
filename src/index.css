@@ -107,6 +107,27 @@
     text-transform: lowercase;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    position: relative;
+  }
+
+  /* Global inner-page backdrop via #root — overridden on landing page */
+  #root {
+    position: relative;
+    min-height: 100vh;
+  }
+  #root::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url('/images/dark-backdrop.png') center/cover no-repeat;
+    z-index: -2;
+  }
+  #root::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, #000000 85%);
+    z-index: -1;
   }
 
   /* Preserve user-typed capitalization in inputs */
@@ -149,147 +170,105 @@
   }
 }
 
-/* ========== Glossy Button Styles — Radial highlight, no pseudo-elements ========== */
+/* ========== Glossy Button Styles — Image-based glass capsules ========== */
 @layer components {
-  /* Primary mint — glass capsule with radial highlight */
+  /* Primary mint — glass button image */
   .btn-glossy-mint {
-    background:
-      radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(to bottom, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0.2) 100%),
-      linear-gradient(to bottom, #7DD4B8, #5EB298, #3A7D65);
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.5),
-      inset 0 -1px 2px rgba(0,0,0,0.2),
-      0 4px 12px rgba(0,0,0,0.4);
+    background: url('/images/btn-mint.jpg') center/100% 100% no-repeat;
+    border: none;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-mint:hover {
-    background:
-      radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.18) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.15) 100%),
-      linear-gradient(to bottom, #90DCC4, #6BC4A8, #4A9A7F);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.55),
-      inset 0 -1px 2px rgba(0,0,0,0.15),
-      0 6px 24px rgba(94,178,152,0.5),
-      0 0 16px rgba(94,178,152,0.25);
+    filter: brightness(1.12);
+    box-shadow: 0 6px 24px rgba(94,178,152,0.5), 0 0 16px rgba(94,178,152,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-mint:active {
-    background:
-      radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 60%),
-      linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.25) 100%),
-      linear-gradient(to bottom, #5EB298, #4A9A7F, #2D7A5F);
-    box-shadow:
-      inset 0 2px 4px rgba(0,0,0,0.35),
-      0 1px 3px rgba(0,0,0,0.3);
+    filter: brightness(0.92);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
 
-  /* Secondary peach — glass capsule with radial highlight */
+  /* Secondary peach — glass button image */
   .btn-glossy-peach {
-    background:
-      radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(to bottom, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0.2) 100%),
-      linear-gradient(to bottom, #FACEBE, #F8B4A0, #C4897A);
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.5),
-      inset 0 -1px 2px rgba(0,0,0,0.2),
-      0 4px 12px rgba(0,0,0,0.4);
+    background: url('/images/btn-peach.png') center/100% 100% no-repeat;
+    border: none;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-peach:hover {
-    background:
-      radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.18) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.15) 100%),
-      linear-gradient(to bottom, #FDD8CC, #FAC4B4, #D4907A);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.55),
-      inset 0 -1px 2px rgba(0,0,0,0.15),
-      0 6px 24px rgba(248,180,160,0.5),
-      0 0 16px rgba(248,180,160,0.25);
+    filter: brightness(1.12);
+    box-shadow: 0 6px 24px rgba(248,180,160,0.5), 0 0 16px rgba(248,180,160,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-peach:active {
-    background:
-      radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 60%),
-      linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.25) 100%),
-      linear-gradient(to bottom, #F8B4A0, #D4907A, #B87060);
-    box-shadow:
-      inset 0 2px 4px rgba(0,0,0,0.35),
-      0 1px 3px rgba(0,0,0,0.3);
+    filter: brightness(0.92);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
 
-  /* Destructive — glass capsule with radial highlight */
+  /* Destructive — uses mint image tinted red via CSS */
   .btn-glossy-destructive {
     background:
-      radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0.2) 100%),
-      linear-gradient(to bottom, #F87171, #EF4444, #B91C1C);
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.45),
-      inset 0 -1px 2px rgba(0,0,0,0.2),
-      0 4px 12px rgba(0,0,0,0.4);
+      linear-gradient(to bottom, rgba(239,68,68,0.85), rgba(185,28,28,0.9)),
+      url('/images/btn-mint.jpg') center/100% 100% no-repeat;
+    background-blend-mode: color, normal;
+    border: none;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-destructive:hover {
-    background:
-      radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(to bottom, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.15) 100%),
-      linear-gradient(to bottom, #FCA5A5, #F87171, #DC2626);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.5),
-      inset 0 -1px 2px rgba(0,0,0,0.15),
-      0 6px 24px rgba(239,68,68,0.5),
-      0 0 16px rgba(239,68,68,0.25);
+    filter: brightness(1.12);
+    box-shadow: 0 6px 24px rgba(239,68,68,0.5), 0 0 16px rgba(239,68,68,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-destructive:active {
-    background:
-      radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%),
-      linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.25) 100%),
-      linear-gradient(to bottom, #EF4444, #B91C1C, #991B1B);
-    box-shadow:
-      inset 0 2px 4px rgba(0,0,0,0.35),
-      0 1px 3px rgba(0,0,0,0.3);
+    filter: brightness(0.92);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
 
-  /* Outline — glass pill on dark bg */
+  /* Outline — transparent glass pill */
   .btn-glossy-outline {
-    background:
-      radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 35%, transparent 50%, rgba(0,0,0,0.05) 80%, rgba(0,0,0,0.1) 100%),
-      linear-gradient(to bottom, rgba(255,255,255,0.06), rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+    background: transparent;
     border: 1px solid rgba(255,255,255,0.2);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.12),
-      inset 0 -1px 2px rgba(0,0,0,0.1),
-      0 4px 12px rgba(0,0,0,0.3);
+    color: hsl(var(--foreground));
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
   }
   .btn-glossy-outline:hover {
-    background:
-      radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 70%),
-      linear-gradient(to bottom, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 35%, transparent 50%, rgba(0,0,0,0.04) 80%, rgba(0,0,0,0.08) 100%),
-      linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0.03), rgba(0,0,0,0.03));
+    background: rgba(255,255,255,0.05);
     border-color: rgba(255,255,255,0.3);
-    box-shadow:
-      inset 0 1px 1px rgba(255,255,255,0.18),
-      inset 0 -1px 2px rgba(0,0,0,0.08),
-      0 6px 24px rgba(94,178,152,0.15),
-      0 0 12px rgba(255,255,255,0.05);
+    box-shadow: 0 6px 24px rgba(94,178,152,0.15), 0 0 12px rgba(255,255,255,0.05);
     transform: translateY(-1px);
   }
   .btn-glossy-outline:active {
-    background:
-      radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%),
-      linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 35%, transparent 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.12) 100%),
-      linear-gradient(to bottom, rgba(255,255,255,0.03), rgba(0,0,0,0.02), rgba(0,0,0,0.06));
-    box-shadow:
-      inset 0 2px 4px rgba(0,0,0,0.2),
-      0 1px 3px rgba(0,0,0,0.2);
+    background: rgba(255,255,255,0.03);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.2);
     transform: translateY(0);
+  }
+
+  /* Inner page backdrop — use on all pages except landing */
+  .page-backdrop {
+    position: relative;
+    min-height: 100vh;
+  }
+  .page-backdrop::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url('/images/dark-backdrop.png') center/cover no-repeat;
+    z-index: -2;
+  }
+  .page-backdrop::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 30%, #000000 85%);
+    z-index: -1;
   }
 }
 
