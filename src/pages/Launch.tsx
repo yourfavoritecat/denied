@@ -108,19 +108,20 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
         </p>
 
         {/* Email form */}
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-12 bg-white/[0.04] backdrop-blur-sm border border-white/[0.08] rounded-2xl p-2 shadow-hero">
+        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 w-full max-w-md mb-12">
           <Input
             type="email"
             placeholder="enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 bg-white/10 border-white/15 text-white placeholder:text-white/40 flex-1 rounded-xl shadow-none focus-visible:ring-primary/50"
+            className="h-12 flex-1 rounded-full text-white placeholder:text-white/50 shadow-none focus-visible:ring-primary/50 border"
+            style={{ background: 'rgba(0,0,0,0.4)', borderColor: 'rgba(255,255,255,0.15)' }}
             disabled={isLoading}
           />
           <Button
             type="submit"
             size="lg"
-            className="h-12 px-8 font-bold whitespace-nowrap rounded-xl"
+            className="h-12 px-8 font-bold whitespace-nowrap"
             disabled={isLoading}
           >
             {isLoading ? "joining..." : "join the waitlist"}

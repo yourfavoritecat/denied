@@ -299,7 +299,7 @@ const BookingDetail = () => {
                           </div>
                         )}
                         {booking.status === "quoted" && (
-                          <Button className="w-full mt-2 bg-secondary hover:bg-secondary/90" onClick={handlePayDeposit} disabled={paying}>
+                          <Button variant="secondary" className="w-full mt-2" onClick={handlePayDeposit} disabled={paying}>
                             <CreditCard className="w-4 h-4 mr-2" />
                             {paying ? "Processing..." : `Accept & Pay $${Number(booking.deposit_amount).toLocaleString()} Deposit`}
                           </Button>
