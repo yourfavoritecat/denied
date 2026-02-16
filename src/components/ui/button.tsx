@@ -10,20 +10,20 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "btn-glossy-mint text-black",
+          "btn-glossy-mint text-white",
         destructive:
           "btn-glossy-destructive text-white",
         outline:
           "btn-glossy-outline text-foreground",
         secondary:
-          "btn-glossy-peach text-black",
+          "btn-glossy-peach text-white",
         ghost: "hover:bg-white/5 hover:text-foreground text-muted-foreground",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-12 px-8 py-3",
-        sm: "h-10 px-5 py-2 text-xs",
-        lg: "h-14 px-10 py-4 text-base",
+        default: "h-14 px-12 py-3.5",
+        sm: "h-11 px-8 py-2 text-xs",
+        lg: "h-16 px-14 py-4 text-base",
         icon: "h-12 w-12",
       },
     },
