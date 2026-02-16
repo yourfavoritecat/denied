@@ -172,77 +172,62 @@
 
 /* ========== Glossy Button Styles — Image-based glass capsules ========== */
 @layer components {
-  /* Primary mint — pure CSS glass with 135° diagonal highlight */
+  /* Primary mint — glass button image */
   .btn-glossy-mint {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 40%, transparent 60%),
-      linear-gradient(to bottom, #7DD4B8 0%, #5EB298 50%, #3D8A6F 100%);
-    border: 1px solid rgba(255,255,255,0.2);
+    background: url('/images/btn-mint.jpg') center/100% 100% no-repeat;
+    border: none;
     color: white;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-mint:hover {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.15) 40%, transparent 60%),
-      linear-gradient(to bottom, #8EDCC4 0%, #6BBFA6 50%, #4A9A7D 100%);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 24px rgba(94,178,152,0.5), 0 0 16px rgba(94,178,152,0.25);
+    filter: brightness(1.12);
+    box-shadow: 0 6px 24px rgba(94,178,152,0.5), 0 0 16px rgba(94,178,152,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-mint:active {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 40%, transparent 60%),
-      linear-gradient(to bottom, #5EB298 0%, #4A9A7D 50%, #357A62 100%);
+    filter: brightness(0.92);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
 
-  /* Secondary peach — pure CSS glass with 135° diagonal highlight */
+  /* Secondary peach — glass button image */
   .btn-glossy-peach {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 40%, transparent 60%),
-      linear-gradient(to bottom, #FACEBE 0%, #F8B4A0 50%, #C4897A 100%);
-    border: 1px solid rgba(255,255,255,0.2);
+    background: url('/images/btn-peach.png') center/100% 100% no-repeat;
+    border: none;
     color: white;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -2px 4px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-peach:hover {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.15) 40%, transparent 60%),
-      linear-gradient(to bottom, #FCD8CE 0%, #FAC0AE 50%, #D09A8B 100%);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 6px 24px rgba(248,180,160,0.5), 0 0 16px rgba(248,180,160,0.25);
+    filter: brightness(1.12);
+    box-shadow: 0 6px 24px rgba(248,180,160,0.5), 0 0 16px rgba(248,180,160,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-peach:active {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 40%, transparent 60%),
-      linear-gradient(to bottom, #F8B4A0 0%, #C4897A 50%, #A87060 100%);
+    filter: brightness(0.92);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
 
-  /* Destructive — pure CSS glass with 135° diagonal highlight */
+  /* Destructive — uses mint image tinted red via CSS */
   .btn-glossy-destructive {
     background:
-      linear-gradient(135deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 40%, transparent 60%),
-      linear-gradient(to bottom, #EF6868 0%, #DC2626 50%, #991B1B 100%);
-    border: 1px solid rgba(255,255,255,0.15);
+      linear-gradient(to bottom, rgba(239,68,68,0.85), rgba(185,28,28,0.9)),
+      url('/images/btn-mint.jpg') center/100% 100% no-repeat;
+    background-blend-mode: color, normal;
+    border: none;
     color: white;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -2px 4px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-destructive:hover {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.12) 40%, transparent 60%),
-      linear-gradient(to bottom, #F87171 0%, #EF4444 50%, #B91C1C 100%);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 6px 24px rgba(239,68,68,0.5), 0 0 16px rgba(239,68,68,0.25);
+    filter: brightness(1.12);
+    box-shadow: 0 6px 24px rgba(239,68,68,0.5), 0 0 16px rgba(239,68,68,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-destructive:active {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.04) 40%, transparent 60%),
-      linear-gradient(to bottom, #DC2626 0%, #991B1B 50%, #7F1D1D 100%);
+    filter: brightness(0.92);
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
