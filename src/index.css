@@ -149,236 +149,145 @@
   }
 }
 
-/* ========== Glossy Button Styles — Gem / Candy / Glass Pill ========== */
+/* ========== Glossy Button Styles — Radial highlight, no pseudo-elements ========== */
 @layer components {
-  /* Primary mint glossy — shiny gem-like candy button */
+  /* Primary mint — glass capsule with radial highlight */
   .btn-glossy-mint {
-    background: linear-gradient(180deg, #8EDCC0 0%, #5EB298 35%, #3D8A6F 100%);
+    background:
+      radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(to bottom, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0.2) 100%),
+      linear-gradient(to bottom, #7DD4B8, #5EB298, #3A7D65);
     border: 1px solid rgba(255,255,255,0.15);
-    border-top-color: rgba(255,255,255,0.4);
     box-shadow:
-      inset 0 1px 2px rgba(255,255,255,0.35),
-      inset 0 -2px 4px rgba(0,0,0,0.25),
-      0 4px 12px rgba(0,0,0,0.5),
-      0 0 8px rgba(94,178,152,0.2);
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-glossy-mint::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 5%;
-    right: 5%;
-    height: 55%;
-    background: linear-gradient(
-      180deg,
-      rgba(255,255,255,0.50) 0%,
-      rgba(255,255,255,0.25) 40%,
-      rgba(255,255,255,0.05) 80%,
-      transparent 100%
-    );
-    pointer-events: none;
-    border-radius: inherit;
-  }
-  .btn-glossy-mint::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.12) 100%);
-    pointer-events: none;
-    border-radius: inherit;
+      inset 0 1px 1px rgba(255,255,255,0.5),
+      inset 0 -1px 2px rgba(0,0,0,0.2),
+      0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-mint:hover {
-    background: linear-gradient(180deg, #A0E8D0 0%, #6BC4A8 35%, #4A9A7F 100%);
+    background:
+      radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.18) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.15) 100%),
+      linear-gradient(to bottom, #90DCC4, #6BC4A8, #4A9A7F);
     box-shadow:
-      inset 0 1px 2px rgba(255,255,255,0.4),
-      inset 0 -2px 4px rgba(0,0,0,0.2),
+      inset 0 1px 1px rgba(255,255,255,0.55),
+      inset 0 -1px 2px rgba(0,0,0,0.15),
       0 6px 24px rgba(94,178,152,0.5),
-      0 0 16px rgba(94,178,152,0.3);
+      0 0 16px rgba(94,178,152,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-mint:active {
-    background: linear-gradient(180deg, #5EB298 0%, #4A9A7F 35%, #2D7A5F 100%);
+    background:
+      radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 60%),
+      linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.25) 100%),
+      linear-gradient(to bottom, #5EB298, #4A9A7F, #2D7A5F);
     box-shadow:
-      inset 0 2px 6px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(0,0,0,0.35),
       0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
 
-  /* Secondary peach glossy — gem pill */
+  /* Secondary peach — glass capsule with radial highlight */
   .btn-glossy-peach {
-    background: linear-gradient(180deg, #FCCEBE 0%, #F8B4A0 35%, #D4907A 100%);
+    background:
+      radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(to bottom, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0.2) 100%),
+      linear-gradient(to bottom, #FACEBE, #F8B4A0, #C4897A);
     border: 1px solid rgba(255,255,255,0.15);
-    border-top-color: rgba(255,255,255,0.4);
     box-shadow:
-      inset 0 1px 2px rgba(255,255,255,0.35),
-      inset 0 -2px 4px rgba(0,0,0,0.25),
-      0 4px 12px rgba(0,0,0,0.5),
-      0 0 8px rgba(248,180,160,0.2);
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-glossy-peach::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 5%;
-    right: 5%;
-    height: 55%;
-    background: linear-gradient(
-      180deg,
-      rgba(255,255,255,0.50) 0%,
-      rgba(255,255,255,0.25) 40%,
-      rgba(255,255,255,0.05) 80%,
-      transparent 100%
-    );
-    pointer-events: none;
-    border-radius: inherit;
-  }
-  .btn-glossy-peach::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.12) 100%);
-    pointer-events: none;
-    border-radius: inherit;
+      inset 0 1px 1px rgba(255,255,255,0.5),
+      inset 0 -1px 2px rgba(0,0,0,0.2),
+      0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-peach:hover {
-    background: linear-gradient(180deg, #FDD8CC 0%, #FAC4B4 35%, #E0A08A 100%);
+    background:
+      radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(to bottom, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.18) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.15) 100%),
+      linear-gradient(to bottom, #FDD8CC, #FAC4B4, #D4907A);
     box-shadow:
-      inset 0 1px 2px rgba(255,255,255,0.4),
-      inset 0 -2px 4px rgba(0,0,0,0.2),
+      inset 0 1px 1px rgba(255,255,255,0.55),
+      inset 0 -1px 2px rgba(0,0,0,0.15),
       0 6px 24px rgba(248,180,160,0.5),
-      0 0 16px rgba(248,180,160,0.3);
+      0 0 16px rgba(248,180,160,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-peach:active {
-    background: linear-gradient(180deg, #F8B4A0 0%, #D4907A 35%, #B87060 100%);
+    background:
+      radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 60%),
+      linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.05) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.25) 100%),
+      linear-gradient(to bottom, #F8B4A0, #D4907A, #B87060);
     box-shadow:
-      inset 0 2px 6px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(0,0,0,0.35),
       0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
 
-  /* Destructive glossy — gem pill */
+  /* Destructive — glass capsule with radial highlight */
   .btn-glossy-destructive {
-    background: linear-gradient(180deg, #F87171 0%, #EF4444 35%, #B91C1C 100%);
+    background:
+      radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.12) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 80%, rgba(0,0,0,0.2) 100%),
+      linear-gradient(to bottom, #F87171, #EF4444, #B91C1C);
     border: 1px solid rgba(255,255,255,0.15);
-    border-top-color: rgba(255,255,255,0.35);
     box-shadow:
-      inset 0 1px 2px rgba(255,255,255,0.3),
-      inset 0 -2px 4px rgba(0,0,0,0.25),
-      0 4px 12px rgba(0,0,0,0.5),
-      0 0 8px rgba(239,68,68,0.2);
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-glossy-destructive::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 5%;
-    right: 5%;
-    height: 55%;
-    background: linear-gradient(
-      180deg,
-      rgba(255,255,255,0.45) 0%,
-      rgba(255,255,255,0.20) 40%,
-      rgba(255,255,255,0.05) 80%,
-      transparent 100%
-    );
-    pointer-events: none;
-    border-radius: inherit;
-  }
-  .btn-glossy-destructive::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.12) 100%);
-    pointer-events: none;
-    border-radius: inherit;
+      inset 0 1px 1px rgba(255,255,255,0.45),
+      inset 0 -1px 2px rgba(0,0,0,0.2),
+      0 4px 12px rgba(0,0,0,0.4);
   }
   .btn-glossy-destructive:hover {
-    background: linear-gradient(180deg, #FCA5A5 0%, #F87171 35%, #DC2626 100%);
+    background:
+      radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(to bottom, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.15) 100%),
+      linear-gradient(to bottom, #FCA5A5, #F87171, #DC2626);
     box-shadow:
-      inset 0 1px 2px rgba(255,255,255,0.35),
-      inset 0 -2px 4px rgba(0,0,0,0.2),
+      inset 0 1px 1px rgba(255,255,255,0.5),
+      inset 0 -1px 2px rgba(0,0,0,0.15),
       0 6px 24px rgba(239,68,68,0.5),
-      0 0 16px rgba(239,68,68,0.3);
+      0 0 16px rgba(239,68,68,0.25);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-destructive:active {
-    background: linear-gradient(180deg, #EF4444 0%, #B91C1C 35%, #991B1B 100%);
+    background:
+      radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0) 60%),
+      linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 35%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.15) 80%, rgba(0,0,0,0.25) 100%),
+      linear-gradient(to bottom, #EF4444, #B91C1C, #991B1B);
     box-shadow:
-      inset 0 2px 6px rgba(0,0,0,0.4),
+      inset 0 2px 4px rgba(0,0,0,0.35),
       0 1px 3px rgba(0,0,0,0.3);
     transform: scale(0.97) translateY(1px);
   }
 
-  /* Outline glossy — glass pill */
+  /* Outline — glass pill on dark bg */
   .btn-glossy-outline {
-    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.05) 100%);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-top-color: rgba(255,255,255,0.35);
+    background:
+      radial-gradient(ellipse at 50% 20%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(to bottom, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.03) 35%, transparent 50%, rgba(0,0,0,0.05) 80%, rgba(0,0,0,0.1) 100%),
+      linear-gradient(to bottom, rgba(255,255,255,0.06), rgba(255,255,255,0.02), rgba(0,0,0,0.04));
+    border: 1px solid rgba(255,255,255,0.2);
     box-shadow:
-      inset 0 1px 2px rgba(255,255,255,0.12),
-      inset 0 -2px 4px rgba(0,0,0,0.15),
-      0 4px 12px rgba(0,0,0,0.4);
-    position: relative;
-    overflow: hidden;
-  }
-  .btn-glossy-outline::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 5%;
-    right: 5%;
-    height: 55%;
-    background: linear-gradient(
-      180deg,
-      rgba(255,255,255,0.18) 0%,
-      rgba(255,255,255,0.08) 40%,
-      rgba(255,255,255,0.02) 80%,
-      transparent 100%
-    );
-    pointer-events: none;
-    border-radius: inherit;
-  }
-  .btn-glossy-outline::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 40%;
-    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.06) 100%);
-    pointer-events: none;
-    border-radius: inherit;
+      inset 0 1px 1px rgba(255,255,255,0.12),
+      inset 0 -1px 2px rgba(0,0,0,0.1),
+      0 4px 12px rgba(0,0,0,0.3);
   }
   .btn-glossy-outline:hover {
-    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 50%, rgba(0,0,0,0.03) 100%);
+    background:
+      radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 70%),
+      linear-gradient(to bottom, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 35%, transparent 50%, rgba(0,0,0,0.04) 80%, rgba(0,0,0,0.08) 100%),
+      linear-gradient(to bottom, rgba(255,255,255,0.08), rgba(255,255,255,0.03), rgba(0,0,0,0.03));
     border-color: rgba(255,255,255,0.3);
     box-shadow:
-      inset 0 1px 2px rgba(255,255,255,0.15),
-      inset 0 -2px 4px rgba(0,0,0,0.1),
-      0 6px 24px rgba(94,178,152,0.2),
+      inset 0 1px 1px rgba(255,255,255,0.18),
+      inset 0 -1px 2px rgba(0,0,0,0.08),
+      0 6px 24px rgba(94,178,152,0.15),
       0 0 12px rgba(255,255,255,0.05);
     transform: translateY(-1px);
   }
   .btn-glossy-outline:active {
-    background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(0,0,0,0.05) 100%);
+    background:
+      radial-gradient(ellipse at 50% 25%, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0) 60%),
+      linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 35%, transparent 50%, rgba(0,0,0,0.08) 80%, rgba(0,0,0,0.12) 100%),
+      linear-gradient(to bottom, rgba(255,255,255,0.03), rgba(0,0,0,0.02), rgba(0,0,0,0.06));
     box-shadow:
-      inset 0 2px 6px rgba(0,0,0,0.25),
+      inset 0 2px 4px rgba(0,0,0,0.2),
       0 1px 3px rgba(0,0,0,0.2);
     transform: translateY(0);
   }
