@@ -145,7 +145,7 @@ const ProviderProfile = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className="min-h-screen">
         <Navbar />
         <main className="pt-16 pb-24">
           <div className="bg-gradient-to-br from-denied-black to-denied-black/90">
@@ -172,7 +172,7 @@ const ProviderProfile = () => {
   // 404 state — provider not found in DB
   if (!pRec) {
     return (
-      <div className="min-h-screen bg-muted">
+      <div className="min-h-screen">
         <Navbar />
         <main className="pt-24 pb-16 text-center">
           <h1 className="text-3xl font-bold mb-4">Provider Not Found</h1>
@@ -204,7 +204,7 @@ const ProviderProfile = () => {
     : null;
 
   return (
-    <div className="min-h-screen bg-muted">
+    <div className="min-h-screen">
       <Navbar />
       <main className="pt-16 pb-24">
         {/* Hero */}

@@ -21,7 +21,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
       style={{ backgroundColor: "#000000" }}
     >
       <img
-        src="/splash-logo.svg"
+        src="/splash-logo.png"
         alt="Denied"
         className="w-72 md:w-96 lg:w-[460px] h-auto animate-splash-glow"
       />

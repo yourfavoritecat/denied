@@ -110,7 +110,7 @@ const ProviderOnboarding = () => {
   const stepProps = { userId: user.id, providerSlug, onComplete: () => markStepComplete(currentStep) };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">

@@ -99,7 +99,7 @@ const Apply = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-muted flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4">
         <Card className="max-w-lg w-full text-center shadow-floating border-border/50">
           <CardContent className="pt-10 pb-10 space-y-6">
             <CheckCircle className="w-16 h-16 text-primary mx-auto" />
@@ -122,7 +122,7 @@ const Apply = () => {
   }
 
   return (
-    <div className="min-h-screen bg-muted py-12 px-4">
+    <div className="min-h-screen py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-center mb-8">
           <Link to="/">

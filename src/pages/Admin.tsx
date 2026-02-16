@@ -63,7 +63,7 @@ const AdminPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
@@ -76,7 +76,7 @@ const AdminPage = () => {
   const ActiveSection = SECTIONS[section];
 
   return (
-    <div className="min-h-screen bg-muted flex">
+    <div className="min-h-screen flex">
       <AdminSidebar active={section} onChange={setSection} inboxCount={inboxCount} flagCount={flagCount} />
       <main className="flex-1 p-4 pt-16 lg:pt-6 lg:p-8 overflow-y-auto">
         {section === "overview" ? (

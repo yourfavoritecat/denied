@@ -151,7 +151,7 @@ const CreatorProfile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
     );
@@ -159,7 +159,7 @@ const CreatorProfile = () => {
 
   if (notFound || !profile) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4 px-4">
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4">
         <h1 className="text-2xl font-bold">creator not found</h1>
         <p className="text-muted-foreground text-center">This creator profile doesn't exist or isn't published yet.</p>
         <Button asChild variant="outline">
@@ -189,7 +189,7 @@ const CreatorProfile = () => {
   const isOwner = user && profile.user_id === user.id;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       {/* Owner Edit Banner */}
       {isOwner && (
         <div className="sticky top-0 z-40 bg-primary/10 border-b border-primary/20">

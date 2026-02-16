@@ -68,7 +68,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed left-0 right-0 z-50 bg-denied-black border-b border-denied-black/10 ${showBanner ? "top-6" : "top-0"}`}>
+    <nav className={`fixed left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/5 ${showBanner ? "top-6" : "top-0"}`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
