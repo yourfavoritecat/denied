@@ -118,8 +118,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
           <Button
             type="submit"
             size="lg"
-            className="h-12 px-8 font-bold whitespace-nowrap rounded-xl shadow-floating hover:shadow-hero"
-            style={{ backgroundColor: "#5EB298", color: "#000000" }}
+            className="h-12 px-8 font-bold whitespace-nowrap rounded-xl"
             disabled={isLoading}
           >
             {isLoading ? "joining..." : "join the waitlist"}

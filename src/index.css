@@ -149,6 +149,109 @@
   }
 }
 
+/* ========== Glossy Button Styles ========== */
+@layer components {
+  /* Primary mint glossy — iOS 2012 style */
+  .btn-glossy-mint {
+    background: linear-gradient(180deg, #7DD4B8 0%, #5EB298 40%, #3D8A6F 100%);
+    border-top: 1px solid rgba(255,255,255,0.25);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.2),
+      0 2px 8px rgba(0,0,0,0.4),
+      0 0 0 1px rgba(94,178,152,0.15);
+  }
+  .btn-glossy-mint:hover {
+    background: linear-gradient(180deg, #95E0CA 0%, #6BC4A8 40%, #4A9A7F 100%);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.3),
+      0 4px 20px rgba(94,178,152,0.4),
+      0 0 0 1px rgba(94,178,152,0.25);
+    transform: scale(1.02) translateY(-1px);
+  }
+  .btn-glossy-mint:active {
+    background: linear-gradient(180deg, #5EB298 0%, #4A9A7F 40%, #357A62 100%);
+    box-shadow:
+      inset 0 2px 3px rgba(0,0,0,0.3),
+      0 1px 2px rgba(0,0,0,0.3);
+    transform: scale(0.98) translateY(0);
+  }
+
+  /* Secondary peach glossy */
+  .btn-glossy-peach {
+    background: linear-gradient(180deg, #FCD0C4 0%, #F8B4A0 40%, #D4907A 100%);
+    border-top: 1px solid rgba(255,255,255,0.25);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.2),
+      0 2px 8px rgba(0,0,0,0.4),
+      0 0 0 1px rgba(248,180,160,0.15);
+  }
+  .btn-glossy-peach:hover {
+    background: linear-gradient(180deg, #FDE0D8 0%, #FAC4B4 40%, #E0A08A 100%);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.3),
+      0 4px 20px rgba(248,180,160,0.4),
+      0 0 0 1px rgba(248,180,160,0.25);
+    transform: scale(1.02) translateY(-1px);
+  }
+  .btn-glossy-peach:active {
+    background: linear-gradient(180deg, #F8B4A0 0%, #D4907A 40%, #B87060 100%);
+    box-shadow:
+      inset 0 2px 3px rgba(0,0,0,0.3),
+      0 1px 2px rgba(0,0,0,0.3);
+    transform: scale(0.98) translateY(0);
+  }
+
+  /* Destructive glossy */
+  .btn-glossy-destructive {
+    background: linear-gradient(180deg, #F87171 0%, #EF4444 40%, #B91C1C 100%);
+    border-top: 1px solid rgba(255,255,255,0.2);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.15),
+      0 2px 8px rgba(0,0,0,0.4),
+      0 0 0 1px rgba(239,68,68,0.15);
+  }
+  .btn-glossy-destructive:hover {
+    background: linear-gradient(180deg, #FCA5A5 0%, #F87171 40%, #DC2626 100%);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.25),
+      0 4px 20px rgba(239,68,68,0.35),
+      0 0 0 1px rgba(239,68,68,0.25);
+    transform: scale(1.02) translateY(-1px);
+  }
+  .btn-glossy-destructive:active {
+    background: linear-gradient(180deg, #EF4444 0%, #B91C1C 40%, #991B1B 100%);
+    box-shadow:
+      inset 0 2px 3px rgba(0,0,0,0.3),
+      0 1px 2px rgba(0,0,0,0.3);
+    transform: scale(0.98) translateY(0);
+  }
+
+  /* Outline glossy */
+  .btn-glossy-outline {
+    background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.03) 40%, rgba(255,255,255,0.01) 100%);
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.08),
+      0 2px 8px rgba(0,0,0,0.3);
+  }
+  .btn-glossy-outline:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.06) 40%, rgba(255,255,255,0.02) 100%);
+    border-color: rgba(255,255,255,0.25);
+    box-shadow:
+      inset 0 1px 1px rgba(255,255,255,0.12),
+      0 4px 20px rgba(94,178,152,0.15),
+      0 0 0 1px rgba(255,255,255,0.1);
+    transform: translateY(-1px);
+  }
+  .btn-glossy-outline:active {
+    background: linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%);
+    box-shadow:
+      inset 0 2px 3px rgba(0,0,0,0.2),
+      0 1px 2px rgba(0,0,0,0.2);
+    transform: translateY(0);
+  }
+}
+
 /* ========== Utility Classes ========== */
 @layer utilities {
   .text-gradient-peach {
