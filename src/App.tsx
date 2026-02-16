@@ -10,7 +10,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import ViewAsSwitcher from "@/components/admin/ViewAsSwitcher";
 import ViewAsBanner from "@/components/admin/ViewAsBanner";
 import Launch from "./pages/Launch";
-import Index from "./pages/Index";
+
 import Auth from "./pages/Auth";
 import Search from "./pages/Search";
 import ProviderProfile from "./pages/ProviderProfile";
@@ -48,7 +48,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Launch />} />
             <Route path="/admin-login" element={<Launch showLogin />} />
-            <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/provider/:slug" element={<ProtectedRoute><ProviderProfile /></ProtectedRoute>} />
