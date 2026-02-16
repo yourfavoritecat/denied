@@ -102,6 +102,11 @@ export default {
           "0%": { opacity: "0", transform: "scale(0.95)" },
           "100%": { opacity: "1", transform: "scale(1)" },
         },
+        "splash-glow": {
+          "0%": { opacity: "0", transform: "scale(0.92)", filter: "brightness(0.8)" },
+          "50%": { opacity: "1", transform: "scale(1)", filter: "brightness(1.1) drop-shadow(0 0 40px rgba(94,178,152,0.25))" },
+          "100%": { opacity: "1", transform: "scale(1)", filter: "brightness(1) drop-shadow(0 0 20px rgba(94,178,152,0.1))" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -109,6 +114,7 @@ export default {
         "fade-in": "fade-in 0.5s ease-out forwards",
         "fade-in-up": "fade-in-up 0.6s ease-out forwards",
         "scale-in": "scale-in 0.4s ease-out forwards",
+        "splash-glow": "splash-glow 1.4s ease-in-out forwards",
       },
     },
   },

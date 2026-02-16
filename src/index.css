@@ -117,6 +117,27 @@
   }
 
   /* Grain texture overlay — subtle 2-3% */
+  /* Custom scrollbar — thin mint on dark */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0A0A0A;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(94,178,152,0.4);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(94,178,152,0.6);
+  }
+
+  /* Firefox scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(94,178,152,0.4) #0A0A0A;
+  }
+
   body::after {
     content: '';
     position: fixed;
@@ -255,4 +276,23 @@
     height: 500px;
     background: radial-gradient(circle, rgba(248,180,160,0.04) 0%, transparent 70%);
   }
+
+  /* Scroll-triggered fade-in */
+  .scroll-fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+  }
+  .scroll-fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Stagger children animation */
+  .stagger-children > .scroll-fade-in:nth-child(1) { transition-delay: 0ms; }
+  .stagger-children > .scroll-fade-in:nth-child(2) { transition-delay: 100ms; }
+  .stagger-children > .scroll-fade-in:nth-child(3) { transition-delay: 200ms; }
+  .stagger-children > .scroll-fade-in:nth-child(4) { transition-delay: 300ms; }
+  .stagger-children > .scroll-fade-in:nth-child(5) { transition-delay: 400ms; }
+  .stagger-children > .scroll-fade-in:nth-child(6) { transition-delay: 500ms; }
 }
