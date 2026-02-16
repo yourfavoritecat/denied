@@ -57,7 +57,6 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Denied brand colors
         denied: {
           black: "hsl(var(--denied-black))",
           peach: "hsl(var(--denied-peach))",
@@ -66,10 +65,12 @@ export default {
         },
       },
       borderRadius: {
-        xl: "calc(var(--radius) + 4px)",
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        "2xl": "calc(var(--radius) + 4px)", /* 24px */
+        xl: "var(--radius)", /* 20px */
+        lg: "calc(var(--radius) - 4px)", /* 16px */
+        md: "calc(var(--radius) - 8px)", /* 12px */
+        sm: "calc(var(--radius) - 12px)", /* 8px */
+        full: "9999px",
       },
       boxShadow: {
         "elevated": "var(--shadow-md)",
@@ -77,6 +78,8 @@ export default {
         "floating": "var(--shadow-xl)",
         "hero": "var(--shadow-float)",
         "inner-subtle": "var(--shadow-inset)",
+        "glow-mint": "var(--shadow-glow-mint)",
+        "glow-peach": "var(--shadow-glow-peach)",
       },
       keyframes: {
         "accordion-down": {
