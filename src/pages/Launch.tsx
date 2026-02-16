@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import logoReflection from "@/assets/logo-reflection.svg";
+import darkBackdrop from "@/assets/dark-backdrop.png";
 
 const TikTokIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -64,10 +65,11 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-background">
-      {/* Ambient glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(160_50%_65%/0.05)_0%,_transparent_60%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_hsl(15_100%_71%/0.04)_0%,_transparent_50%)]" />
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden" style={{ backgroundColor: '#000000' }}>
+      {/* Background image */}
+      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${darkBackdrop})` }} />
+      {/* Radial vignette overlay */}
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, #000000 85%)' }} />
 
       {showLogin && (
         <div className="absolute top-6 right-6 z-20">
