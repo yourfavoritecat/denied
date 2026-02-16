@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import logoReflection from "@/assets/logo-reflection.svg";
+import logo from "@/assets/logo-clean.png";
 import darkBackdrop from "@/assets/dark-backdrop.png";
 
 const TikTokIcon = () => (
@@ -87,7 +87,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
       <div className="w-full max-w-xl flex flex-col items-center text-center relative z-10">
         {/* Logo with reflection — large and prominent */}
         <img
-          src={logoReflection}
+          src={logo}
           alt="Denied"
           className="w-80 md:w-[400px] lg:w-[500px] h-auto mb-10"
         />

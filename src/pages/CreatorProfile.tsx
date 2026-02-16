@@ -10,7 +10,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Star, MapPin, Instagram, ExternalLink, Play, X, ChevronLeft, ChevronRight, BadgeCheck, ArrowUp, Pencil } from "lucide-react";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
 import ReviewCard, { type ReviewData } from "@/components/reviews/ReviewCard";
-import logoSvg from "@/assets/logo.svg";
+import logo from "@/assets/logo-clean.png";
 
 interface CreatorProfileData {
   id: string;
@@ -375,7 +375,7 @@ const CreatorProfile = () => {
             </div>
           )}
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <img src={logoSvg} alt="denied.care" className="h-5 w-auto" />
+            <img src={logo} alt="denied.care" className="h-5 w-auto" />
             <span>denied.care</span>
           </Link>
         </div>
