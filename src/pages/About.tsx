@@ -28,7 +28,7 @@ const socials = [
 
 const About = () => {
   return (
-    <div className="min-h-screen relative" style={{ backgroundColor: "#1A1A1A" }}>
+    <div className="min-h-screen relative bg-background">
       {/* Gradient mesh blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div

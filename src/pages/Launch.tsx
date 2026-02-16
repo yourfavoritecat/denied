@@ -64,7 +64,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden" style={{ backgroundColor: "#0A0A0A" }}>
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden bg-background">
       {/* Ambient glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(160_50%_65%/0.05)_0%,_transparent_60%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_hsl(15_100%_71%/0.04)_0%,_transparent_50%)]" />
@@ -119,7 +119,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
             type="submit"
             size="lg"
             className="h-12 px-8 font-bold whitespace-nowrap rounded-xl shadow-floating hover:shadow-hero"
-            style={{ backgroundColor: "#5EB298", color: "#0A0A0A" }}
+            style={{ backgroundColor: "#5EB298", color: "#000000" }}
             disabled={isLoading}
           >
             {isLoading ? "joining..." : "join the waitlist"}
