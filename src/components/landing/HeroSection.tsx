@@ -84,7 +84,7 @@ const HeroSection = () => {
             <Button 
               type="submit" 
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12 px-8 whitespace-nowrap rounded-xl shadow-floating hover:shadow-hero"
+              className="font-bold h-12 px-8 whitespace-nowrap rounded-xl"
               disabled={isLoading}
             >
               {isLoading ? "Joining..." : "Join the Waitlist"}

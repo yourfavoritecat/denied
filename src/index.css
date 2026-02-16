@@ -177,9 +177,10 @@
     background:
       linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.12) 35%, transparent 55%),
       linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 40%, rgba(0,0,0,0.1) 100%),
-      linear-gradient(to bottom, #7DD4B8 0%, #5EB298 45%, #3D8A6F 100%);
+      linear-gradient(to bottom, #7DD4B8 0%, #5EB298 45%, #3D8A6F 100%) !important;
+    background-color: transparent !important;
     border: 1px solid rgba(255,255,255,0.25);
-    color: white;
+    color: white !important;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     box-shadow: inset 0 1px 1px rgba(255,255,255,0.45), inset 0 -1px 2px rgba(0,0,0,0.15), 0 4px 14px rgba(0,0,0,0.35);
   }
@@ -205,9 +206,10 @@
     background:
       linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.12) 35%, transparent 55%),
       linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, transparent 40%, rgba(0,0,0,0.1) 100%),
-      linear-gradient(to bottom, #FACEBE 0%, #F8B4A0 45%, #C4897A 100%);
+      linear-gradient(to bottom, #FACEBE 0%, #F8B4A0 45%, #C4897A 100%) !important;
+    background-color: transparent !important;
     border: 1px solid rgba(255,255,255,0.25);
-    color: white;
+    color: white !important;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     box-shadow: inset 0 1px 1px rgba(255,255,255,0.45), inset 0 -1px 2px rgba(0,0,0,0.15), 0 4px 14px rgba(0,0,0,0.35);
   }
@@ -233,9 +235,10 @@
     background:
       linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 35%, transparent 55%),
       linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.15) 100%),
-      linear-gradient(to bottom, #EF6464 0%, #DC2626 45%, #B91C1C 100%);
+      linear-gradient(to bottom, #EF6464 0%, #DC2626 45%, #B91C1C 100%) !important;
+    background-color: transparent !important;
     border: 1px solid rgba(255,255,255,0.2);
-    color: white;
+    color: white !important;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     box-shadow: inset 0 1px 1px rgba(255,255,255,0.35), inset 0 -1px 2px rgba(0,0,0,0.15), 0 4px 14px rgba(0,0,0,0.35);
   }

@@ -68,7 +68,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className={`fixed left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/5 ${showBanner ? "top-6" : "top-0"}`}>
+    <nav className={`fixed left-0 right-0 z-50 ${showBanner ? "top-6" : "top-0"}`} style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
@@ -155,7 +155,7 @@ const Navbar = () => {
                   <Button variant="ghost" className="text-white hover:text-white hover:bg-white/10" onClick={() => navigate("/auth")}>
                     Log In
                   </Button>
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold" onClick={() => navigate("/auth")}>
+                  <Button className="font-semibold" onClick={() => navigate("/auth")}>
                     Sign Up
                   </Button>
                 </>
