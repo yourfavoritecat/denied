@@ -18,7 +18,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
   return (
     <div
       className={`fixed inset-0 z-[99999] flex items-center justify-center transition-opacity duration-500 ${fadeOut ? "opacity-0" : "opacity-100"}`}
-      style={{ backgroundColor: "#0A0A0A" }}
+      style={{ backgroundColor: "#000000" }}
     >
       <img
         src="/splash-logo.svg"
