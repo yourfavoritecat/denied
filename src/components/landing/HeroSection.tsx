@@ -72,19 +72,19 @@ const HeroSection = () => {
 
         {/* Elevated form container */}
         <div className="max-w-md mx-auto mb-16 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-2 shadow-hero">
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 bg-black/40 backdrop-blur-sm border border-white/10 rounded-full p-2 shadow-hero">
             <Input
               type="email"
               placeholder="Enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-white/10 border-white/15 text-white placeholder:text-white/40 h-12 rounded-xl shadow-none focus-visible:ring-primary/50"
+              className="bg-black/40 border-white/10 text-white placeholder:text-white/40 h-14 rounded-full shadow-none focus-visible:ring-primary/50"
               disabled={isLoading}
             />
             <Button 
               type="submit" 
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-12 px-8 whitespace-nowrap rounded-xl shadow-floating hover:shadow-hero"
+              className="whitespace-nowrap"
               disabled={isLoading}
             >
               {isLoading ? "Joining..." : "Join the Waitlist"}
