@@ -114,7 +114,6 @@ const CreatorEdit = () => {
       .maybeSingle();
 
     if (!cp) {
-      toast({ title: "No creator profile found", variant: "destructive" });
       navigate("/dashboard", { replace: true });
       return;
     }
