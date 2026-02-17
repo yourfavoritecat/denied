@@ -89,10 +89,10 @@ const Navbar = () => {
             <Button
               size="sm"
               variant="secondary"
-              className="hidden sm:flex items-center gap-1.5 whitespace-nowrap text-xs lg:text-sm"
+              className="hidden sm:flex items-center gap-1.5 whitespace-nowrap text-[13px] h-7 px-[18px] py-1.5"
               onClick={() => navigate(user ? "/my-trips?plan=new" : "/auth")}
             >
-              <PlusCircle className="w-4 h-4 shrink-0" />
+              <PlusCircle className="w-3.5 h-3.5 shrink-0" />
               Plan a Trip
             </Button>
 
