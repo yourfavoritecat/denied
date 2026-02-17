@@ -5,6 +5,8 @@ import type { ReviewData } from "@/components/reviews/ReviewCard";
 
 interface VideoTestimonialGalleryProps {
   reviews: ReviewData[];
+  /** When true, renders thumbnails inline without a header or scrollable wrapper — for side-by-side layout */
+  compact?: boolean;
 }
 
 interface VideoReview {
@@ -119,7 +121,7 @@ const VideoPlayerModal = ({
   );
 };
 
-const VideoTestimonialGallery = ({ reviews }: VideoTestimonialGalleryProps) => {
+const VideoTestimonialGallery = ({ reviews, compact = false }: VideoTestimonialGalleryProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
@@ -129,6 +131,46 @@ const VideoTestimonialGallery = ({ reviews }: VideoTestimonialGalleryProps) => {
 
   if (videoReviews.length === 0) return null;
 
+  const thumbnails = videoReviews.map((vr, i) => (
+    <button
+      key={i}
+      onClick={() => { setSelectedIndex(i); setModalOpen(true); }}
+      className="shrink-0 w-[100px] aspect-[9/16] rounded-lg overflow-hidden bg-black border border-border/50 hover:ring-2 hover:ring-[#5EB298] transition-all relative group"
+    >
+      <video
+        src={vr.videoUrl}
+        className="w-full h-full object-cover"
+        muted
+        playsInline
+        preload="metadata"
+      />
+      <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+        <Play className="w-8 h-8 text-white drop-shadow-lg" />
+      </div>
+      <div className="absolute bottom-1 left-1 right-1">
+        <p className="text-white text-[10px] font-semibold truncate drop-shadow">
+          {vr.review.profile?.first_name || "Anonymous"}
+        </p>
+      </div>
+    </button>
+  ));
+
+  if (compact) {
+    return (
+      <>
+        <div className="flex gap-3 flex-wrap">
+          {thumbnails}
+        </div>
+        <VideoPlayerModal
+          videoReviews={videoReviews}
+          initialIndex={selectedIndex}
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="space-y-3">
       <h3 className="text-lg font-bold flex items-center gap-2">
@@ -136,29 +178,7 @@ const VideoTestimonialGallery = ({ reviews }: VideoTestimonialGalleryProps) => {
       </h3>
       <div className="overflow-x-auto">
         <div className="flex gap-3 pb-2">
-          {videoReviews.map((vr, i) => (
-            <button
-              key={i}
-              onClick={() => { setSelectedIndex(i); setModalOpen(true); }}
-              className="shrink-0 w-[100px] aspect-[9/16] rounded-lg overflow-hidden bg-black border border-border/50 hover:ring-2 hover:ring-[#5EB298] transition-all relative group"
-            >
-              <video
-                src={vr.videoUrl}
-                className="w-full h-full object-cover"
-                muted
-                playsInline
-                preload="metadata"
-              />
-              <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/20 transition-colors">
-                <Play className="w-8 h-8 text-white drop-shadow-lg" />
-              </div>
-              <div className="absolute bottom-1 left-1 right-1">
-                <p className="text-white text-[10px] font-semibold truncate drop-shadow">
-                  {vr.review.profile?.first_name || "Anonymous"}
-                </p>
-              </div>
-            </button>
-          ))}
+          {thumbnails}
         </div>
       </div>
 
