@@ -43,6 +43,24 @@ const glassCard = {
   WebkitBackdropFilter: 'blur(10px)',
 } as const;
 
+const peachCard = {
+  background: 'rgba(224,166,147,0.08)',
+  border: '1px solid rgba(224,166,147,0.12)',
+  borderTop: '1px solid rgba(255,255,255,0.1)',
+  boxShadow: '0 0 20px rgba(224,166,147,0.05)',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+} as const;
+
+const neutralCard = {
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+} as const;
+
+const sectionDivider = "border-t border-[rgba(94,178,152,0.12)] my-8";
+
 /** Consistent "view more / show less" toggle button */
 const ExpandToggle = ({
   expanded,
@@ -92,7 +110,7 @@ const TeamMemberCard = ({ member, index }: { member: any; index: number }) => {
       viewport={{ once: true }}
       transition={{ delay: index * 0.05 }}
     >
-      <div className="rounded-xl p-4 flex gap-3 items-start" style={glassCard}>
+      <div className="rounded-xl p-4 flex gap-3 items-start" style={peachCard}>
         <Avatar className="w-12 h-12 shrink-0 ring-2 ring-white/20">
           <AvatarImage src={member.headshot_url} alt={member.name} />
           <AvatarFallback className="bg-muted">
@@ -315,7 +333,7 @@ const ProviderProfile = () => {
         {/* ═══════ CONTENT ═══════ */}
         <div className="max-w-[960px] mx-auto px-4 mt-6 space-y-6">
 
-          {/* ═══════ 2. ABOUT ═══════ */}
+          {/* ═══════ 2. ABOUT (in card — mint) ═══════ */}
           {providerDescription && (
             <section>
               <div className="rounded-xl p-5" style={glassCard}>
@@ -326,8 +344,8 @@ const ProviderProfile = () => {
                     {specialties.map((s: string) => (
                       <span
                         key={s}
-                        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium text-white backdrop-blur-sm"
-                        style={{ background: 'rgba(94,178,152,0.15)', border: '1px solid rgba(94,178,152,0.3)' }}
+                        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium backdrop-blur-sm"
+                        style={{ background: 'rgba(224,166,147,0.15)', border: '1px solid rgba(224,166,147,0.25)', color: '#E0A693' }}
                       >
                         {s}
                       </span>
@@ -356,10 +374,45 @@ const ProviderProfile = () => {
             </section>
           )}
 
-          {/* ═══════ 3. REVIEWS (moved up) ═══════ */}
+          <div className={sectionDivider} />
+
+          {/* Facility Photos */}
+          {facilityPhotos.length > 1 && (
+            <section>
+              <div className={`grid gap-2 ${facilityPhotos.length === 2 ? "grid-cols-2" : facilityPhotos.length === 3 ? "grid-cols-3" : "grid-cols-2 md:grid-cols-4"}`}>
+                {facilityPhotos.slice(0, 5).map((url, i) => (
+                  <div
+                    key={i}
+                    className={`rounded-xl overflow-hidden border border-white/10 ${
+                      facilityPhotos.length >= 4 && i === 0 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-52" : "aspect-[4/3]"
+                    }`}
+                  >
+                    <img src={url} alt={`Facility ${i + 1}`} className="w-full h-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          <div className={sectionDivider} />
+
+          {/* ═══════ 3. REVIEWS (no card wrapper — directly on page) ═══════ */}
           <section>
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <h2 className="text-lg font-bold">Reviews</h2>
+              <div className="flex items-center gap-3 flex-wrap">
+                <h2 className="text-lg font-bold">Reviews</h2>
+                {/* External review links inline */}
+                {externalLinks?.google_business_url && (
+                  <a href={externalLinks.google_business_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-white flex items-center gap-1 transition-colors">
+                    <ExternalLink className="w-3 h-3" /> Google
+                  </a>
+                )}
+                {externalLinks?.yelp_url && (
+                  <a href={externalLinks.yelp_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-white flex items-center gap-1 transition-colors">
+                    <ExternalLink className="w-3 h-3" /> Yelp
+                  </a>
+                )}
+              </div>
               {user && (
                 <Button onClick={() => setReviewOpen(true)} variant="outline" size="sm" className="gap-1.5">
                   <PenLine className="w-3.5 h-3.5" /> Leave a Review
@@ -491,7 +544,7 @@ const ProviderProfile = () => {
               );
             })()}
 
-            {/* Written reviews — only collapse when more than 3 */}
+            {/* Written reviews */}
             <div className="space-y-3">
               {reviewsLoading ? (
                 <div className="flex justify-center py-8">
@@ -525,7 +578,9 @@ const ProviderProfile = () => {
             </div>
           </section>
 
-          {/* ═══════ 4. PROCEDURES & PRICING ═══════ */}
+          <div className={sectionDivider} />
+
+          {/* ═══════ 4. PROCEDURES & PRICING (in card — peach) ═══════ */}
           {procedures.length > 0 && (
             <section>
               <h2 className="text-lg font-bold mb-3">Procedures & Pricing</h2>
@@ -538,12 +593,12 @@ const ProviderProfile = () => {
                 />
               </div>
 
-              {/* Pricing table — collapsible */}
+              {/* Pricing table — collapsible, peach tint */}
               <div className="relative">
-                <div className="rounded-xl overflow-hidden border border-white/10" style={{ ...glassCard, border: undefined }}>
+                <div className="rounded-xl overflow-hidden" style={{ ...peachCard }}>
                   <Table>
                     <TableHeader>
-                      <TableRow className="bg-[#0a0a0a] hover:bg-[#0a0a0a]">
+                      <TableRow style={{ background: 'rgba(224,166,147,0.1)' }} className="hover:bg-transparent">
                         <TableHead className="text-white font-bold">Procedure</TableHead>
                         <TableHead className="text-white font-bold text-right">Price</TableHead>
                         <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>
@@ -588,45 +643,33 @@ const ProviderProfile = () => {
             </section>
           )}
 
-          {/* ═══════ 5. TEAM ═══════ */}
-          {data && data.team.length > 0 && (
-            <section>
-              <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-                <Users className="w-5 h-5" /> Our Team
-              </h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {(data.team || []).map((member: any, i: number) => (
-                  <TeamMemberCard key={member.id} member={member} index={i} />
-                ))}
-              </div>
-            </section>
-          )}
+          <div className={sectionDivider} />
 
-          {/* ═══════ 6. POLICIES & INFO ═══════ */}
+          {/* ═══════ 5. POLICIES & INFO (no card wrapper — neutral mini-cards) ═══════ */}
           {data?.policies && (
             <section>
               <h2 className="text-lg font-bold mb-3">Policies & Info</h2>
               <div className="grid sm:grid-cols-2 gap-3">
                 {data.policies.hours_of_operation && (
-                  <div className="rounded-xl p-4" style={glassCard}>
+                  <div className="rounded-xl p-4" style={neutralCard}>
                     <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Hours</p>
                     <p className="text-xs text-muted-foreground whitespace-pre-line">{data.policies.hours_of_operation}</p>
                   </div>
                 )}
                 {data.policies.cancellation_policy && (
-                  <div className="rounded-xl p-4" style={glassCard}>
+                  <div className="rounded-xl p-4" style={neutralCard}>
                     <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> Cancellation</p>
                     <p className="text-xs text-muted-foreground">{data.policies.cancellation_policy}</p>
                   </div>
                 )}
                 {data.policies.deposit_requirements && (
-                  <div className="rounded-xl p-4" style={glassCard}>
+                  <div className="rounded-xl p-4" style={neutralCard}>
                     <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Deposit</p>
                     <p className="text-xs text-muted-foreground">{data.policies.deposit_requirements}</p>
                   </div>
                 )}
                 {data.policies.accepted_payments?.length > 0 && (
-                  <div className="rounded-xl p-4" style={glassCard}>
+                  <div className="rounded-xl p-4" style={neutralCard}>
                     <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Payments</p>
                     <div className="flex flex-wrap gap-1">
                       {data.policies.accepted_payments.map((p: string) => (
@@ -639,13 +682,15 @@ const ProviderProfile = () => {
             </section>
           )}
 
-          {/* ═══════ 7. GETTING THERE ═══════ */}
+          <div className={sectionDivider} />
+
+          {/* ═══════ 6. GETTING THERE (in card — peach) ═══════ */}
           {pRec?.travel_info && (
             <section>
               <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
                 <Plane className="w-5 h-5" /> Getting There
               </h2>
-              <div className="rounded-xl p-5" style={glassCard}>
+              <div className="rounded-xl p-5" style={peachCard}>
                 <p className="text-sm text-muted-foreground leading-relaxed">{pRec.travel_info}</p>
               </div>
             </section>
@@ -662,21 +707,18 @@ const ProviderProfile = () => {
             </div>
           </section>
 
-          {/* ═══════ 8. EXTERNAL REVIEWS ═══════ */}
-          {(externalLinks?.google_business_url || externalLinks?.yelp_url) && (
+          <div className={sectionDivider} />
+
+          {/* ═══════ 7. TEAM (no card wrapper — peach doctor cards, at the very bottom) ═══════ */}
+          {data && data.team.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold mb-3">External Reviews</h2>
-              <div className="flex flex-wrap gap-2">
-                {externalLinks?.google_business_url && (
-                  <a href={externalLinks.google_business_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" size="sm" className="gap-1.5"><ExternalLink className="w-3.5 h-3.5" /> Google Reviews</Button>
-                  </a>
-                )}
-                {externalLinks?.yelp_url && (
-                  <a href={externalLinks.yelp_url} target="_blank" rel="noopener noreferrer">
-                    <Button variant="outline" size="sm" className="gap-1.5"><ExternalLink className="w-3.5 h-3.5" /> Yelp</Button>
-                  </a>
-                )}
+              <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <Users className="w-5 h-5" /> Our Team
+              </h2>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {(data.team || []).map((member: any, i: number) => (
+                  <TeamMemberCard key={member.id} member={member} index={i} />
+                ))}
               </div>
             </section>
           )}

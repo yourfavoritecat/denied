@@ -84,8 +84,9 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <Button
               size="sm"
-              variant="secondary"
+              variant="outline"
               className="hidden sm:flex items-center gap-1.5 whitespace-nowrap text-[13px] h-7 px-[18px] py-1.5"
+              style={{ borderColor: 'rgba(224,166,147,0.5)', color: '#E0A693' }}
               onClick={() => navigate(user ? "/my-trips?plan=new" : "/auth")}
             >
               <PlusCircle className="w-3.5 h-3.5 shrink-0" />
@@ -192,7 +193,8 @@ const Navbar = () => {
                     ))}
                     <button
                       onClick={() => handleMobileNav(user ? "/my-trips?plan=new" : "/auth")}
-                      className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-secondary font-semibold hover:bg-muted transition-colors text-sm"
+                      className="flex items-center gap-3 w-full px-3 py-3 rounded-lg font-semibold hover:bg-muted transition-colors text-sm"
+                      style={{ color: '#E0A693' }}
                     >
                       <PlusCircle className="w-5 h-5" />
                       Plan a Trip
