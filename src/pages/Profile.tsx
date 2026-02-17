@@ -3,7 +3,7 @@ import Footer from "@/components/landing/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Heart, Calendar, ShieldCheck, Camera, User, ExternalLink, ClipboardList } from "lucide-react";
+import { Settings, Heart, Calendar, ShieldCheck, Camera, User, ExternalLink, ClipboardList, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,27 @@ import TripsTab from "@/components/profile/TripsTab";
 import ProfileFeedTab from "@/components/profile/ProfileFeedTab";
 import AboutMeTab from "@/components/profile/AboutMeTab";
 import AvatarUpload from "@/components/profile/AvatarUpload";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const ProfilePage = () => {
   const { user, profile } = useAuth();
   const socialVerifications = (profile as any)?.social_verifications || {};
   const trustTier = computeUserTrustTier(socialVerifications, false);
+  const [creatorHandle, setCreatorHandle] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchCreator = async () => {
+      const { data } = await supabase
+        .from("creator_profiles")
+        .select("handle")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      setCreatorHandle(data?.handle || null);
+    };
+    fetchCreator();
+  }, [user]);
 
   const displayName = profile
     ? [profile.first_name, profile.last_name].filter(Boolean).join(" ") || "User"
@@ -50,6 +66,21 @@ const ProfilePage = () => {
                         <Link to={`/user/${(profile as any).username}`}>
                           <ExternalLink className="w-3.5 h-3.5" />
                           View Public Profile
+                        </Link>
+                      </Button>
+                    )}
+                    {creatorHandle ? (
+                      <Button variant="secondary" size="sm" asChild className="gap-1.5">
+                        <Link to={`/c/${creatorHandle}`}>
+                          <Sparkles className="w-3.5 h-3.5" />
+                          View Creator Page
+                        </Link>
+                      </Button>
+                    ) : (
+                      <Button variant="secondary" size="sm" asChild className="gap-1.5">
+                        <Link to="/creator/edit">
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Create Public Profile
                         </Link>
                       </Button>
                     )}
