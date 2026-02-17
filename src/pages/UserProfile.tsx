@@ -162,7 +162,7 @@ const UserProfile = () => {
                       </h1>
                       {profile.badge_type && (
                         <div className="mb-2">
-                          <UserBadge badgeType={profile.badge_type} size="md" />
+                          <UserBadge badgeType={profile.badge_type} size="default" />
                         </div>
                       )}
                     </div>
