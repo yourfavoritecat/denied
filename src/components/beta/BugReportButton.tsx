@@ -75,12 +75,13 @@ const BugReportButton = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed left-5 z-50 flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2.5 rounded-full shadow-lg hover:opacity-90 transition-opacity text-sm font-medium"
-        style={{ bottom: 80 }}
+        className="fixed left-5 z-50 flex items-center justify-center rounded-full shadow-lg transition-opacity"
+        style={{ bottom: 80, width: 40, height: 40, opacity: 0.4, background: 'hsl(var(--destructive))' }}
+        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.8')}
+        onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.4')}
         title="Report a bug"
       >
-        <Bug className="w-4 h-4" />
-        Report Bug
+        <Bug className="w-4 h-4 text-white" />
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
