@@ -18,6 +18,7 @@ interface CreatorCard {
   user_id: string;
   badge_type?: string | null;
   review_count?: number;
+  procedure_count?: number;
 }
 
 const Creators = () => {
@@ -44,7 +45,7 @@ const Creators = () => {
 
     const [badgeRes, reviewRes] = await Promise.all([
       supabase.from("profiles").select("user_id, badge_type").in("user_id", userIds),
-      supabase.from("reviews").select("user_id").in("user_id", userIds),
+      supabase.from("reviews").select("user_id, procedure_name").in("user_id", userIds),
     ]);
 
     const badgeMap: Record<string, string | null> = {};
@@ -53,8 +54,10 @@ const Creators = () => {
     });
 
     const reviewCountMap: Record<string, number> = {};
+    const procedureCountMap: Record<string, number> = {};
     ((reviewRes.data as any[]) || []).forEach((r) => {
       reviewCountMap[r.user_id] = (reviewCountMap[r.user_id] || 0) + 1;
+      if (!procedureCountMap[r.user_id]) procedureCountMap[r.user_id] = 0;
     });
 
     setCreators(
@@ -72,19 +75,15 @@ const Creators = () => {
   return (
     <div className="min-h-screen">
       {/* Header */}
-      <div className="relative w-full h-[200px] overflow-hidden">
-        <img src="/images/hero-creator.jpg" alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
-        <div className="absolute bottom-0 left-0 right-0 px-6 pb-6 max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold">creators</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Trusted voices documenting real medical tourism experiences
-          </p>
-        </div>
+      <div className="max-w-4xl mx-auto px-6 pt-16 pb-8">
+        <h1 className="text-3xl font-bold mb-2">creators</h1>
+        <p className="text-muted-foreground text-sm">
+          People sharing real medical tourism experiences
+        </p>
       </div>
 
       {/* Grid */}
-      <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="max-w-4xl mx-auto px-4 pb-10">
         {loading ? (
           <div className="flex justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
@@ -128,7 +127,7 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
         <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
         {/* Avatar overlapping */}
         <div className="absolute -bottom-6 left-4">
-          <Avatar className="w-14 h-14 border-3 border-card shadow-md">
+          <Avatar className="w-14 h-14 border-[3px] border-card shadow-md">
             {creator.avatar_url && <AvatarImage src={creator.avatar_url} alt={creator.display_name} className="object-cover" />}
             <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
               {creator.display_name?.[0]?.toUpperCase() || "C"}
@@ -139,24 +138,25 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
 
       {/* Content */}
       <div className="pt-8 pb-4 px-4">
+        {/* Name + Badge row */}
         <div className="flex items-start justify-between gap-2 mb-1">
           <h3 className="font-semibold text-sm leading-tight">{creator.display_name}</h3>
         </div>
 
         {/* Badge */}
-        {creator.badge_type ? (
-          <div className="mb-2">
+        <div className="mb-2">
+          {creator.badge_type ? (
             <UserBadge badgeType={creator.badge_type as any} size="sm" />
-          </div>
-        ) : (
-          <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs mb-2">
-            <BadgeCheck className="w-3 h-3" /> creator
-          </Badge>
-        )}
+          ) : (
+            <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs">
+              <BadgeCheck className="w-3 h-3" /> creator
+            </Badge>
+          )}
+        </div>
 
-        {/* Bio */}
+        {/* Bio — 1-line preview */}
         {creator.bio && (
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{creator.bio}</p>
+          <p className="text-xs text-muted-foreground line-clamp-1 mb-2">{creator.bio}</p>
         )}
 
         {/* Specialties */}
@@ -167,6 +167,11 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
                 {s}
               </span>
             ))}
+            {creator.specialties.length > 3 && (
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
+                +{creator.specialties.length - 3}
+              </span>
+            )}
           </div>
         )}
 
@@ -183,3 +188,4 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
 );
 
 export default Creators;
+
