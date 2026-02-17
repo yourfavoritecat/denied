@@ -13,6 +13,8 @@ interface Profile {
   verification_tier: string;
   onboarding_complete: boolean;
   social_verifications: any;
+  is_creator: boolean;
+  badge_type: string | null;
 }
 
 interface AuthContextType {

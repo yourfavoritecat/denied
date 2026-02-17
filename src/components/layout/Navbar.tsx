@@ -27,7 +27,7 @@ const Navbar = () => {
   const { isAdmin } = useAdmin();
   const { viewAs } = useViewAs();
   const { isBetaTester } = useBetaTester();
-  const { isCreator } = useCreator();
+  const { isCreator, creatorHandle } = useCreator();
   const { setIsOpen: openChat } = useChat();
   const showBanner = isAdmin && viewAs !== "admin";
 
@@ -50,6 +50,8 @@ const Navbar = () => {
   // Build the public profile URL for the current user
   const publicProfileUrl = (() => {
     if (!profile) return "/profile";
+    // If user is a creator with a handle, link to their creator page
+    if (isCreator && creatorHandle) return `/c/${creatorHandle}`;
     const p = profile as any;
     if (p.username) return `/user/${p.username}`;
     return "/profile";

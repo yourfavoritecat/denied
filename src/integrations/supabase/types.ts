@@ -488,6 +488,7 @@ export type Database = {
           created_at: string
           first_name: string | null
           id: string
+          is_creator: boolean
           last_name: string | null
           notification_preferences: Json | null
           onboarding_complete: boolean
@@ -508,6 +509,7 @@ export type Database = {
           created_at?: string
           first_name?: string | null
           id?: string
+          is_creator?: boolean
           last_name?: string | null
           notification_preferences?: Json | null
           onboarding_complete?: boolean
@@ -528,6 +530,7 @@ export type Database = {
           created_at?: string
           first_name?: string | null
           id?: string
+          is_creator?: boolean
           last_name?: string | null
           notification_preferences?: Json | null
           onboarding_complete?: boolean
