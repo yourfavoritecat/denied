@@ -286,17 +286,19 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
 
               {/* Category breakdown */}
               {review.rating_cleanliness != null && (
-                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1">
-                  {REVIEW_CATEGORIES.map(({ key, label }) => {
-                    const val = review[key as keyof ReviewData] as number | undefined;
-                    if (val == null) return null;
-                    return (
-                      <div key={key} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                        <span className="truncate">{label}</span>
-                        <span className="font-semibold text-foreground">{val}/5</span>
-                      </div>
-                    );
-                  })}
+                <div className="mt-3 rounded-lg p-3" style={{ background: 'rgba(224,166,147,0.08)', border: '1px solid rgba(224,166,147,0.12)' }}>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2">
+                    {REVIEW_CATEGORIES.map(({ key, label }) => {
+                      const val = review[key as keyof ReviewData] as number | undefined;
+                      if (val == null) return null;
+                      return (
+                        <div key={key} className="flex items-center justify-between gap-2 text-xs">
+                          <span className="truncate font-bold" style={{ color: '#E0A693' }}>{label}</span>
+                          <span className="font-bold shrink-0" style={{ color: '#E0A693' }}>{val}/5</span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
