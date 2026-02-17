@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Shield, ClipboardList, FileText, Bug, Sparkles, MessageCircle } from "lucide-react";
+import { Search, Plane, User, LogOut, PlusCircle, Menu, X, LayoutDashboard, Settings, Shield, ClipboardList, FileText, Bug, Sparkles, MessageCircle, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useViewAs } from "@/hooks/useViewAs";
@@ -62,6 +62,7 @@ const Navbar = () => {
     : [
         { to: "/dashboard", icon: LayoutDashboard, label: "Home" },
         { to: "/search", icon: Search, label: "Providers" },
+        { to: "/creators", icon: Users, label: "Creators" },
         { to: "/my-trips", icon: Plane, label: "My Trips" },
         { to: publicProfileUrl, icon: User, label: "My Profile" },
       ];

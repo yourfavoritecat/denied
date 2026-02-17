@@ -331,6 +331,7 @@ export type Database = {
           handle: string
           id: string
           is_published: boolean | null
+          profile_theme: string | null
           social_links: Json | null
           specialties: string[] | null
           updated_at: string | null
@@ -346,6 +347,7 @@ export type Database = {
           handle: string
           id?: string
           is_published?: boolean | null
+          profile_theme?: string | null
           social_links?: Json | null
           specialties?: string[] | null
           updated_at?: string | null
@@ -361,9 +363,34 @@ export type Database = {
           handle?: string
           id?: string
           is_published?: boolean | null
+          profile_theme?: string | null
           social_links?: Json | null
           specialties?: string[] | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          id: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          target_id: string
+          target_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          target_id?: string
+          target_type?: string
           user_id?: string
         }
         Relationships: []

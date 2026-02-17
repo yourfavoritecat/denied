@@ -71,6 +71,7 @@ const CreatorEdit = () => {
   const [socialLinks, setSocialLinks] = useState({ instagram: "", tiktok: "", youtube: "" });
   const [isPublished, setIsPublished] = useState(false);
   const [featuredProviders, setFeaturedProviders] = useState<string[]>([]);
+  const [profileTheme, setProfileTheme] = useState<"mint" | "peach" | "pearl">("mint");
 
   // Provider data
   const [providerMap, setProviderMap] = useState<Record<string, ProviderInfo>>({});
@@ -132,6 +133,7 @@ const CreatorEdit = () => {
     });
     setIsPublished(profile.is_published);
     setFeaturedProviders(profile.featured_providers || []);
+    setProfileTheme(((profile as any).profile_theme as "mint" | "peach" | "pearl") || "mint");
 
     // Fetch content
     const { data: contentData } = await supabase
@@ -199,6 +201,7 @@ const CreatorEdit = () => {
         social_links: socialLinks,
         featured_providers: featuredProviders,
         is_published: isPublished,
+        profile_theme: profileTheme,
       } as any)
       .eq("id", creatorProfile.id);
 
@@ -433,6 +436,34 @@ const CreatorEdit = () => {
             placeholder="Tell people about yourself and your medical tourism journey..."
             rows={3}
           />
+        </section>
+
+        {/* Profile Theme */}
+        <section className="space-y-3">
+          <Label className="text-base font-semibold">Profile Theme</Label>
+          <p className="text-xs text-muted-foreground">Choose the accent color for your public creator page.</p>
+          <div className="flex gap-3">
+            {([
+              { value: "mint", label: "Mint", bg: "rgba(94,178,152,0.15)", border: "#5EB298", dot: "#5EB298" },
+              { value: "peach", label: "Peach", bg: "rgba(224,166,147,0.15)", border: "#E0A693", dot: "#E0A693" },
+              { value: "pearl", label: "Pearl", bg: "rgba(255,255,255,0.08)", border: "#D4C5A9", dot: "#D4C5A9" },
+            ] as const).map((t) => (
+              <button
+                key={t.value}
+                onClick={() => setProfileTheme(t.value)}
+                className="flex-1 rounded-xl p-3 flex flex-col items-center gap-2 transition-all border-2"
+                style={{
+                  background: t.bg,
+                  borderColor: profileTheme === t.value ? t.border : "transparent",
+                  outline: profileTheme === t.value ? `2px solid ${t.border}40` : "none",
+                }}
+              >
+                <div className="w-5 h-5 rounded-full" style={{ background: t.dot }} />
+                <span className="text-xs font-medium">{t.label}</span>
+                {profileTheme === t.value && <span className="text-[10px]" style={{ color: t.dot }}>active</span>}
+              </button>
+            ))}
+          </div>
         </section>
 
         {/* Social Links */}
