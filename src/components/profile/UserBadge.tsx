@@ -20,7 +20,7 @@ const UserBadge = ({ badgeType, size = "default" }: UserBadgeProps) => {
     <img
       src={src}
       alt={badgeType}
-      className={size === "sm" ? "h-5 w-auto" : "h-7 w-auto"}
+      className={size === "sm" ? "h-6 w-auto" : "h-9 w-auto"}
       draggable={false}
     />
   );

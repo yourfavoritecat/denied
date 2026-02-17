@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BadgeCheck, Star } from "lucide-react";
-import UserBadge from "@/components/profile/UserBadge";
+
 import logo from "@/assets/logo-clean.png";
 
 interface CreatorCard {
@@ -126,10 +126,10 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
         />
         <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
         {/* Avatar overlapping */}
-        <div className="absolute -bottom-6 left-4">
-          <Avatar className="w-14 h-14 border-[3px] border-card shadow-md">
+        <div className="absolute -bottom-7 left-4">
+          <Avatar className="w-16 h-16 border-[3px] border-card shadow-md">
             {creator.avatar_url && <AvatarImage src={creator.avatar_url} alt={creator.display_name} className="object-cover" />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">
               {creator.display_name?.[0]?.toUpperCase() || "C"}
             </AvatarFallback>
           </Avatar>
@@ -137,16 +137,20 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
       </div>
 
       {/* Content */}
-      <div className="pt-8 pb-4 px-4">
+      <div className="pt-10 pb-4 px-4">
         {/* Name + Badge row */}
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="font-semibold text-sm leading-tight">{creator.display_name}</h3>
-        </div>
-
-        {/* Badge */}
-        <div className="mb-2">
+        <div className="flex items-center gap-2 flex-wrap mb-2">
+          <h3 className="font-semibold text-xl leading-tight">{creator.display_name}</h3>
           {creator.badge_type ? (
-            <UserBadge badgeType={creator.badge_type as any} size="sm" />
+            <img
+              src={(() => {
+                const map: Record<string, string> = { founder: "/badges/founder.png", trusted_creator: "/badges/creator.png", trusted_traveler: "/badges/creator.png", trusted_provider: "/badges/provider.png" };
+                return map[creator.badge_type!] || "";
+              })()}
+              alt={creator.badge_type}
+              className="h-7 w-auto"
+              draggable={false}
+            />
           ) : (
             <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs">
               <BadgeCheck className="w-3 h-3" /> creator
