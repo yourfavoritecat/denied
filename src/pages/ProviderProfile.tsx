@@ -472,20 +472,23 @@ const ProviderProfile = () => {
 
                 {/* Savings calculator (left) + star rating breakdown (right) */}
                 {(procedures.length > 0 || reviewCount > 0 || categoryAggregates) && (
-                  <div className="flex flex-col md:flex-row gap-4 mb-5">
-                    {/* Savings Calculator — left side, no card wrapper */}
+                  <div className="flex flex-col md:flex-row md:items-stretch gap-4 mb-5">
+                    {/* Savings Calculator — left side, matches right card height */}
                     {procedures.length > 0 && (
-                      <div className="flex-1 min-w-0">
-                        <SavingsCalculator
-                          procedures={procedures}
-                          onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
-                        />
+                      <div className="flex-1 min-w-0 flex flex-col">
+                        <div className="flex-1 flex flex-col rounded-xl border overflow-hidden" style={{ background: 'rgba(26,26,26,1)', borderColor: 'rgba(94,178,152,0.12)' }}>
+                          <SavingsCalculator
+                            procedures={procedures}
+                            onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
+                            showPlaceholder
+                          />
+                        </div>
                       </div>
                     )}
 
                     {/* Star rating breakdown — right side */}
                     {(reviewCount > 0 || categoryAggregates) && (
-                      <div className="rounded-xl p-5 flex-1 min-w-0" style={glassCard}>
+                      <div className="rounded-xl p-5 flex-1 min-w-0 flex flex-col" style={glassCard}>
                         {reviewCount > 0 && (
                           <>
                             <div className="text-center mb-4">
@@ -512,19 +515,21 @@ const ProviderProfile = () => {
                           </>
                         )}
                         {categoryAggregates && (
-                          <div className="space-y-2">
-                            <h4 className="text-xs font-semibold">Category Breakdown</h4>
-                            {categoryAggregates.map(({ key, label, avg }) => (
-                              <div key={key} className="space-y-0.5">
-                                <div className="flex justify-between text-[11px]">
-                                  <span className="text-muted-foreground">{label}</span>
-                                  <span className="font-semibold">{avg}/5</span>
+                          <div className="rounded-lg p-4 mt-auto" style={{ background: 'rgba(224,166,147,0.08)', border: '1px solid rgba(224,166,147,0.12)' }}>
+                            <h4 className="text-xs font-bold mb-2" style={{ color: '#E0A693' }}>Category Breakdown</h4>
+                            <div className="space-y-2">
+                              {categoryAggregates.map(({ key, label, avg }) => (
+                                <div key={key} className="space-y-0.5">
+                                  <div className="flex justify-between text-[11px]">
+                                    <span className="font-bold" style={{ color: '#E0A693' }}>{label}</span>
+                                    <span className="font-bold" style={{ color: '#E0A693' }}>{avg}/5</span>
+                                  </div>
+                                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(224,166,147,0.12)' }}>
+                                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
+                                  </div>
                                 </div>
-                                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
-                                </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
                           </div>
                         )}
                       </div>
