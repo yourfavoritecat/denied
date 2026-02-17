@@ -14,7 +14,7 @@ const SavedProvidersTab = () => {
 
   const handleRemove = (id: number, name: string) => {
     setSavedProviders((prev) => prev.filter((p) => p.id !== id));
-    toast({ title: "Provider removed", description: `${name} has been removed from your saved list.` });
+    toast({ title: "Provider removed", description: `${name} has been removed from your favorites.` });
   };
 
   return (
@@ -22,9 +22,9 @@ const SavedProvidersTab = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Heart className="w-5 h-5" />
-          Saved Providers
+          Favorite Providers
         </CardTitle>
-        <CardDescription>Providers you've bookmarked for later</CardDescription>
+        <CardDescription>Providers you've saved as favorites</CardDescription>
       </CardHeader>
       <CardContent>
         {savedProviders.length > 0 ? (
@@ -62,7 +62,7 @@ const SavedProvidersTab = () => {
           </div>
         ) : (
           <p className="text-center text-muted-foreground py-8">
-            No saved providers yet. Start browsing to save your favorites!
+            No favorite providers yet. Start browsing to save your favorites!
           </p>
         )}
       </CardContent>

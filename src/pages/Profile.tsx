@@ -108,7 +108,7 @@ const ProfilePage = () => {
               </TabsTrigger>
               <TabsTrigger value="saved" className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <Heart className="w-4 h-4" />
-                <span className="hidden sm:inline">Saved</span>
+                <span className="hidden sm:inline">Favorites</span>
               </TabsTrigger>
               <TabsTrigger value="trips" className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <Calendar className="w-4 h-4" />
