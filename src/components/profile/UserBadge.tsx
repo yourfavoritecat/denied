@@ -1,10 +1,10 @@
 export type BadgeType = "trusted_creator" | "trusted_traveler" | "founder" | "trusted_provider" | null;
 
 const BADGE_IMAGES: Record<string, string> = {
-  founder: "/badges/founder.png",
-  trusted_creator: "/badges/creator.png",
-  trusted_traveler: "/badges/creator.png",
-  trusted_provider: "/badges/provider.png",
+  founder: "/badges/founder.png?v=3",
+  trusted_creator: "/badges/creator.png?v=3",
+  trusted_traveler: "/badges/creator.png?v=3",
+  trusted_provider: "/badges/provider.png?v=3",
 };
 
 interface UserBadgeProps {
