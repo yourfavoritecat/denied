@@ -9,24 +9,40 @@ interface UserBadgeProps {
   size?: "sm" | "md";
 }
 
+// Star icon: which badge image provides which star personality
+// founder → pearl/cream star (white badge)
+// trusted_creator → peach star (peach badge)
+// trusted_traveler → green star (green badge)
 const badgeConfig: Record<
   NonNullable<BadgeType>,
-  { image: string; label: string; textColor: string }
+  {
+    starImage: string;
+    label: string;
+    pillBg: string;
+    pillBorder: string;
+    textColor: string;
+  }
 > = {
+  founder: {
+    starImage: badgeFounder,
+    label: "founder",
+    pillBg: "rgba(212,197,169,0.15)",
+    pillBorder: "rgba(212,197,169,0.3)",
+    textColor: "#D4C5A9",
+  },
   trusted_creator: {
-    image: badgeTrustedCreator,
+    starImage: badgeTrustedCreator,
     label: "trusted creator",
-    textColor: "rgba(30, 70, 55, 0.95)",
+    pillBg: "rgba(94,178,152,0.15)",
+    pillBorder: "rgba(94,178,152,0.3)",
+    textColor: "#5EB298",
   },
   trusted_traveler: {
-    image: badgeTrustedTraveler,
+    starImage: badgeTrustedTraveler,
     label: "trusted traveler",
-    textColor: "rgba(100, 45, 30, 0.95)",
-  },
-  founder: {
-    image: badgeFounder,
-    label: "founder",
-    textColor: "rgba(60, 50, 30, 0.95)",
+    pillBg: "rgba(224,166,147,0.15)",
+    pillBorder: "rgba(224,166,147,0.3)",
+    textColor: "#E0A693",
   },
 };
 
@@ -35,62 +51,65 @@ const UserBadge = ({ badgeType, size = "md" }: UserBadgeProps) => {
   const config = badgeConfig[badgeType];
   if (!config) return null;
 
-  // The badge pill image has a 3D star on the LEFT side that protrudes ~38% of the width.
-  // Text must live in the RIGHT portion only — no overlap with the star.
-  const width = size === "sm" ? 108 : 130;
-  const height = size === "sm" ? 30 : 36;
-  const fontSize = size === "sm" ? 9.5 : 11;
-  // Star occupies roughly 38% from the left edge; add a small gap
-  const textPaddingLeft = Math.round(width * 0.40);
-  const textPaddingRight = size === "sm" ? 8 : 10;
+  const starSize = size === "sm" ? 18 : 22;
+  const fontSize = size === "sm" ? 10 : 11;
+  const gap = size === "sm" ? 4 : 5;
+  const py = size === "sm" ? 2 : 3;
+  const px = size === "sm" ? 8 : 10;
 
   return (
     <div
       style={{
-        position: "relative",
-        width,
-        height,
         display: "inline-flex",
         alignItems: "center",
+        gap,
         flexShrink: 0,
-        // No background — let PNG render with full transparency intact
-        background: "transparent",
       }}
     >
-      {/* Badge image — fills container, preserves PNG alpha */}
-      <img
-        src={config.image}
-        alt={config.label}
-        draggable={false}
+      {/* 3D star icon — cropped to show just the star from the left portion of the badge PNG */}
+      <div
         style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "fill",
-          // No border-radius here — the PNG itself has rounded pill shape
-          display: "block",
+          width: starSize,
+          height: starSize,
+          flexShrink: 0,
+          overflow: "hidden",
+          borderRadius: "50%",
         }}
-      />
+      >
+        <img
+          src={config.starImage}
+          alt=""
+          draggable={false}
+          style={{
+            // Show only the left ~40% of the image where the 3D star lives
+            width: `${starSize / 0.38}px`,
+            height: `${starSize}px`,
+            objectFit: "cover",
+            objectPosition: "left center",
+            display: "block",
+          }}
+        />
+      </div>
 
-      {/* Text label — pushed RIGHT of the star */}
+      {/* Pure CSS pill for the label */}
       <span
         style={{
-          position: "relative",
-          zIndex: 1,
-          paddingLeft: textPaddingLeft,
-          paddingRight: textPaddingRight,
-          width: "100%",
+          display: "inline-flex",
+          alignItems: "center",
+          borderRadius: 9999,
+          paddingTop: py,
+          paddingBottom: py,
+          paddingLeft: px,
+          paddingRight: px,
+          background: config.pillBg,
+          border: `1px solid ${config.pillBorder}`,
           fontSize,
           fontFamily: "Inter, system-ui, sans-serif",
-          fontWeight: 700,
+          fontWeight: 600,
           color: config.textColor,
-          letterSpacing: "0.01em",
+          letterSpacing: "0.02em",
           whiteSpace: "nowrap",
           lineHeight: 1,
-          textAlign: "left",
-          // Subtle text shadow for legibility on lighter pills
-          textShadow: "0 0 3px rgba(255,255,255,0.4)",
         }}
       >
         {config.label}
