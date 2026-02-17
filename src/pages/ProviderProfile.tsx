@@ -11,8 +11,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   Star, MapPin, Globe, MessageSquareQuote, PenLine,
   Users, Clock, CreditCard, ShieldCheck, ChevronDown, ChevronUp,
-  Play, Camera, Image as ImageIcon,
+  Play, Camera, Image as ImageIcon, Heart,
 } from "lucide-react";
+import { useFavorite } from "@/hooks/useFavorite";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import VerificationBadge from "@/components/providers/VerificationBadge";
 import { REVIEW_CATEGORIES, US_PRICE_MAP } from "@/data/providers";
@@ -208,6 +209,7 @@ const ProviderProfile = () => {
   const [data, setData] = useState<ProviderData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>("Overview");
+  const { isFavorited: isProviderFavorited, toggle: toggleProviderFavorite } = useFavorite(slug || "", "provider");
 
   // Collapsible state
   const [pricingExpanded, setPricingExpanded] = useState(false);
@@ -392,6 +394,20 @@ const ProviderProfile = () => {
                   {languages.length > 0 && <span className="flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {languages.join(", ")}</span>}
                 </div>
               </div>
+              {/* Favorite heart button */}
+              {user && (
+                <button
+                  onClick={toggleProviderFavorite}
+                  className="shrink-0 p-2 rounded-full transition-all hover:scale-110 active:scale-95"
+                  style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)' }}
+                  title={isProviderFavorited ? "Remove from favorites" : "Add to favorites"}
+                >
+                  <Heart
+                    className="w-5 h-5 transition-colors"
+                    style={isProviderFavorited ? { fill: '#5EB298', color: '#5EB298' } : { color: 'rgba(255,255,255,0.7)' }}
+                  />
+                </button>
+              )}
             </div>
           </div>
 

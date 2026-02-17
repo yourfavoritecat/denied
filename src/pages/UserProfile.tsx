@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, Calendar, MapPin, Heart, Sparkles, Plane, Pencil } from "lucide-react";
+import { ThumbsUp, Calendar, MapPin, Heart, Sparkles, Plane, Pencil, Star, Building2, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useReviews } from "@/hooks/useReviews";
 import { useAuth } from "@/hooks/useAuth";
@@ -47,6 +47,8 @@ const UserProfile = () => {
   const [extras, setExtras] = useState<ProfileExtras | null>(null);
   const [loading, setLoading] = useState(true);
   const [tripsCount, setTripsCount] = useState(0);
+  const [favProviders, setFavProviders] = useState<any[]>([]);
+  const [favCreators, setFavCreators] = useState<any[]>([]);
 
   useEffect(() => {
     const fetch = async () => {
@@ -56,7 +58,6 @@ const UserProfile = () => {
         .eq("username", userId)
         .maybeSingle();
       
-      // Also fetch badge_type from profiles table
       let badgeType: BadgeType = null;
       if (data) {
         const { data: profileData } = await supabase
@@ -70,22 +71,26 @@ const UserProfile = () => {
       setProfile(data ? { ...(data as any), badge_type: badgeType } : null);
 
       if (data) {
-        const [tripsResult, extrasResult] = await Promise.all([
-          supabase
-            .from("trip_briefs")
-            .select("id", { count: "exact", head: true })
-            .eq("user_id", (data as any).user_id)
-            .eq("status", "completed"),
-          supabase
-            .from("user_profile_extras")
-            .select("bio, hobbies, fun_facts, favorite_emoji, skin_type, hair_type, favorite_treatments, beauty_goals, travel_style, favorite_destinations, bucket_list_procedures, public_fields")
-            .eq("user_id", (data as any).user_id)
-            .maybeSingle(),
+        const uid = (data as any).user_id;
+        const [tripsResult, extrasResult, favsResult] = await Promise.all([
+          supabase.from("trip_briefs").select("id", { count: "exact", head: true }).eq("user_id", uid).eq("status", "completed"),
+          supabase.from("user_profile_extras").select("bio, hobbies, fun_facts, favorite_emoji, skin_type, hair_type, favorite_treatments, beauty_goals, travel_style, favorite_destinations, bucket_list_procedures, public_fields").eq("user_id", uid).maybeSingle(),
+          supabase.from("favorites" as any).select("target_id, target_type").eq("user_id", uid),
         ]);
         setTripsCount(tripsResult.count || 0);
-        if (extrasResult.data) {
-          setExtras(extrasResult.data as any);
-        }
+        if (extrasResult.data) setExtras(extrasResult.data as any);
+
+        // Resolve favorites
+        const favs = (favsResult.data as any[]) || [];
+        const provSlugs = favs.filter(f => f.target_type === "provider").map(f => f.target_id);
+        const creatorHandles = favs.filter(f => f.target_type === "creator").map(f => f.target_id);
+
+        const [provData, creatorData] = await Promise.all([
+          provSlugs.length > 0 ? supabase.from("providers").select("slug, name, city, cover_photo_url, country").in("slug", provSlugs) : Promise.resolve({ data: [] }),
+          creatorHandles.length > 0 ? supabase.from("creator_profiles").select("handle, display_name, avatar_url, specialties").in("handle", creatorHandles).eq("is_published", true) : Promise.resolve({ data: [] }),
+        ]);
+        setFavProviders((provData.data as any[]) || []);
+        setFavCreators((creatorData.data as any[]) || []);
       }
       setLoading(false);
     };
@@ -197,6 +202,58 @@ const UserProfile = () => {
               )}
             </CardContent>
           </Card>
+
+          {/* Favorite Creators */}
+          {favCreators.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Star className="w-4 h-4" style={{ fill: '#E0A693', color: '#E0A693' }} /> favorite creators
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3 flex-wrap">
+                  {favCreators.slice(0, 3).map((c: any) => (
+                    <Link key={c.handle} to={`/c/${c.handle}`} className="flex items-center gap-2 p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+                      <Avatar className="w-8 h-8 shrink-0">
+                        {c.avatar_url && <AvatarImage src={c.avatar_url} />}
+                        <AvatarFallback className="text-xs bg-primary text-primary-foreground">{c.display_name?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">{c.display_name}</span>
+                    </Link>
+                  ))}
+                  {favCreators.length > 3 && <Link to="/creators" className="text-xs text-primary self-center">view all {favCreators.length}</Link>}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Favorite Providers */}
+          {favProviders.length > 0 && (
+            <Card className="mb-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Heart className="w-4 h-4" style={{ fill: '#5EB298', color: '#5EB298' }} /> favorite providers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex gap-3 flex-wrap">
+                  {favProviders.slice(0, 3).map((p: any) => (
+                    <Link key={p.slug} to={`/provider/${p.slug}`} className="flex items-center gap-2 p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
+                      <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-card">
+                        {p.cover_photo_url ? <img src={p.cover_photo_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-muted-foreground">{p.name?.[0]}</div>}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium leading-tight">{p.name}</p>
+                        {p.city && <p className="text-xs text-muted-foreground">{p.city}</p>}
+                      </div>
+                    </Link>
+                  ))}
+                  {favProviders.length > 3 && <span className="text-xs text-muted-foreground self-center">+{favProviders.length - 3} more</span>}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Public About Me Sections */}
           {extras && (
