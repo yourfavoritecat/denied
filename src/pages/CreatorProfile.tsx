@@ -300,21 +300,23 @@ const CreatorProfile = () => {
       {/* Profile Header — overlapping cover */}
       <div className="relative max-w-2xl mx-auto px-4 -mt-14 z-10">
         <div className="flex items-end gap-4 mb-4">
-          <Avatar className="w-24 h-24 border-4 border-background shadow-elevated shrink-0">
+          <Avatar className="w-28 h-28 border-4 border-background shadow-elevated shrink-0">
             {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.display_name} className="object-cover" />}
             <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-bold">
               {profile.display_name?.[0]?.toUpperCase() || "C"}
             </AvatarFallback>
           </Avatar>
           <div className="pb-1 flex-1 min-w-0">
-            <h1 className="text-2xl font-bold leading-tight">{profile.display_name}</h1>
-            {userBadge ? (
-              <div className="mt-1"><UserBadge badgeType={userBadge as any} /></div>
-            ) : (
-              <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs mt-1">
-                <BadgeCheck className="w-3 h-3" /> denied.care creator
-              </Badge>
-            )}
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-3xl font-bold leading-tight">{profile.display_name}</h1>
+              {userBadge ? (
+                <UserBadge badgeType={userBadge as any} />
+              ) : (
+                <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs">
+                  <BadgeCheck className="w-3 h-3" /> denied.care creator
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
