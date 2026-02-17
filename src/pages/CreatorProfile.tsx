@@ -307,8 +307,8 @@ const CreatorProfile = () => {
             </AvatarFallback>
           </Avatar>
           <div className="pb-1 flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-3xl font-bold leading-tight">{profile.display_name}</h1>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1 className="text-5xl font-bold leading-tight">{profile.display_name}</h1>
               {userBadge ? (
                 <UserBadge badgeType={userBadge as any} />
               ) : (
@@ -409,8 +409,8 @@ const CreatorProfile = () => {
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="max-w-2xl mx-auto px-4 pb-16">
+      {/* Tabs — flush below stats, full width */}
+      <div className="max-w-2xl mx-auto pb-16">
         <CreatorTabs
           profile={profile}
           theme={theme}
@@ -557,140 +557,141 @@ const CreatorTabs = ({
   ungroupedContent: ContentItem[];
   openLightbox: (urls: string[], index: number) => void;
   setQuoteProvider: (p: { name: string; slug: string } | null) => void;
-}) => (
-  <Tabs defaultValue="reviews">
-    <TabsList className="w-full mb-6 bg-card border border-border p-0 h-auto rounded-xl overflow-hidden">
-      {(["reviews", "providers", "content", "trips"] as const).map((tab) => (
-        <button
-          key={tab}
-          onClick={() => {
-            const el = document.querySelector(`[data-radix-collection-item][value="${tab}"]`) as HTMLButtonElement;
-            el?.click();
-          }}
-          className="flex-1"
-        />
-      ))}
-      <TabsTrigger value="reviews" className="flex-1 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent data-[state=active]:border-b-2 h-10 text-xs font-medium"
-        style={{ '--tab-active-color': theme.tabActive } as any}>Reviews</TabsTrigger>
-      <TabsTrigger value="providers" className="flex-1 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent h-10 text-xs font-medium">Saved Providers</TabsTrigger>
-      <TabsTrigger value="content" className="flex-1 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent h-10 text-xs font-medium">Content</TabsTrigger>
-      <TabsTrigger value="trips" className="flex-1 data-[state=active]:shadow-none rounded-none border-b-2 border-transparent h-10 text-xs font-medium">Trip Reports</TabsTrigger>
-    </TabsList>
+}) => {
+  const accentColor = theme.tabActive;
+  return (
+    <Tabs defaultValue="reviews" className="w-full">
+      {/* Tab bar — flat underline style, no card wrapper */}
+      <TabsList className="w-full grid grid-cols-4 bg-transparent border-b border-border rounded-none h-auto p-0">
+        <TabsTrigger value="reviews" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Reviews</TabsTrigger>
+        <TabsTrigger value="providers" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Saved Providers</TabsTrigger>
+        <TabsTrigger value="content" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Content</TabsTrigger>
+        <TabsTrigger value="trips" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Trip Reports</TabsTrigger>
+      </TabsList>
 
-    <TabsContent value="reviews">
-      {reviews.length === 0 ? (
-        <EmptyState icon={<Star className="w-6 h-6 text-muted-foreground" />} title="No reviews yet" description={`${profile.display_name} hasn't left any reviews yet.`} />
-      ) : (
-        <div className="space-y-4">
-          {reviews.map((review) => (
-            <div key={review.id} className="relative">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5 px-1">
-                <Building2 className="w-3 h-3" />
-                <Link to={`/provider/${review.provider_slug}`} className="hover:text-primary transition-colors font-medium" style={{ color: theme.accentColor }}>
-                  {providers[review.provider_slug]?.name || review.provider_slug}
-                </Link>
-              </div>
-              <ReviewCard review={review} showProviderName providerName={providers[review.provider_slug]?.name || review.provider_slug} />
+      {/* Scoped CSS to color active tab underline with theme accent */}
+      <style>{`
+        .creator-tabs [data-state="active"] { border-bottom-color: ${accentColor} !important; }
+      `}</style>
+
+      <div className="creator-tabs px-4 pt-4">
+        <TabsContent value="reviews">
+          {reviews.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-muted-foreground text-sm">no reviews yet</p>
             </div>
-          ))}
-        </div>
-      )}
-    </TabsContent>
-
-    <TabsContent value="providers">
-      {orderedProviderSlugs.length === 0 ? (
-        <EmptyState icon={<Building2 className="w-6 h-6 text-muted-foreground" />} title="No saved providers" description={`${profile.display_name} hasn't curated their provider list yet.`} />
-      ) : (
-        <div className="grid grid-cols-2 gap-4">
-          {orderedProviderSlugs.map((slug) => {
-            const prov = providers[slug];
-            if (!prov) return null;
-            const ar = adminReviews[slug];
-            return (
-              <Card key={slug} className="overflow-hidden" style={theme.card}>
-                <Link to={`/provider/${slug}`}>
-                  <div className="h-28 bg-muted overflow-hidden">
-                    {prov.cover_photo_url ? (
-                      <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center" style={{ background: theme.tagBg }}>
-                        <span className="text-3xl font-bold opacity-20">{prov.name[0]}</span>
-                      </div>
-                    )}
+          ) : (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="relative">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5 px-1">
+                    <Building2 className="w-3 h-3" />
+                    <Link to={`/provider/${review.provider_slug}`} className="hover:text-primary transition-colors font-medium" style={{ color: accentColor }}>
+                      {providers[review.provider_slug]?.name || review.provider_slug}
+                    </Link>
                   </div>
-                </Link>
-                <CardContent className="p-3">
-                  <Link to={`/provider/${slug}`} className="hover:opacity-80 transition-opacity">
-                    <h3 className="font-semibold text-sm truncate">{prov.name}</h3>
-                  </Link>
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                    <MapPin className="w-3 h-3 shrink-0" />
-                    <span className="truncate">{prov.city}{prov.country ? `, ${prov.country}` : ""}</span>
-                  </div>
-                  {ar && (
-                    <div className="flex items-center gap-0.5 mt-1.5">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className="w-3 h-3" style={{ fill: s <= ar.rating ? theme.accentColor : 'transparent', color: s <= ar.rating ? theme.accentColor : 'rgba(255,255,255,0.2)' }} />
-                      ))}
-                      <span className="text-xs text-muted-foreground ml-1">editorial</span>
-                    </div>
-                  )}
-                  <Button
-                    size="sm" variant="outline"
-                    className="w-full mt-2 h-7 text-xs"
-                    style={{ borderColor: `${theme.accentColor}40`, color: theme.accentColor }}
-                    onClick={() => setQuoteProvider({ name: prov.name, slug: prov.slug })}
-                  >
-                    Get a Quote
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-    </TabsContent>
-
-    <TabsContent value="content">
-      {content.length === 0 ? (
-        <EmptyState icon={<Play className="w-6 h-6 text-muted-foreground" />} title="No content yet" description={`${profile.display_name} hasn't uploaded any content yet.`} />
-      ) : (
-        <div>
-          {Object.entries(contentByProvider).map(([slug, items]) => (
-            <div key={slug} className="mb-8">
-              <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: theme.accentColor }}>
-                <Building2 className="w-3.5 h-3.5" />
-                <Link to={`/provider/${slug}`} className="hover:opacity-80 transition-opacity">{providers[slug]?.name || slug}</Link>
-              </h3>
-              <ContentGrid items={items} onOpen={openLightbox} />
-            </div>
-          ))}
-          {ungroupedContent.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">more from {profile.display_name}</h3>
-              <ContentGrid items={ungroupedContent} onOpen={openLightbox} />
+                  <ReviewCard review={review} showProviderName providerName={providers[review.provider_slug]?.name || review.provider_slug} />
+                </div>
+              ))}
             </div>
           )}
-        </div>
-      )}
-    </TabsContent>
+        </TabsContent>
 
-    <TabsContent value="trips">
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
-          <BookOpen className="w-6 h-6 text-muted-foreground" />
-        </div>
-        <h3 className="font-semibold mb-2">Trip reports coming soon</h3>
-        <p className="text-muted-foreground text-sm max-w-xs">
-          Long-form writeups documenting full medical tourism trips — procedures, recovery, logistics, costs — will live here.
-        </p>
-        <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-          <Clock className="w-3.5 h-3.5" />
-          <span>Check back soon</span>
-        </div>
+        <TabsContent value="providers">
+          {orderedProviderSlugs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-muted-foreground text-sm">no saved providers yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {orderedProviderSlugs.map((slug) => {
+                const prov = providers[slug];
+                if (!prov) return null;
+                const ar = adminReviews[slug];
+                return (
+                  <Card key={slug} className="overflow-hidden" style={theme.card}>
+                    <Link to={`/provider/${slug}`}>
+                      <div className="h-28 bg-muted overflow-hidden">
+                        {prov.cover_photo_url ? (
+                          <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center" style={{ background: theme.tagBg }}>
+                            <span className="text-3xl font-bold opacity-20">{prov.name[0]}</span>
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+                    <CardContent className="p-3">
+                      <Link to={`/provider/${slug}`} className="hover:opacity-80 transition-opacity">
+                        <h3 className="font-semibold text-sm truncate">{prov.name}</h3>
+                      </Link>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                        <MapPin className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{prov.city}{prov.country ? `, ${prov.country}` : ""}</span>
+                      </div>
+                      {ar && (
+                        <div className="flex items-center gap-0.5 mt-1.5">
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <Star key={s} className="w-3 h-3" style={{ fill: s <= ar.rating ? accentColor : 'transparent', color: s <= ar.rating ? accentColor : 'rgba(255,255,255,0.2)' }} />
+                          ))}
+                          <span className="text-xs text-muted-foreground ml-1">editorial</span>
+                        </div>
+                      )}
+                      <Button
+                        size="sm" variant="outline"
+                        className="w-full mt-2 h-7 text-xs"
+                        style={{ borderColor: `${accentColor}40`, color: accentColor }}
+                        onClick={() => setQuoteProvider({ name: prov.name, slug: prov.slug })}
+                      >
+                        Get a Quote
+                      </Button>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="content">
+          {content.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <p className="text-muted-foreground text-sm">no content yet</p>
+            </div>
+          ) : (
+            <div>
+              {Object.entries(contentByProvider).map(([slug, items]) => (
+                <div key={slug} className="mb-8">
+                  <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: accentColor }}>
+                    <Building2 className="w-3.5 h-3.5" />
+                    <Link to={`/provider/${slug}`} className="hover:opacity-80 transition-opacity">{providers[slug]?.name || slug}</Link>
+                  </h3>
+                  <ContentGrid items={items} onOpen={openLightbox} />
+                </div>
+              ))}
+              {ungroupedContent.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="text-sm font-semibold text-muted-foreground mb-3">more from {profile.display_name}</h3>
+                  <ContentGrid items={ungroupedContent} onOpen={openLightbox} />
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="trips">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <p className="text-muted-foreground text-sm mb-2">trip reports coming soon</p>
+            <p className="text-muted-foreground text-xs max-w-xs">long-form writeups documenting full medical tourism trips will live here.</p>
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Clock className="w-3.5 h-3.5" />
+              <span>check back soon</span>
+            </div>
+          </div>
+        </TabsContent>
       </div>
-    </TabsContent>
-  </Tabs>
-);
+    </Tabs>
+  );
+};
 
 export default CreatorProfile;
