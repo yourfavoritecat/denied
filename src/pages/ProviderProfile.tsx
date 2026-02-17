@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Star, MapPin, Globe, MessageSquareQuote, PenLine, ExternalLink,
-  Users, Clock, CreditCard, ShieldCheck, Plane, ChevronDown, ChevronUp,
+  Star, MapPin, Globe, MessageSquareQuote, PenLine,
+  Users, Clock, CreditCard, ShieldCheck, ChevronDown, ChevronUp,
+  Play, Camera, Image as ImageIcon,
 } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import VerificationBadge from "@/components/providers/VerificationBadge";
 import { REVIEW_CATEGORIES, US_PRICE_MAP } from "@/data/providers";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
@@ -61,24 +63,11 @@ const neutralCard = {
 
 const sectionDivider = "border-t border-[rgba(94,178,152,0.12)] my-8";
 
-/** Consistent "view more / show less" toggle button */
 const ExpandToggle = ({
-  expanded,
-  onToggle,
-  labelExpand,
-  labelCollapse = "show less",
-}: {
-  expanded: boolean;
-  onToggle: () => void;
-  labelExpand: string;
-  labelCollapse?: string;
-}) => (
+  expanded, onToggle, labelExpand, labelCollapse = "show less",
+}: { expanded: boolean; onToggle: () => void; labelExpand: string; labelCollapse?: string }) => (
   <div className="flex justify-center mt-3">
-    <button
-      onClick={onToggle}
-      className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80"
-      style={{ color: '#5EB298' }}
-    >
+    <button onClick={onToggle} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style={{ color: '#5EB298' }}>
       {expanded ? labelCollapse : labelExpand}
       {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
     </button>
@@ -99,8 +88,8 @@ interface ProviderData {
 
 /* ── Team card ── */
 
-const TeamMemberCard = ({ member, index }: { member: any; index: number }) => {
-  const [expanded, setExpanded] = useState(false);
+const TeamMemberCard = ({ member, index, fullBio = false }: { member: any; index: number; fullBio?: boolean }) => {
+  const [expanded, setExpanded] = useState(fullBio);
   const hasBio = member.bio && member.bio.length > 0;
 
   return (
@@ -128,20 +117,18 @@ const TeamMemberCard = ({ member, index }: { member: any; index: number }) => {
           {member.license_number && (
             <p className="text-[11px] text-muted-foreground">lic: {member.license_number}</p>
           )}
-          {hasBio && (
+          {hasBio && !fullBio && (
             <>
-              <p className={`text-xs text-muted-foreground mt-1 ${expanded ? "" : "line-clamp-2"}`}>
-                {member.bio}
-              </p>
+              <p className={`text-xs text-muted-foreground mt-1 ${expanded ? "" : "line-clamp-2"}`}>{member.bio}</p>
               {member.bio.length > 100 && (
-                <button
-                  onClick={() => setExpanded(!expanded)}
-                  className="text-[11px] text-primary hover:underline mt-0.5 flex items-center gap-0.5"
-                >
+                <button onClick={() => setExpanded(!expanded)} className="text-[11px] text-primary hover:underline mt-0.5 flex items-center gap-0.5">
                   {expanded ? <>less <ChevronUp className="w-3 h-3" /></> : <>more <ChevronDown className="w-3 h-3" /></>}
                 </button>
               )}
             </>
+          )}
+          {hasBio && fullBio && (
+            <p className="text-xs text-muted-foreground mt-1">{member.bio}</p>
           )}
         </div>
       </div>
@@ -149,7 +136,63 @@ const TeamMemberCard = ({ member, index }: { member: any; index: number }) => {
   );
 };
 
-/* ── Main component ── */
+/* ── Tab definitions ── */
+const TABS = ["Overview", "Photos & Videos", "Team"] as const;
+type TabKey = typeof TABS[number];
+
+/* ── Priority procedure ordering for collapsed pricing view ── */
+const PRIORITY_PROCEDURES = [
+  "Zirconia Crown",
+  "Porcelain Crown",
+  "E-max Crown",
+  "Filling (per surface)",
+  "Teeth Cleaning",
+  "Root Canal",
+];
+
+/* ── Media lightbox ── */
+const MediaLightbox = ({ items, initialIndex, open, onClose }: {
+  items: { type: "photo" | "video"; url: string }[];
+  initialIndex: number;
+  open: boolean;
+  onClose: () => void;
+}) => {
+  const [index, setIndex] = useState(initialIndex);
+  useEffect(() => { setIndex(initialIndex); }, [initialIndex, open]);
+
+  if (!open || items.length === 0) return null;
+  const current = items[index];
+
+  return (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-3xl p-0 bg-black border-none overflow-hidden [&>button]:hidden">
+        <div className="relative flex items-center justify-center min-h-[300px] max-h-[80vh]">
+          {current.type === "photo" ? (
+            <img src={current.url} alt="" className="max-w-full max-h-[80vh] object-contain" />
+          ) : (
+            <video src={current.url} className="max-w-full max-h-[80vh]" controls autoPlay playsInline />
+          )}
+          {items.length > 1 && (
+            <>
+              <button onClick={() => setIndex((index - 1 + items.length) % items.length)} className="absolute left-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white bg-black/30 rounded-full p-2">
+                <ChevronDown className="w-5 h-5 rotate-90" />
+              </button>
+              <button onClick={() => setIndex((index + 1) % items.length)} className="absolute right-2 top-1/2 -translate-y-1/2 text-white/60 hover:text-white bg-black/30 rounded-full p-2">
+                <ChevronDown className="w-5 h-5 -rotate-90" />
+              </button>
+              <div className="absolute top-3 left-3 text-white/50 text-xs bg-black/40 rounded px-2 py-0.5">
+                {index + 1} / {items.length}
+              </div>
+            </>
+          )}
+          <button onClick={onClose} className="absolute top-3 right-3 text-white/70 hover:text-white bg-black/40 rounded-full p-1.5">✕</button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+/* ══════════════════════════════════════════ Main component ══════════════════════════════════════════ */
 
 const ProviderProfile = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -164,10 +207,15 @@ const ProviderProfile = () => {
   const { reviews, loading: reviewsLoading, refetch } = useReviews(slug);
   const [data, setData] = useState<ProviderData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<TabKey>("Overview");
 
   // Collapsible state
   const [pricingExpanded, setPricingExpanded] = useState(false);
   const [reviewsExpanded, setReviewsExpanded] = useState(false);
+
+  // Lightbox state for Photos & Videos tab
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
@@ -203,7 +251,6 @@ const ProviderProfile = () => {
   const tier = pRec?.verification_tier || "listed";
   const languages = data?.policies?.languages_spoken || pRec?.languages || [];
   const specialties = pRec?.specialties || [];
-  const externalLinks = data?.links;
   const coverPhoto = pRec?.cover_photo_url || null;
   const facilityPhotos = (data?.facility?.photos as string[]) || [];
 
@@ -238,7 +285,7 @@ const ProviderProfile = () => {
     });
   }, [reviews]);
 
-  const procedures = data?.services.map((s: any) => ({
+  const allProcedures = data?.services.map((s: any) => ({
     name: s.procedure_name,
     price: `$${Number(s.base_price_usd).toLocaleString()}`,
     usPrice: US_PRICE_MAP[s.procedure_name] || null,
@@ -249,14 +296,37 @@ const ProviderProfile = () => {
     packageDeals: s.package_deals,
   })) || [];
 
+  // Sort procedures: priority ones first in specified order, rest alphabetically
+  const procedures = useMemo(() => {
+    const priorityMap = new Map(PRIORITY_PROCEDURES.map((name, i) => [name.toLowerCase(), i]));
+    return [...allProcedures].sort((a, b) => {
+      const aIdx = priorityMap.get(a.name.toLowerCase());
+      const bIdx = priorityMap.get(b.name.toLowerCase());
+      if (aIdx !== undefined && bIdx !== undefined) return aIdx - bIdx;
+      if (aIdx !== undefined) return -1;
+      if (bIdx !== undefined) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  }, [allProcedures]);
+
   const startingPrice = data?.services.length ? Math.min(...data.services.map((s: any) => Number(s.base_price_usd))) : null;
 
-  // Collapsible limits
   const PRICING_LIMIT = 6;
   const REVIEWS_LIMIT = 3;
 
   const visibleProcedures = pricingExpanded ? procedures : procedures.slice(0, PRICING_LIMIT);
   const visibleReviews = reviewsExpanded ? sortedReviews : sortedReviews.slice(0, REVIEWS_LIMIT);
+
+  // Aggregate all media for Photos & Videos tab
+  const allMedia = useMemo(() => {
+    const items: { type: "photo" | "video"; url: string }[] = [];
+    facilityPhotos.forEach(url => items.push({ type: "photo", url }));
+    reviews.forEach(r => {
+      r.photos?.forEach(url => items.push({ type: "photo", url }));
+      r.videos?.forEach(url => items.push({ type: "video", url }));
+    });
+    return items;
+  }, [facilityPhotos, reviews]);
 
   /* ── Loading ── */
   if (loading) {
@@ -295,7 +365,7 @@ const ProviderProfile = () => {
     <div className="min-h-screen">
       <Navbar />
       <main className="pt-16 pb-28">
-        {/* ═══════ 1. HERO ═══════ */}
+        {/* ═══════ HERO ═══════ */}
         <div className="relative max-w-[960px] mx-auto px-4 mt-6">
           <div className="relative rounded-2xl overflow-hidden h-[200px]">
             {coverPhoto ? (
@@ -330,396 +400,376 @@ const ProviderProfile = () => {
           </div>
         </div>
 
-        {/* ═══════ CONTENT ═══════ */}
+        {/* ═══════ STICKY TAB BAR ═══════ */}
+        <div className="sticky top-16 z-30 bg-[#0a0a0a]/95 backdrop-blur-lg border-b border-[rgba(94,178,152,0.12)]">
+          <div className="max-w-[960px] mx-auto px-4">
+            <div className="flex gap-6">
+              {TABS.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-3 text-sm font-medium transition-colors relative ${
+                    activeTab === tab
+                      ? "text-white"
+                      : "text-muted-foreground hover:text-white/70"
+                  }`}
+                >
+                  {tab}
+                  {activeTab === tab && (
+                    <motion.div
+                      layoutId="provider-tab-underline"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                      style={{ background: '#5EB298' }}
+                    />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════ TAB CONTENT ═══════ */}
         <div className="max-w-[960px] mx-auto px-4 mt-6 space-y-6">
 
-          {/* ═══════ 2. ABOUT (in card — mint) ═══════ */}
-          {providerDescription && (
-            <section>
-              <div className="rounded-xl p-5" style={glassCard}>
-                <h2 className="text-lg font-bold mb-2">About</h2>
-                <p className="text-sm text-muted-foreground leading-relaxed">{providerDescription}</p>
-                {specialties.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {specialties.map((s: string) => (
-                      <span
-                        key={s}
-                        className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium backdrop-blur-sm"
-                        style={{ background: 'rgba(224,166,147,0.15)', border: '1px solid rgba(224,166,147,0.25)', color: '#E0A693' }}
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Facility Photos */}
-          {facilityPhotos.length > 1 && (
-            <section>
-              <div className={`grid gap-2 ${facilityPhotos.length === 2 ? "grid-cols-2" : facilityPhotos.length === 3 ? "grid-cols-3" : "grid-cols-2 md:grid-cols-4"}`}>
-                {facilityPhotos.slice(0, 5).map((url, i) => (
-                  <div
-                    key={i}
-                    className={`rounded-xl overflow-hidden border border-white/10 ${
-                      facilityPhotos.length >= 4 && i === 0 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-52" : "aspect-[4/3]"
-                    }`}
-                  >
-                    <img src={url} alt={`Facility ${i + 1}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          <div className={sectionDivider} />
-
-          {/* Facility Photos */}
-          {facilityPhotos.length > 1 && (
-            <section>
-              <div className={`grid gap-2 ${facilityPhotos.length === 2 ? "grid-cols-2" : facilityPhotos.length === 3 ? "grid-cols-3" : "grid-cols-2 md:grid-cols-4"}`}>
-                {facilityPhotos.slice(0, 5).map((url, i) => (
-                  <div
-                    key={i}
-                    className={`rounded-xl overflow-hidden border border-white/10 ${
-                      facilityPhotos.length >= 4 && i === 0 ? "col-span-2 row-span-2 aspect-square md:aspect-auto md:h-52" : "aspect-[4/3]"
-                    }`}
-                  >
-                    <img src={url} alt={`Facility ${i + 1}`} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          <div className={sectionDivider} />
-
-          {/* ═══════ 3. REVIEWS (no card wrapper — directly on page) ═══════ */}
-          <section>
-            <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h2 className="text-lg font-bold">Reviews</h2>
-                {/* External review links inline */}
-                {externalLinks?.google_business_url && (
-                  <a href={externalLinks.google_business_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-white flex items-center gap-1 transition-colors">
-                    <ExternalLink className="w-3 h-3" /> Google
-                  </a>
-                )}
-                {externalLinks?.yelp_url && (
-                  <a href={externalLinks.yelp_url} target="_blank" rel="noopener noreferrer" className="text-xs text-muted-foreground hover:text-white flex items-center gap-1 transition-colors">
-                    <ExternalLink className="w-3 h-3" /> Yelp
-                  </a>
-                )}
-              </div>
-              {user && (
-                <Button onClick={() => setReviewOpen(true)} variant="outline" size="sm" className="gap-1.5">
-                  <PenLine className="w-3.5 h-3.5" /> Leave a Review
-                </Button>
-              )}
-            </div>
-
-            {/* Videos + overall rating side by side (compact when <4 videos) */}
-            {(() => {
-              const videoCount = reviews.filter(r => r.videos && r.videos.length > 0).reduce((acc, r) => acc + r.videos.length, 0);
-              const useCompactLayout = videoCount > 0 && videoCount < 4;
-
-              if (useCompactLayout) {
-                return (
-                  <div className="flex flex-col md:flex-row gap-4 mb-5">
-                    <div className="flex-1 min-w-0 rounded-xl p-4" style={glassCard}>
-                      <h3 className="text-sm font-bold mb-3 flex items-center gap-2">
-                        Patient Videos
-                      </h3>
-                      <VideoTestimonialGallery reviews={reviews} compact />
-                    </div>
-                    {(reviewCount > 0 || categoryAggregates) && (
-                      <div className="rounded-xl p-5 flex-1 min-w-0" style={glassCard}>
-                        {reviewCount > 0 && (
-                          <>
-                            <div className="text-center mb-4">
-                              <div className="text-4xl font-bold">{avgRating}</div>
-                              <div className="flex justify-center mt-1 mb-0.5">
-                                <StarRating rating={Math.round(avgRating)} />
-                              </div>
-                              <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
-                            </div>
-                            <div className="space-y-1.5 mb-4">
-                              {[5, 4, 3, 2, 1].map((star, idx) => {
-                                const count = ratingBreakdown[idx];
-                                const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
-                                return (
-                                  <div key={star} className="flex items-center gap-1.5 text-xs">
-                                    <span className="w-3 text-right">{star}</span>
-                                    <Star className="w-3 h-3 fill-secondary text-secondary" />
-                                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                      <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                                    </div>
-                                    <span className="w-6 text-right text-muted-foreground">{count}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </>
-                        )}
-                        {categoryAggregates && (
-                          <div className="space-y-2">
-                            <h4 className="text-xs font-semibold">Category Breakdown</h4>
-                            {categoryAggregates.map(({ key, label, avg }) => (
-                              <div key={key} className="space-y-0.5">
-                                <div className="flex justify-between text-[11px]">
-                                  <span className="text-muted-foreground">{label}</span>
-                                  <span className="font-semibold">{avg}/5</span>
-                                </div>
-                                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+          {/* ────────── OVERVIEW TAB ────────── */}
+          {activeTab === "Overview" && (
+            <>
+              {/* ABOUT (mint card) */}
+              {providerDescription && (
+                <section>
+                  <div className="rounded-xl p-5" style={glassCard}>
+                    <h2 className="text-lg font-bold mb-2">About</h2>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{providerDescription}</p>
+                    {specialties.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {specialties.map((s: string) => (
+                          <span
+                            key={s}
+                            className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium backdrop-blur-sm"
+                            style={{ background: 'rgba(224,166,147,0.15)', border: '1px solid rgba(224,166,147,0.25)', color: '#E0A693' }}
+                          >
+                            {s}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
-                );
-              }
+                </section>
+              )}
 
-              // 4+ videos or no videos: original layout
-              return (
-                <div className="flex flex-col md:flex-row gap-4 mb-5">
-                  <div className="flex-1 min-w-0">
-                    <VideoTestimonialGallery reviews={reviews} />
-                  </div>
+              <div className={sectionDivider} />
 
-                  {(reviewCount > 0 || categoryAggregates) && (
-                    <div className="rounded-xl p-5 md:w-[260px] shrink-0" style={glassCard}>
-                      {reviewCount > 0 && (
-                        <>
-                          <div className="text-center mb-4">
-                            <div className="text-4xl font-bold">{avgRating}</div>
-                            <div className="flex justify-center mt-1 mb-0.5">
-                              <StarRating rating={Math.round(avgRating)} />
-                            </div>
-                            <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
-                          </div>
-                          <div className="space-y-1.5 mb-4">
-                            {[5, 4, 3, 2, 1].map((star, idx) => {
-                              const count = ratingBreakdown[idx];
-                              const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
-                              return (
-                                <div key={star} className="flex items-center gap-1.5 text-xs">
-                                  <span className="w-3 text-right">{star}</span>
-                                  <Star className="w-3 h-3 fill-secondary text-secondary" />
-                                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                    <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                                  </div>
-                                  <span className="w-6 text-right text-muted-foreground">{count}</span>
+              {/* REVIEWS (no card wrapper) */}
+              <section>
+                <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                  <h2 className="text-lg font-bold">Reviews</h2>
+                  {user && (
+                    <Button onClick={() => setReviewOpen(true)} variant="outline" size="sm" className="gap-1.5">
+                      <PenLine className="w-3.5 h-3.5" /> Leave a Review
+                    </Button>
+                  )}
+                </div>
+
+                {/* Videos + overall rating side by side (compact when <4 videos) */}
+                {(() => {
+                  const videoCount = reviews.filter(r => r.videos && r.videos.length > 0).reduce((acc, r) => acc + r.videos.length, 0);
+                  const useCompactLayout = videoCount > 0 && videoCount < 4;
+
+                  if (useCompactLayout) {
+                    return (
+                      <div className="flex flex-col md:flex-row gap-4 mb-5">
+                        <div className="flex-1 min-w-0 rounded-xl p-4" style={glassCard}>
+                          <h3 className="text-sm font-bold mb-3 flex items-center gap-2">Patient Videos</h3>
+                          <VideoTestimonialGallery reviews={reviews} compact />
+                        </div>
+                        {(reviewCount > 0 || categoryAggregates) && (
+                          <div className="rounded-xl p-5 flex-1 min-w-0" style={glassCard}>
+                            {reviewCount > 0 && (
+                              <>
+                                <div className="text-center mb-4">
+                                  <div className="text-4xl font-bold">{avgRating}</div>
+                                  <div className="flex justify-center mt-1 mb-0.5"><StarRating rating={Math.round(avgRating)} /></div>
+                                  <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
                                 </div>
-                              );
-                            })}
+                                <div className="space-y-1.5 mb-4">
+                                  {[5, 4, 3, 2, 1].map((star, idx) => {
+                                    const count = ratingBreakdown[idx];
+                                    const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
+                                    return (
+                                      <div key={star} className="flex items-center gap-1.5 text-xs">
+                                        <span className="w-3 text-right">{star}</span>
+                                        <Star className="w-3 h-3 fill-secondary text-secondary" />
+                                        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                                          <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                        </div>
+                                        <span className="w-6 text-right text-muted-foreground">{count}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </>
+                            )}
+                            {categoryAggregates && (
+                              <div className="space-y-2">
+                                <h4 className="text-xs font-semibold">Category Breakdown</h4>
+                                {categoryAggregates.map(({ key, label, avg }) => (
+                                  <div key={key} className="space-y-0.5">
+                                    <div className="flex justify-between text-[11px]">
+                                      <span className="text-muted-foreground">{label}</span>
+                                      <span className="font-semibold">{avg}/5</span>
+                                    </div>
+                                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                      <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        </>
-                      )}
+                        )}
+                      </div>
+                    );
+                  }
 
-                      {categoryAggregates && (
-                        <div className="space-y-2">
-                          <h4 className="text-xs font-semibold">Category Breakdown</h4>
-                          {categoryAggregates.map(({ key, label, avg }) => (
-                            <div key={key} className="space-y-0.5">
-                              <div className="flex justify-between text-[11px]">
-                                <span className="text-muted-foreground">{label}</span>
-                                <span className="font-semibold">{avg}/5</span>
+                  // 4+ videos or no videos: stacked layout
+                  return (
+                    <div className="flex flex-col md:flex-row gap-4 mb-5">
+                      <div className="flex-1 min-w-0">
+                        <VideoTestimonialGallery reviews={reviews} />
+                      </div>
+                      {(reviewCount > 0 || categoryAggregates) && (
+                        <div className="rounded-xl p-5 md:w-[260px] shrink-0" style={glassCard}>
+                          {reviewCount > 0 && (
+                            <>
+                              <div className="text-center mb-4">
+                                <div className="text-4xl font-bold">{avgRating}</div>
+                                <div className="flex justify-center mt-1 mb-0.5"><StarRating rating={Math.round(avgRating)} /></div>
+                                <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
                               </div>
-                              <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
+                              <div className="space-y-1.5 mb-4">
+                                {[5, 4, 3, 2, 1].map((star, idx) => {
+                                  const count = ratingBreakdown[idx];
+                                  const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
+                                  return (
+                                    <div key={star} className="flex items-center gap-1.5 text-xs">
+                                      <span className="w-3 text-right">{star}</span>
+                                      <Star className="w-3 h-3 fill-secondary text-secondary" />
+                                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                                        <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                      </div>
+                                      <span className="w-6 text-right text-muted-foreground">{count}</span>
+                                    </div>
+                                  );
+                                })}
                               </div>
+                            </>
+                          )}
+                          {categoryAggregates && (
+                            <div className="space-y-2">
+                              <h4 className="text-xs font-semibold">Category Breakdown</h4>
+                              {categoryAggregates.map(({ key, label, avg }) => (
+                                <div key={key} className="space-y-0.5">
+                                  <div className="flex justify-between text-[11px]">
+                                    <span className="text-muted-foreground">{label}</span>
+                                    <span className="font-semibold">{avg}/5</span>
+                                  </div>
+                                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          ))}
+                          )}
                         </div>
                       )}
                     </div>
+                  );
+                })()}
+
+                {/* Written reviews */}
+                <div className="space-y-3">
+                  {reviewsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                    </div>
+                  ) : sortedReviews.length > 0 ? (
+                    <>
+                      <div className="relative">
+                        <div className="space-y-3">
+                          {(sortedReviews.length > REVIEWS_LIMIT ? visibleReviews : sortedReviews).map((review) => (
+                            <ReviewCard key={review.id} review={review} onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }} />
+                          ))}
+                        </div>
+                        {sortedReviews.length > REVIEWS_LIMIT && !reviewsExpanded && (
+                          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none" />
+                        )}
+                      </div>
+                      {sortedReviews.length > REVIEWS_LIMIT && (
+                        <ExpandToggle
+                          expanded={reviewsExpanded}
+                          onToggle={() => setReviewsExpanded(!reviewsExpanded)}
+                          labelExpand={`view all ${sortedReviews.length} reviews`}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-muted-foreground text-sm">No reviews yet. Be the first to leave a review!</p>
+                    </div>
                   )}
                 </div>
-              );
-            })()}
+              </section>
 
-            {/* Written reviews */}
-            <div className="space-y-3">
-              {reviewsLoading ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                </div>
-              ) : sortedReviews.length > 0 ? (
-                <>
+              <div className={sectionDivider} />
+
+              {/* PROCEDURES & PRICING (peach card) */}
+              {procedures.length > 0 && (
+                <section>
+                  <h2 className="text-lg font-bold mb-3">Procedures & Pricing</h2>
+                  <div className="mb-3">
+                    <SavingsCalculator
+                      procedures={procedures}
+                      onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
+                    />
+                  </div>
                   <div className="relative">
-                    <div className="space-y-3">
-                      {(sortedReviews.length > REVIEWS_LIMIT ? visibleReviews : sortedReviews).map((review) => (
-                        <ReviewCard key={review.id} review={review} onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }} />
-                      ))}
+                    <div className="rounded-xl overflow-hidden" style={{ ...peachCard }}>
+                      <Table>
+                        <TableHeader>
+                          <TableRow style={{ background: 'rgba(224,166,147,0.1)' }} className="hover:bg-transparent">
+                            <TableHead className="text-white font-bold">Procedure</TableHead>
+                            <TableHead className="text-white font-bold text-right">Price</TableHead>
+                            <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>
+                            <TableHead className="text-white font-bold text-right">Savings</TableHead>
+                            <TableHead className="text-white font-bold text-right hidden sm:table-cell">Duration</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {visibleProcedures.map((proc: any) => (
+                            <TableRow key={proc.name}>
+                              <TableCell className="font-medium text-sm">
+                                {proc.name}
+                                {proc.packageDeals && <p className="text-xs text-secondary mt-0.5">{proc.packageDeals}</p>}
+                              </TableCell>
+                              <TableCell className="text-right font-bold text-primary">{proc.price}</TableCell>
+                              <TableCell className="text-right text-muted-foreground line-through hidden md:table-cell">
+                                {proc.usPrice ? `$${proc.usPrice.toLocaleString()}` : "—"}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {proc.savings && proc.savings > 0 ? (
+                                  <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs">{proc.savings}% OFF</Badge>
+                                ) : null}
+                              </TableCell>
+                              <TableCell className="text-right text-muted-foreground hidden sm:table-cell text-sm">{proc.duration}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </div>
-                    {sortedReviews.length > REVIEWS_LIMIT && !reviewsExpanded && (
-                      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none" />
+                    {!pricingExpanded && procedures.length > PRICING_LIMIT && (
+                      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none rounded-b-xl" />
                     )}
                   </div>
-                  {sortedReviews.length > REVIEWS_LIMIT && (
+                  {procedures.length > PRICING_LIMIT && (
                     <ExpandToggle
-                      expanded={reviewsExpanded}
-                      onToggle={() => setReviewsExpanded(!reviewsExpanded)}
-                      labelExpand={`view all ${sortedReviews.length} reviews`}
+                      expanded={pricingExpanded}
+                      onToggle={() => setPricingExpanded(!pricingExpanded)}
+                      labelExpand={`view all ${procedures.length} procedures`}
                     />
                   )}
-                </>
+                </section>
+              )}
+
+              <div className={sectionDivider} />
+
+              {/* POLICIES & INFO (no card wrapper, neutral mini-cards) */}
+              {data?.policies && (
+                <section>
+                  <h2 className="text-lg font-bold mb-3">Policies & Info</h2>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {data.policies.hours_of_operation && (
+                      <div className="rounded-xl p-4" style={neutralCard}>
+                        <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Hours</p>
+                        <p className="text-xs text-muted-foreground whitespace-pre-line">{data.policies.hours_of_operation}</p>
+                      </div>
+                    )}
+                    {data.policies.cancellation_policy && (
+                      <div className="rounded-xl p-4" style={neutralCard}>
+                        <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> Cancellation</p>
+                        <p className="text-xs text-muted-foreground">{data.policies.cancellation_policy}</p>
+                      </div>
+                    )}
+                    {data.policies.deposit_requirements && (
+                      <div className="rounded-xl p-4" style={neutralCard}>
+                        <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Deposit</p>
+                        <p className="text-xs text-muted-foreground">{data.policies.deposit_requirements}</p>
+                      </div>
+                    )}
+                    {data.policies.accepted_payments?.length > 0 && (
+                      <div className="rounded-xl p-4" style={neutralCard}>
+                        <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Payments</p>
+                        <div className="flex flex-wrap gap-1">
+                          {data.policies.accepted_payments.map((p: string) => (
+                            <Badge key={p} variant="outline" className="text-[10px]">{p}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              )}
+            </>
+          )}
+
+          {/* ────────── PHOTOS & VIDEOS TAB ────────── */}
+          {activeTab === "Photos & Videos" && (
+            <section>
+              {allMedia.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {allMedia.map((item, i) => (
+                    <button
+                      key={i}
+                      onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
+                      className="relative aspect-square rounded-xl overflow-hidden border border-white/10 hover:ring-2 hover:ring-[#5EB298] transition-all group"
+                    >
+                      {item.type === "photo" ? (
+                        <img src={item.url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <>
+                          <video src={item.url} className="w-full h-full object-cover" muted playsInline preload="metadata" />
+                          <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/20 transition-colors">
+                            <Play className="w-8 h-8 text-white drop-shadow-lg" />
+                          </div>
+                        </>
+                      )}
+                    </button>
+                  ))}
+                </div>
               ) : (
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground text-sm">No reviews yet. Be the first to leave a review!</p>
+                <div className="text-center py-16">
+                  <Camera className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">No photos or videos yet.</p>
                 </div>
               )}
-            </div>
-          </section>
+              <MediaLightbox items={allMedia} initialIndex={lightboxIndex} open={lightboxOpen} onClose={() => setLightboxOpen(false)} />
+            </section>
+          )}
 
-          <div className={sectionDivider} />
-
-          {/* ═══════ 4. PROCEDURES & PRICING (in card — peach) ═══════ */}
-          {procedures.length > 0 && (
+          {/* ────────── TEAM TAB ────────── */}
+          {activeTab === "Team" && (
             <section>
-              <h2 className="text-lg font-bold mb-3">Procedures & Pricing</h2>
-
-              {/* Savings Calculator — compact inline above table */}
-              <div className="mb-3">
-                <SavingsCalculator
-                  procedures={procedures}
-                  onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
-                />
-              </div>
-
-              {/* Pricing table — collapsible, peach tint */}
-              <div className="relative">
-                <div className="rounded-xl overflow-hidden" style={{ ...peachCard }}>
-                  <Table>
-                    <TableHeader>
-                      <TableRow style={{ background: 'rgba(224,166,147,0.1)' }} className="hover:bg-transparent">
-                        <TableHead className="text-white font-bold">Procedure</TableHead>
-                        <TableHead className="text-white font-bold text-right">Price</TableHead>
-                        <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>
-                        <TableHead className="text-white font-bold text-right">Savings</TableHead>
-                        <TableHead className="text-white font-bold text-right hidden sm:table-cell">Duration</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {visibleProcedures.map((proc: any) => (
-                        <TableRow key={proc.name}>
-                          <TableCell className="font-medium text-sm">
-                            {proc.name}
-                            {proc.packageDeals && <p className="text-xs text-secondary mt-0.5">{proc.packageDeals}</p>}
-                          </TableCell>
-                          <TableCell className="text-right font-bold text-primary">{proc.price}</TableCell>
-                          <TableCell className="text-right text-muted-foreground line-through hidden md:table-cell">
-                            {proc.usPrice ? `$${proc.usPrice.toLocaleString()}` : "—"}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {proc.savings && proc.savings > 0 ? (
-                              <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs">{proc.savings}% OFF</Badge>
-                            ) : null}
-                          </TableCell>
-                          <TableCell className="text-right text-muted-foreground hidden sm:table-cell text-sm">{proc.duration}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
+              {data && data.team.length > 0 ? (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {data.team.map((member: any, i: number) => (
+                    <TeamMemberCard key={member.id} member={member} index={i} fullBio />
+                  ))}
                 </div>
-                {/* Gradient fade hint */}
-                {!pricingExpanded && procedures.length > PRICING_LIMIT && (
-                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none rounded-b-xl" />
-                )}
-              </div>
-              {procedures.length > PRICING_LIMIT && (
-                <ExpandToggle
-                  expanded={pricingExpanded}
-                  onToggle={() => setPricingExpanded(!pricingExpanded)}
-                  labelExpand={`view all ${procedures.length} procedures`}
-                />
+              ) : (
+                <div className="text-center py-16">
+                  <Users className="w-10 h-10 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground text-sm">Team info coming soon.</p>
+                </div>
               )}
-            </section>
-          )}
-
-          <div className={sectionDivider} />
-
-          {/* ═══════ 5. POLICIES & INFO (no card wrapper — neutral mini-cards) ═══════ */}
-          {data?.policies && (
-            <section>
-              <h2 className="text-lg font-bold mb-3">Policies & Info</h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {data.policies.hours_of_operation && (
-                  <div className="rounded-xl p-4" style={neutralCard}>
-                    <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Hours</p>
-                    <p className="text-xs text-muted-foreground whitespace-pre-line">{data.policies.hours_of_operation}</p>
-                  </div>
-                )}
-                {data.policies.cancellation_policy && (
-                  <div className="rounded-xl p-4" style={neutralCard}>
-                    <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> Cancellation</p>
-                    <p className="text-xs text-muted-foreground">{data.policies.cancellation_policy}</p>
-                  </div>
-                )}
-                {data.policies.deposit_requirements && (
-                  <div className="rounded-xl p-4" style={neutralCard}>
-                    <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Deposit</p>
-                    <p className="text-xs text-muted-foreground">{data.policies.deposit_requirements}</p>
-                  </div>
-                )}
-                {data.policies.accepted_payments?.length > 0 && (
-                  <div className="rounded-xl p-4" style={neutralCard}>
-                    <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Payments</p>
-                    <div className="flex flex-wrap gap-1">
-                      {data.policies.accepted_payments.map((p: string) => (
-                        <Badge key={p} variant="outline" className="text-[10px]">{p}</Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </section>
-          )}
-
-          <div className={sectionDivider} />
-
-          {/* ═══════ 6. GETTING THERE (in card — peach) ═══════ */}
-          {pRec?.travel_info && (
-            <section>
-              <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-                <Plane className="w-5 h-5" /> Getting There
-              </h2>
-              <div className="rounded-xl p-5" style={peachCard}>
-                <p className="text-sm text-muted-foreground leading-relaxed">{pRec.travel_info}</p>
-              </div>
-            </section>
-          )}
-
-          {/* Location */}
-          <section>
-            <div className="rounded-xl h-36 flex items-center justify-center" style={glassCard}>
-              <div className="text-center">
-                <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-1" />
-                <p className="text-sm text-muted-foreground font-medium">{locationString}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">Exact address provided after booking</p>
-              </div>
-            </div>
-          </section>
-
-          <div className={sectionDivider} />
-
-          {/* ═══════ 7. TEAM (no card wrapper — peach doctor cards, at the very bottom) ═══════ */}
-          {data && data.team.length > 0 && (
-            <section>
-              <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-                <Users className="w-5 h-5" /> Our Team
-              </h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {(data.team || []).map((member: any, i: number) => (
-                  <TeamMemberCard key={member.id} member={member} index={i} />
-                ))}
-              </div>
             </section>
           )}
         </div>
