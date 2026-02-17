@@ -49,11 +49,11 @@ const Navbar = () => {
 
   const navLinks = visitorMode
     ? [
-        { to: "/search", icon: Search, label: "Search" },
+        { to: "/search", icon: Search, label: "Providers" },
       ]
     : [
         { to: "/dashboard", icon: LayoutDashboard, label: "Home" },
-        { to: "/search", icon: Search, label: "Search" },
+        { to: "/search", icon: Search, label: "Providers" },
         { to: "/my-trips", icon: Plane, label: "My Trips" },
         { to: "/profile", icon: User, label: "My Profile" },
       ];
