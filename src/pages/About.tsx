@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 
 const steps = [
@@ -50,45 +51,69 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <main className="flex-1 flex flex-col justify-center max-w-3xl mx-auto px-6 py-10">
-        {/* Tagline */}
-        <h1 className="text-2xl font-bold text-white mb-3 text-center">
-          say yes, because health insurance said no
-        </h1>
-        <p className="text-sm text-white/60 text-center max-w-xl mx-auto mb-10 leading-relaxed">
-          denied.care connects you with vetted dental and medical clinics abroad — saving up to 75% on procedures your insurance denied or priced out of reach. Real providers, transparent pricing, zero guesswork.
-        </p>
+      <Navbar />
 
-        {/* How it works — compact row */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {steps.map((step) => (
-            <div key={step.title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
-              <step.icon className="w-5 h-5 mx-auto mb-2" style={{ color: "#5EB298" }} />
-              <h3 className="text-sm font-semibold text-white mb-1">{step.title}</h3>
-              <p className="text-xs text-white/50 leading-snug">{step.desc}</p>
-            </div>
-          ))}
+      <main className="flex-1 flex flex-col pt-16">
+        {/* Hero with background image */}
+        <div className="relative w-full" style={{ height: 250 }}>
+          <img
+            src="/images/hero-about.jpg"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 60%, hsl(var(--background)) 100%)" }} />
+
+          {/* Overlaid text */}
+          <div className="relative z-10 flex flex-col justify-end h-full max-w-2xl mx-auto px-6 pb-4">
+            <h1 className="text-2xl font-bold mb-2" style={{ color: "#5EB298" }}>
+              say yes, because health insurance said no
+            </h1>
+          </div>
         </div>
 
-        {/* Why — 2 sentences, italic */}
-        <p className="text-xs text-white/40 italic text-center max-w-lg mx-auto mb-8">
-          Our founder got quoted $11,800 for dental work, got denied by insurance, flew to Tijuana and paid $3,400 for the same procedures. She built denied.care so nobody else has to figure it out alone.
-        </p>
+        {/* Body copy */}
+        <div className="max-w-2xl mx-auto px-6 py-5 space-y-3">
+          <p className="text-sm text-white/70 leading-relaxed">
+            denied.care is a marketplace for people who've been priced out of healthcare in the US. we connect you with vetted dental and medical clinics abroad — real providers, transparent pricing, zero guesswork — saving up to 75% on procedures your insurance denied or couldn't cover.
+          </p>
+          <p className="text-sm text-white/70 leading-relaxed">
+            but this isn't just a booking site. we're building a community of people who've been through it — patients sharing real experiences, honest reviews, safety tips, what to look for (and what to avoid) when exploring medical tourism. the more we share, the safer and smarter everyone gets.
+          </p>
+          <p className="text-xs text-white/40 italic leading-relaxed">
+            our founder got quoted $11,800 for dental work in the US. blue cross blue shield denied coverage. she flew to tijuana, got the same procedures, and paid $3,400. denied.care exists so nobody else has to figure that out alone.
+          </p>
+        </div>
+
+        {/* How it works */}
+        <div className="max-w-2xl mx-auto px-6 pb-4">
+          <div className="grid grid-cols-3 gap-4">
+            {steps.map((step) => (
+              <div key={step.title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
+                <step.icon className="w-5 h-5 mx-auto mb-2" style={{ color: "#5EB298" }} />
+                <h3 className="text-sm font-semibold text-white mb-1">{step.title}</h3>
+                <p className="text-xs text-white/50 leading-snug">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Waitlist CTA */}
-        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto w-full">
-          <Input
-            type="email"
-            placeholder="enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="bg-white/10 border-white/15 text-white placeholder:text-white/40 h-9 rounded-full text-sm"
-            disabled={isLoading}
-          />
-          <Button type="submit" className="h-9 px-5 whitespace-nowrap rounded-full text-sm" disabled={isLoading}>
-            {isLoading ? "joining..." : "join the waitlist"}
-          </Button>
-        </form>
+        <div className="max-w-2xl mx-auto px-6 pb-8">
+          <p className="text-xs text-white/50 text-center mb-3">be the first to know when we launch</p>
+          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto w-full">
+            <Input
+              type="email"
+              placeholder="enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-white/10 border-white/15 text-white placeholder:text-white/40 h-9 rounded-full text-sm"
+              disabled={isLoading}
+            />
+            <Button type="submit" className="h-9 px-5 whitespace-nowrap rounded-full text-sm" disabled={isLoading}>
+              {isLoading ? "joining..." : "join the waitlist"}
+            </Button>
+          </form>
+        </div>
       </main>
 
       <Footer />
