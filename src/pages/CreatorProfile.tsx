@@ -6,10 +6,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Star, MapPin, Instagram, ExternalLink, Play, X, ChevronLeft, ChevronRight, BadgeCheck, ArrowUp, Pencil } from "lucide-react";
+import {
+  Star, MapPin, Instagram, Play, X, ChevronLeft, ChevronRight,
+  BadgeCheck, ArrowUp, Pencil, BookOpen, Building2, Stethoscope,
+  ExternalLink, Clock
+} from "lucide-react";
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
 import ReviewCard, { type ReviewData } from "@/components/reviews/ReviewCard";
+import UserBadge from "@/components/profile/UserBadge";
 import logo from "@/assets/logo-clean.png";
 
 interface CreatorProfileData {
@@ -23,6 +29,7 @@ interface CreatorProfileData {
   social_links: Record<string, string>;
   featured_providers: string[];
   is_published: boolean;
+  specialties: string[];
 }
 
 interface ProviderInfo {
@@ -72,6 +79,7 @@ const CreatorProfile = () => {
   const [adminReviews, setAdminReviews] = useState<Record<string, AdminReview>>({});
   const [content, setContent] = useState<ContentItem[]>([]);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
+  const [userBadge, setUserBadge] = useState<string | null>(null);
   const [quoteProvider, setQuoteProvider] = useState<{ name: string; slug: string } | null>(null);
   const [lightboxPhotos, setLightboxPhotos] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -98,10 +106,9 @@ const CreatorProfile = () => {
     const p = cp as unknown as CreatorProfileData;
     setProfile(p);
 
-    // Fetch providers, admin reviews, content, and user reviews in parallel
     const slugs = p.featured_providers || [];
 
-    const [provRes, arRes, contentRes, reviewRes] = await Promise.all([
+    const [provRes, arRes, contentRes, reviewRes, profileRes] = await Promise.all([
       slugs.length > 0
         ? supabase.from("providers").select("slug, name, city, cover_photo_url, country").in("slug", slugs)
         : Promise.resolve({ data: [] }),
@@ -110,19 +117,19 @@ const CreatorProfile = () => {
         : Promise.resolve({ data: [] }),
       supabase.from("creator_content").select("*").eq("creator_id", p.id).order("sort_order", { ascending: true }),
       supabase.from("reviews").select("*").eq("user_id", p.user_id).order("created_at", { ascending: false }),
+      supabase.from("profiles").select("badge_type").eq("user_id", p.user_id).maybeSingle(),
     ]);
 
-    // Build provider map
     const pMap: Record<string, ProviderInfo> = {};
     ((provRes.data as ProviderInfo[]) || []).forEach((prov) => (pMap[prov.slug] = prov));
     setProviders(pMap);
 
-    // Build admin review map
     const arMap: Record<string, AdminReview> = {};
     ((arRes.data as unknown as AdminReview[]) || []).forEach((ar) => (arMap[ar.provider_slug] = ar));
     setAdminReviews(arMap);
 
     setContent((contentRes.data as unknown as ContentItem[]) || []);
+    setUserBadge((profileRes.data as any)?.badge_type || null);
 
     if (reviewRes.data) {
       setReviews(
@@ -145,10 +152,6 @@ const CreatorProfile = () => {
     setLightboxIndex(index);
   };
 
-  const scrollToProviders = () => {
-    document.getElementById("creator-providers")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -169,7 +172,17 @@ const CreatorProfile = () => {
     );
   }
 
-  // Group content by provider
+  const orderedProviderSlugs = (profile.featured_providers || []).filter((s) => providers[s]);
+  const socialLinks = profile.social_links || {};
+  const hasSocials = socialLinks.instagram || socialLinks.tiktok || socialLinks.youtube;
+  const isOwner = user && profile.user_id === user.id;
+
+  // Stats
+  const reviewCount = reviews.length;
+  const uniqueProviders = new Set(reviews.map((r) => r.provider_slug)).size;
+  const uniqueProcedures = new Set(reviews.map((r) => r.procedure_name).filter(Boolean)).size;
+
+  // Content grouping for gallery
   const contentByProvider: Record<string, ContentItem[]> = {};
   const ungroupedContent: ContentItem[] = [];
   content.forEach((item) => {
@@ -181,12 +194,7 @@ const CreatorProfile = () => {
     }
   });
 
-  const orderedProviderSlugs = (profile.featured_providers || []).filter((s) => providers[s]);
-
-  const socialLinks = profile.social_links || {};
-  const hasSocials = socialLinks.instagram || socialLinks.tiktok || socialLinks.youtube;
-
-  const isOwner = user && profile.user_id === user.id;
+  const specialties = (profile as any).specialties || [];
 
   return (
     <div className="min-h-screen">
@@ -205,171 +213,245 @@ const CreatorProfile = () => {
         </div>
       )}
 
-      {/* Cover Photo */}
-      <div className="relative w-full h-[40vh] min-h-[280px] overflow-hidden">
+      {/* Hero / Cover */}
+      <div className="relative w-full h-[220px] overflow-hidden">
         <img
           src={profile.cover_photo_url || '/images/hero-creator.jpg'}
           alt=""
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
         />
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
       </div>
 
       {/* Profile Header — overlapping cover */}
-      <div className="relative max-w-2xl mx-auto px-4 -mt-16 z-10">
+      <div className="relative max-w-2xl mx-auto px-4 -mt-14 z-10">
         <div className="flex items-end gap-4 mb-4">
-          <Avatar className="w-20 h-20 border-4 border-background shadow-elevated shrink-0">
+          <Avatar className="w-24 h-24 border-4 border-background shadow-elevated shrink-0">
             {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.display_name} className="object-cover" />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">
+            <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-bold">
               {profile.display_name?.[0]?.toUpperCase() || "C"}
             </AvatarFallback>
           </Avatar>
-          <div className="pb-1">
-            <h1 className="text-2xl font-bold leading-tight">{profile.display_name}</h1>
-            <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs mt-1">
-              <BadgeCheck className="w-3 h-3" /> denied.care creator
-            </Badge>
+          <div className="pb-1 flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-bold leading-tight">{profile.display_name}</h1>
+            </div>
+            {userBadge ? (
+              <div className="mt-1">
+                <UserBadge badgeType={userBadge as any} />
+              </div>
+            ) : (
+              <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs mt-1">
+                <BadgeCheck className="w-3 h-3" /> denied.care creator
+              </Badge>
+            )}
           </div>
         </div>
 
         {/* Bio */}
         {profile.bio && (
-          <p className="text-muted-foreground leading-relaxed mb-4">{profile.bio}</p>
+          <p className="text-muted-foreground leading-relaxed mb-3">{profile.bio}</p>
+        )}
+
+        {/* Specialty tags */}
+        {specialties.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-3">
+            {specialties.map((s: string) => (
+              <span key={s} className="text-xs px-2.5 py-1 rounded-full bg-secondary/10 text-secondary border border-secondary/20 font-medium">
+                {s}
+              </span>
+            ))}
+          </div>
         )}
 
         {/* Social Links */}
         {hasSocials && (
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-6">
             {socialLinks.instagram && (
-              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
-                <Instagram className="w-5 h-5" />
+              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer"
+                className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                <Instagram className="w-4 h-4" />
               </a>
             )}
             {socialLinks.tiktok && (
-              <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
-                <TikTokIcon className="w-5 h-5" />
+              <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer"
+                className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                <TikTokIcon className="w-4 h-4" />
               </a>
             )}
             {socialLinks.youtube && (
-              <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
-                <YouTubeIcon className="w-5 h-5" />
+              <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer"
+                className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                <YouTubeIcon className="w-4 h-4" />
               </a>
             )}
           </div>
         )}
       </div>
 
-      {/* My Favorites */}
-      {orderedProviderSlugs.length > 0 && (
-        <section id="creator-providers" className="max-w-2xl mx-auto px-4 mb-10">
-          <h2 className="text-lg font-bold mb-4">my favorites</h2>
-          <div className="flex gap-4 overflow-x-auto pb-3 -mx-4 px-4 snap-x">
-            {orderedProviderSlugs.map((slug) => {
-              const prov = providers[slug];
-              if (!prov) return null;
-              const ar = adminReviews[slug];
-              return (
-                <Card key={slug} className="w-[260px] shrink-0 snap-start overflow-hidden tactile-press cursor-pointer">
-                  <Link to={`/provider/${slug}`}>
-                    <div className="h-32 bg-muted overflow-hidden">
-                      {prov.cover_photo_url ? (
-                        <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-                          <span className="text-3xl font-bold text-muted-foreground/30">{prov.name[0]}</span>
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                  <CardContent className="p-4">
-                    <Link to={`/provider/${slug}`} className="hover:text-primary transition-colors">
-                      <h3 className="font-semibold truncate">{prov.name}</h3>
-                    </Link>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <MapPin className="w-3 h-3" />
-                      {prov.city}{prov.country ? `, ${prov.country}` : ""}
-                    </div>
-                    {ar && (
-                      <div className="flex items-center gap-1 mt-2">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className={`w-3.5 h-3.5 ${s <= ar.rating ? "fill-secondary text-secondary" : "text-border"}`} />
-                        ))}
-                        <span className="text-xs text-muted-foreground ml-1">editorial</span>
-                      </div>
-                    )}
-                    <Button
-                      size="sm"
-                      className="w-full mt-3"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setQuoteProvider({ name: prov.name, slug: prov.slug });
-                      }}
-                    >
-                      Get a Quote
-                    </Button>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </section>
-      )}
+      {/* Stats Row */}
+      <div className="max-w-2xl mx-auto px-4 mb-6">
+        <div className="grid grid-cols-3 gap-3">
+          <StatBox icon={<Building2 className="w-4 h-4" />} value={uniqueProviders} label="providers visited" />
+          <StatBox icon={<Star className="w-4 h-4" />} value={reviewCount} label="reviews written" />
+          <StatBox icon={<Stethoscope className="w-4 h-4" />} value={uniqueProcedures} label="procedures documented" />
+        </div>
+      </div>
 
-      {/* Content Gallery — grouped by provider */}
-      {content.length > 0 && (
-        <section className="max-w-2xl mx-auto px-4 mb-10">
-          {Object.entries(contentByProvider).map(([slug, items]) => (
-            <div key={slug} className="mb-8">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                <Link to={`/provider/${slug}`} className="hover:text-primary transition-colors">
-                  {providers[slug]?.name || slug}
-                </Link>
-              </h3>
-              <ContentGrid items={items} onOpen={openLightbox} />
-            </div>
-          ))}
+      {/* Tabs */}
+      <div className="max-w-2xl mx-auto px-4 pb-16">
+        <Tabs defaultValue="reviews">
+          <TabsList className="w-full mb-6 bg-card border border-border">
+            <TabsTrigger value="reviews" className="flex-1">Reviews</TabsTrigger>
+            <TabsTrigger value="providers" className="flex-1">Saved Providers</TabsTrigger>
+            <TabsTrigger value="content" className="flex-1">Content</TabsTrigger>
+            <TabsTrigger value="trips" className="flex-1">Trip Reports</TabsTrigger>
+          </TabsList>
 
-          {ungroupedContent.length > 0 && (
-            <div className="mb-8">
-              <h3 className="text-sm font-semibold text-muted-foreground mb-3">
-                more from {profile.display_name}
-              </h3>
-              <ContentGrid items={ungroupedContent} onOpen={openLightbox} />
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Reviews */}
-      {reviews.length > 0 && (
-        <section className="max-w-2xl mx-auto px-4 mb-10">
-          <h2 className="text-lg font-bold mb-4">reviews</h2>
-          <div className="space-y-3">
-            {reviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                showProviderName
-                providerName={providers[review.provider_slug]?.name || review.provider_slug}
+          {/* Reviews Tab */}
+          <TabsContent value="reviews">
+            {reviews.length === 0 ? (
+              <EmptyState
+                icon={<Star className="w-6 h-6 text-muted-foreground" />}
+                title="No reviews yet"
+                description={`${profile.display_name} hasn't left any reviews yet.`}
               />
-            ))}
-          </div>
-        </section>
-      )}
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => (
+                  <div key={review.id} className="relative">
+                    {/* Provider name header */}
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5 px-1">
+                      <Building2 className="w-3 h-3" />
+                      <Link to={`/provider/${review.provider_slug}`} className="hover:text-primary transition-colors font-medium">
+                        {providers[review.provider_slug]?.name || review.provider_slug}
+                      </Link>
+                    </div>
+                    <ReviewCard
+                      review={review}
+                      showProviderName
+                      providerName={providers[review.provider_slug]?.name || review.provider_slug}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Saved Providers Tab */}
+          <TabsContent value="providers">
+            {orderedProviderSlugs.length === 0 ? (
+              <EmptyState
+                icon={<Building2 className="w-6 h-6 text-muted-foreground" />}
+                title="No saved providers"
+                description={`${profile.display_name} hasn't curated their provider list yet.`}
+              />
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 gap-4">
+                {orderedProviderSlugs.map((slug) => {
+                  const prov = providers[slug];
+                  if (!prov) return null;
+                  const ar = adminReviews[slug];
+                  return (
+                    <Card key={slug} className="overflow-hidden tactile-press">
+                      <Link to={`/provider/${slug}`}>
+                        <div className="h-28 bg-muted overflow-hidden">
+                          {prov.cover_photo_url ? (
+                            <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                              <span className="text-3xl font-bold text-muted-foreground/30">{prov.name[0]}</span>
+                            </div>
+                          )}
+                        </div>
+                      </Link>
+                      <CardContent className="p-3">
+                        <Link to={`/provider/${slug}`} className="hover:text-primary transition-colors">
+                          <h3 className="font-semibold text-sm truncate">{prov.name}</h3>
+                        </Link>
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                          <MapPin className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{prov.city}{prov.country ? `, ${prov.country}` : ""}</span>
+                        </div>
+                        {ar && (
+                          <div className="flex items-center gap-0.5 mt-1.5">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star key={s} className={`w-3 h-3 ${s <= ar.rating ? "fill-secondary text-secondary" : "text-border"}`} />
+                            ))}
+                            <span className="text-xs text-muted-foreground ml-1">editorial</span>
+                          </div>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full mt-2 h-7 text-xs"
+                          onClick={() => setQuoteProvider({ name: prov.name, slug: prov.slug })}
+                        >
+                          Get a Quote
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Content Gallery Tab */}
+          <TabsContent value="content">
+            {content.length === 0 ? (
+              <EmptyState
+                icon={<Play className="w-6 h-6 text-muted-foreground" />}
+                title="No content yet"
+                description={`${profile.display_name} hasn't uploaded any content yet.`}
+              />
+            ) : (
+              <div>
+                {Object.entries(contentByProvider).map(([slug, items]) => (
+                  <div key={slug} className="mb-8">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                      <Building2 className="w-3.5 h-3.5" />
+                      <Link to={`/provider/${slug}`} className="hover:text-primary transition-colors">
+                        {providers[slug]?.name || slug}
+                      </Link>
+                    </h3>
+                    <ContentGrid items={items} onOpen={openLightbox} />
+                  </div>
+                ))}
+                {ungroupedContent.length > 0 && (
+                  <div className="mb-8">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3">
+                      more from {profile.display_name}
+                    </h3>
+                    <ContentGrid items={ungroupedContent} onOpen={openLightbox} />
+                  </div>
+                )}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Trip Reports Tab */}
+          <TabsContent value="trips">
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
+                <BookOpen className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <h3 className="font-semibold mb-2">Trip reports coming soon</h3>
+              <p className="text-muted-foreground text-sm max-w-xs">
+                Long-form writeups documenting full medical tourism trips — procedures, recovery, logistics, costs — will live here.
+              </p>
+              <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Clock className="w-3.5 h-3.5" />
+                <span>Check back soon</span>
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Footer CTA */}
-      <footer className="border-t border-border bg-card mt-8">
+      <footer className="border-t border-border bg-card">
         <div className="max-w-2xl mx-auto px-4 py-10 text-center">
-          {orderedProviderSlugs.length > 0 && (
-            <div className="mb-6">
-              <p className="text-muted-foreground mb-3">want to work with a provider you see here?</p>
-              <Button variant="outline" className="gap-2" onClick={scrollToProviders}>
-                <ArrowUp className="w-4 h-4" /> browse providers
-              </Button>
-            </div>
-          )}
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <img src={logo} alt="denied.care" className="h-5 w-auto" />
             <span>denied.care</span>
@@ -436,6 +518,26 @@ const CreatorProfile = () => {
     </div>
   );
 };
+
+// Stat Box sub-component
+const StatBox = ({ icon, value, label }: { icon: React.ReactNode; value: number; label: string }) => (
+  <div className="rounded-xl p-4 bg-card border border-border text-center">
+    <div className="flex justify-center mb-1 text-primary opacity-70">{icon}</div>
+    <div className="text-2xl font-bold tabular-nums">{value}</div>
+    <div className="text-xs text-muted-foreground mt-0.5 leading-tight">{label}</div>
+  </div>
+);
+
+// Empty State sub-component
+const EmptyState = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => (
+  <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div className="w-14 h-14 rounded-2xl bg-card border border-border flex items-center justify-center mb-4">
+      {icon}
+    </div>
+    <h3 className="font-semibold mb-2">{title}</h3>
+    <p className="text-muted-foreground text-sm max-w-xs">{description}</p>
+  </div>
+);
 
 // Content Grid sub-component
 const ContentGrid = ({

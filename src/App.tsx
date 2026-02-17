@@ -33,6 +33,7 @@ import MyBugReports from "./pages/MyBugReports";
 import CreatorJoin from "./pages/CreatorJoin";
 import CreatorEdit from "./pages/CreatorEdit";
 import CreatorProfile from "./pages/CreatorProfile";
+import Creators from "./pages/Creators";
 import BugReportButton from "./components/beta/BugReportButton";
 import TripAssistantWrapper from "./components/chat/TripAssistantWrapper";
 import NotFound from "./pages/NotFound";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/apply" element={<ProtectedRoute><Apply /></ProtectedRoute>} />
             <Route path="/join/:code" element={<CreatorJoin />} />
             <Route path="/c/:handle" element={<CreatorProfile />} />
+            <Route path="/creators" element={<Creators />} />
             <Route path="/creator/edit" element={<ProtectedRoute><CreatorEdit /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

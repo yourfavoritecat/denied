@@ -332,6 +332,7 @@ export type Database = {
           id: string
           is_published: boolean | null
           social_links: Json | null
+          specialties: string[] | null
           updated_at: string | null
           user_id: string
         }
@@ -346,6 +347,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           social_links?: Json | null
+          specialties?: string[] | null
           updated_at?: string | null
           user_id: string
         }
@@ -360,6 +362,7 @@ export type Database = {
           id?: string
           is_published?: boolean | null
           social_links?: Json | null
+          specialties?: string[] | null
           updated_at?: string | null
           user_id?: string
         }
