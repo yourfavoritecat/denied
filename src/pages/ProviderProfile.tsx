@@ -298,7 +298,24 @@ const ProviderProfile = () => {
                   </p>
                   {specialties.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-4">
-                      {specialties.map((s: string) => <Badge key={s} variant="secondary">{s}</Badge>)}
+                      {specialties.map((s: string) => (
+                        <span
+                          key={s}
+                          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white backdrop-blur-sm transition-all duration-300 hover:shadow-[0_0_12px_rgba(94,178,152,0.2)] cursor-default"
+                          style={{
+                            background: 'rgba(94,178,152,0.15)',
+                            border: '1px solid rgba(94,178,152,0.3)',
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.background = 'rgba(94,178,152,0.25)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = 'rgba(94,178,152,0.15)';
+                          }}
+                        >
+                          {s}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </CardContent>
@@ -309,22 +326,24 @@ const ProviderProfile = () => {
           {/* Team Members */}
           {data && data.team.length > 0 && (
             <motion.section initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-50px" }} variants={fadeUp}>
-              <h2 className="text-2xl font-bold mb-4 flex items-center gap-2"><Users className="w-6 h-6" /> Our Team</h2>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <h2 className="text-2xl font-bold mt-12 mb-6 flex items-center gap-2"><Users className="w-6 h-6" /> our team</h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {data.team.map((member: any, i: number) => (
                   <motion.div key={member.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
-                  <Card className="border border-border/50 shadow-elevated hover:shadow-floating tactile-lift bg-card">
-                    <CardContent className="pt-6 flex gap-4">
-                      <Avatar className="w-16 h-16 shrink-0">
+                  <Card className="border border-border/50 shadow-elevated hover:shadow-floating tactile-lift bg-card min-h-[180px]">
+                    <CardContent className="p-6 flex gap-4">
+                      <Avatar className="w-16 h-16 shrink-0 ring-2 ring-white/20">
                         <AvatarImage src={member.headshot_url} alt={member.name} />
-                        <AvatarFallback className="bg-primary text-primary-foreground font-bold">{member.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="bg-muted">
+                          <Users className="w-7 h-7 text-muted-foreground" />
+                        </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
                         <p className="font-bold">{member.name}</p>
                         <p className="text-sm text-primary">{member.role}</p>
-                        {member.license_number && <p className="text-xs text-muted-foreground">License: {member.license_number}</p>}
+                        {member.license_number && <p className="text-xs text-muted-foreground">license: {member.license_number}</p>}
                         {member.bio && <p className="text-sm text-muted-foreground mt-2 line-clamp-3">{member.bio}</p>}
-                        {member.is_lead && <Badge className="mt-2 bg-secondary/10 text-secondary text-xs">Lead</Badge>}
+                        {member.is_lead && <Badge variant="secondary" className="mt-2 btn-glossy-peach text-xs !py-0.5 !px-2">lead</Badge>}
                       </div>
                     </CardContent>
                   </Card>
