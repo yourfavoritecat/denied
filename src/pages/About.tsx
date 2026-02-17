@@ -74,10 +74,10 @@ const About = () => {
         {/* Body copy */}
         <div className="max-w-2xl mx-auto px-6 py-5 space-y-3">
           <p className="text-sm text-white/70 leading-relaxed">
-            denied.care is a marketplace for people who've been priced out of healthcare in the US. we connect you with vetted dental and medical clinics abroad — real providers, transparent pricing, zero guesswork — saving up to 75% on procedures your insurance denied or couldn't cover.
+            denied.care is a marketplace for people who've been priced out of healthcare in the us. we connect you with vetted dental and medical clinics abroad. real providers, transparent pricing, zero guesswork and saving up to 75% on procedures your insurance denied or barely cover.
           </p>
           <p className="text-sm text-white/70 leading-relaxed">
-            but this isn't just a booking site. we're building a community of people who've been through it — patients sharing real experiences, honest reviews, safety tips, what to look for (and what to avoid) when exploring medical tourism. the more we share, the safer and smarter everyone gets.
+            we're more than a booking site. we're building a community of people who've been through it. our users are sharing real experiences, honest reviews, safety tips, what to look for (and what to avoid) when exploring medical tourism. the more we share, the safer and smarter everyone gets.
           </p>
           <p className="text-xs text-white/40 italic leading-relaxed">
             our founder got quoted $11,800 for dental work in the US. blue cross blue shield denied coverage. she flew to tijuana, got the same procedures, and paid $3,400. denied.care exists so nobody else has to figure that out alone.
