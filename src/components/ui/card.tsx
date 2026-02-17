@@ -6,13 +6,26 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl text-card-foreground shadow-elevated glossy-border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lifted hover:shadow-glow-mint",
+      "rounded-2xl text-card-foreground glossy-border transition-all duration-300 hover:-translate-y-0.5",
       className
     )}
     style={{
-      background: 'rgba(255,255,255,0.06)',
-      border: '1px solid rgba(255,255,255,0.08)',
+      background: 'rgba(255,255,255,0.08)',
+      border: '1px solid rgba(94,178,152,0.15)',
+      boxShadow: '0 0 20px rgba(94,178,152,0.05)',
       ...style,
+    }}
+    onMouseEnter={(e) => {
+      const el = e.currentTarget;
+      el.style.borderColor = 'rgba(94,178,152,0.5)';
+      el.style.boxShadow = '0 0 20px rgba(94,178,152,0.25), 0 0 40px rgba(94,178,152,0.15), 0 0 60px rgba(94,178,152,0.05)';
+      el.style.background = 'rgba(255,255,255,0.12)';
+    }}
+    onMouseLeave={(e) => {
+      const el = e.currentTarget;
+      el.style.borderColor = 'rgba(94,178,152,0.15)';
+      el.style.boxShadow = '0 0 20px rgba(94,178,152,0.05)';
+      el.style.background = 'rgba(255,255,255,0.08)';
     }}
     {...props}
   />

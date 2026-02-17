@@ -120,7 +120,7 @@
     position: fixed;
     inset: 0;
     background: url('/images/dark-backdrop.png') center/cover no-repeat;
-    opacity: 0.25;
+    opacity: 0.5;
     z-index: -2;
   }
   #root::after {
@@ -128,7 +128,7 @@
     position: fixed;
     inset: 0;
     background:
-      radial-gradient(ellipse at 50% 30%, rgba(94,178,152,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 20%, rgba(94,178,152,0.2) 0%, rgba(94,178,152,0.08) 30%, transparent 65%),
       radial-gradient(ellipse at center, transparent 30%, #000000 85%);
     z-index: -1;
   }
@@ -186,7 +186,7 @@
   }
   .btn-glossy-mint:hover {
     filter: brightness(1.12);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 6px 24px rgba(94,178,152,0.45), 0 0 16px rgba(94,178,152,0.2);
+    box-shadow: 0 0 20px rgba(94,178,152,0.4), 0 0 40px rgba(94,178,152,0.2);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-mint:active {
@@ -206,7 +206,7 @@
   }
   .btn-glossy-peach:hover {
     filter: brightness(1.12);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 6px 24px rgba(248,180,160,0.45), 0 0 16px rgba(248,180,160,0.2);
+    box-shadow: 0 0 20px rgba(248,180,160,0.4), 0 0 40px rgba(248,180,160,0.2);
     transform: scale(1.03) translateY(-1px);
   }
   .btn-glossy-peach:active {
