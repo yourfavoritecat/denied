@@ -16,6 +16,7 @@ import {
 import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
 import ReviewCard, { type ReviewData } from "@/components/reviews/ReviewCard";
 import UserBadge from "@/components/profile/UserBadge";
+import Navbar from "@/components/layout/Navbar";
 import logo from "@/assets/logo-clean.png";
 
 /* ── Types ── */
@@ -255,6 +256,7 @@ const CreatorProfile = () => {
 
   return (
     <div className="min-h-screen">
+      <Navbar />
       {/* Owner Edit Banner */}
       {isOwner && (
         <div className="sticky top-0 z-40 border-b" style={{ background: `${theme.accentColor}18`, borderColor: `${theme.accentColor}30` }}>
@@ -270,8 +272,8 @@ const CreatorProfile = () => {
         </div>
       )}
 
-      {/* Hero / Cover */}
-      <div className="relative w-full h-[220px] overflow-hidden">
+      {/* Hero / Cover — pt-16 to clear fixed navbar */}
+      <div className="relative w-full h-[220px] overflow-hidden pt-16">
         <img
           src={profile.cover_photo_url || '/images/hero-creator.jpg'}
           alt=""
