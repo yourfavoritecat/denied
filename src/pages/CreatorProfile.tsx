@@ -540,12 +540,12 @@ const CreatorTabs = ({
 }) => {
   const accentColor = theme.tabActive;
   return (
-    <Tabs defaultValue="reviews" className="w-full">
+    <Tabs defaultValue="content" className="w-full">
       {/* Tab bar — flat underline style, no card wrapper */}
       <TabsList className="w-full grid grid-cols-4 bg-transparent border-b border-border rounded-none h-auto p-0">
-        <TabsTrigger value="reviews" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Reviews</TabsTrigger>
-        <TabsTrigger value="providers" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Saved Providers</TabsTrigger>
         <TabsTrigger value="content" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Content</TabsTrigger>
+        <TabsTrigger value="reviews" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Reviews</TabsTrigger>
+        <TabsTrigger value="providers" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Favorite Providers</TabsTrigger>
         <TabsTrigger value="trips" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Trip Reports</TabsTrigger>
       </TabsList>
 
@@ -580,7 +580,7 @@ const CreatorTabs = ({
         <TabsContent value="providers">
           {orderedProviderSlugs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <p className="text-muted-foreground text-sm">no saved providers yet</p>
+              <p className="text-muted-foreground text-sm">no favorite providers yet</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
