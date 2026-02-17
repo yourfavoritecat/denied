@@ -124,6 +124,8 @@ const CreatorProfile = () => {
   const [quoteProvider, setQuoteProvider] = useState<{ name: string; slug: string } | null>(null);
   const [lightboxPhotos, setLightboxPhotos] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [favProviders, setFavProviders] = useState<ProviderInfo[]>([]);
+  const [favProvidersTotal, setFavProvidersTotal] = useState(0);
 
   // Favorite star (for travelers only, using creator handle as target_id)
   const { isFavorited: isStarred, toggle: toggleStar } = useFavorite(handle || "", "creator");
@@ -152,7 +154,7 @@ const CreatorProfile = () => {
 
     const slugs = p.featured_providers || [];
 
-    const [provRes, arRes, contentRes, reviewRes, profileRes] = await Promise.all([
+    const [provRes, arRes, contentRes, reviewRes, profileRes, favsRes] = await Promise.all([
       slugs.length > 0
         ? supabase.from("providers").select("slug, name, city, cover_photo_url, country").in("slug", slugs)
         : Promise.resolve({ data: [] }),
@@ -162,6 +164,7 @@ const CreatorProfile = () => {
       supabase.from("creator_content").select("*").eq("creator_id", p.id).order("sort_order", { ascending: true }),
       supabase.from("reviews").select("*").eq("user_id", p.user_id).order("created_at", { ascending: false }),
       supabase.from("profiles").select("badge_type").eq("user_id", p.user_id).maybeSingle(),
+      supabase.from("favorites" as any).select("target_id").eq("user_id", p.user_id).eq("target_type", "provider"),
     ]);
 
     const pMap: Record<string, ProviderInfo> = {};
@@ -174,6 +177,18 @@ const CreatorProfile = () => {
 
     setContent((contentRes.data as unknown as ContentItem[]) || []);
     setUserBadge((profileRes.data as any)?.badge_type || null);
+
+    // Load favorited providers
+    const favSlugs = ((favsRes.data as any[]) || []).map((f: any) => f.target_id);
+    setFavProvidersTotal(favSlugs.length);
+    if (favSlugs.length > 0) {
+      const { data: favProvData } = await supabase
+        .from("providers")
+        .select("slug, name, city, cover_photo_url, country")
+        .in("slug", favSlugs)
+        .limit(5);
+      setFavProviders((favProvData as ProviderInfo[]) || []);
+    }
 
     if (reviewRes.data) {
       setReviews(
@@ -351,6 +366,44 @@ const CreatorProfile = () => {
           <StatBox icon={<Stethoscope className="w-4 h-4" />} value={uniqueProcedures} label="procedures documented" accentColor={theme.accentColor} cardStyle={theme.card} />
         </div>
       </div>
+
+      {/* Favorite Providers Section */}
+      {favProviders.length > 0 && (
+        <div className="max-w-2xl mx-auto px-4 mb-6">
+          <div className="rounded-xl p-4" style={theme.card}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.accentColor }}>
+                <Heart className="w-4 h-4" style={{ fill: theme.accentColor }} />
+                favorite providers
+              </h2>
+              {favProvidersTotal > 4 && (
+                <span className="text-xs text-muted-foreground">+{favProvidersTotal - 4} more</span>
+              )}
+            </div>
+            <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+              {favProviders.slice(0, 4).map((prov) => (
+                <Link
+                  key={prov.slug}
+                  to={`/provider/${prov.slug}`}
+                  className="flex-shrink-0 flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:opacity-80"
+                  style={{ background: theme.tagBg, border: `1px solid ${theme.tagBorder}` }}
+                >
+                  <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-muted">
+                    {prov.cover_photo_url
+                      ? <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
+                      : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-muted-foreground">{prov.name[0]}</div>
+                    }
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold leading-tight whitespace-nowrap">{prov.name}</p>
+                    {prov.city && <p className="text-[10px] text-muted-foreground whitespace-nowrap">{prov.city}{prov.country ? `, ${prov.country}` : ""}</p>}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="max-w-2xl mx-auto px-4 pb-16">
