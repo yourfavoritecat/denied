@@ -1,10 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -25,6 +24,8 @@ import SavingsCalculator from "@/components/provider/SavingsCalculator";
 import VideoTestimonialGallery from "@/components/provider/VideoTestimonialGallery";
 import VibeTagsDisplay from "@/components/provider/VibeTagsDisplay";
 
+/* ── Shared helpers ── */
+
 const StarRating = ({ rating }: { rating: number }) => (
   <div className="flex gap-0.5">
     {[1, 2, 3, 4, 5].map((s) => (
@@ -32,6 +33,41 @@ const StarRating = ({ rating }: { rating: number }) => (
     ))}
   </div>
 );
+
+const glassCard = {
+  background: 'rgba(94,178,152,0.08)',
+  border: '1px solid rgba(94,178,152,0.12)',
+  borderTop: '1px solid rgba(255,255,255,0.1)',
+  boxShadow: '0 0 20px rgba(94,178,152,0.05)',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+} as const;
+
+/** Consistent "view more / show less" toggle button */
+const ExpandToggle = ({
+  expanded,
+  onToggle,
+  labelExpand,
+  labelCollapse = "show less",
+}: {
+  expanded: boolean;
+  onToggle: () => void;
+  labelExpand: string;
+  labelCollapse?: string;
+}) => (
+  <div className="flex justify-center mt-3">
+    <button
+      onClick={onToggle}
+      className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80"
+      style={{ color: '#5EB298' }}
+    >
+      {expanded ? labelCollapse : labelExpand}
+      {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+    </button>
+  </div>
+);
+
+/* ── Types ── */
 
 interface ProviderData {
   business: any | null;
@@ -43,14 +79,7 @@ interface ProviderData {
   providerRecord: any | null;
 }
 
-const glassCard = {
-  background: 'rgba(94,178,152,0.08)',
-  border: '1px solid rgba(94,178,152,0.12)',
-  borderTop: '1px solid rgba(255,255,255,0.1)',
-  boxShadow: '0 0 20px rgba(94,178,152,0.05)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-} as const;
+/* ── Team card ── */
 
 const TeamMemberCard = ({ member, index }: { member: any; index: number }) => {
   const [expanded, setExpanded] = useState(false);
@@ -102,6 +131,8 @@ const TeamMemberCard = ({ member, index }: { member: any; index: number }) => {
   );
 };
 
+/* ── Main component ── */
+
 const ProviderProfile = () => {
   const { slug } = useParams<{ slug: string }>();
   const [quoteOpen, setQuoteOpen] = useState(false);
@@ -115,6 +146,11 @@ const ProviderProfile = () => {
   const { reviews, loading: reviewsLoading, refetch } = useReviews(slug);
   const [data, setData] = useState<ProviderData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Collapsible state
+  const [pricingExpanded, setPricingExpanded] = useState(false);
+  const [teamExpanded, setTeamExpanded] = useState(false);
+  const [reviewsExpanded, setReviewsExpanded] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -158,9 +194,7 @@ const ProviderProfile = () => {
     if (reviews.length === 0) return { avgRating: 0, reviewCount: 0, ratingBreakdown: [0, 0, 0, 0, 0] };
     const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
     const breakdown = [0, 0, 0, 0, 0];
-    reviews.forEach((r) => {
-      if (r.rating >= 1 && r.rating <= 5) breakdown[5 - r.rating]++;
-    });
+    reviews.forEach((r) => { if (r.rating >= 1 && r.rating <= 5) breakdown[5 - r.rating]++; });
     return { avgRating: Math.round((sum / reviews.length) * 10) / 10, reviewCount: reviews.length, ratingBreakdown: breakdown };
   }, [reviews]);
 
@@ -200,7 +234,16 @@ const ProviderProfile = () => {
 
   const startingPrice = data?.services.length ? Math.min(...data.services.map((s: any) => Number(s.base_price_usd))) : null;
 
-  // Loading state
+  // Collapsible limits
+  const PRICING_LIMIT = 6;
+  const TEAM_LIMIT = 4;
+  const REVIEWS_LIMIT = 3;
+
+  const visibleProcedures = pricingExpanded ? procedures : procedures.slice(0, PRICING_LIMIT);
+  const visibleTeam = teamExpanded ? (data?.team || []) : (data?.team || []).slice(0, TEAM_LIMIT);
+  const visibleReviews = reviewsExpanded ? sortedReviews : sortedReviews.slice(0, REVIEWS_LIMIT);
+
+  /* ── Loading ── */
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -217,6 +260,7 @@ const ProviderProfile = () => {
     );
   }
 
+  /* ── 404 ── */
   if (!pRec) {
     return (
       <div className="min-h-screen">
@@ -236,7 +280,7 @@ const ProviderProfile = () => {
     <div className="min-h-screen">
       <Navbar />
       <main className="pt-16 pb-28">
-        {/* ── Hero ── */}
+        {/* ═══════ 1. HERO ═══════ */}
         <div className="relative max-w-[960px] mx-auto px-4 mt-6">
           <div className="relative rounded-2xl overflow-hidden h-[200px]">
             {coverPhoto ? (
@@ -246,10 +290,8 @@ const ProviderProfile = () => {
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[hsl(var(--primary))]/20 to-[hsl(var(--primary))]/5" />
             )}
-            {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
 
-            {/* Info overlay */}
             <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end gap-4">
               <div className="w-16 h-16 rounded-xl bg-[hsl(var(--primary))]/20 border border-[hsl(var(--primary))]/30 flex items-center justify-center shrink-0 backdrop-blur-sm">
                 <span className="text-2xl font-bold text-[hsl(var(--primary))]">{providerName.charAt(0)}</span>
@@ -260,31 +302,23 @@ const ProviderProfile = () => {
                   <VerificationBadge tier={tier} size="sm" />
                 </div>
                 <div className="flex items-center gap-3 text-white/70 text-sm flex-wrap">
-                  {locationString && (
-                    <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {locationString}</span>
-                  )}
-                  {reviewCount > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Star className="w-3.5 h-3.5 fill-secondary text-secondary" /> {avgRating} ({reviewCount})
-                    </span>
-                  )}
-                  {languages.length > 0 && (
-                    <span className="flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {languages.join(", ")}</span>
-                  )}
+                  {locationString && <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> {locationString}</span>}
+                  {reviewCount > 0 && <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 fill-secondary text-secondary" /> {avgRating} ({reviewCount})</span>}
+                  {languages.length > 0 && <span className="flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {languages.join(", ")}</span>}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Vibe tags */}
           <div className="mt-3">
             <VibeTagsDisplay reviews={reviews} />
           </div>
         </div>
 
-        {/* ── Content ── */}
+        {/* ═══════ CONTENT ═══════ */}
         <div className="max-w-[960px] mx-auto px-4 mt-6 space-y-6">
-          {/* About */}
+
+          {/* ═══════ 2. ABOUT ═══════ */}
           {providerDescription && (
             <section>
               <div className="rounded-xl p-5" style={glassCard}>
@@ -307,7 +341,7 @@ const ProviderProfile = () => {
             </section>
           )}
 
-          {/* Facility Photos (if multiple) */}
+          {/* Facility Photos */}
           {facilityPhotos.length > 1 && (
             <section>
               <div className={`grid gap-2 ${facilityPhotos.length === 2 ? "grid-cols-2" : facilityPhotos.length === 3 ? "grid-cols-3" : "grid-cols-2 md:grid-cols-4"}`}>
@@ -325,69 +359,7 @@ const ProviderProfile = () => {
             </section>
           )}
 
-          {/* Procedures & Pricing + Savings Calculator */}
-          {procedures.length > 0 && (
-            <section>
-              <h2 className="text-lg font-bold mb-3">Procedures & Pricing</h2>
-              <div className="rounded-xl overflow-hidden border border-white/10" style={{ ...glassCard, border: undefined }}>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-[#0a0a0a] hover:bg-[#0a0a0a]">
-                      <TableHead className="text-white font-bold">Procedure</TableHead>
-                      <TableHead className="text-white font-bold text-right">Price</TableHead>
-                      <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>
-                      <TableHead className="text-white font-bold text-right">Savings</TableHead>
-                      <TableHead className="text-white font-bold text-right hidden sm:table-cell">Duration</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {procedures.map((proc: any) => (
-                      <TableRow key={proc.name}>
-                        <TableCell className="font-medium text-sm">
-                          {proc.name}
-                          {proc.packageDeals && <p className="text-xs text-secondary mt-0.5">{proc.packageDeals}</p>}
-                        </TableCell>
-                        <TableCell className="text-right font-bold text-primary">{proc.price}</TableCell>
-                        <TableCell className="text-right text-muted-foreground line-through hidden md:table-cell">
-                          {proc.usPrice ? `$${proc.usPrice.toLocaleString()}` : "—"}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {proc.savings && proc.savings > 0 ? (
-                            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs">{proc.savings}% OFF</Badge>
-                          ) : null}
-                        </TableCell>
-                        <TableCell className="text-right text-muted-foreground hidden sm:table-cell text-sm">{proc.duration}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-
-              {/* Savings Calculator inline */}
-              <div className="mt-4">
-                <SavingsCalculator
-                  procedures={procedures}
-                  onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
-                />
-              </div>
-            </section>
-          )}
-
-          {/* Team */}
-          {data && data.team.length > 0 && (
-            <section>
-              <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
-                <Users className="w-5 h-5" /> Our Team
-              </h2>
-              <div className="grid sm:grid-cols-2 gap-3">
-                {data.team.map((member: any, i: number) => (
-                  <TeamMemberCard key={member.id} member={member} index={i} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Reviews */}
+          {/* ═══════ 3. REVIEWS (moved up) ═══════ */}
           <section>
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
               <h2 className="text-lg font-bold">Reviews</h2>
@@ -398,11 +370,16 @@ const ProviderProfile = () => {
               )}
             </div>
 
-            <VideoTestimonialGallery reviews={reviews} />
+            {/* Videos + overall rating side by side */}
+            <div className="flex flex-col md:flex-row gap-4 mb-5">
+              {/* Video testimonials */}
+              <div className="flex-1 min-w-0">
+                <VideoTestimonialGallery reviews={reviews} />
+              </div>
 
-            <div className="grid md:grid-cols-3 gap-4 mt-4">
+              {/* Overall rating card */}
               {(reviewCount > 0 || categoryAggregates) && (
-                <div className="rounded-xl p-5" style={glassCard}>
+                <div className="rounded-xl p-5 md:w-[260px] shrink-0" style={glassCard}>
                   {reviewCount > 0 && (
                     <>
                       <div className="text-center mb-4">
@@ -449,26 +426,133 @@ const ProviderProfile = () => {
                   )}
                 </div>
               )}
+            </div>
 
-              <div className={reviewCount > 0 || categoryAggregates ? "md:col-span-2 space-y-3" : "md:col-span-3 space-y-3"}>
-                {reviewsLoading ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            {/* Written reviews — collapsible */}
+            <div className="space-y-3">
+              {reviewsLoading ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                </div>
+              ) : sortedReviews.length > 0 ? (
+                <>
+                  <div className="relative">
+                    <div className="space-y-3">
+                      {visibleReviews.map((review) => (
+                        <ReviewCard key={review.id} review={review} onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }} />
+                      ))}
+                    </div>
+                    {/* Gradient fade hint when collapsed */}
+                    {!reviewsExpanded && sortedReviews.length > REVIEWS_LIMIT && (
+                      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none" />
+                    )}
                   </div>
-                ) : reviews.length > 0 ? (
-                  reviews.map((review) => (
-                    <ReviewCard key={review.id} review={review} onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }} />
-                  ))
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground text-sm">No reviews yet. Be the first to leave a review!</p>
-                  </div>
-                )}
-              </div>
+                  {sortedReviews.length > REVIEWS_LIMIT && (
+                    <ExpandToggle
+                      expanded={reviewsExpanded}
+                      onToggle={() => setReviewsExpanded(!reviewsExpanded)}
+                      labelExpand={`view all ${sortedReviews.length} reviews`}
+                    />
+                  )}
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground text-sm">No reviews yet. Be the first to leave a review!</p>
+                </div>
+              )}
             </div>
           </section>
 
-          {/* Policies & Info */}
+          {/* ═══════ 4. PROCEDURES & PRICING ═══════ */}
+          {procedures.length > 0 && (
+            <section>
+              <h2 className="text-lg font-bold mb-3">Procedures & Pricing</h2>
+
+              {/* Savings Calculator — compact inline above table */}
+              <div className="mb-3">
+                <SavingsCalculator
+                  procedures={procedures}
+                  onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
+                />
+              </div>
+
+              {/* Pricing table — collapsible */}
+              <div className="relative">
+                <div className="rounded-xl overflow-hidden border border-white/10" style={{ ...glassCard, border: undefined }}>
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-[#0a0a0a] hover:bg-[#0a0a0a]">
+                        <TableHead className="text-white font-bold">Procedure</TableHead>
+                        <TableHead className="text-white font-bold text-right">Price</TableHead>
+                        <TableHead className="text-white font-bold text-right hidden md:table-cell">U.S. Price</TableHead>
+                        <TableHead className="text-white font-bold text-right">Savings</TableHead>
+                        <TableHead className="text-white font-bold text-right hidden sm:table-cell">Duration</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {visibleProcedures.map((proc: any) => (
+                        <TableRow key={proc.name}>
+                          <TableCell className="font-medium text-sm">
+                            {proc.name}
+                            {proc.packageDeals && <p className="text-xs text-secondary mt-0.5">{proc.packageDeals}</p>}
+                          </TableCell>
+                          <TableCell className="text-right font-bold text-primary">{proc.price}</TableCell>
+                          <TableCell className="text-right text-muted-foreground line-through hidden md:table-cell">
+                            {proc.usPrice ? `$${proc.usPrice.toLocaleString()}` : "—"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            {proc.savings && proc.savings > 0 ? (
+                              <Badge className="bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs">{proc.savings}% OFF</Badge>
+                            ) : null}
+                          </TableCell>
+                          <TableCell className="text-right text-muted-foreground hidden sm:table-cell text-sm">{proc.duration}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                {/* Gradient fade hint */}
+                {!pricingExpanded && procedures.length > PRICING_LIMIT && (
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none rounded-b-xl" />
+                )}
+              </div>
+              {procedures.length > PRICING_LIMIT && (
+                <ExpandToggle
+                  expanded={pricingExpanded}
+                  onToggle={() => setPricingExpanded(!pricingExpanded)}
+                  labelExpand={`view all ${procedures.length} procedures`}
+                />
+              )}
+            </section>
+          )}
+
+          {/* ═══════ 5. TEAM — collapsible ═══════ */}
+          {data && data.team.length > 0 && (
+            <section>
+              <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+                <Users className="w-5 h-5" /> Our Team
+              </h2>
+              <div className="relative">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {visibleTeam.map((member: any, i: number) => (
+                    <TeamMemberCard key={member.id} member={member} index={i} />
+                  ))}
+                </div>
+                {!teamExpanded && data.team.length > TEAM_LIMIT && (
+                  <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#0a0a0a] to-transparent pointer-events-none" />
+                )}
+              </div>
+              {data.team.length > TEAM_LIMIT && (
+                <ExpandToggle
+                  expanded={teamExpanded}
+                  onToggle={() => setTeamExpanded(!teamExpanded)}
+                  labelExpand={`view all ${data.team.length} team members`}
+                />
+              )}
+            </section>
+          )}
+
+          {/* ═══════ 6. POLICIES & INFO ═══════ */}
           {data?.policies && (
             <section>
               <h2 className="text-lg font-bold mb-3">Policies & Info</h2>
@@ -505,7 +589,7 @@ const ProviderProfile = () => {
             </section>
           )}
 
-          {/* Getting There */}
+          {/* ═══════ 7. GETTING THERE ═══════ */}
           {pRec?.travel_info && (
             <section>
               <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
@@ -528,7 +612,7 @@ const ProviderProfile = () => {
             </div>
           </section>
 
-          {/* External Reviews */}
+          {/* ═══════ 8. EXTERNAL REVIEWS ═══════ */}
           {(externalLinks?.google_business_url || externalLinks?.yelp_url) && (
             <section>
               <h2 className="text-lg font-bold mb-3">External Reviews</h2>
@@ -559,20 +643,11 @@ const ProviderProfile = () => {
             </span>
           </div>
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="font-bold"
-              onClick={() => setQuoteOpen(true)}
-            >
+            <Button variant="outline" size="sm" className="font-bold" onClick={() => setQuoteOpen(true)}>
               <MessageSquareQuote className="w-4 h-4 mr-1.5" />
               Request Quote
             </Button>
-            <Button
-              size="sm"
-              className="font-bold"
-              onClick={() => setQuoteOpen(true)}
-            >
+            <Button size="sm" className="font-bold" onClick={() => setQuoteOpen(true)}>
               Book Now
             </Button>
           </div>
