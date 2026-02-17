@@ -470,121 +470,67 @@ const ProviderProfile = () => {
                   )}
                 </div>
 
-                {/* Videos + overall rating side by side (compact when <4 videos) */}
-                {(() => {
-                  const videoCount = reviews.filter(r => r.videos && r.videos.length > 0).reduce((acc, r) => acc + r.videos.length, 0);
-                  const useCompactLayout = videoCount > 0 && videoCount < 4;
+                {/* Savings calculator (left) + star rating breakdown (right) */}
+                {(procedures.length > 0 || reviewCount > 0 || categoryAggregates) && (
+                  <div className="flex flex-col md:flex-row gap-4 mb-5">
+                    {/* Savings Calculator — left side, no card wrapper */}
+                    {procedures.length > 0 && (
+                      <div className="flex-1 min-w-0">
+                        <SavingsCalculator
+                          procedures={procedures}
+                          onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
+                        />
+                      </div>
+                    )}
 
-                  if (useCompactLayout) {
-                    return (
-                      <div className="flex flex-col md:flex-row gap-4 mb-5">
-                        <div className="flex-1 min-w-0 rounded-xl p-4" style={glassCard}>
-                          <h3 className="text-sm font-bold mb-3 flex items-center gap-2">Patient Videos</h3>
-                          <VideoTestimonialGallery reviews={reviews} compact />
-                        </div>
-                        {(reviewCount > 0 || categoryAggregates) && (
-                          <div className="rounded-xl p-5 flex-1 min-w-0" style={glassCard}>
-                            {reviewCount > 0 && (
-                              <>
-                                <div className="text-center mb-4">
-                                  <div className="text-4xl font-bold">{avgRating}</div>
-                                  <div className="flex justify-center mt-1 mb-0.5"><StarRating rating={Math.round(avgRating)} /></div>
-                                  <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
-                                </div>
-                                <div className="space-y-1.5 mb-4">
-                                  {[5, 4, 3, 2, 1].map((star, idx) => {
-                                    const count = ratingBreakdown[idx];
-                                    const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
-                                    return (
-                                      <div key={star} className="flex items-center gap-1.5 text-xs">
-                                        <span className="w-3 text-right">{star}</span>
-                                        <Star className="w-3 h-3 fill-secondary text-secondary" />
-                                        <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                          <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                                        </div>
-                                        <span className="w-6 text-right text-muted-foreground">{count}</span>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              </>
-                            )}
-                            {categoryAggregates && (
-                              <div className="space-y-2">
-                                <h4 className="text-xs font-semibold">Category Breakdown</h4>
-                                {categoryAggregates.map(({ key, label, avg }) => (
-                                  <div key={key} className="space-y-0.5">
-                                    <div className="flex justify-between text-[11px]">
-                                      <span className="text-muted-foreground">{label}</span>
-                                      <span className="font-semibold">{avg}/5</span>
+                    {/* Star rating breakdown — right side */}
+                    {(reviewCount > 0 || categoryAggregates) && (
+                      <div className="rounded-xl p-5 flex-1 min-w-0" style={glassCard}>
+                        {reviewCount > 0 && (
+                          <>
+                            <div className="text-center mb-4">
+                              <div className="text-4xl font-bold">{avgRating}</div>
+                              <div className="flex justify-center mt-1 mb-0.5"><StarRating rating={Math.round(avgRating)} /></div>
+                              <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
+                            </div>
+                            <div className="space-y-1.5 mb-4">
+                              {[5, 4, 3, 2, 1].map((star, idx) => {
+                                const count = ratingBreakdown[idx];
+                                const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
+                                return (
+                                  <div key={star} className="flex items-center gap-1.5 text-xs">
+                                    <span className="w-3 text-right">{star}</span>
+                                    <Star className="w-3 h-3 fill-secondary text-secondary" />
+                                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                                      <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
                                     </div>
-                                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                      <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
-                                    </div>
+                                    <span className="w-6 text-right text-muted-foreground">{count}</span>
                                   </div>
-                                ))}
+                                );
+                              })}
+                            </div>
+                          </>
+                        )}
+                        {categoryAggregates && (
+                          <div className="space-y-2">
+                            <h4 className="text-xs font-semibold">Category Breakdown</h4>
+                            {categoryAggregates.map(({ key, label, avg }) => (
+                              <div key={key} className="space-y-0.5">
+                                <div className="flex justify-between text-[11px]">
+                                  <span className="text-muted-foreground">{label}</span>
+                                  <span className="font-semibold">{avg}/5</span>
+                                </div>
+                                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
+                                </div>
                               </div>
-                            )}
+                            ))}
                           </div>
                         )}
                       </div>
-                    );
-                  }
-
-                  // 4+ videos or no videos: stacked layout
-                  return (
-                    <div className="flex flex-col md:flex-row gap-4 mb-5">
-                      <div className="flex-1 min-w-0">
-                        <VideoTestimonialGallery reviews={reviews} />
-                      </div>
-                      {(reviewCount > 0 || categoryAggregates) && (
-                        <div className="rounded-xl p-5 md:w-[260px] shrink-0" style={glassCard}>
-                          {reviewCount > 0 && (
-                            <>
-                              <div className="text-center mb-4">
-                                <div className="text-4xl font-bold">{avgRating}</div>
-                                <div className="flex justify-center mt-1 mb-0.5"><StarRating rating={Math.round(avgRating)} /></div>
-                                <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
-                              </div>
-                              <div className="space-y-1.5 mb-4">
-                                {[5, 4, 3, 2, 1].map((star, idx) => {
-                                  const count = ratingBreakdown[idx];
-                                  const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
-                                  return (
-                                    <div key={star} className="flex items-center gap-1.5 text-xs">
-                                      <span className="w-3 text-right">{star}</span>
-                                      <Star className="w-3 h-3 fill-secondary text-secondary" />
-                                      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                        <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                                      </div>
-                                      <span className="w-6 text-right text-muted-foreground">{count}</span>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </>
-                          )}
-                          {categoryAggregates && (
-                            <div className="space-y-2">
-                              <h4 className="text-xs font-semibold">Category Breakdown</h4>
-                              {categoryAggregates.map(({ key, label, avg }) => (
-                                <div key={key} className="space-y-0.5">
-                                  <div className="flex justify-between text-[11px]">
-                                    <span className="text-muted-foreground">{label}</span>
-                                    <span className="font-semibold">{avg}/5</span>
-                                  </div>
-                                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })()}
+                    )}
+                  </div>
+                )}
 
                 {/* Written reviews */}
                 <div className="space-y-3">
@@ -626,12 +572,6 @@ const ProviderProfile = () => {
               {procedures.length > 0 && (
                 <section>
                   <h2 className="text-lg font-bold mb-3">Procedures & Pricing</h2>
-                  <div className="mb-3">
-                    <SavingsCalculator
-                      procedures={procedures}
-                      onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
-                    />
-                  </div>
                   <div className="relative">
                     <div className="rounded-xl overflow-hidden" style={{ ...peachCard }}>
                       <Table>
