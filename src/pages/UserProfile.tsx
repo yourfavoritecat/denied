@@ -1,16 +1,19 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { ThumbsUp, Calendar, MapPin, Heart, Sparkles, Plane } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ThumbsUp, Calendar, MapPin, Heart, Sparkles, Plane, Pencil } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useReviews } from "@/hooks/useReviews";
+import { useAuth } from "@/hooks/useAuth";
 import ReviewCard from "@/components/reviews/ReviewCard";
 import { providers } from "@/data/providers";
 import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
+import UserBadge, { BadgeType } from "@/components/profile/UserBadge";
 
 interface PublicProfile {
   user_id: string;
@@ -20,6 +23,7 @@ interface PublicProfile {
   username: string;
   created_at: string;
   social_verifications?: Record<string, any>;
+  badge_type?: BadgeType;
 }
 
 interface ProfileExtras {
@@ -34,11 +38,11 @@ interface ProfileExtras {
   travel_style?: string;
   favorite_destinations?: string[];
   bucket_list_procedures?: string[];
-  
 }
 
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
+  const { user } = useAuth();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [extras, setExtras] = useState<ProfileExtras | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,13 +50,24 @@ const UserProfile = () => {
 
   useEffect(() => {
     const fetch = async () => {
-      // Try lookup by username first, then by user_id
       let { data } = await supabase
         .from("profiles_public" as any)
         .select("user_id, first_name, avatar_url, city, username, created_at, social_verifications")
         .eq("username", userId)
         .maybeSingle();
-      setProfile(data as any);
+      
+      // Also fetch badge_type from profiles table
+      let badgeType: BadgeType = null;
+      if (data) {
+        const { data: profileData } = await supabase
+          .from("profiles")
+          .select("badge_type")
+          .eq("user_id", (data as any).user_id)
+          .maybeSingle();
+        badgeType = (profileData as any)?.badge_type ?? null;
+      }
+
+      setProfile(data ? { ...(data as any), badge_type: badgeType } : null);
 
       if (data) {
         const [tripsResult, extrasResult] = await Promise.all([
@@ -82,6 +97,8 @@ const UserProfile = () => {
   const totalHelpfulness = reviews.reduce((sum, r) => sum + r.upvote_count, 0);
   const procedureTags = [...new Set(reviews.map((r) => r.procedure_name))];
 
+  const isOwner = user?.id === profile?.user_id;
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -92,6 +109,7 @@ const UserProfile = () => {
       </div>
     );
   }
+
   const hasAboutContent = (e: ProfileExtras) =>
     !!(e.bio || (e.hobbies?.length) || (e.fun_facts?.length) || e.favorite_emoji);
   const hasBeautyContent = (e: ProfileExtras) =>
@@ -127,14 +145,30 @@ const UserProfile = () => {
                   {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.first_name || "User"} />}
                   <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
                 </Avatar>
-                <div className="text-center sm:text-left">
-                  <h1 className="text-2xl font-bold mb-1 flex items-center gap-2">
-                    {profile.first_name || "User"}
-                    <UserTrustBadge
-                      tier={computeUserTrustTier(profile.social_verifications, tripsCount > 0)}
-                      size="lg"
-                    />
-                  </h1>
+                <div className="text-center sm:text-left flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <h1 className="text-2xl font-bold mb-1 flex items-center gap-2 flex-wrap">
+                        {profile.first_name || "User"}
+                        <UserTrustBadge
+                          tier={computeUserTrustTier(profile.social_verifications, tripsCount > 0)}
+                          size="lg"
+                        />
+                      </h1>
+                      {profile.badge_type && (
+                        <div className="mb-2">
+                          <UserBadge badgeType={profile.badge_type} size="md" />
+                        </div>
+                      )}
+                    </div>
+                    {isOwner && (
+                      <Button asChild size="sm" variant="outline" className="shrink-0 gap-1.5 text-xs" style={{ borderColor: 'rgba(224,166,147,0.4)', color: '#E0A693' }}>
+                        <Link to="/profile/edit">
+                          <Pencil className="w-3 h-3" /> edit profile
+                        </Link>
+                      </Button>
+                    )}
+                  </div>
                   {profile.city && (
                     <p className="text-muted-foreground flex items-center gap-1 justify-center sm:justify-start mb-3">
                       <MapPin className="w-4 h-4" /> {profile.city}

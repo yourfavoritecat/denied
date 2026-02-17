@@ -47,6 +47,14 @@ const Navbar = () => {
 
   const visitorMode = isAdmin && viewAs === "visitor";
 
+  // Build the public profile URL for the current user
+  const publicProfileUrl = (() => {
+    if (!profile) return "/profile";
+    const p = profile as any;
+    if (p.username) return `/user/${p.username}`;
+    return "/profile";
+  })();
+
   const navLinks = visitorMode
     ? [
         { to: "/search", icon: Search, label: "Providers" },
@@ -55,7 +63,7 @@ const Navbar = () => {
         { to: "/dashboard", icon: LayoutDashboard, label: "Home" },
         { to: "/search", icon: Search, label: "Providers" },
         { to: "/my-trips", icon: Plane, label: "My Trips" },
-        { to: "/profile", icon: User, label: "My Profile" },
+        { to: publicProfileUrl, icon: User, label: "My Profile" },
       ];
 
   const handleMobileNav = (to: string) => {
@@ -113,7 +121,7 @@ const Navbar = () => {
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate("/profile")}>
+                    <DropdownMenuItem onClick={() => navigate(publicProfileUrl)}>
                       <User className="w-4 h-4 mr-2" /> Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/settings")}>

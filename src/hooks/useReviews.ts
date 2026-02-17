@@ -34,13 +34,23 @@ export const useReviews = (providerSlug?: string, userId?: string) => {
 
     // Fetch profiles for all review users
     const userIds = [...new Set(typedReviews.map((r: any) => r.user_id))];
-    const { data: profiles } = await supabase
-      .from("review_author_profiles" as any)
-      .select("user_id, first_name, city, username, public_profile, social_verifications, avatar_url")
-      .in("user_id", userIds);
+    const [profilesResult, badgesResult] = await Promise.all([
+      supabase
+        .from("review_author_profiles" as any)
+        .select("user_id, first_name, city, username, public_profile, social_verifications, avatar_url")
+        .in("user_id", userIds),
+      supabase
+        .from("profiles")
+        .select("user_id, badge_type")
+        .in("user_id", userIds),
+    ]);
+
+    const badgeMap = new Map(
+      ((badgesResult.data as any[]) || []).map((p: any) => [p.user_id, p.badge_type ?? null])
+    );
 
     const profileMap = new Map(
-      (profiles || []).map((p: any) => [p.user_id, p])
+      ((profilesResult.data as any[]) || []).map((p: any) => [p.user_id, { ...p, badge_type: badgeMap.get(p.user_id) ?? null }])
     );
 
     // Fetch upvote counts

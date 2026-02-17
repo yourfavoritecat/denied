@@ -452,6 +452,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          badge_type: string | null
           chat_hidden: boolean
           city: string | null
           created_at: string
@@ -471,6 +472,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          badge_type?: string | null
           chat_hidden?: boolean
           city?: string | null
           created_at?: string
@@ -490,6 +492,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          badge_type?: string | null
           chat_hidden?: boolean
           city?: string | null
           created_at?: string

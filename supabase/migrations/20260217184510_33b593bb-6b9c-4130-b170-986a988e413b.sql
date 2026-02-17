@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS badge_type text DEFAULT NULL CHECK (badge_type IN ('trusted_creator', 'trusted_traveler', 'founder'));
