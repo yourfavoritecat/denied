@@ -325,17 +325,32 @@ const SearchPage = () => {
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4">
-          {/* Search Header */}
+          {/* Hero Banner */}
+          <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: 180 }}>
+            <img
+              src="/images/hero-search.jpg"
+              alt=""
+              className="w-full h-full object-cover"
+            />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom, transparent 20%, #0a0a0a 100%)' }}
+            />
+            <div className="absolute bottom-0 left-0 p-6">
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
+                Find Your Provider
+              </h1>
+              <p className="text-white/70">Browse verified clinics with transparent pricing across Mexico</p>
+            </div>
+          </div>
+
+          {/* Search Bar */}
           <motion.div
             className="mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Find Your Provider
-            </h1>
-            <p className="text-muted-foreground mb-6">Browse verified clinics with transparent pricing across Mexico</p>
             <div className="flex flex-col sm:flex-row gap-3 max-w-2xl">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />

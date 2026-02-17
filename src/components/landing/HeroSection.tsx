@@ -48,9 +48,23 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="bg-denied-black min-h-screen flex items-center pt-16 relative overflow-hidden">
-      {/* Subtle radial glow behind content */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_hsl(160_50%_65%/0.06)_0%,_transparent_70%)]" />
+    <section className="min-h-screen flex items-center pt-16 relative overflow-hidden">
+      {/* Full-screen resort background */}
+      <div
+        className="absolute inset-0"
+        style={{
+          backgroundImage: `url('/images/hero-landing.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
+      {/* Dark gradient overlay */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 50%, #000000 100%)',
+        }}
+      />
       
       <div className="container mx-auto px-4 py-20 text-center relative z-10">
         {/* Logo */}
