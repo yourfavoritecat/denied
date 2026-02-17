@@ -52,12 +52,10 @@ const Navbar = () => {
         { to: "/search", icon: Search, label: "Search" },
       ]
     : [
+        { to: "/dashboard", icon: LayoutDashboard, label: "Home" },
         { to: "/search", icon: Search, label: "Search" },
         { to: "/my-trips", icon: Plane, label: "My Trips" },
-        ...(showProviderDashboard ? [{ to: "/provider-dashboard", icon: LayoutDashboard, label: "Provider Dashboard" }] : []),
-        ...(showAdminLink ? [{ to: "/admin", icon: Shield, label: "Admin" }] : []),
-        ...(showCreatorLink ? [{ to: "/creator/edit", icon: Sparkles, label: "My Creator Page" }] : []),
-        { to: "/profile", icon: User, label: "Profile" },
+        { to: "/profile", icon: User, label: "My Profile" },
       ];
 
   const handleMobileNav = (to: string) => {

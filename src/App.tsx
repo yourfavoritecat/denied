@@ -25,6 +25,9 @@ import ProviderDashboard from "./pages/ProviderDashboard";
 import Admin from "./pages/Admin";
 import Dashboard from "./pages/Dashboard";
 import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Terms from "./pages/Terms";
+import Cookies from "./pages/Cookies";
 import Notifications from "./pages/Notifications";
 import MyBugReports from "./pages/MyBugReports";
 import CreatorJoin from "./pages/CreatorJoin";
@@ -53,6 +56,9 @@ const App = () => (
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
             <Route path="/provider/:slug" element={<ProtectedRoute><ProviderProfile /></ProtectedRoute>} />
             <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/cookies" element={<Cookies />} />
             <Route path="/apply" element={<ProtectedRoute><Apply /></ProtectedRoute>} />
             <Route path="/join/:code" element={<CreatorJoin />} />
             <Route path="/c/:handle" element={<CreatorProfile />} />
