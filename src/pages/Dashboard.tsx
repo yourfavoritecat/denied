@@ -97,23 +97,34 @@ const Dashboard = () => {
       <Navbar />
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4 max-w-5xl">
-          {/* Header */}
+          {/* Hero Banner */}
           <motion.div
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8"
+            className="relative rounded-2xl overflow-hidden mb-8"
+            style={{ height: 220 }}
           >
-            <div className="flex items-center gap-4">
-              <Avatar className="w-14 h-14 bg-primary text-primary-foreground">
+            <img
+              src="/images/hero-dashboard.jpg"
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ objectPosition: 'center 40%' }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{ background: 'linear-gradient(to bottom, transparent 20%, #0a0a0a 100%)' }}
+            />
+            <div className="absolute bottom-0 left-0 p-6 flex items-end gap-4">
+              <Avatar className="w-14 h-14 bg-primary text-primary-foreground border-2 border-background">
                 <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
               </Avatar>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold">
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
                   {greeting()}, {firstName} 👋
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <p className="text-muted-foreground text-sm">Welcome back to Denied</p>
+                  <p className="text-white/70 text-sm">Welcome back to Denied</p>
                   <UserTrustBadge tier={trustTier} size="sm" />
                 </div>
               </div>

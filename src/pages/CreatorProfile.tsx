@@ -207,15 +207,11 @@ const CreatorProfile = () => {
 
       {/* Cover Photo */}
       <div className="relative w-full h-[40vh] min-h-[280px] overflow-hidden">
-        {profile.cover_photo_url ? (
-          <img
-            src={profile.cover_photo_url}
-            alt=""
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/30 via-secondary/20 to-primary/10" />
-        )}
+        <img
+          src={profile.cover_photo_url || '/images/hero-creator.jpg'}
+          alt=""
+          className="w-full h-full object-cover"
+        />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
       </div>
