@@ -470,84 +470,76 @@ const ProviderProfile = () => {
                   )}
                 </div>
 
-                {/* Savings calculator (left) + star rating breakdown (right) */}
-                {(procedures.length > 0 || reviewCount > 0 || categoryAggregates) && (
-                  <div className="flex flex-col md:flex-row md:items-stretch gap-4 mb-5">
-                    {/* Savings Calculator — left side, matches right card height */}
-                    {procedures.length > 0 && (
-                      <div className="flex-1 min-w-0 flex flex-col">
-                        <div className="flex-1 flex flex-col rounded-xl border overflow-hidden" style={{ background: 'rgba(26,26,26,1)', borderColor: 'rgba(94,178,152,0.12)' }}>
-                          <SavingsCalculator
-                            procedures={procedures}
-                            onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
-                            showPlaceholder
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Star rating breakdown — right side */}
-                    {(reviewCount > 0 || categoryAggregates) && (
-                      <div className="rounded-xl p-5 flex-1 min-w-0 flex flex-col" style={glassCard}>
-                        {reviewCount > 0 && (
-                          <>
-                            <div className="text-center mb-4">
-                              <div className="text-4xl font-bold">{avgRating}</div>
-                              <div className="flex justify-center mt-1 mb-0.5"><StarRating rating={Math.round(avgRating)} /></div>
-                              <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
-                            </div>
-                            <div className="space-y-1.5 mb-4">
-                              {[5, 4, 3, 2, 1].map((star, idx) => {
-                                const count = ratingBreakdown[idx];
-                                const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
-                                return (
-                                  <div key={star} className="flex items-center gap-1.5 text-xs">
-                                    <span className="w-3 text-right">{star}</span>
-                                    <Star className="w-3 h-3 fill-secondary text-secondary" />
-                                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                                      <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
-                                    </div>
-                                    <span className="w-6 text-right text-muted-foreground">{count}</span>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </>
-                        )}
-                        {categoryAggregates && (
-                          <div className="rounded-lg p-4 mt-auto" style={{ background: 'rgba(224,166,147,0.08)', border: '1px solid rgba(224,166,147,0.12)' }}>
-                            <h4 className="text-xs font-bold mb-2" style={{ color: '#E0A693' }}>Category Breakdown</h4>
-                            <div className="space-y-2">
-                              {categoryAggregates.map(({ key, label, avg }) => (
-                                <div key={key} className="space-y-0.5">
-                                  <div className="flex justify-between text-[11px]">
-                                    <span className="font-bold" style={{ color: '#E0A693' }}>{label}</span>
-                                    <span className="font-bold" style={{ color: '#E0A693' }}>{avg}/5</span>
-                                  </div>
-                                  <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(224,166,147,0.12)' }}>
-                                    <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                {/* Star rating breakdown (left) + first review (right) */}
+                {(reviewCount > 0 || categoryAggregates) && (
+                  <div className="flex flex-col md:flex-row md:items-start gap-4 mb-5">
+                    {/* Star rating breakdown — left side */}
+                    <div className="rounded-xl p-5 md:w-[340px] shrink-0" style={glassCard}>
+                      {reviewCount > 0 && (
+                        <>
+                          <div className="text-center mb-4">
+                            <div className="text-4xl font-bold">{avgRating}</div>
+                            <div className="flex justify-center mt-1 mb-0.5"><StarRating rating={Math.round(avgRating)} /></div>
+                            <p className="text-xs text-muted-foreground">{reviewCount} review{reviewCount !== 1 ? "s" : ""}</p>
                           </div>
-                        )}
+                          <div className="space-y-1.5 mb-4">
+                            {[5, 4, 3, 2, 1].map((star, idx) => {
+                              const count = ratingBreakdown[idx];
+                              const pct = reviewCount > 0 ? (count / reviewCount) * 100 : 0;
+                              return (
+                                <div key={star} className="flex items-center gap-1.5 text-xs">
+                                  <span className="w-3 text-right">{star}</span>
+                                  <Star className="w-3 h-3 fill-secondary text-secondary" />
+                                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
+                                    <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                                  </div>
+                                  <span className="w-6 text-right text-muted-foreground">{count}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                      {categoryAggregates && (
+                        <div className="rounded-lg p-4 mt-auto" style={{ background: 'rgba(224,166,147,0.08)', border: '1px solid rgba(224,166,147,0.12)' }}>
+                          <h4 className="text-xs font-bold mb-2" style={{ color: '#E0A693' }}>Category Breakdown</h4>
+                          <div className="space-y-2">
+                            {categoryAggregates.map(({ key, label, avg }) => (
+                              <div key={key} className="space-y-0.5">
+                                <div className="flex justify-between text-[11px]">
+                                  <span className="font-bold" style={{ color: '#E0A693' }}>{label}</span>
+                                  <span className="font-bold" style={{ color: '#E0A693' }}>{avg}/5</span>
+                                </div>
+                                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(224,166,147,0.12)' }}>
+                                  <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${(avg / 5) * 100}%` }} />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* First written review — right side */}
+                    {!reviewsLoading && sortedReviews.length > 0 && (
+                      <div className="flex-1 min-w-0">
+                        <ReviewCard review={sortedReviews[0]} onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }} />
                       </div>
                     )}
                   </div>
                 )}
 
-                {/* Written reviews */}
+                {/* Remaining written reviews */}
                 <div className="space-y-3">
                   {reviewsLoading ? (
                     <div className="flex justify-center py-8">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
                     </div>
-                  ) : sortedReviews.length > 0 ? (
+                  ) : sortedReviews.length > 1 ? (
                     <>
                       <div className="relative">
                         <div className="space-y-3">
-                          {(sortedReviews.length > REVIEWS_LIMIT ? visibleReviews : sortedReviews).map((review) => (
+                          {(sortedReviews.length > REVIEWS_LIMIT ? visibleReviews : sortedReviews).slice(1).map((review) => (
                             <ReviewCard key={review.id} review={review} onEdit={(r) => { setEditingReview(r); setReviewOpen(true); }} />
                           ))}
                         </div>
@@ -563,22 +555,30 @@ const ProviderProfile = () => {
                         />
                       )}
                     </>
-                  ) : (
+                  ) : sortedReviews.length === 0 && !reviewsLoading ? (
                     <div className="text-center py-8">
                       <p className="text-muted-foreground text-sm">No reviews yet. Be the first to leave a review!</p>
                     </div>
-                  )}
+                  ) : null}
                 </div>
               </section>
 
               <div className={sectionDivider} />
 
-              {/* PROCEDURES & PRICING (peach card) */}
+              {/* PROCEDURES & PRICING (peach card with savings calculator header) */}
               {procedures.length > 0 && (
                 <section>
                   <h2 className="text-lg font-bold mb-3">Procedures & Pricing</h2>
                   <div className="relative">
                     <div className="rounded-xl overflow-hidden" style={{ ...peachCard }}>
+                      {/* Savings Calculator as interactive header */}
+                      <div className="border-b" style={{ borderColor: 'rgba(224,166,147,0.15)' }}>
+                        <SavingsCalculator
+                          procedures={procedures}
+                          onRequestQuote={(procName) => { setQuoteProcedure(procName); setQuoteOpen(true); }}
+                          showPlaceholder
+                        />
+                      </div>
                       <Table>
                         <TableHeader>
                           <TableRow style={{ background: 'rgba(224,166,147,0.1)' }} className="hover:bg-transparent">
