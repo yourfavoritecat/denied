@@ -120,13 +120,16 @@
     position: fixed;
     inset: 0;
     background: url('/images/dark-backdrop.png') center/cover no-repeat;
+    opacity: 0.25;
     z-index: -2;
   }
   #root::after {
     content: '';
     position: fixed;
     inset: 0;
-    background: radial-gradient(ellipse at center, transparent 30%, #000000 85%);
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(94,178,152,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse at center, transparent 30%, #000000 85%);
     z-index: -1;
   }
 
