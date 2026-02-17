@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Badge } from "@/components/ui/badge";
+
 import type { ReviewData } from "@/components/reviews/ReviewCard";
 
 interface VibeTagsDisplayProps {
@@ -27,12 +27,22 @@ const VibeTagsDisplay = ({ reviews }: VibeTagsDisplayProps) => {
   return (
     <div className="flex flex-wrap gap-2">
       {tagCounts.map(([tag, count]) => (
-        <Badge
+        <span
           key={tag}
-          className="bg-[#5EB298]/15 text-[#5EB298] border border-[#5EB298]/30 hover:bg-[#5EB298]/25 text-xs font-medium"
+          className="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium text-white backdrop-blur-sm transition-all duration-300 hover:shadow-[0_0_12px_rgba(94,178,152,0.2)] cursor-default"
+          style={{
+            background: 'rgba(94,178,152,0.15)',
+            border: '1px solid rgba(94,178,152,0.3)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(94,178,152,0.25)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(94,178,152,0.15)';
+          }}
         >
           {tag} ({count})
-        </Badge>
+        </span>
       ))}
     </div>
   );
