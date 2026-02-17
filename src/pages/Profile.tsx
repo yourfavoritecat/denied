@@ -69,18 +69,11 @@ const ProfilePage = () => {
                         </Link>
                       </Button>
                     )}
-                    {creatorHandle ? (
+                    {creatorHandle && (
                       <Button variant="secondary" size="sm" asChild className="gap-1.5">
                         <Link to={`/c/${creatorHandle}`}>
                           <Sparkles className="w-3.5 h-3.5" />
                           View Creator Page
-                        </Link>
-                      </Button>
-                    ) : (
-                      <Button variant="secondary" size="sm" asChild className="gap-1.5">
-                        <Link to="/creator/edit">
-                          <Sparkles className="w-3.5 h-3.5" />
-                          Create Public Profile
                         </Link>
                       </Button>
                     )}

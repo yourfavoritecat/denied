@@ -173,88 +173,58 @@
   }
 }
 
-/* ========== Glossy Button Styles — Image-based glass capsules ========== */
+/* ========== Flat Button Styles — Simple solid pills ========== */
 @layer components {
-  /* Primary mint — glass button image */
+  /* Primary mint — flat solid */
   .btn-glossy-mint {
-    background: url('/images/btn-mint-glass.png') center/cover no-repeat;
-    background-color: #5EB298 !important;
+    background: #5EB298 !important;
     border: none;
-    color: #1a1a1a !important;
-    text-shadow: 0 1px 1px rgba(255,255,255,0.3);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 4px 14px rgba(0,0,0,0.35);
+    color: white !important;
   }
   .btn-glossy-mint:hover {
-    filter: brightness(1.12);
-    box-shadow: 0 0 20px rgba(94,178,152,0.4), 0 0 40px rgba(94,178,152,0.2);
-    transform: scale(1.03) translateY(-1px);
+    background: #4EA088 !important;
   }
   .btn-glossy-mint:active {
-    filter: brightness(0.92);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.25);
-    transform: scale(0.97) translateY(1px);
+    background: #458F79 !important;
   }
 
-  /* Secondary peach — glass button image */
+  /* Secondary peach — flat solid */
   .btn-glossy-peach {
-    background: url('/images/btn-peach-glass.png') center/cover no-repeat;
-    background-color: #F8B4A0 !important;
+    background: #F8B4A0 !important;
     border: none;
     color: #1a1a1a !important;
-    text-shadow: 0 1px 1px rgba(255,255,255,0.3);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.3), 0 4px 14px rgba(0,0,0,0.35);
   }
   .btn-glossy-peach:hover {
-    filter: brightness(1.12);
-    box-shadow: 0 0 20px rgba(248,180,160,0.4), 0 0 40px rgba(248,180,160,0.2);
-    transform: scale(1.03) translateY(-1px);
+    background: #F5A08A !important;
   }
   .btn-glossy-peach:active {
-    filter: brightness(0.92);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.25);
-    transform: scale(0.97) translateY(1px);
+    background: #F08C74 !important;
   }
 
-  /* Destructive — pure CSS glass */
+  /* Destructive — flat solid */
   .btn-glossy-destructive {
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 35%, transparent 55%),
-      linear-gradient(to bottom, rgba(255,255,255,0.15) 0%, transparent 40%, rgba(0,0,0,0.15) 100%),
-      linear-gradient(to bottom, #EF6464 0%, #DC2626 45%, #B91C1C 100%) !important;
-    background-color: transparent !important;
-    border: 1px solid rgba(255,255,255,0.2);
+    background: #DC2626 !important;
+    border: none;
     color: white !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.35), inset 0 -1px 2px rgba(0,0,0,0.15), 0 4px 14px rgba(0,0,0,0.35);
   }
   .btn-glossy-destructive:hover {
-    filter: brightness(1.12);
-    box-shadow: 0 6px 24px rgba(239,68,68,0.5), 0 0 16px rgba(239,68,68,0.25);
-    transform: scale(1.03) translateY(-1px);
+    background: #B91C1C !important;
   }
   .btn-glossy-destructive:active {
-    filter: brightness(0.92);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.3);
-    transform: scale(0.97) translateY(1px);
+    background: #991B1B !important;
   }
 
-  /* Outline — transparent glass pill */
+  /* Outline — flat transparent */
   .btn-glossy-outline {
     background: transparent;
-    border: 1px solid rgba(255,255,255,0.2);
-    color: hsl(var(--foreground));
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid rgba(94,178,152,0.3);
+    color: #5EB298;
   }
   .btn-glossy-outline:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.3);
-    box-shadow: 0 6px 24px rgba(94,178,152,0.15), 0 0 12px rgba(255,255,255,0.05);
-    transform: translateY(-1px);
+    background: rgba(94,178,152,0.1);
   }
   .btn-glossy-outline:active {
-    background: rgba(255,255,255,0.03);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.2);
-    transform: translateY(0);
+    background: rgba(94,178,152,0.15);
   }
 
   /* Inner page backdrop — use on all pages except landing */

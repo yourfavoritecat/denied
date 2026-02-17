@@ -75,7 +75,8 @@ const BugReportButton = () => {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 left-6 z-50 flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2.5 rounded-full shadow-lg hover:opacity-90 transition-opacity text-sm font-medium"
+        className="fixed left-5 z-50 flex items-center gap-2 bg-destructive text-destructive-foreground px-4 py-2.5 rounded-full shadow-lg hover:opacity-90 transition-opacity text-sm font-medium"
+        style={{ bottom: 80 }}
         title="Report a bug"
       >
         <Bug className="w-4 h-4" />
