@@ -257,10 +257,11 @@ const CreatorProfile = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
+
       {/* Owner Edit Banner */}
       {isOwner && (
         <div className="sticky top-0 z-40 border-b" style={{ background: `${theme.accentColor}18`, borderColor: `${theme.accentColor}30` }}>
-          <div className="max-w-2xl mx-auto px-4 py-2.5 flex items-center justify-between">
+          <div className="max-w-[960px] mx-auto px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm" style={{ color: theme.accentColor }}>
               <Pencil className="w-4 h-4" />
               <span>This is your creator page</span>
@@ -272,16 +273,15 @@ const CreatorProfile = () => {
         </div>
       )}
 
-      {/* Hero / Cover — pt-16 to clear fixed navbar */}
-      <div className="relative w-full h-[220px] overflow-hidden pt-16">
+      {/* ── Hero Cover ── */}
+      <div className="relative w-full overflow-hidden" style={{ height: '220px', paddingTop: '64px' }}>
         <img
           src={profile.cover_photo_url || '/images/hero-creator.jpg'}
           alt=""
           className="w-full h-full object-cover object-center"
+          style={{ position: 'absolute', inset: 0, height: '100%' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-
-        {/* Favorite star — visible to logged-in non-owners */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         {user && !isOwner && (
           <button
             onClick={toggleStar}
@@ -297,37 +297,64 @@ const CreatorProfile = () => {
         )}
       </div>
 
-      {/* Profile Header — overlapping cover */}
-      <div className="relative max-w-2xl mx-auto px-4 -mt-14 z-10">
-        <div className="flex items-end gap-4 mb-4">
-          <Avatar className="w-28 h-28 border-4 border-background shadow-elevated shrink-0">
+      {/* ── All content below cover ── */}
+      <div className="max-w-[960px] mx-auto px-6">
+
+        {/* ── Identity Row — overlaps cover by pulling up ── */}
+        <div className="flex items-center gap-6 -mt-16 relative z-10 mb-3">
+          {/* Avatar */}
+          <Avatar className="w-32 h-32 shrink-0 border-[3px] border-[#0a0a0a] shadow-lg">
             {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.display_name} className="object-cover" />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-bold">
+            <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold">
               {profile.display_name?.[0]?.toUpperCase() || "C"}
             </AvatarFallback>
           </Avatar>
-          <div className="pb-1 flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-5xl font-bold leading-tight">{profile.display_name}</h1>
-              {userBadge ? (
-                <UserBadge badgeType={userBadge as any} />
-              ) : (
-                <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs">
-                  <BadgeCheck className="w-3 h-3" /> denied.care creator
-                </Badge>
-              )}
-            </div>
+
+          {/* Name + Badge, vertically centered with avatar */}
+          <div className="flex items-center gap-2 flex-wrap pt-16">
+            <h1 className="text-6xl font-bold leading-none tracking-tight">{profile.display_name}</h1>
+            {userBadge ? (
+              <img
+                src={userBadge === 'founder' ? '/badges/founder.png?v=3'
+                  : userBadge === 'trusted_creator' || userBadge === 'trusted_traveler' ? '/badges/creator.png?v=3'
+                  : '/badges/provider.png?v=3'}
+                alt={userBadge}
+                className="h-10 w-auto"
+                draggable={false}
+              />
+            ) : (
+              <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs">
+                <BadgeCheck className="w-3 h-3" /> denied.care creator
+              </Badge>
+            )}
           </div>
         </div>
 
-        {/* Bio */}
+        {/* ── Stats line — inline text, under name column ── */}
+        <div className="ml-0 mb-2">
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            <span className="font-semibold text-white">{uniqueProviders}</span>
+            {' '}provider{uniqueProviders !== 1 ? 's' : ''} visited
+            {' · '}
+            <span className="font-semibold text-white">{reviewCount}</span>
+            {' '}review{reviewCount !== 1 ? 's' : ''}
+            {' · '}
+            <span className="font-semibold text-white">{uniqueProcedures}</span>
+            {' '}procedure{uniqueProcedures !== 1 ? 's' : ''}
+          </p>
+        </div>
+
+        {/* ── Bio ── */}
         {profile.bio && (
-          <p className="text-muted-foreground leading-relaxed mb-3">{profile.bio}</p>
+          <p className="text-base mb-3 leading-relaxed line-clamp-3" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            {profile.bio}
+          </p>
         )}
 
-        {/* Specialty tags */}
-        {specialties.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
+        {/* ── Tags + Social on one row ── */}
+        <div className="flex items-center justify-between gap-4 mb-0">
+          {/* Specialty tags */}
+          <div className="flex flex-wrap gap-2">
             {specialties.map((s: string) => (
               <span key={s} className="text-xs px-2.5 py-1 rounded-full font-medium"
                 style={{ background: theme.tagBg, border: `1px solid ${theme.tagBorder}`, color: theme.accentColor }}>
@@ -335,100 +362,53 @@ const CreatorProfile = () => {
               </span>
             ))}
           </div>
-        )}
 
-        {/* Social Links */}
-        {hasSocials && (
-          <div className="flex items-center gap-3 mb-6">
-            {socialLinks.instagram && (
-              <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer"
-                className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
-                <Instagram className="w-4 h-4" />
-              </a>
-            )}
-            {socialLinks.tiktok && (
-              <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer"
-                className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
-                <TikTokIcon className="w-4 h-4" />
-              </a>
-            )}
-            {socialLinks.youtube && (
-              <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer"
-                className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
-                <YouTubeIcon className="w-4 h-4" />
-              </a>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Stats Row */}
-      <div className="max-w-2xl mx-auto px-4 mb-6">
-        <div className="grid grid-cols-3 gap-3">
-          <StatBox icon={<Building2 className="w-4 h-4" />} value={uniqueProviders} label="providers visited" accentColor={theme.accentColor} cardStyle={theme.card} />
-          <StatBox icon={<Star className="w-4 h-4" />} value={reviewCount} label="reviews written" accentColor={theme.accentColor} cardStyle={theme.card} />
-          <StatBox icon={<Stethoscope className="w-4 h-4" />} value={uniqueProcedures} label="procedures documented" accentColor={theme.accentColor} cardStyle={theme.card} />
-        </div>
-      </div>
-
-      {/* Favorite Providers Section */}
-      {favProviders.length > 0 && (
-        <div className="max-w-2xl mx-auto px-4 mb-6">
-          <div className="rounded-xl p-4" style={theme.card}>
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold flex items-center gap-2" style={{ color: theme.accentColor }}>
-                <Heart className="w-4 h-4" style={{ fill: theme.accentColor }} />
-                favorite providers
-              </h2>
-              {favProvidersTotal > 4 && (
-                <span className="text-xs text-muted-foreground">+{favProvidersTotal - 4} more</span>
+          {/* Social icons */}
+          {hasSocials && (
+            <div className="flex items-center gap-2 shrink-0">
+              {socialLinks.instagram && (
+                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer"
+                  className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                  <Instagram className="w-4 h-4" />
+                </a>
+              )}
+              {socialLinks.tiktok && (
+                <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer"
+                  className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                  <TikTokIcon className="w-4 h-4" />
+                </a>
+              )}
+              {socialLinks.youtube && (
+                <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer"
+                  className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                  <YouTubeIcon className="w-4 h-4" />
+                </a>
               )}
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-              {favProviders.slice(0, 4).map((prov) => (
-                <Link
-                  key={prov.slug}
-                  to={`/provider/${prov.slug}`}
-                  className="flex-shrink-0 flex items-center gap-2.5 rounded-lg px-3 py-2 transition-colors hover:opacity-80"
-                  style={{ background: theme.tagBg, border: `1px solid ${theme.tagBorder}` }}
-                >
-                  <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-muted">
-                    {prov.cover_photo_url
-                      ? <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
-                      : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-muted-foreground">{prov.name[0]}</div>
-                    }
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold leading-tight whitespace-nowrap">{prov.name}</p>
-                    {prov.city && <p className="text-[10px] text-muted-foreground whitespace-nowrap">{prov.city}{prov.country ? `, ${prov.country}` : ""}</p>}
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
-      )}
 
-      {/* Tabs — flush below stats, full width */}
-      <div className="max-w-2xl mx-auto pb-16">
-        <CreatorTabs
-          profile={profile}
-          theme={theme}
-          reviews={reviews}
-          providers={providers}
-          adminReviews={adminReviews}
-          orderedProviderSlugs={orderedProviderSlugs}
-          content={content}
-          contentByProvider={contentByProvider}
-          ungroupedContent={ungroupedContent}
-          openLightbox={openLightbox}
-          setQuoteProvider={setQuoteProvider}
-        />
+        {/* ── Tabs ── */}
+        <div className="mt-6 pb-16">
+          <CreatorTabs
+            profile={profile}
+            theme={theme}
+            reviews={reviews}
+            providers={providers}
+            adminReviews={adminReviews}
+            orderedProviderSlugs={orderedProviderSlugs}
+            content={content}
+            contentByProvider={contentByProvider}
+            ungroupedContent={ungroupedContent}
+            openLightbox={openLightbox}
+            setQuoteProvider={setQuoteProvider}
+          />
+        </div>
       </div>
 
       {/* Footer */}
       <footer className="border-t border-border bg-card">
-        <div className="max-w-2xl mx-auto px-4 py-10 text-center">
+        <div className="max-w-[960px] mx-auto px-6 py-10 text-center">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <img src={logo} alt="denied.care" className="h-5 w-auto" />
             <span>denied.care</span>
@@ -574,7 +554,7 @@ const CreatorTabs = ({
         .creator-tabs [data-state="active"] { border-bottom-color: ${accentColor} !important; }
       `}</style>
 
-      <div className="creator-tabs px-4 pt-4">
+      <div className="creator-tabs pt-4">
         <TabsContent value="reviews">
           {reviews.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
