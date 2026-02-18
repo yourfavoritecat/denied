@@ -154,17 +154,21 @@ const YouTubeIcon = ({ className }: { className?: string }) => (
 /* ── Helpers ── */
 
 /**
- * Ensures a social link is a proper https:// URL.
- * If the user stored just a handle like "@denied.care" or "denied.care",
- * we prepend the platform base URL.
+ * Ensures a social link value is a navigable https:// URL.
+ * Handles all common input formats:
+ *   "https://instagram.com/user"  → used as-is
+ *   "www.instagram.com/user"      → prepend https://
+ *   "instagram.com/user"          → prepend https:// (has a slash → domain/path)
+ *   "catrific" / "@catrific"      → strip @, prepend platform baseUrl
+ *   "denied.care" (handle w/ dot) → treated as username, prepend platform baseUrl
  */
 const normalizeSocialUrl = (value: string, baseUrl: string): string => {
-  const v = value.trim().replace(/^@/, "");
+  const v = value.trim();
   if (/^https?:\/\//i.test(v)) return v;
-  // If it looks like a full domain (has a dot) treat it as a full URL
-  if (v.includes(".")) return `https://${v}`;
-  // Otherwise treat it as a username/handle
-  return `${baseUrl}${v}`;
+  if (/^www\./i.test(v)) return `https://${v}`;
+  const handle = v.replace(/^@/, "");
+  if (handle.includes("/")) return `https://${handle}`;
+  return `${baseUrl}${handle}`;
 };
 
 /* ── Main component ── */
@@ -451,21 +455,21 @@ const CreatorProfile = () => {
           {hasSocials && (
             <div className="flex items-center gap-2 shrink-0">
               {socialLinks.instagram && (
-                <a href={normalizeSocialUrl(socialLinks.instagram, "https://instagram.com/")} target="_blank" rel="noopener noreferrer"
+                <a href={normalizeSocialUrl(socialLinks.instagram, "https://www.instagram.com/")} target="_blank" rel="noopener noreferrer"
                   className="p-2 rounded-full transition-colors hover:opacity-80"
                   style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <Instagram className="w-4 h-4" />
                 </a>
               )}
               {socialLinks.tiktok && (
-                <a href={normalizeSocialUrl(socialLinks.tiktok, "https://tiktok.com/@")} target="_blank" rel="noopener noreferrer"
+                <a href={normalizeSocialUrl(socialLinks.tiktok, "https://www.tiktok.com/@")} target="_blank" rel="noopener noreferrer"
                   className="p-2 rounded-full transition-colors hover:opacity-80"
                   style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <TikTokIcon className="w-4 h-4" />
                 </a>
               )}
               {socialLinks.youtube && (
-                <a href={normalizeSocialUrl(socialLinks.youtube, "https://youtube.com/")} target="_blank" rel="noopener noreferrer"
+                <a href={normalizeSocialUrl(socialLinks.youtube, "https://www.youtube.com/@")} target="_blank" rel="noopener noreferrer"
                   className="p-2 rounded-full transition-colors hover:opacity-80"
                   style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <YouTubeIcon className="w-4 h-4" />

@@ -190,6 +190,23 @@ const CreatorEdit = () => {
     if (!creatorProfile || !user) return;
     setSaving(true);
 
+    // Normalize social links so they are always valid https:// URLs
+    const normalizeSocial = (value: string, baseUrl: string): string => {
+      const v = value.trim();
+      if (!v) return v;
+      if (/^https?:\/\//i.test(v)) return v;
+      if (/^www\./i.test(v)) return `https://${v}`;
+      const handle = v.replace(/^@/, "");
+      if (handle.includes("/")) return `https://${handle}`;
+      return `${baseUrl}${handle}`;
+    };
+
+    const normalizedSocialLinks = {
+      instagram: normalizeSocial(socialLinks.instagram, "https://www.instagram.com/"),
+      tiktok: normalizeSocial(socialLinks.tiktok, "https://www.tiktok.com/@"),
+      youtube: normalizeSocial(socialLinks.youtube, "https://www.youtube.com/@"),
+    };
+
     const { error } = await supabase
       .from("creator_profiles")
       .update({
@@ -198,7 +215,7 @@ const CreatorEdit = () => {
         bio: bio || null,
         avatar_url: avatarUrl,
         cover_photo_url: coverPhotoUrl,
-        social_links: socialLinks,
+        social_links: normalizedSocialLinks,
         featured_providers: featuredProviders,
         is_published: isPublished,
         profile_theme: profileTheme,
@@ -212,7 +229,7 @@ const CreatorEdit = () => {
     }
     toast({ title: "Profile saved! ✨" });
     setSaving(false);
-    navigate(`/c/${handle}`);
+    navigate(`/${handle}`);
   };
 
   // Avatar upload
