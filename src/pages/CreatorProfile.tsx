@@ -402,6 +402,7 @@ const CreatorProfile = () => {
             ungroupedContent={ungroupedContent}
             openLightbox={openLightbox}
             setQuoteProvider={setQuoteProvider}
+            favProviders={favProviders}
           />
         </div>
       </div>
@@ -525,6 +526,7 @@ const ContentGrid = ({
 const CreatorTabs = ({
   profile, theme, reviews, providers, adminReviews, orderedProviderSlugs,
   content, contentByProvider, ungroupedContent, openLightbox, setQuoteProvider,
+  favProviders,
 }: {
   profile: CreatorProfileData;
   theme: typeof THEMES["mint"];
@@ -537,6 +539,7 @@ const CreatorTabs = ({
   ungroupedContent: ContentItem[];
   openLightbox: (urls: string[], index: number) => void;
   setQuoteProvider: (p: { name: string; slug: string } | null) => void;
+  favProviders: ProviderInfo[];
 }) => {
   const accentColor = theme.tabActive;
   return (
@@ -578,19 +581,19 @@ const CreatorTabs = ({
         </TabsContent>
 
         <TabsContent value="providers">
-          {orderedProviderSlugs.length === 0 ? (
+          {favProviders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
+              <Heart className="w-8 h-8 text-muted-foreground/30 mb-3" />
               <p className="text-muted-foreground text-sm">no favorite providers yet</p>
+              <p className="text-muted-foreground text-xs mt-1">providers this creator favorites will appear here</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
-              {orderedProviderSlugs.map((slug) => {
-                const prov = providers[slug];
-                if (!prov) return null;
-                const ar = adminReviews[slug];
+              {favProviders.map((prov) => {
+                const ar = adminReviews[prov.slug];
                 return (
-                  <Card key={slug} className="overflow-hidden" style={theme.card}>
-                    <Link to={`/provider/${slug}`}>
+                  <Card key={prov.slug} className="overflow-hidden" style={theme.card}>
+                    <Link to={`/provider/${prov.slug}`}>
                       <div className="h-28 bg-muted overflow-hidden">
                         {prov.cover_photo_url ? (
                           <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
@@ -602,7 +605,7 @@ const CreatorTabs = ({
                       </div>
                     </Link>
                     <CardContent className="p-3">
-                      <Link to={`/provider/${slug}`} className="hover:opacity-80 transition-opacity">
+                      <Link to={`/provider/${prov.slug}`} className="hover:opacity-80 transition-opacity">
                         <h3 className="font-semibold text-sm truncate">{prov.name}</h3>
                       </Link>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
