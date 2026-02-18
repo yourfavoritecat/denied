@@ -15,6 +15,7 @@ import InboxSection from "@/components/admin/InboxSection";
 import UsersSection from "@/components/admin/UsersSection";
 import BugReportsSection from "@/components/admin/BugReportsSection";
 import CreatorsSection from "@/components/admin/CreatorsSection";
+import CommissionsSection from "@/components/admin/CommissionsSection";
 
 const SECTIONS: Record<AdminSection, React.ComponentType<any>> = {
   overview: OverviewSection,
@@ -29,6 +30,7 @@ const SECTIONS: Record<AdminSection, React.ComponentType<any>> = {
   users: UsersSection,
   bugs: BugReportsSection,
   creators: CreatorsSection,
+  commissions: CommissionsSection,
 };
 
 const AdminPage = () => {
