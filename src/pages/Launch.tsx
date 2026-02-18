@@ -6,7 +6,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo-new.png";
-import darkBackdrop from "@/assets/dark-backdrop.png";
 
 const TikTokIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -66,10 +65,8 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden" style={{ backgroundColor: '#000000' }}>
-      {/* Background image */}
-      <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${darkBackdrop})` }} />
-      {/* Radial vignette overlay */}
-      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, transparent 30%, #000000 85%)' }} />
+      {/* Pure black base + radial vignette — no backdrop image */}
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 0%, rgba(0,0,0,0.6) 60%, #000000 100%)' }} />
 
       {showLogin && (
         <div className="absolute top-6 right-6 z-20">
@@ -85,26 +82,33 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
       )}
 
       <div className="w-full max-w-xl flex flex-col items-center text-center relative z-10">
-        {/* Logo with reflection — large and prominent */}
-        <img
-          src={logo}
-          alt="Denied"
-          className="w-80 md:w-[400px] lg:w-[500px] h-auto mb-10"
-          style={{ mixBlendMode: 'screen' }}
-        />
+        {/* Logo with soft neon glow behind it */}
+        <div className="relative mb-10">
+          {/* Neon green glow blob behind logo */}
+          <div className="absolute inset-0 -z-10" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 60%, rgba(80,255,144,0.13) 0%, transparent 70%)', filter: 'blur(24px)' }} />
+          <img
+            src={logo}
+            alt="Denied"
+            className="w-80 md:w-[400px] lg:w-[500px] h-auto relative"
+            style={{ mixBlendMode: 'screen' }}
+          />
+        </div>
 
-        {/* Tagline */}
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-black mb-6 leading-tight" style={{ color: "#FF8C69" }}>
+        {/* Tagline — white for readability */}
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white mb-6 leading-tight">
           say yes, because health insurance said no. oh, and f* health insurance.
         </h1>
 
         {/* Body copy */}
-        <p className="text-sm md:text-base leading-relaxed mb-8 max-w-[600px] font-light" style={{ color: "#E0DDD8" }}>
+        <p className="text-sm md:text-base leading-relaxed mb-8 max-w-[500px] font-light" style={{ color: "#E0DDD8" }}>
           we're building a marketplace that connects you with verified doctors, dentists, and practitioners abroad — saving you up to 75% on procedures your insurance denied or priced out of reach.
         </p>
 
-        {/* CTA line */}
-        <p className="text-base md:text-lg font-bold mb-8" style={{ color: "#50FF90" }}>
+        {/* Divider */}
+        <div className="mb-6" style={{ width: '200px', height: '1px', background: 'rgba(80,255,144,0.20)' }} />
+
+        {/* CTA line — peach, draws the eye */}
+        <p className="text-base md:text-lg font-bold mb-8" style={{ color: "#FF8C69" }}>
           be the first to know when we launch.
         </p>
 
@@ -122,29 +126,38 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
           <Button
             type="submit"
             size="lg"
-            className="h-12 px-8 font-bold whitespace-nowrap"
-            style={{ background: '#50FF90', color: '#1a1714' }}
+            className="h-12 px-8 whitespace-nowrap"
+            style={{ background: '#50FF90', color: '#1a1714', fontWeight: 800, fontSize: '15px' }}
             disabled={isLoading}
           >
             {isLoading ? "joining..." : "join the waitlist"}
           </Button>
         </form>
 
-        {/* Social icons */}
+        {/* Social icons — white 40% → neon green on hover */}
         <div className="flex gap-4 mb-16">
-          <a href="https://instagram.com/denied.care" target="_blank" rel="noopener noreferrer" className="transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }} onMouseEnter={e => (e.currentTarget.style.color = '#50FF90')} onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
-            <Instagram className="w-5 h-5" />
-          </a>
-          <a href="#" target="_blank" rel="noopener noreferrer" className="transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }} onMouseEnter={e => (e.currentTarget.style.color = '#50FF90')} onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
-            <TikTokIcon />
-          </a>
-          <a href="#" target="_blank" rel="noopener noreferrer" className="transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }} onMouseEnter={e => (e.currentTarget.style.color = '#50FF90')} onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
-            <FacebookIcon />
-          </a>
+          {[
+            { href: "https://instagram.com/denied.care", icon: <Instagram className="w-5 h-5" /> },
+            { href: "#", icon: <TikTokIcon /> },
+            { href: "#", icon: <FacebookIcon /> },
+          ].map(({ href, icon }, i) => (
+            <a
+              key={i}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-all duration-200 bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#50FF90')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
+            >
+              {icon}
+            </a>
+          ))}
         </div>
 
         {/* Footer */}
-        <p className="text-xs" style={{ color: "#E0DDD8", opacity: 0.35 }}>
+        <p className="text-xs" style={{ color: "#E0DDD8", opacity: 0.3 }}>
           © 2026 denied.care. all rights reserved.
         </p>
       </div>
