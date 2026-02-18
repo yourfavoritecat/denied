@@ -65,33 +65,75 @@ interface ContentItem {
 
 type Theme = "mint" | "peach" | "pearl";
 
-const THEMES: Record<Theme, {
-  card: React.CSSProperties;
+interface ThemeTokens {
   accentColor: string;
+  coverGradient: string;
+  avatarBorder: string;
   tagBg: string;
   tagBorder: string;
+  tagColor: string;
+  socialIconBg: string;
   tabActive: string;
-}> = {
+  cardBg: string;
+  cardBorder: string;
+  divider: string;
+  buttonBg: string;
+  buttonColor: string;
+  pageBg: string;
+  statsAccent: string;
+}
+
+const THEMES: Record<Theme, ThemeTokens> = {
   mint: {
-    card: { background: 'rgba(94,178,152,0.08)', border: '1px solid rgba(94,178,152,0.12)' },
     accentColor: '#5EB298',
-    tagBg: 'rgba(94,178,152,0.12)',
-    tagBorder: 'rgba(94,178,152,0.25)',
+    coverGradient: 'linear-gradient(to top, rgba(94,178,152,0.18) 0%, rgba(10,10,10,0.5) 60%, transparent 100%)',
+    avatarBorder: '3px solid #5EB298',
+    tagBg: 'rgba(94,178,152,0.15)',
+    tagBorder: 'rgba(94,178,152,0.3)',
+    tagColor: '#5EB298',
+    socialIconBg: 'rgba(94,178,152,0.15)',
     tabActive: '#5EB298',
+    cardBg: 'rgba(94,178,152,0.08)',
+    cardBorder: '1px solid rgba(94,178,152,0.12)',
+    divider: 'rgba(94,178,152,0.15)',
+    buttonBg: '#5EB298',
+    buttonColor: '#fff',
+    pageBg: '#0a0a0a',
+    statsAccent: '#5EB298',
   },
   peach: {
-    card: { background: 'rgba(224,166,147,0.08)', border: '1px solid rgba(224,166,147,0.12)' },
     accentColor: '#E0A693',
-    tagBg: 'rgba(224,166,147,0.12)',
-    tagBorder: 'rgba(224,166,147,0.25)',
+    coverGradient: 'linear-gradient(to top, rgba(224,166,147,0.18) 0%, rgba(10,10,10,0.5) 60%, transparent 100%)',
+    avatarBorder: '3px solid #E0A693',
+    tagBg: 'rgba(224,166,147,0.15)',
+    tagBorder: 'rgba(224,166,147,0.3)',
+    tagColor: '#E0A693',
+    socialIconBg: 'rgba(224,166,147,0.15)',
     tabActive: '#E0A693',
+    cardBg: 'rgba(224,166,147,0.08)',
+    cardBorder: '1px solid rgba(224,166,147,0.12)',
+    divider: 'rgba(224,166,147,0.15)',
+    buttonBg: '#E0A693',
+    buttonColor: '#1a1a1a',
+    pageBg: '#0a0a0a',
+    statsAccent: '#E0A693',
   },
   pearl: {
-    card: { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' },
     accentColor: '#D4C5A9',
+    coverGradient: 'linear-gradient(to top, rgba(212,197,169,0.12) 0%, rgba(18,18,18,0.5) 60%, transparent 100%)',
+    avatarBorder: '3px solid #D4C5A9',
     tagBg: 'rgba(212,197,169,0.12)',
     tagBorder: 'rgba(212,197,169,0.25)',
+    tagColor: '#D4C5A9',
+    socialIconBg: 'rgba(212,197,169,0.12)',
     tabActive: '#D4C5A9',
+    cardBg: 'rgba(255,255,255,0.05)',
+    cardBorder: '1px solid rgba(255,255,255,0.10)',
+    divider: 'rgba(212,197,169,0.12)',
+    buttonBg: '#D4C5A9',
+    buttonColor: '#1a1a1a',
+    pageBg: '#121212',
+    statsAccent: '#D4C5A9',
   },
 };
 
@@ -128,7 +170,6 @@ const CreatorProfile = () => {
   const [favProviders, setFavProviders] = useState<ProviderInfo[]>([]);
   const [favProvidersTotal, setFavProvidersTotal] = useState(0);
 
-  // Favorite star (for travelers only, using creator handle as target_id)
   const { isFavorited: isStarred, toggle: toggleStar } = useFavorite(handle || "", "creator");
 
   useEffect(() => {
@@ -179,7 +220,6 @@ const CreatorProfile = () => {
     setContent((contentRes.data as unknown as ContentItem[]) || []);
     setUserBadge((profileRes.data as any)?.badge_type || null);
 
-    // Load favorited providers
     const favSlugs = ((favsRes.data as any[]) || []).map((f: any) => f.target_id);
     setFavProvidersTotal(favSlugs.length);
     if (favSlugs.length > 0) {
@@ -237,12 +277,10 @@ const CreatorProfile = () => {
   const isOwner = user && profile.user_id === user.id;
   const specialties = (profile as any).specialties || [];
 
-  // Stats
   const reviewCount = reviews.length;
   const uniqueProviders = new Set(reviews.map((r) => r.provider_slug)).size;
   const uniqueProcedures = new Set(reviews.map((r) => r.procedure_name).filter(Boolean)).size;
 
-  // Content grouping
   const contentByProvider: Record<string, ContentItem[]> = {};
   const ungroupedContent: ContentItem[] = [];
   content.forEach((item) => {
@@ -255,18 +293,19 @@ const CreatorProfile = () => {
   });
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" style={{ background: theme.pageBg }}>
       <Navbar />
 
       {/* Owner Edit Banner */}
       {isOwner && (
-        <div className="sticky top-0 z-40 border-b" style={{ background: `${theme.accentColor}18`, borderColor: `${theme.accentColor}30` }}>
+        <div className="sticky top-0 z-40 border-b" style={{ background: `${theme.accentColor}18`, borderColor: theme.divider }}>
           <div className="max-w-[960px] mx-auto px-6 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm" style={{ color: theme.accentColor }}>
               <Pencil className="w-4 h-4" />
               <span>This is your creator page</span>
             </div>
-            <Button size="sm" variant="outline" asChild style={{ borderColor: `${theme.accentColor}40`, color: theme.accentColor }}>
+            <Button size="sm" asChild
+              style={{ background: theme.buttonBg, color: theme.buttonColor, border: 'none' }}>
               <Link to="/creator/edit">Edit Profile</Link>
             </Button>
           </div>
@@ -281,7 +320,8 @@ const CreatorProfile = () => {
           className="w-full h-full object-cover object-center"
           style={{ position: 'absolute', inset: 0, height: '100%' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+        {/* Theme-tinted gradient overlay */}
+        <div className="absolute inset-0" style={{ background: theme.coverGradient }} />
         {user && !isOwner && (
           <button
             onClick={toggleStar}
@@ -291,7 +331,7 @@ const CreatorProfile = () => {
           >
             <Star
               className="w-5 h-5 transition-colors"
-              style={isStarred ? { fill: '#E0A693', color: '#E0A693' } : { color: 'rgba(255,255,255,0.75)' }}
+              style={isStarred ? { fill: theme.accentColor, color: theme.accentColor } : { color: 'rgba(255,255,255,0.75)' }}
             />
           </button>
         )}
@@ -300,17 +340,18 @@ const CreatorProfile = () => {
       {/* ── All content below cover ── */}
       <div className="max-w-[960px] mx-auto px-6">
 
-        {/* ── Identity Row — overlaps cover by pulling up ── */}
+        {/* ── Identity Row ── */}
         <div className="flex items-center gap-6 -mt-16 relative z-10 mb-3">
-          {/* Avatar */}
-          <Avatar className="w-32 h-32 shrink-0 border-[3px] border-[#0a0a0a] shadow-lg">
+          <Avatar
+            className="w-32 h-32 shrink-0 shadow-lg"
+            style={{ border: theme.avatarBorder, boxShadow: `0 0 0 3px ${theme.pageBg}, 0 4px 20px rgba(0,0,0,0.5)` }}
+          >
             {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.display_name} className="object-cover" />}
-            <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold">
+            <AvatarFallback style={{ background: theme.tagBg, color: theme.accentColor }} className="text-4xl font-bold">
               {profile.display_name?.[0]?.toUpperCase() || "C"}
             </AvatarFallback>
           </Avatar>
 
-          {/* Name + Badge, vertically centered with avatar */}
           <div className="flex items-center gap-2 flex-wrap pt-16">
             <h1 className="text-6xl font-bold leading-none tracking-tight">{profile.display_name}</h1>
             {userBadge ? (
@@ -323,23 +364,23 @@ const CreatorProfile = () => {
                 draggable={false}
               />
             ) : (
-              <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs">
+              <Badge style={{ background: `${theme.accentColor}18`, color: theme.accentColor, border: `1px solid ${theme.accentColor}30` }} className="gap-1 text-xs">
                 <BadgeCheck className="w-3 h-3" /> denied.care creator
               </Badge>
             )}
           </div>
         </div>
 
-        {/* ── Stats line — inline text, under name column ── */}
+        {/* ── Stats line ── */}
         <div className="ml-0 mb-2">
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            <span className="font-semibold text-white">{uniqueProviders}</span>
+            <span className="font-semibold" style={{ color: theme.statsAccent }}>{uniqueProviders}</span>
             {' '}provider{uniqueProviders !== 1 ? 's' : ''} visited
             {' · '}
-            <span className="font-semibold text-white">{reviewCount}</span>
+            <span className="font-semibold" style={{ color: theme.statsAccent }}>{reviewCount}</span>
             {' '}review{reviewCount !== 1 ? 's' : ''}
             {' · '}
-            <span className="font-semibold text-white">{uniqueProcedures}</span>
+            <span className="font-semibold" style={{ color: theme.statsAccent }}>{uniqueProcedures}</span>
             {' '}procedure{uniqueProcedures !== 1 ? 's' : ''}
           </p>
         </div>
@@ -351,36 +392,46 @@ const CreatorProfile = () => {
           </p>
         )}
 
+        {/* ── Divider ── */}
+        {(specialties.length > 0 || hasSocials) && (
+          <div className="h-px mb-4" style={{ background: theme.divider }} />
+        )}
+
         {/* ── Tags + Social on one row ── */}
         <div className="flex items-center justify-between gap-4 mb-0">
-          {/* Specialty tags */}
           <div className="flex flex-wrap gap-2">
             {specialties.map((s: string) => (
               <span key={s} className="text-xs px-2.5 py-1 rounded-full font-medium"
-                style={{ background: theme.tagBg, border: `1px solid ${theme.tagBorder}`, color: theme.accentColor }}>
+                style={{
+                  background: theme.tagBg,
+                  border: `1px solid ${theme.tagBorder}`,
+                  color: theme.tagColor,
+                }}>
                 {s}
               </span>
             ))}
           </div>
 
-          {/* Social icons */}
           {hasSocials && (
             <div className="flex items-center gap-2 shrink-0">
               {socialLinks.instagram && (
                 <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                  className="p-2 rounded-full transition-colors hover:opacity-80"
+                  style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <Instagram className="w-4 h-4" />
                 </a>
               )}
               {socialLinks.tiktok && (
                 <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                  className="p-2 rounded-full transition-colors hover:opacity-80"
+                  style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <TikTokIcon className="w-4 h-4" />
                 </a>
               )}
               {socialLinks.youtube && (
                 <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-card border border-border hover:bg-muted transition-colors">
+                  className="p-2 rounded-full transition-colors hover:opacity-80"
+                  style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <YouTubeIcon className="w-4 h-4" />
                 </a>
               )}
@@ -408,7 +459,7 @@ const CreatorProfile = () => {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-card">
+      <footer className="border-t" style={{ borderColor: theme.divider, background: theme.pageBg }}>
         <div className="max-w-[960px] mx-auto px-6 py-10 text-center">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
             <img src={logo} alt="denied.care" className="h-5 w-auto" />
@@ -463,7 +514,7 @@ const CreatorProfile = () => {
         <Link
           to="/creator/edit"
           className="fixed bottom-24 right-6 z-40 text-white rounded-full p-3 shadow-elevated hover:-translate-y-0.5 transition-all"
-          style={{ background: theme.accentColor }}
+          style={{ background: theme.buttonBg, color: theme.buttonColor }}
         >
           <Pencil className="w-5 h-5" />
         </Link>
@@ -473,18 +524,6 @@ const CreatorProfile = () => {
 };
 
 /* ── Sub-components ── */
-
-const StatBox = ({
-  icon, value, label, accentColor, cardStyle,
-}: {
-  icon: React.ReactNode; value: number; label: string; accentColor: string; cardStyle: React.CSSProperties;
-}) => (
-  <div className="rounded-xl p-4 text-center" style={cardStyle}>
-    <div className="flex justify-center mb-1" style={{ color: accentColor, opacity: 0.8 }}>{icon}</div>
-    <div className="text-2xl font-bold tabular-nums">{value}</div>
-    <div className="text-xs text-muted-foreground mt-0.5 leading-tight">{label}</div>
-  </div>
-);
 
 const EmptyState = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => (
   <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -529,7 +568,7 @@ const CreatorTabs = ({
   favProviders,
 }: {
   profile: CreatorProfileData;
-  theme: typeof THEMES["mint"];
+  theme: ThemeTokens;
   reviews: ReviewData[];
   providers: Record<string, ProviderInfo>;
   adminReviews: Record<string, AdminReview>;
@@ -542,22 +581,38 @@ const CreatorTabs = ({
   favProviders: ProviderInfo[];
 }) => {
   const accentColor = theme.tabActive;
+
   return (
     <Tabs defaultValue="content" className="w-full">
-      {/* Tab bar — flat underline style, no card wrapper */}
-      <TabsList className="w-full grid grid-cols-4 bg-transparent border-b border-border rounded-none h-auto p-0">
-        <TabsTrigger value="content" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Content</TabsTrigger>
-        <TabsTrigger value="reviews" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Reviews</TabsTrigger>
-        <TabsTrigger value="providers" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Favorite Providers</TabsTrigger>
-        <TabsTrigger value="trips" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">Trip Reports</TabsTrigger>
-      </TabsList>
-
       {/* Scoped CSS to color active tab underline with theme accent */}
       <style>{`
-        .creator-tabs [data-state="active"] { border-bottom-color: ${accentColor} !important; }
+        .creator-tabs [data-state="active"] {
+          border-bottom-color: ${accentColor} !important;
+          color: ${accentColor} !important;
+        }
       `}</style>
 
+      {/* Tab bar */}
+      <TabsList
+        className="creator-tabs w-full grid grid-cols-4 bg-transparent rounded-none h-auto p-0 border-b"
+        style={{ borderColor: theme.divider }}
+      >
+        {(['content', 'reviews', 'providers', 'trips'] as const).map((tab) => (
+          <TabsTrigger
+            key={tab}
+            value={tab}
+            className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors"
+          >
+            {tab === 'content' ? 'Content'
+              : tab === 'reviews' ? 'Reviews'
+              : tab === 'providers' ? 'Favorite Providers'
+              : 'Trip Reports'}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+
       <div className="creator-tabs pt-4">
+        {/* Reviews Tab */}
         <TabsContent value="reviews">
           {reviews.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -569,21 +624,25 @@ const CreatorTabs = ({
                 <div key={review.id} className="relative">
                   <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5 px-1">
                     <Building2 className="w-3 h-3" />
-                    <Link to={`/provider/${review.provider_slug}`} className="hover:text-primary transition-colors font-medium" style={{ color: accentColor }}>
+                    <Link to={`/provider/${review.provider_slug}`} className="hover:opacity-80 transition-opacity font-medium" style={{ color: accentColor }}>
                       {providers[review.provider_slug]?.name || review.provider_slug}
                     </Link>
                   </div>
-                  <ReviewCard review={review} showProviderName providerName={providers[review.provider_slug]?.name || review.provider_slug} />
+                  {/* Themed review card wrapper */}
+                  <div className="rounded-2xl overflow-hidden" style={{ background: theme.cardBg, border: theme.cardBorder }}>
+                    <ReviewCard review={review} showProviderName providerName={providers[review.provider_slug]?.name || review.provider_slug} />
+                  </div>
                 </div>
               ))}
             </div>
           )}
         </TabsContent>
 
+        {/* Favorite Providers Tab */}
         <TabsContent value="providers">
           {favProviders.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
-              <Heart className="w-8 h-8 text-muted-foreground/30 mb-3" />
+              <Heart className="w-8 h-8 mb-3" style={{ color: theme.accentColor, opacity: 0.3 }} />
               <p className="text-muted-foreground text-sm">no favorite providers yet</p>
               <p className="text-muted-foreground text-xs mt-1">providers this creator favorites will appear here</p>
             </div>
@@ -592,19 +651,25 @@ const CreatorTabs = ({
               {favProviders.map((prov) => {
                 const ar = adminReviews[prov.slug];
                 return (
-                  <Card key={prov.slug} className="overflow-hidden" style={theme.card}>
+                  <div
+                    key={prov.slug}
+                    className="rounded-2xl overflow-hidden transition-all hover:-translate-y-0.5"
+                    style={{ background: theme.cardBg, border: theme.cardBorder }}
+                  >
                     <Link to={`/provider/${prov.slug}`}>
-                      <div className="h-28 bg-muted overflow-hidden">
+                      <div className="h-28 overflow-hidden relative">
                         {prov.cover_photo_url ? (
                           <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center" style={{ background: theme.tagBg }}>
-                            <span className="text-3xl font-bold opacity-20">{prov.name[0]}</span>
+                            <span className="text-3xl font-bold" style={{ color: theme.accentColor, opacity: 0.3 }}>{prov.name[0]}</span>
                           </div>
                         )}
+                        {/* Theme overlay on image */}
+                        <div className="absolute inset-0" style={{ background: `linear-gradient(to top, ${theme.cardBg} 0%, transparent 60%)` }} />
                       </div>
                     </Link>
-                    <CardContent className="p-3">
+                    <div className="p-3">
                       <Link to={`/provider/${prov.slug}`} className="hover:opacity-80 transition-opacity">
                         <h3 className="font-semibold text-sm truncate">{prov.name}</h3>
                       </Link>
@@ -620,22 +685,24 @@ const CreatorTabs = ({
                           <span className="text-xs text-muted-foreground ml-1">editorial</span>
                         </div>
                       )}
-                      <Button
-                        size="sm" variant="outline"
-                        className="w-full mt-2 h-7 text-xs"
-                        style={{ borderColor: `${accentColor}40`, color: accentColor }}
+                      {/* Themed divider */}
+                      <div className="h-px my-2" style={{ background: theme.divider }} />
+                      <button
+                        className="w-full mt-1 h-7 text-xs rounded-full font-medium transition-opacity hover:opacity-80"
+                        style={{ background: theme.buttonBg, color: theme.buttonColor }}
                         onClick={() => setQuoteProvider({ name: prov.name, slug: prov.slug })}
                       >
                         Get a Quote
-                      </Button>
-                    </CardContent>
-                  </Card>
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
           )}
         </TabsContent>
 
+        {/* Content Tab */}
         <TabsContent value="content">
           {content.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -645,16 +712,23 @@ const CreatorTabs = ({
             <div>
               {Object.entries(contentByProvider).map(([slug, items]) => (
                 <div key={slug} className="mb-8">
-                  <h3 className="text-sm font-semibold mb-3 flex items-center gap-2" style={{ color: accentColor }}>
-                    <Building2 className="w-3.5 h-3.5" />
-                    <Link to={`/provider/${slug}`} className="hover:opacity-80 transition-opacity">{providers[slug]?.name || slug}</Link>
-                  </h3>
+                  {/* Themed section header with divider */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-sm font-semibold flex items-center gap-1.5" style={{ color: accentColor }}>
+                      <Building2 className="w-3.5 h-3.5" />
+                      <Link to={`/provider/${slug}`} className="hover:opacity-80 transition-opacity">{providers[slug]?.name || slug}</Link>
+                    </h3>
+                    <div className="flex-1 h-px" style={{ background: theme.divider }} />
+                  </div>
                   <ContentGrid items={items} onOpen={openLightbox} />
                 </div>
               ))}
               {ungroupedContent.length > 0 && (
                 <div className="mb-8">
-                  <h3 className="text-sm font-semibold text-muted-foreground mb-3">more from {profile.display_name}</h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <h3 className="text-sm font-semibold text-muted-foreground">more from {profile.display_name}</h3>
+                    <div className="flex-1 h-px" style={{ background: theme.divider }} />
+                  </div>
                   <ContentGrid items={ungroupedContent} onOpen={openLightbox} />
                 </div>
               )}
@@ -662,6 +736,7 @@ const CreatorTabs = ({
           )}
         </TabsContent>
 
+        {/* Trip Reports Tab */}
         <TabsContent value="trips">
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <p className="text-muted-foreground text-sm mb-2">trip reports coming soon</p>
