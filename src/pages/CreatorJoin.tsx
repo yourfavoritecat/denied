@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Sparkles, AlertTriangle } from "lucide-react";
-import logo from "@/assets/logo-new.png";
+import logo from "@/assets/final-new-logo.png";
 
 type InviteStatus = "loading" | "valid" | "invalid";
 

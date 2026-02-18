@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo-new.png";
+import logo from "@/assets/final-new-logo.png";
 
 const HeroSection = () => {
   const [email, setEmail] = useState("");

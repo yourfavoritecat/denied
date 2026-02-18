@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAdmin } from "@/hooks/useAdmin";
 import { useViewAs } from "@/hooks/useViewAs";
 import { User, Stethoscope, KeyRound } from "lucide-react";
-import logo from "@/assets/logo-new.png";
+import logo from "@/assets/final-new-logo.png";
 
 type SignupRole = null | "patient" | "provider";
 
