@@ -120,16 +120,16 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
     <div
       className="rounded-2xl overflow-hidden border hover:border-primary/30 transition-all duration-200 cursor-pointer h-full"
       style={{
-        background: 'rgba(94,178,152,0.05)',
-        border: '1px solid rgba(94,178,152,0.1)',
-        boxShadow: '0 0 20px rgba(94,178,152,0.03)',
+        background: 'rgba(80,255,144,0.04)',
+        border: '1px solid rgba(80,255,144,0.1)',
+        boxShadow: '0 0 20px rgba(80,255,144,0.02)',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 0 20px rgba(94,178,152,0.15), 0 0 40px rgba(94,178,152,0.08)';
+        e.currentTarget.style.boxShadow = '0 0 20px rgba(80,255,144,0.2), 0 0 40px rgba(80,255,144,0.08)';
         e.currentTarget.style.transform = 'translateY(-2px)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 0 20px rgba(94,178,152,0.03)';
+        e.currentTarget.style.boxShadow = '0 0 20px rgba(80,255,144,0.02)';
         e.currentTarget.style.transform = 'translateY(0)';
       }}
     >
@@ -176,7 +176,7 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
           <div className="flex flex-wrap gap-1">
             {creator.specialties.slice(0, 3).map((s) => (
               <span key={s} className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{ background: 'rgba(94,178,152,0.12)', border: '1px solid rgba(94,178,152,0.2)', color: '#5EB298' }}>
+                style={{ background: 'rgba(80,255,144,0.1)', border: '1px solid rgba(80,255,144,0.2)', color: '#50FF90' }}>
                 {s}
               </span>
             ))}

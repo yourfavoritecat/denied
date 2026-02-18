@@ -38,37 +38,24 @@ const StarRating = ({ rating }: { rating: number }) => (
 );
 
 const glassCard = {
-  background: 'rgba(94,178,152,0.08)',
-  border: '1px solid rgba(94,178,152,0.12)',
+  background: 'rgba(80,255,144,0.06)',
+  border: '1px solid rgba(80,255,144,0.1)',
   borderTop: '1px solid rgba(255,255,255,0.1)',
-  boxShadow: '0 0 20px rgba(94,178,152,0.05)',
+  boxShadow: '0 0 20px rgba(80,255,144,0.04)',
   backdropFilter: 'blur(10px)',
   WebkitBackdropFilter: 'blur(10px)',
 } as const;
 
-const peachCard = {
-  background: 'rgba(224,166,147,0.08)',
-  border: '1px solid rgba(224,166,147,0.12)',
-  borderTop: '1px solid rgba(255,255,255,0.1)',
-  boxShadow: '0 0 20px rgba(224,166,147,0.05)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-} as const;
+const sectionDivider = "border-t border-[rgba(80,255,144,0.1)] my-8";
 
-const neutralCard = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-} as const;
-
-const sectionDivider = "border-t border-[rgba(94,178,152,0.12)] my-8";
+const peachCard = { ...glassCard, background: 'rgba(255,140,105,0.06)', border: '1px solid rgba(255,140,105,0.1)', boxShadow: '0 0 20px rgba(255,140,105,0.04)' } as const;
+const neutralCard = { ...glassCard, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 20px rgba(0,0,0,0.2)' } as const;
 
 const ExpandToggle = ({
   expanded, onToggle, labelExpand, labelCollapse = "show less",
 }: { expanded: boolean; onToggle: () => void; labelExpand: string; labelCollapse?: string }) => (
   <div className="flex justify-center mt-3">
-    <button onClick={onToggle} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style={{ color: '#5EB298' }}>
+    <button onClick={onToggle} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style={{ color: '#50FF90' }}>
       {expanded ? labelCollapse : labelExpand}
       {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
     </button>
@@ -404,7 +391,7 @@ const ProviderProfile = () => {
                 >
                   <Heart
                     className="w-5 h-5 transition-colors"
-                    style={isProviderFavorited ? { fill: '#5EB298', color: '#5EB298' } : { color: 'rgba(255,255,255,0.7)' }}
+                    style={isProviderFavorited ? { fill: '#50FF90', color: '#50FF90' } : { color: 'rgba(255,255,255,0.7)' }}
                   />
                 </button>
               )}
@@ -417,7 +404,7 @@ const ProviderProfile = () => {
         </div>
 
         {/* ═══════ STICKY TAB BAR ═══════ */}
-        <div className="sticky top-16 z-30 bg-[#0a0a0a]/95 backdrop-blur-lg border-b border-[rgba(94,178,152,0.12)]">
+        <div className="sticky top-16 z-30 bg-[#1a1714]/95 backdrop-blur-lg border-b border-[rgba(80,255,144,0.1)]">
           <div className="max-w-[960px] mx-auto px-4">
             <div className="flex gap-6">
               {TABS.map((tab) => (
@@ -435,7 +422,7 @@ const ProviderProfile = () => {
                     <motion.div
                       layoutId="provider-tab-underline"
                       className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
-                      style={{ background: '#5EB298' }}
+                      style={{ background: '#50FF90' }}
                     />
                   )}
                 </button>
@@ -691,7 +678,7 @@ const ProviderProfile = () => {
                     <button
                       key={i}
                       onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
-                      className="relative aspect-square rounded-xl overflow-hidden border border-white/10 hover:ring-2 hover:ring-[#5EB298] transition-all group"
+                      className="relative aspect-square rounded-xl overflow-hidden border border-white/10 hover:ring-2 hover:ring-[#50FF90] transition-all group"
                     >
                       {item.type === "photo" ? (
                         <img src={item.url} alt="" className="w-full h-full object-cover" />

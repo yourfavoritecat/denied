@@ -418,8 +418,8 @@ const LeaveReviewModal = ({
                     onClick={() => toggleVibeTag(tag)}
                     className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
                       isSelected
-                        ? "bg-[#5EB298] text-white border-[#5EB298]"
-                        : "bg-transparent text-[#5EB298] border-[#5EB298]/50 hover:border-[#5EB298]"
+                        ? "bg-[#50FF90] text-black border-[#50FF90]"
+                        : "bg-transparent text-[#50FF90] border-[#50FF90]/50 hover:border-[#50FF90]"
                     }`}
                   >
                     {tag}

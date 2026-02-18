@@ -173,13 +173,13 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
 
       {/* Owner edit banner */}
       {isOwner && (
-        <div className="sticky top-0 z-40 border-b" style={{ background: 'rgba(94,178,152,0.08)', borderColor: 'rgba(94,178,152,0.2)' }}>
+        <div className="sticky top-0 z-40 border-b" style={{ background: 'rgba(80,255,144,0.06)', borderColor: 'rgba(80,255,144,0.18)' }}>
           <div className="max-w-[960px] mx-auto px-6 py-2.5 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm" style={{ color: '#5EB298' }}>
+            <div className="flex items-center gap-2 text-sm" style={{ color: '#50FF90' }}>
               <Pencil className="w-4 h-4" />
               <span>This is your public profile</span>
             </div>
-            <Button size="sm" variant="outline" asChild style={{ borderColor: 'rgba(94,178,152,0.4)', color: '#5EB298' }}>
+            <Button size="sm" variant="outline" asChild style={{ borderColor: 'rgba(80,255,144,0.4)', color: '#50FF90' }}>
               <Link to="/profile">Edit Profile</Link>
             </Button>
           </div>
@@ -192,7 +192,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
         style={{
           height: '180px',
           paddingTop: '64px',
-          background: 'linear-gradient(135deg, rgba(94,178,152,0.15) 0%, rgba(224,166,147,0.1) 100%)',
+          background: 'linear-gradient(135deg, rgba(80,255,144,0.1) 0%, rgba(255,140,105,0.07) 100%)',
         }}
       >
         <div className="absolute inset-0 opacity-[0.03]"
@@ -271,7 +271,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                   onClick={handleSaveStatus}
                   disabled={savingStatus}
                   className="shrink-0 p-1 rounded-full hover:bg-white/10 transition-colors"
-                  style={{ color: '#5EB298' }}
+                  style={{ color: '#50FF90' }}
                 >
                   <Check className="w-4 h-4" />
                 </button>
@@ -312,7 +312,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
             </TabsList>
 
             <style>{`
-              [data-radix-collection-item][data-state="active"] { border-bottom-color: #5EB298 !important; }
+              [data-radix-collection-item][data-state="active"] { border-bottom-color: #50FF90 !important; }
             `}</style>
 
             <div className="pt-4">
@@ -331,7 +331,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                       <div key={review.id} className="relative">
                         <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5 px-1">
                           <Building2 className="w-3 h-3" />
-                          <Link to={`/provider/${review.provider_slug}`} className="hover:text-primary transition-colors font-medium" style={{ color: '#5EB298' }}>
+                          <Link to={`/provider/${review.provider_slug}`} className="hover:text-primary transition-colors font-medium" style={{ color: '#50FF90' }}>
                             {review.provider_slug}
                           </Link>
                         </div>
@@ -354,18 +354,18 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                     {favProviders.length > 0 && (
                       <div>
                         <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          <Heart className="w-3 h-3 inline mr-1.5" style={{ color: '#5EB298' }} />
+                          <Heart className="w-3 h-3 inline mr-1.5" style={{ color: '#50FF90' }} />
                           favorite providers
                         </h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           {favProviders.map((p: any) => (
                             <Link key={p.slug} to={`/provider/${p.slug}`}
                               className="rounded-xl overflow-hidden border hover:border-primary/30 transition-all duration-200 group"
-                              style={{ background: 'rgba(94,178,152,0.06)', borderColor: 'rgba(94,178,152,0.12)' }}>
+                              style={{ background: 'rgba(80,255,144,0.04)', borderColor: 'rgba(80,255,144,0.1)' }}>
                               <div className="h-24 overflow-hidden bg-muted">
                                 {p.cover_photo_url
                                   ? <img src={p.cover_photo_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                                  : <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(94,178,152,0.1)' }}>
+                                  : <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(80,255,144,0.08)' }}>
                                       <span className="text-2xl font-bold opacity-20">{p.name?.[0]}</span>
                                     </div>
                                 }

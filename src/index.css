@@ -2,51 +2,51 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Denied.care Design System — High-Gloss Black
-   Colors: Peach (#F8B4A0), Mint (#5EB298), Black (#0A0A0A), Cream (#FFF5F0)
-   Vibe: Luxury tech × inflatable glossy 3D logo
-   Depth: Layered glass, glossy edges, tactile weight
+/* Denied.care Design System — Premium Dark Neon
+   Colors: Neon Lime (#50FF90), Neon Peach (#FF8C69), Dark Base (#1a1714), Cream (#FFF5F0)
+   Vibe: Luxury tech × neon glow × high contrast
+   Depth: Layered glass, neon edges, tactile weight
 */
 
 @layer base {
   :root {
-    /* Core — pure black base */
-    --background: 0 0% 0%; /* #000000 */
+    /* Core — deep warm dark base */
+    --background: 24 13% 9%; /* #1a1714 */
     --foreground: 0 0% 100%; /* white */
 
-    --card: 0 0% 5%; /* #0D0D0D */
+    --card: 24 10% 6%; /* slightly darker than base */
     --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 5%;
+    --popover: 24 10% 6%;
     --popover-foreground: 0 0% 100%;
 
-    /* Primary: Mint #5EB298 */
-    --primary: 155 35% 53%;
+    /* Primary: Neon Lime #50FF90 */
+    --primary: 142 100% 66%;
     --primary-foreground: 0 0% 0%;
 
-    /* Secondary: Peach #F8B4A0 */
-    --secondary: 15 85% 80%;
+    /* Secondary: Neon Peach #FF8C69 */
+    --secondary: 16 100% 71%;
     --secondary-foreground: 0 0% 0%;
 
-    --muted: 0 0% 7%;
+    --muted: 24 8% 10%;
     --muted-foreground: 0 0% 69%; /* #B0B0B0 */
 
-    --accent: 15 85% 80%;
+    --accent: 16 100% 71%;
     --accent-foreground: 0 0% 0%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 155 35% 53%;
+    --border: 24 8% 15%;
+    --input: 24 8% 15%;
+    --ring: 142 100% 66%;
 
     --radius: 1.25rem; /* 20px base */
 
     /* Brand tokens */
-    --denied-black: 0 0% 0%;
-    --denied-peach: 15 85% 80%;
-    --denied-mint: 155 35% 53%;
+    --denied-black: 24 13% 9%;
+    --denied-peach: 16 100% 71%;
+    --denied-mint: 142 100% 66%;
     --denied-cream: 13 100% 97%;
 
     /* Glossy elevation shadows */
@@ -54,45 +54,45 @@
     --shadow-md: 0 4px 16px -2px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
     --shadow-lg: 0 8px 32px -4px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
     --shadow-xl: 0 16px 48px -8px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
-    --shadow-float: 0 24px 64px -16px rgba(0,0,0,0.8), 0 8px 32px rgba(94,178,152,0.06);
+    --shadow-float: 0 24px 64px -16px rgba(0,0,0,0.8), 0 8px 32px rgba(80,255,144,0.08);
     --shadow-inset: inset 0 1px 2px 0 rgba(0,0,0,0.4);
-    --shadow-glow-mint: 0 0 24px rgba(94,178,152,0.2), 0 0 0 1px rgba(94,178,152,0.15);
-    --shadow-glow-peach: 0 0 24px rgba(248,180,160,0.18), 0 0 0 1px rgba(248,180,160,0.12);
+    --shadow-glow-mint: 0 0 28px rgba(80,255,144,0.35), 0 0 0 1px rgba(80,255,144,0.2);
+    --shadow-glow-peach: 0 0 28px rgba(255,140,105,0.3), 0 0 0 1px rgba(255,140,105,0.18);
 
     /* Glossy border gradient (used via border-image or pseudo elements) */
     --glossy-border: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 100%);
 
-    --sidebar-background: 0 0% 3%;
+    --sidebar-background: 24 10% 4%;
     --sidebar-foreground: 0 0% 85%;
-    --sidebar-primary: 155 35% 53%;
+    --sidebar-primary: 142 100% 66%;
     --sidebar-primary-foreground: 0 0% 0%;
-    --sidebar-accent: 0 0% 7%;
+    --sidebar-accent: 24 8% 10%;
     --sidebar-accent-foreground: 0 0% 85%;
-    --sidebar-border: 0 0% 10%;
-    --sidebar-ring: 155 35% 53%;
+    --sidebar-border: 24 8% 13%;
+    --sidebar-ring: 142 100% 66%;
   }
 
   /* Dark mode is our default — alias */
   .dark {
-    --background: 0 0% 0%;
+    --background: 24 13% 9%;
     --foreground: 0 0% 100%;
-    --card: 0 0% 5%;
+    --card: 24 10% 6%;
     --card-foreground: 0 0% 100%;
-    --popover: 0 0% 5%;
+    --popover: 24 10% 6%;
     --popover-foreground: 0 0% 100%;
-    --primary: 155 35% 53%;
+    --primary: 142 100% 66%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 15 85% 80%;
+    --secondary: 16 100% 71%;
     --secondary-foreground: 0 0% 0%;
-    --muted: 0 0% 7%;
+    --muted: 24 8% 10%;
     --muted-foreground: 0 0% 69%;
-    --accent: 15 85% 80%;
+    --accent: 16 100% 71%;
     --accent-foreground: 0 0% 0%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 100%;
-    --border: 0 0% 12%;
-    --input: 0 0% 12%;
-    --ring: 155 35% 53%;
+    --border: 24 8% 15%;
+    --input: 24 8% 15%;
+    --ring: 142 100% 66%;
   }
 }
 
@@ -128,8 +128,8 @@
     position: fixed;
     inset: 0;
     background:
-      radial-gradient(ellipse at 50% 20%, rgba(94,178,152,0.2) 0%, rgba(94,178,152,0.08) 30%, transparent 65%),
-      radial-gradient(ellipse at center, transparent 30%, #000000 85%);
+      radial-gradient(ellipse at 50% 20%, rgba(80,255,144,0.12) 0%, rgba(80,255,144,0.04) 30%, transparent 65%),
+      radial-gradient(ellipse at center, transparent 30%, #1a1714 85%);
     z-index: -1;
   }
 
@@ -149,17 +149,17 @@
     background: #000000;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(94,178,152,0.4);
+    background: rgba(80,255,144,0.4);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(94,178,152,0.6);
+    background: rgba(80,255,144,0.65);
   }
 
   /* Firefox scrollbar */
   * {
     scrollbar-width: thin;
-    scrollbar-color: rgba(94,178,152,0.4) #000000;
+    scrollbar-color: rgba(80,255,144,0.4) #1a1714;
   }
 
   body::after {
@@ -175,30 +175,30 @@
 
 /* ========== Flat Button Styles — Simple solid pills ========== */
 @layer components {
-  /* Primary mint — flat solid */
+  /* Primary neon lime — flat solid */
   .btn-glossy-mint {
-    background: #5EB298 !important;
+    background: #50FF90 !important;
     border: none;
-    color: white !important;
+    color: #0a0a0a !important;
   }
   .btn-glossy-mint:hover {
-    background: #4EA088 !important;
+    background: #3DE87A !important;
   }
   .btn-glossy-mint:active {
-    background: #458F79 !important;
+    background: #2DD169 !important;
   }
 
-  /* Secondary peach — flat solid */
+  /* Secondary neon peach — flat solid */
   .btn-glossy-peach {
-    background: #F8B4A0 !important;
+    background: #FF8C69 !important;
     border: none;
-    color: #1a1a1a !important;
+    color: #0a0a0a !important;
   }
   .btn-glossy-peach:hover {
-    background: #F5A08A !important;
+    background: #FF7550 !important;
   }
   .btn-glossy-peach:active {
-    background: #F08C74 !important;
+    background: #F06040 !important;
   }
 
   /* Destructive — flat solid */
@@ -217,14 +217,14 @@
   /* Outline — flat transparent */
   .btn-glossy-outline {
     background: transparent;
-    border: 1px solid rgba(94,178,152,0.3);
-    color: #5EB298;
+    border: 1px solid rgba(80,255,144,0.35);
+    color: #50FF90;
   }
   .btn-glossy-outline:hover {
-    background: rgba(94,178,152,0.1);
+    background: rgba(80,255,144,0.08);
   }
   .btn-glossy-outline:active {
-    background: rgba(94,178,152,0.15);
+    background: rgba(80,255,144,0.14);
   }
 
   /* Inner page backdrop — use on all pages except landing */
@@ -283,12 +283,12 @@
     border: 1px solid transparent;
     border-image: var(--glossy-border) 1;
     border-radius: var(--radius);
-    box-shadow: var(--shadow-md), 0 8px 32px rgba(94,178,152,0.04);
+    box-shadow: var(--shadow-md), 0 8px 32px rgba(80,255,144,0.04);
     @apply transition-all duration-300 ease-out;
   }
   .glossy-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg), 0 8px 32px rgba(94,178,152,0.08);
+    box-shadow: var(--shadow-lg), 0 8px 32px rgba(80,255,144,0.1);
     border-image: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%) 1;
   }
 
@@ -345,7 +345,7 @@
   /* Glossy divider line */
   .glossy-divider {
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(94,178,152,0.2) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(80,255,144,0.25) 50%, transparent 100%);
   }
 
   /* Ambient gradient mesh blobs */
@@ -366,14 +366,14 @@
     left: -10%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(94,178,152,0.04) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(80,255,144,0.05) 0%, transparent 70%);
   }
   .ambient-mesh::after {
     bottom: -10%;
     right: -10%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(248,180,160,0.04) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(255,140,105,0.05) 0%, transparent 70%);
   }
 
   /* Scroll-triggered fade-in */

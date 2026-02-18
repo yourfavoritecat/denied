@@ -85,7 +85,7 @@ const VideoPlayerModal = ({
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 pb-6">
             <div className="flex items-center gap-1 mb-1">
               {[1, 2, 3, 4, 5].map((s) => (
-                <Star key={s} className={`w-3.5 h-3.5 ${s <= current.review.rating ? "fill-[#5EB298] text-[#5EB298]" : "text-white/30"}`} />
+                <Star key={s} className={`w-3.5 h-3.5 ${s <= current.review.rating ? "fill-[#50FF90] text-[#50FF90]" : "text-white/30"}`} />
               ))}
             </div>
             <p className="text-white font-bold text-sm">{firstName}</p>
@@ -135,7 +135,7 @@ const VideoTestimonialGallery = ({ reviews, compact = false }: VideoTestimonialG
     <button
       key={i}
       onClick={() => { setSelectedIndex(i); setModalOpen(true); }}
-      className="shrink-0 w-[100px] aspect-[9/16] rounded-lg overflow-hidden bg-black border border-border/50 hover:ring-2 hover:ring-[#5EB298] transition-all relative group"
+      className="shrink-0 w-[100px] aspect-[9/16] rounded-lg overflow-hidden bg-black border border-border/50 hover:ring-2 hover:ring-[#50FF90] transition-all relative group"
     >
       <video
         src={vr.videoUrl}
@@ -174,7 +174,7 @@ const VideoTestimonialGallery = ({ reviews, compact = false }: VideoTestimonialG
   return (
     <div className="space-y-3">
       <h3 className="text-lg font-bold flex items-center gap-2">
-        <Play className="w-5 h-5 text-[#5EB298]" /> Patient Videos
+        <Play className="w-5 h-5 text-[#50FF90]" /> Patient Videos
       </h3>
       <div className="overflow-x-auto">
         <div className="flex gap-3 pb-2">
