@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo-clean.png";
+import logo from "@/assets/logo-new.png";
 import darkBackdrop from "@/assets/dark-backdrop.png";
 
 const TikTokIcon = () => (
@@ -93,17 +93,17 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
         />
 
         {/* Tagline */}
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-white mb-6 leading-tight">
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-black mb-6 leading-tight" style={{ color: "#FF8C69" }}>
           say yes, because health insurance said no. oh, and f* health insurance.
         </h1>
 
         {/* Body copy */}
-        <p className="text-sm md:text-base leading-relaxed mb-8 max-w-[600px] font-light" style={{ color: "#B0B0B0" }}>
+        <p className="text-sm md:text-base leading-relaxed mb-8 max-w-[600px] font-light" style={{ color: "#E0DDD8" }}>
           we're building a marketplace that connects you with verified doctors, dentists, and practitioners abroad — saving you up to 75% on procedures your insurance denied or priced out of reach.
         </p>
 
         {/* CTA line */}
-        <p className="text-base md:text-lg font-bold mb-8" style={{ color: "#FF8C69" }}>
+        <p className="text-base md:text-lg font-bold mb-8" style={{ color: "#50FF90" }}>
           be the first to know when we launch.
         </p>
 
@@ -114,7 +114,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
             placeholder="enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 flex-1 rounded-full text-white placeholder:text-white/50 shadow-none focus-visible:ring-primary/50 border"
+            className="h-12 flex-1 rounded-full text-white placeholder:text-white/50 shadow-none border focus-visible:ring-2 focus-visible:ring-[#50FF90]/60 focus-visible:border-[#50FF90]/50"
             style={{ background: 'rgba(0,0,0,0.4)', borderColor: 'rgba(255,255,255,0.15)' }}
             disabled={isLoading}
           />
@@ -122,6 +122,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
             type="submit"
             size="lg"
             className="h-12 px-8 font-bold whitespace-nowrap"
+            style={{ background: '#50FF90', color: '#1a1714' }}
             disabled={isLoading}
           >
             {isLoading ? "joining..." : "join the waitlist"}
@@ -130,19 +131,19 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
 
         {/* Social icons */}
         <div className="flex gap-4 mb-16">
-          <a href="https://instagram.com/denied.care" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-secondary transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10">
+          <a href="https://instagram.com/denied.care" target="_blank" rel="noopener noreferrer" className="transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }} onMouseEnter={e => (e.currentTarget.style.color = '#50FF90')} onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
             <Instagram className="w-5 h-5" />
           </a>
-          <a href="#" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-secondary transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10">
+          <a href="#" target="_blank" rel="noopener noreferrer" className="transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }} onMouseEnter={e => (e.currentTarget.style.color = '#50FF90')} onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
             <TikTokIcon />
           </a>
-          <a href="#" target="_blank" rel="noopener noreferrer" className="text-white/40 hover:text-secondary transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10">
+          <a href="#" target="_blank" rel="noopener noreferrer" className="transition-colors bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10" style={{ color: 'rgba(255,255,255,0.4)' }} onMouseEnter={e => (e.currentTarget.style.color = '#50FF90')} onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}>
             <FacebookIcon />
           </a>
         </div>
 
         {/* Footer */}
-        <p className="text-xs" style={{ color: "#444" }}>
+        <p className="text-xs" style={{ color: "#E0DDD8", opacity: 0.35 }}>
           © 2026 denied.care. all rights reserved.
         </p>
       </div>

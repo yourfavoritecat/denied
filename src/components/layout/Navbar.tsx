@@ -18,7 +18,7 @@ import { useBetaTester } from "@/hooks/useBetaTester";
 import { useCreator } from "@/hooks/useCreator";
 import { useChat } from "@/hooks/useChatContext";
 import NotificationBell from "@/components/notifications/NotificationBell";
-import logo from "@/assets/logo-clean.png";
+import logo from "@/assets/logo-new.png";
 
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
