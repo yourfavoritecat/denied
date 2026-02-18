@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { User, Bell, Eye, Lock, Mail, MessageCircle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -26,6 +27,7 @@ const SettingsTab = () => {
   const [phone, setPhone] = useState("");
   const [username, setUsername] = useState("");
   const [city, setCity] = useState("");
+  const [status, setStatus] = useState("");
   const [publicProfile, setPublicProfile] = useState(false);
   const [saving, setSaving] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>(defaultNotifPrefs);
@@ -38,6 +40,7 @@ const SettingsTab = () => {
     setPhone(profile.phone || "");
     setUsername((profile as any)?.username || "");
     setCity((profile as any)?.city || "");
+    setStatus((profile as any)?.status || "");
     setPublicProfile((profile as any)?.public_profile || false);
     setNotifPrefs((profile as any)?.notification_preferences || defaultNotifPrefs);
   }, [profile]);
@@ -66,6 +69,7 @@ const SettingsTab = () => {
         phone,
         ...(isUsernameLocked ? {} : { username: username.trim() || null }),
         city: city.trim() || null,
+        status: status.trim() || null,
         public_profile: publicProfile,
         notification_preferences: notifPrefs,
       } as any)
@@ -113,6 +117,17 @@ const SettingsTab = () => {
               <Label htmlFor="city">City</Label>
               <Input id="city" placeholder="e.g. Phoenix, AZ" value={city} onChange={(e) => setCity(e.target.value)} />
             </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="status">Status — share what you're up to</Label>
+            <Input
+              id="status"
+              placeholder="e.g. researching my first trip to tijuana for veneers..."
+              value={status}
+              onChange={(e) => setStatus(e.target.value.slice(0, 150))}
+              maxLength={150}
+            />
+            <p className="text-xs text-muted-foreground">{status.length}/150 · shows on your public profile</p>
           </div>
           <Button onClick={handleSave} disabled={saving}>
             {saving ? "Saving..." : "Save Changes"}

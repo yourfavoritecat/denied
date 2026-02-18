@@ -496,6 +496,7 @@ export type Database = {
           provider_slug: string | null
           public_profile: boolean
           social_verifications: Json | null
+          status: string | null
           updated_at: string
           user_id: string
           username: string | null
@@ -517,6 +518,7 @@ export type Database = {
           provider_slug?: string | null
           public_profile?: boolean
           social_verifications?: Json | null
+          status?: string | null
           updated_at?: string
           user_id: string
           username?: string | null
@@ -538,6 +540,7 @@ export type Database = {
           provider_slug?: string | null
           public_profile?: boolean
           social_verifications?: Json | null
+          status?: string | null
           updated_at?: string
           user_id?: string
           username?: string | null
