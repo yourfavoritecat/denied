@@ -1,17 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Heart, Sparkles, Plane, Star, MapPin, Pencil, Building2 } from "lucide-react";
+import { Heart, Star, MapPin, Pencil, Building2, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useReviews } from "@/hooks/useReviews";
 import { useAuth } from "@/hooks/useAuth";
 import ReviewCard from "@/components/reviews/ReviewCard";
 import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
 import UserBadge, { BadgeType } from "@/components/profile/UserBadge";
+import { useToast } from "@/hooks/use-toast";
 
 interface PublicProfile {
   user_id: string;
@@ -22,31 +23,24 @@ interface PublicProfile {
   created_at: string;
   social_verifications?: Record<string, any>;
   badge_type?: BadgeType;
-}
-
-interface ProfileExtras {
-  bio?: string;
-  hobbies?: string[];
-  fun_facts?: string[];
-  favorite_emoji?: string;
-  skin_type?: string;
-  hair_type?: string;
-  favorite_treatments?: string[];
-  beauty_goals?: string;
-  travel_style?: string;
-  favorite_destinations?: string[];
-  bucket_list_procedures?: string[];
+  status?: string | null;
 }
 
 const UserProfile = () => {
   const { userId } = useParams<{ userId: string }>();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
-  const [extras, setExtras] = useState<ProfileExtras | null>(null);
   const [loading, setLoading] = useState(true);
   const [tripsCount, setTripsCount] = useState(0);
   const [favProviders, setFavProviders] = useState<any[]>([]);
   const [favCreators, setFavCreators] = useState<any[]>([]);
+
+  // Status editing
+  const [statusText, setStatusText] = useState("");
+  const [editingStatus, setEditingStatus] = useState(false);
+  const [savingStatus, setSavingStatus] = useState(false);
+  const statusInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetch = async () => {
@@ -57,26 +51,28 @@ const UserProfile = () => {
         .maybeSingle();
 
       let badgeType: BadgeType = null;
+      let statusVal: string | null = null;
       if (data) {
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("badge_type")
+          .select("badge_type, status")
           .eq("user_id", (data as any).user_id)
           .maybeSingle();
         badgeType = (profileData as any)?.badge_type ?? null;
+        statusVal = (profileData as any)?.status ?? null;
       }
 
-      setProfile(data ? { ...(data as any), badge_type: badgeType } : null);
+      const fullProfile = data ? { ...(data as any), badge_type: badgeType, status: statusVal } : null;
+      setProfile(fullProfile);
+      if (statusVal) setStatusText(statusVal);
 
       if (data) {
         const uid = (data as any).user_id;
-        const [tripsResult, extrasResult, favsResult] = await Promise.all([
+        const [tripsResult, favsResult] = await Promise.all([
           supabase.from("trip_briefs").select("id", { count: "exact", head: true }).eq("user_id", uid).eq("status", "completed"),
-          supabase.from("user_profile_extras").select("bio, hobbies, fun_facts, favorite_emoji, skin_type, hair_type, favorite_treatments, beauty_goals, travel_style, favorite_destinations, bucket_list_procedures, public_fields").eq("user_id", uid).maybeSingle(),
           supabase.from("favorites" as any).select("target_id, target_type").eq("user_id", uid),
         ]);
         setTripsCount(tripsResult.count || 0);
-        if (extrasResult.data) setExtras(extrasResult.data as any);
 
         const favs = (favsResult.data as any[]) || [];
         const provSlugs = favs.filter(f => f.target_type === "provider").map(f => f.target_id);
@@ -94,8 +90,29 @@ const UserProfile = () => {
     fetch();
   }, [userId]);
 
+  useEffect(() => {
+    if (editingStatus && statusInputRef.current) {
+      statusInputRef.current.focus();
+      statusInputRef.current.setSelectionRange(statusText.length, statusText.length);
+    }
+  }, [editingStatus]);
+
+  const handleSaveStatus = async () => {
+    if (!user || !profile) return;
+    setSavingStatus(true);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ status: statusText.trim() || null } as any)
+      .eq("user_id", user.id);
+    setSavingStatus(false);
+    if (!error) {
+      setEditingStatus(false);
+      setProfile(prev => prev ? { ...prev, status: statusText.trim() || null } : prev);
+      toast({ title: "Status updated" });
+    }
+  };
+
   const { reviews, loading: reviewsLoading } = useReviews(undefined, profile?.user_id || "__none__");
-  const procedureTags = [...new Set(reviews.map((r) => r.procedure_name))];
   const isOwner = user?.id === profile?.user_id;
 
   if (loading) {
@@ -126,23 +143,6 @@ const UserProfile = () => {
   const trustTier = computeUserTrustTier(profile.social_verifications, tripsCount > 0);
   const memberYear = new Date(profile.created_at).getFullYear();
 
-  // Travel style tags
-  const travelStyleTags = extras?.travel_style
-    ? extras.travel_style.split(",").map(s => s.trim()).filter(Boolean)
-    : [];
-
-  const hasAboutContent = !!(
-    extras?.bio ||
-    extras?.hobbies?.length ||
-    extras?.fun_facts?.length ||
-    extras?.favorite_emoji ||
-    extras?.beauty_goals ||
-    extras?.favorite_treatments?.length ||
-    extras?.travel_style ||
-    extras?.favorite_destinations?.length ||
-    extras?.bucket_list_procedures?.length
-  );
-
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -171,7 +171,6 @@ const UserProfile = () => {
           background: 'linear-gradient(135deg, rgba(94,178,152,0.15) 0%, rgba(224,166,147,0.1) 100%)',
         }}
       >
-        {/* subtle grid texture overlay */}
         <div className="absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,1) 40px,rgba(255,255,255,1) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,1) 40px,rgba(255,255,255,1) 41px)' }} />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
@@ -208,7 +207,7 @@ const UserProfile = () => {
         </div>
 
         {/* Stats line */}
-        <div className="mb-2">
+        <div className="mb-1">
           <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
             <span className="font-semibold text-white">{reviews.length}</span>
             {' '}review{reviews.length !== 1 ? 's' : ''}
@@ -226,51 +225,73 @@ const UserProfile = () => {
           </p>
         </div>
 
-        {/* Bio */}
-        {extras?.bio && (
-          <p className="text-base mb-3 leading-relaxed line-clamp-3" style={{ color: 'rgba(255,255,255,0.7)' }}>
-            {extras.bio}
-          </p>
-        )}
-
-        {/* Tags row */}
-        {(procedureTags.length > 0 || travelStyleTags.length > 0) && (
-          <div className="flex flex-wrap gap-2 mb-0">
-            {procedureTags.slice(0, 4).map((tag) => (
-              <span key={tag} className="text-xs px-2.5 py-1 rounded-full font-medium"
-                style={{ background: 'rgba(94,178,152,0.12)', border: '1px solid rgba(94,178,152,0.25)', color: '#5EB298' }}>
-                {tag}
-              </span>
-            ))}
-            {travelStyleTags.slice(0, 3).map((tag) => (
-              <span key={tag} className="text-xs px-2.5 py-1 rounded-full font-medium"
-                style={{ background: 'rgba(224,166,147,0.12)', border: '1px solid rgba(224,166,147,0.25)', color: '#E0A693' }}>
-                {tag}
-              </span>
-            ))}
+        {/* Status — inline editable for owner */}
+        {isOwner ? (
+          <div className="mb-4 mt-1">
+            {editingStatus ? (
+              <div className="flex items-center gap-2">
+                <input
+                  ref={statusInputRef}
+                  value={statusText}
+                  onChange={(e) => setStatusText(e.target.value.slice(0, 150))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveStatus();
+                    if (e.key === "Escape") setEditingStatus(false);
+                  }}
+                  placeholder="share what you're up to..."
+                  maxLength={150}
+                  className="bg-transparent border-none outline-none text-base italic w-full max-w-[500px]"
+                  style={{ color: 'rgba(255,255,255,0.6)' }}
+                />
+                <button
+                  onClick={handleSaveStatus}
+                  disabled={savingStatus}
+                  className="shrink-0 p-1 rounded-full hover:bg-white/10 transition-colors"
+                  style={{ color: '#5EB298' }}
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+                <span className="text-xs shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>{statusText.length}/150</span>
+              </div>
+            ) : (
+              <div
+                className="flex items-center gap-1.5 group cursor-pointer w-fit"
+                onClick={() => setEditingStatus(true)}
+              >
+                {statusText ? (
+                  <p className="text-base italic" style={{ color: 'rgba(255,255,255,0.6)' }}>{statusText}</p>
+                ) : (
+                  <p className="text-sm italic" style={{ color: 'rgba(255,255,255,0.25)' }}>+ add a status</p>
+                )}
+                <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" style={{ color: 'rgba(255,255,255,0.6)' }} />
+              </div>
+            )}
           </div>
+        ) : (
+          profile.status && (
+            <p className="text-base italic mb-4 mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+              {profile.status}
+            </p>
+          )
         )}
 
-        {/* Tabs */}
-        <div className="mt-6 pb-16">
+        {/* Tabs — just Reviews and Favorites */}
+        <div className="mt-4 pb-16">
           <Tabs defaultValue="reviews" className="w-full">
-            <TabsList className="w-full grid grid-cols-3 bg-transparent border-b border-border rounded-none h-auto p-0">
-              <TabsTrigger value="reviews" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">
+            <TabsList className="w-full grid grid-cols-2 bg-transparent border-b border-border rounded-none h-auto p-0">
+              <TabsTrigger value="reviews" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors" style={{ '--tw-border-opacity': 1 } as any}>
                 Reviews {reviews.length > 0 && <span className="ml-1.5 text-xs opacity-60">({reviews.length})</span>}
               </TabsTrigger>
               <TabsTrigger value="favorites" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">
                 Favorites
               </TabsTrigger>
-              <TabsTrigger value="about" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">
-                About Me
-              </TabsTrigger>
             </TabsList>
 
             <style>{`
-              .traveler-tabs [data-state="active"] { border-bottom-color: #5EB298 !important; }
+              [data-radix-collection-item][data-state="active"] { border-bottom-color: #5EB298 !important; }
             `}</style>
 
-            <div className="traveler-tabs pt-4">
+            <div className="pt-4">
 
               {/* Reviews tab */}
               <TabsContent value="reviews">
@@ -370,116 +391,6 @@ const UserProfile = () => {
                               </div>
                             </Link>
                           ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </TabsContent>
-
-              {/* About Me tab */}
-              <TabsContent value="about">
-                {!hasAboutContent ? (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <p className="text-muted-foreground text-sm">nothing shared yet</p>
-                  </div>
-                ) : (
-                  <div className="space-y-8">
-                    {/* About section */}
-                    {(extras?.bio || extras?.hobbies?.length || extras?.fun_facts?.length || extras?.favorite_emoji) && (
-                      <div>
-                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>about</h3>
-                        <div className="space-y-3">
-                          {extras?.bio && <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>{extras.bio}</p>}
-                          {extras?.hobbies && extras.hobbies.length > 0 && (
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-2">hobbies</p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {extras.hobbies.map(h => (
-                                  <span key={h} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>{h}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {extras?.fun_facts && extras.fun_facts.length > 0 && (
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-2">fun facts</p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {extras.fun_facts.map(f => (
-                                  <span key={f} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>{f}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {extras?.favorite_emoji && (
-                            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>favorite emoji: {extras.favorite_emoji}</p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* MedSpa / treatments section */}
-                    {(extras?.beauty_goals || extras?.favorite_treatments?.length) && (
-                      <div>
-                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          <Sparkles className="w-3 h-3" style={{ color: '#E0A693' }} /> medspa regulars
-                        </h3>
-                        <div className="space-y-3">
-                          {extras?.favorite_treatments && extras.favorite_treatments.length > 0 && (
-                            <div className="flex flex-wrap gap-1.5">
-                              {extras.favorite_treatments.map(t => (
-                                <span key={t} className="text-xs px-2.5 py-1 rounded-full font-medium"
-                                  style={{ background: 'rgba(224,166,147,0.12)', border: '1px solid rgba(224,166,147,0.25)', color: '#E0A693' }}>{t}</span>
-                              ))}
-                            </div>
-                          )}
-                          {extras?.beauty_goals && (
-                            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
-                              <span className="text-muted-foreground">goals: </span>{extras.beauty_goals}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Travel personality section */}
-                    {(extras?.travel_style || extras?.favorite_destinations?.length || extras?.bucket_list_procedures?.length) && (
-                      <div>
-                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          <Plane className="w-3 h-3" style={{ color: '#5EB298' }} /> tourism personality
-                        </h3>
-                        <div className="space-y-3">
-                          {extras?.travel_style && (
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-2">travel style</p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {extras.travel_style.split(",").filter(Boolean).map(s => (
-                                  <span key={s} className="text-xs px-2.5 py-1 rounded-full font-medium"
-                                    style={{ background: 'rgba(94,178,152,0.12)', border: '1px solid rgba(94,178,152,0.25)', color: '#5EB298' }}>{s.trim()}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {extras?.favorite_destinations && extras.favorite_destinations.length > 0 && (
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-2">favorite destinations</p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {extras.favorite_destinations.map(d => (
-                                  <span key={d} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>{d}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                          {extras?.bucket_list_procedures && extras.bucket_list_procedures.length > 0 && (
-                            <div>
-                              <p className="text-xs text-muted-foreground mb-2">bucket list procedures</p>
-                              <div className="flex flex-wrap gap-1.5">
-                                {extras.bucket_list_procedures.map(p => (
-                                  <span key={p} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>{p}</span>
-                                ))}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     )}

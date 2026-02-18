@@ -3,7 +3,7 @@ import Footer from "@/components/landing/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Heart, Calendar, ShieldCheck, Camera, User, ExternalLink, ClipboardList, Sparkles } from "lucide-react";
+import { Settings, Heart, Calendar, ShieldCheck, Camera, ExternalLink, ClipboardList, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import PatientHistoryTab from "@/components/profile/PatientHistoryTab";
 import SavedProvidersTab from "@/components/profile/SavedProvidersTab";
 import TripsTab from "@/components/profile/TripsTab";
 import ProfileFeedTab from "@/components/profile/ProfileFeedTab";
-import AboutMeTab from "@/components/profile/AboutMeTab";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -84,12 +83,8 @@ const ProfilePage = () => {
           </Card>
 
           {/* Tabbed Content */}
-          <Tabs defaultValue="about" className="space-y-6">
+          <Tabs defaultValue="settings" className="space-y-6">
             <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1">
-              <TabsTrigger value="about" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <User className="w-4 h-4" />
-                <span className="hidden sm:inline">About Me</span>
-              </TabsTrigger>
               <TabsTrigger value="feed" className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <Camera className="w-4 h-4" />
                 <span className="hidden sm:inline">My Journey</span>
@@ -116,7 +111,6 @@ const ProfilePage = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="about"><AboutMeTab /></TabsContent>
             <TabsContent value="feed"><ProfileFeedTab /></TabsContent>
             <TabsContent value="history"><PatientHistoryTab /></TabsContent>
             <TabsContent value="settings"><SettingsTab /></TabsContent>
