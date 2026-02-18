@@ -50,8 +50,8 @@ const Navbar = () => {
   // Build the public profile URL for the current user
   const publicProfileUrl = (() => {
     if (!profile) return "/profile";
-    // If user is a creator with a handle, link to their creator page
-    if (isCreator && creatorHandle) return `/c/${creatorHandle}`;
+    // If user is a creator with a handle, link to their creator page /:handle
+    if (isCreator && creatorHandle) return `/${creatorHandle}`;
     const p = profile as any;
     if (p.username) return `/user/${p.username}`;
     return "/profile";
