@@ -1,10 +1,10 @@
-import { BarChart3, Users, Building2, Plane, Mail, Shield, BadgeCheck, Stethoscope, Inbox, Star, Flag, Bug, Menu, X, Sparkles } from "lucide-react";
+import { BarChart3, Users, Building2, Plane, Mail, Shield, BadgeCheck, Stethoscope, Inbox, Star, Flag, Bug, Menu, X, Sparkles, DollarSign } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-export type AdminSection = "overview" | "inbox" | "waitlist" | "applications" | "verification" | "providers" | "bookings" | "reviews" | "flags" | "users" | "bugs" | "creators";
+export type AdminSection = "overview" | "inbox" | "waitlist" | "applications" | "verification" | "providers" | "bookings" | "reviews" | "flags" | "users" | "bugs" | "creators" | "commissions";
 
 const sections: { id: AdminSection; label: string; icon: React.ElementType }[] = [
   { id: "overview", label: "Overview", icon: BarChart3 },
@@ -17,6 +17,7 @@ const sections: { id: AdminSection; label: string; icon: React.ElementType }[] =
   { id: "reviews", label: "Reviews", icon: Star },
   { id: "flags", label: "Flags", icon: Flag },
   { id: "creators", label: "Creators", icon: Sparkles },
+  { id: "commissions", label: "Commissions", icon: DollarSign },
   { id: "users", label: "Users", icon: Users },
   { id: "bugs", label: "Bug Reports", icon: Bug },
 ];
