@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Send, CheckCircle, Clock, CreditCard, Plane, MessageSquare, Map } from "lucide-react";
+import { ArrowLeft, Send, CheckCircle, Clock, CreditCard, Plane, MessageSquare, Map, Download } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -30,6 +31,8 @@ interface Booking {
   provider_message: string | null;
   provider_estimated_dates: string | null;
   trip_brief_id: string | null;
+  booking_code: string | null;
+  booking_type: string;
   created_at: string;
   updated_at: string;
 }
@@ -75,12 +78,27 @@ const BookingDetail = () => {
   const [sending, setSending] = useState(false);
   const [paying, setPaying] = useState(false);
   const [tripBrief, setTripBrief] = useState<TripBrief | null>(null);
+  const [patientName, setPatientName] = useState<string>("");
+  const passRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const fetchBooking = async () => {
     const { data } = await supabase.from("bookings" as any).select("*").eq("id", id).single();
     const bookingData = data as any;
     setBooking(bookingData);
+
+    // Fetch patient name for the pass
+    if (bookingData?.user_id) {
+      const { data: profile } = await supabase
+        .from("profiles_public")
+        .select("first_name, last_name")
+        .eq("user_id", bookingData.user_id)
+        .single();
+      if (profile) {
+        setPatientName([( profile as any).first_name, (profile as any).last_name].filter(Boolean).join(" "));
+      }
+    }
+
     if (bookingData?.trip_brief_id) {
       const { data: brief } = await supabase
         .from("trip_briefs")
@@ -153,6 +171,20 @@ const BookingDetail = () => {
     setPaying(false);
   };
 
+  const handlePrintPass = () => {
+    if (!passRef.current) return;
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    const passHtml = passRef.current.outerHTML;
+    const styles = Array.from(document.styleSheets)
+      .map((sheet) => { try { return Array.from(sheet.cssRules).map((r) => r.cssText).join(""); } catch { return ""; } })
+      .join("");
+    printWindow.document.write(`<html><head><style>${styles} body{background:#000;display:flex;justify-content:center;padding:40px}</style></head><body>${passHtml}</body></html>`);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => { printWindow.print(); }, 500);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -201,6 +233,90 @@ const BookingDetail = () => {
               {STATUS_STEPS.find((s) => s.key === booking.status)?.label || booking.status}
             </Badge>
           </div>
+
+          {/* ── Booking Pass ──────────────────────────────────────────────── */}
+          {booking.booking_code && (
+            <div className="mb-8 flex justify-center">
+              <div
+                ref={passRef}
+                className="relative w-full max-w-sm rounded-2xl overflow-hidden"
+                style={{ background: "linear-gradient(145deg, #0f0f0f 0%, #1a1a1a 100%)", border: "1px solid rgba(255,255,255,0.08)" }}
+              >
+                {/* Peach top accent strip */}
+                <div className="h-1 w-full" style={{ background: "linear-gradient(90deg, hsl(15,85%,80%), hsl(155,35%,53%))" }} />
+
+                <div className="p-6 flex flex-col items-center gap-5">
+                  {/* QR Code */}
+                  <div className="bg-white rounded-xl p-3">
+                    <QRCodeSVG
+                      value={booking.booking_code}
+                      size={180}
+                      bgColor="#ffffff"
+                      fgColor="#0a0a0a"
+                      level="M"
+                    />
+                  </div>
+
+                  {/* Code */}
+                  <div className="text-center">
+                    <p className="text-white/40 text-[10px] uppercase tracking-widest mb-1">Booking Code</p>
+                    <p className="text-3xl font-mono font-bold tracking-[0.2em]" style={{ color: "hsl(15,85%,80%)" }}>
+                      {booking.booking_code}
+                    </p>
+                  </div>
+
+                  {/* Divider with scissors icon */}
+                  <div className="w-full flex items-center gap-3">
+                    <div className="flex-1 border-t border-dashed border-white/10" />
+                    <span className="text-white/20 text-xs">✂</span>
+                    <div className="flex-1 border-t border-dashed border-white/10" />
+                  </div>
+
+                  {/* Pass details */}
+                  <div className="w-full grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
+                    {patientName && (
+                      <div>
+                        <p className="text-white/40 text-[10px] uppercase tracking-wider mb-0.5">Patient</p>
+                        <p className="text-white font-medium truncate">{patientName}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-white/40 text-[10px] uppercase tracking-wider mb-0.5">Provider</p>
+                      <p className="text-white font-medium truncate">{provider?.name || booking.provider_slug}</p>
+                    </div>
+                    {procedures && (
+                      <div className="col-span-2">
+                        <p className="text-white/40 text-[10px] uppercase tracking-wider mb-0.5">Procedures</p>
+                        <p className="text-white/80 text-xs leading-relaxed">{procedures}</p>
+                      </div>
+                    )}
+                    {(booking.provider_estimated_dates || booking.preferred_dates?.text) && (
+                      <div className="col-span-2">
+                        <p className="text-white/40 text-[10px] uppercase tracking-wider mb-0.5">Appointment</p>
+                        <p className="text-white/80 text-xs">{booking.provider_estimated_dates || booking.preferred_dates?.text}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Save button */}
+                  <Button
+                    size="sm"
+                    onClick={handlePrintPass}
+                    className="w-full gap-2 text-xs font-semibold"
+                    style={{ background: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.7)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  >
+                    <Download className="w-3.5 h-3.5" /> Save to phone
+                  </Button>
+
+                  {/* Branding */}
+                  <p className="text-white/20 text-[10px] tracking-widest uppercase">denied.care</p>
+                </div>
+
+                {/* Bottom accent strip */}
+                <div className="h-0.5 w-full" style={{ background: "linear-gradient(90deg, hsl(155,35%,53%), hsl(15,85%,80%))" }} />
+              </div>
+            </div>
+          )}
 
           {/* Status Tracker */}
           <Card className="mb-8 shadow-elevated border-border/50">
