@@ -151,6 +151,22 @@ const YouTubeIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
+/* ── Helpers ── */
+
+/**
+ * Ensures a social link is a proper https:// URL.
+ * If the user stored just a handle like "@denied.care" or "denied.care",
+ * we prepend the platform base URL.
+ */
+const normalizeSocialUrl = (value: string, baseUrl: string): string => {
+  const v = value.trim().replace(/^@/, "");
+  if (/^https?:\/\//i.test(v)) return v;
+  // If it looks like a full domain (has a dot) treat it as a full URL
+  if (v.includes(".")) return `https://${v}`;
+  // Otherwise treat it as a username/handle
+  return `${baseUrl}${v}`;
+};
+
 /* ── Main component ── */
 
 const CreatorProfile = () => {
@@ -231,15 +247,35 @@ const CreatorProfile = () => {
       setFavProviders((favProvData as ProviderInfo[]) || []);
     }
 
-    if (reviewRes.data) {
+    if (reviewRes.data && (reviewRes.data as any[]).length > 0) {
+      const typedReviews = reviewRes.data as any[];
+      // Fetch profile data for review authors (so ReviewCard shows real names)
+      const reviewUserIds = [...new Set(typedReviews.map((r: any) => r.user_id))];
+      const [profilesResult, badgesResult] = await Promise.all([
+        supabase
+          .from("profiles_public" as any)
+          .select("user_id, first_name, city, username, public_profile, social_verifications, avatar_url")
+          .in("user_id", reviewUserIds),
+        supabase
+          .from("profiles")
+          .select("user_id, badge_type")
+          .in("user_id", reviewUserIds),
+      ]);
+      const badgeMap = new Map(
+        ((badgesResult.data as any[]) || []).map((pr: any) => [pr.user_id, pr.badge_type ?? null])
+      );
+      const profileMap = new Map(
+        ((profilesResult.data as any[]) || []).map((pr: any) => [pr.user_id, { ...pr, badge_type: badgeMap.get(pr.user_id) ?? null }])
+      );
       setReviews(
-        (reviewRes.data as any[]).map((r) => ({
+        typedReviews.map((r) => ({
           ...r,
           photos: r.photos || [],
           videos: r.videos || [],
           upvote_count: 0,
           user_has_upvoted: false,
           vibe_tags: r.vibe_tags || [],
+          profile: profileMap.get(r.user_id) || null,
         }))
       );
     }
@@ -415,21 +451,21 @@ const CreatorProfile = () => {
           {hasSocials && (
             <div className="flex items-center gap-2 shrink-0">
               {socialLinks.instagram && (
-                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer"
+                <a href={normalizeSocialUrl(socialLinks.instagram, "https://instagram.com/")} target="_blank" rel="noopener noreferrer"
                   className="p-2 rounded-full transition-colors hover:opacity-80"
                   style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <Instagram className="w-4 h-4" />
                 </a>
               )}
               {socialLinks.tiktok && (
-                <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer"
+                <a href={normalizeSocialUrl(socialLinks.tiktok, "https://tiktok.com/@")} target="_blank" rel="noopener noreferrer"
                   className="p-2 rounded-full transition-colors hover:opacity-80"
                   style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <TikTokIcon className="w-4 h-4" />
                 </a>
               )}
               {socialLinks.youtube && (
-                <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer"
+                <a href={normalizeSocialUrl(socialLinks.youtube, "https://youtube.com/")} target="_blank" rel="noopener noreferrer"
                   className="p-2 rounded-full transition-colors hover:opacity-80"
                   style={{ background: theme.socialIconBg, color: theme.accentColor }}>
                   <YouTubeIcon className="w-4 h-4" />
