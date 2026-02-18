@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, MapPin, Star, BadgeCheck, ArrowUpDown } from "lucide-react";
+import { Search, MapPin, Star, ArrowUpDown } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import clinicDental from "@/assets/clinic-dental.jpg";
 import clinicMedspa from "@/assets/clinic-medspa.jpg";
@@ -270,7 +270,6 @@ const SearchPage = () => {
               {filtered.map((provider, index) => {
                 const category = getClinicCategory(provider);
                 const isVerified = provider.verification_tier === "verified" || provider.verification_tier === "premium";
-                const isListed = provider.verification_tier === "listed";
                 return (
                   <motion.div
                     key={provider.slug}
@@ -289,19 +288,16 @@ const SearchPage = () => {
                             loading="lazy"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                          {isVerified ? (
+                          {isVerified && (
                             <div className="absolute top-3 right-3">
-                              <Badge className="bg-primary text-primary-foreground gap-1 shadow-floating">
-                                <BadgeCheck className="w-3 h-3" /> Verified
-                              </Badge>
+                              <img
+                                src="/badges/provider.png?v=3"
+                                alt="Verified Provider"
+                                className="h-7 w-auto drop-shadow-lg"
+                                draggable={false}
+                              />
                             </div>
-                          ) : isListed ? (
-                            <div className="absolute top-3 right-3">
-                              <Badge variant="outline" className="bg-card/90 text-muted-foreground gap-1 shadow-elevated border-border backdrop-blur-sm">
-                                <BadgeCheck className="w-3 h-3" /> Listed
-                              </Badge>
-                            </div>
-                          ) : null}
+                          )}
                           <div className="absolute bottom-3 left-4">
                             <span className="bg-black/50 backdrop-blur-sm text-white text-xs uppercase tracking-wider font-medium px-2.5 py-1 rounded-full shadow-elevated">
                               {category === "dental" ? "Dental Clinic" : category === "surgery" ? "Surgery Center" : "Aesthetics & MedSpa"}
