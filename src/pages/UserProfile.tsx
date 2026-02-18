@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Navigate } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,8 +26,9 @@ interface PublicProfile {
   status?: string | null;
 }
 
-const UserProfile = () => {
-  const { userId } = useParams<{ userId: string }>();
+const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
+  const params = useParams<{ userId: string }>();
+  const userId = usernameParam || params.userId;
   const { user } = useAuth();
   const { toast } = useToast();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
@@ -35,6 +36,7 @@ const UserProfile = () => {
   const [tripsCount, setTripsCount] = useState(0);
   const [favProviders, setFavProviders] = useState<any[]>([]);
   const [favCreators, setFavCreators] = useState<any[]>([]);
+  const [creatorHandle, setCreatorHandle] = useState<string | null>(null);
 
   // Status editing
   const [statusText, setStatusText] = useState("");
@@ -52,14 +54,23 @@ const UserProfile = () => {
 
       let badgeType: BadgeType = null;
       let statusVal: string | null = null;
+      let isCreator = false;
       if (data) {
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("badge_type, status")
+          .select("badge_type, status, is_creator")
           .eq("user_id", (data as any).user_id)
           .maybeSingle();
         badgeType = (profileData as any)?.badge_type ?? null;
         statusVal = (profileData as any)?.status ?? null;
+        isCreator = !!(profileData as any)?.is_creator;
+      }
+
+      // If this user is a creator and we're on /user/:username, redirect to /:handle
+      if (isCreator && (data as any)?.username) {
+        setCreatorHandle((data as any).username);
+        setLoading(false);
+        return;
       }
 
       const fullProfile = data ? { ...(data as any), badge_type: badgeType, status: statusVal } : null;
@@ -124,6 +135,11 @@ const UserProfile = () => {
         </main>
       </div>
     );
+  }
+
+  // If this user is a creator, redirect to /:handle
+  if (!loading && creatorHandle) {
+    return <Navigate to={`/${creatorHandle}`} replace />;
   }
 
   if (!profile) {
@@ -369,7 +385,7 @@ const UserProfile = () => {
                         </h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                           {favCreators.map((c: any) => (
-                            <Link key={c.handle} to={`/c/${c.handle}`}
+                            <Link key={c.handle} to={`/${c.handle}`}
                               className="rounded-xl overflow-hidden border hover:border-secondary/30 transition-all duration-200 group"
                               style={{ background: 'rgba(224,166,147,0.06)', borderColor: 'rgba(224,166,147,0.12)' }}>
                               <div className="h-24 overflow-hidden bg-muted">

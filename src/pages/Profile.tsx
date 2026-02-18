@@ -70,7 +70,7 @@ const ProfilePage = () => {
                     )}
                     {creatorHandle && (
                       <Button variant="secondary" size="sm" asChild className="gap-1.5">
-                        <Link to={`/c/${creatorHandle}`}>
+                        <Link to={`/${creatorHandle}`}>
                           <Sparkles className="w-3.5 h-3.5" />
                           View Creator Page
                         </Link>

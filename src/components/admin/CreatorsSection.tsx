@@ -364,7 +364,7 @@ const CreatorsSection = () => {
                     <TableCell className="flex gap-1">
                       {c.is_published && (
                         <Button variant="ghost" size="sm" asChild>
-                          <a href={`/c/${c.handle}`} target="_blank" rel="noopener">
+                          <a href={`/${c.handle}`} target="_blank" rel="noopener">
                             <Eye className="w-3.5 h-3.5" />
                           </a>
                         </Button>
