@@ -10,25 +10,25 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
       className
     )}
     style={{
-      background: 'rgba(94,178,152,0.08)',
-      border: '1px solid rgba(94,178,152,0.12)',
+      background: 'rgba(80,255,144,0.05)',
+      border: '1px solid rgba(80,255,144,0.1)',
       borderTop: '1px solid rgba(255,255,255,0.1)',
-      boxShadow: '0 0 20px rgba(94,178,152,0.05)',
+      boxShadow: '0 0 20px rgba(80,255,144,0.04)',
       backdropFilter: 'blur(10px)',
       WebkitBackdropFilter: 'blur(10px)',
       ...style,
     }}
     onMouseEnter={(e) => {
       const el = e.currentTarget;
-      el.style.borderColor = 'rgba(94,178,152,0.2)';
-      el.style.boxShadow = '0 0 20px rgba(94,178,152,0.25), 0 0 40px rgba(94,178,152,0.15), 0 0 60px rgba(94,178,152,0.05)';
-      el.style.background = 'rgba(94,178,152,0.12)';
+      el.style.borderColor = 'rgba(80,255,144,0.2)';
+      el.style.boxShadow = '0 0 20px rgba(80,255,144,0.3), 0 0 40px rgba(80,255,144,0.15), 0 0 60px rgba(80,255,144,0.05)';
+      el.style.background = 'rgba(80,255,144,0.08)';
     }}
     onMouseLeave={(e) => {
       const el = e.currentTarget;
-      el.style.borderColor = 'rgba(94,178,152,0.12)';
-      el.style.boxShadow = '0 0 20px rgba(94,178,152,0.05)';
-      el.style.background = 'rgba(94,178,152,0.08)';
+      el.style.borderColor = 'rgba(80,255,144,0.1)';
+      el.style.boxShadow = '0 0 20px rgba(80,255,144,0.04)';
+      el.style.background = 'rgba(80,255,144,0.05)';
     }}
     {...props}
   />

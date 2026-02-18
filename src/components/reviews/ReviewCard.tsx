@@ -282,7 +282,7 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
               {review.vibe_tags && review.vibe_tags.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {review.vibe_tags.map((tag) => (
-                    <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#5EB298]/10 text-[#5EB298] border border-[#5EB298]/20">{tag}</span>
+                    <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#50FF90]/10 text-[#50FF90] border border-[#50FF90]/20">{tag}</span>
                   ))}
                 </div>
               )}

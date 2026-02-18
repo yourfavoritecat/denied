@@ -83,7 +83,7 @@ const SavedProvidersTab = () => {
         <div
           key={prov.slug}
           className="rounded-xl overflow-hidden border"
-          style={{ background: 'rgba(94,178,152,0.05)', border: '1px solid rgba(94,178,152,0.12)' }}
+          style={{ background: 'rgba(80,255,144,0.04)', border: '1px solid rgba(80,255,144,0.1)' }}
         >
           {/* Cover */}
           <div className="h-24 bg-muted overflow-hidden relative">
@@ -115,7 +115,7 @@ const SavedProvidersTab = () => {
                 onClick={() => handleRemove(prov.slug, prov.name)}
                 aria-label={`Remove ${prov.name}`}
               >
-                <Heart className="w-3.5 h-3.5 fill-current" style={{ color: '#5EB298' }} />
+                <Heart className="w-3.5 h-3.5 fill-current" style={{ color: '#50FF90' }} />
               </Button>
             </div>
           </div>

@@ -103,7 +103,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
         </p>
 
         {/* CTA line */}
-        <p className="text-base md:text-lg font-bold mb-8" style={{ color: "#F8B4A0" }}>
+        <p className="text-base md:text-lg font-bold mb-8" style={{ color: "#FF8C69" }}>
           be the first to know when we launch.
         </p>
 

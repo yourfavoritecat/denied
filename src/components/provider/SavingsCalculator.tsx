@@ -99,7 +99,7 @@ const SavingsCalculator = ({ procedures, onRequestQuote, showPlaceholder }: Savi
   return (
     <div className="py-5 px-4 sm:px-6">
       <div className="flex items-center gap-2 mb-4">
-        <Calculator className="w-5 h-5 text-[#5EB298]" />
+        <Calculator className="w-5 h-5 text-[#50FF90]" />
         <h3 className="text-sm font-bold text-white">Savings Calculator</h3>
       </div>
 
@@ -136,7 +136,7 @@ const SavingsCalculator = ({ procedures, onRequestQuote, showPlaceholder }: Savi
                     >
                       <Minus className="w-3 h-3" />
                     </button>
-                    <span className="text-[#5EB298] font-bold min-w-[1.25rem] text-center">×{qty}</span>
+                    <span className="text-[#50FF90] font-bold min-w-[1.25rem] text-center">×{qty}</span>
                     <button
                       onClick={() => handleQty(name, 1)}
                       className="hover:text-white/80 transition-colors disabled:opacity-30"
@@ -145,7 +145,7 @@ const SavingsCalculator = ({ procedures, onRequestQuote, showPlaceholder }: Savi
                       <Plus className="w-3 h-3" />
                     </button>
                   </div>
-                  <span className="text-[#5EB298] font-bold">${(localPrice * qty).toLocaleString()}</span>
+                  <span className="text-[#50FF90] font-bold">${(localPrice * qty).toLocaleString()}</span>
                   <button
                     onClick={() => handleRemove(name)}
                     className="ml-1 hover:text-red-400 transition-colors"
@@ -179,7 +179,7 @@ const SavingsCalculator = ({ procedures, onRequestQuote, showPlaceholder }: Savi
                       <span className="text-white/60 truncate mr-4">{name}{qty > 1 ? ` ×${qty}` : ""}</span>
                       <div className="flex items-center gap-4 shrink-0">
                         <span className="text-white/40 line-through">${(usPrice * qty).toLocaleString()}</span>
-                        <span className="text-[#5EB298] font-semibold">${(localPrice * qty).toLocaleString()}</span>
+                        <span className="text-[#50FF90] font-semibold">${(localPrice * qty).toLocaleString()}</span>
                       </div>
                     </div>
                   );
@@ -198,25 +198,25 @@ const SavingsCalculator = ({ procedures, onRequestQuote, showPlaceholder }: Savi
                 </p>
               </div>
               <div>
-                <p className="text-xs text-[#5EB298] uppercase tracking-wider mb-1">
+                <p className="text-xs text-[#50FF90] uppercase tracking-wider mb-1">
                   Price Here{totalUnits > 1 ? " Total" : ""}
                 </p>
-                <p className="text-2xl sm:text-3xl font-bold text-[#5EB298]">
+                <p className="text-2xl sm:text-3xl font-bold text-[#50FF90]">
                   ${animatedLocal.toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-[#F8B4A0] uppercase tracking-wider mb-1">You Save</p>
-                <p className="text-2xl sm:text-3xl font-bold text-[#F8B4A0]">
+                <p className="text-xs text-[#FF8C69] uppercase tracking-wider mb-1">You Save</p>
+                <p className="text-2xl sm:text-3xl font-bold text-[#FF8C69]">
                   ${animatedSavings.toLocaleString()}
                 </p>
-                <p className="text-sm font-semibold text-[#F8B4A0]">{savingsPct}% off</p>
+                <p className="text-sm font-semibold text-[#FF8C69]">{savingsPct}% off</p>
               </div>
             </div>
 
             <div className="mt-6 flex justify-center">
               <Button
-                className="bg-[#5EB298] hover:bg-[#5EB298]/90 text-white font-bold gap-2 px-6"
+                className="bg-[#50FF90] hover:bg-[#3DE87A] text-black font-bold gap-2 px-6"
                 onClick={() => onRequestQuote(selectedItems.map(s => s.qty > 1 ? `${s.name} ×${s.qty}` : s.name).join(", "))}
               >
                 Get a quote for {totalUnits} procedure{totalUnits !== 1 ? "s" : ""} <ArrowRight className="w-4 h-4" />
