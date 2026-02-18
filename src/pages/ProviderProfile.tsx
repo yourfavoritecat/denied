@@ -17,7 +17,7 @@ import { useFavorite } from "@/hooks/useFavorite";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import VerificationBadge from "@/components/providers/VerificationBadge";
 import { REVIEW_CATEGORIES, US_PRICE_MAP } from "@/data/providers";
-import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
+import GetQuoteWizard from "@/components/providers/GetQuoteWizard";
 import LeaveReviewModal from "@/components/reviews/LeaveReviewModal";
 import ReviewCard from "@/components/reviews/ReviewCard";
 import { useReviews } from "@/hooks/useReviews";
@@ -757,7 +757,14 @@ const ProviderProfile = () => {
         </div>
       </div>
 
-      <RequestQuoteModal open={quoteOpen} onOpenChange={setQuoteOpen} providerName={providerName} providerSlug={slug || ""} />
+      <GetQuoteWizard
+        open={quoteOpen}
+        onOpenChange={setQuoteOpen}
+        providerName={providerName}
+        providerSlug={slug || ""}
+        providerProcedures={data?.services.map((s: any) => s.procedure_name) || []}
+        initialProcedure={quoteProcedure}
+      />
       <LeaveReviewModal
         open={reviewOpen}
         onOpenChange={(open) => { setReviewOpen(open); if (!open) setEditingReview(null); }}

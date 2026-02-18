@@ -1069,6 +1069,83 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_requests: {
+        Row: {
+          comparing_providers: boolean
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          group_members: Json | null
+          id: string
+          is_flexible: boolean
+          is_group: boolean
+          notes: string | null
+          procedures: Json | null
+          provider_response: Json | null
+          provider_slug: string
+          quoted_price: number | null
+          request_type: string
+          status: string
+          travel_window_end: string | null
+          travel_window_start: string | null
+          trip_brief_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comparing_providers?: boolean
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          group_members?: Json | null
+          id?: string
+          is_flexible?: boolean
+          is_group?: boolean
+          notes?: string | null
+          procedures?: Json | null
+          provider_response?: Json | null
+          provider_slug: string
+          quoted_price?: number | null
+          request_type?: string
+          status?: string
+          travel_window_end?: string | null
+          travel_window_start?: string | null
+          trip_brief_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comparing_providers?: boolean
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          group_members?: Json | null
+          id?: string
+          is_flexible?: boolean
+          is_group?: boolean
+          notes?: string | null
+          procedures?: Json | null
+          provider_response?: Json | null
+          provider_slug?: string
+          quoted_price?: number | null
+          request_type?: string
+          status?: string
+          travel_window_end?: string | null
+          travel_window_start?: string | null
+          trip_brief_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_requests_trip_brief_id_fkey"
+            columns: ["trip_brief_id"]
+            isOneToOne: false
+            referencedRelation: "trip_briefs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       review_upvotes: {
         Row: {
           created_at: string
@@ -1181,15 +1258,23 @@ export type Database = {
         Row: {
           budget_max: number | null
           budget_min: number | null
+          budget_range: string | null
           created_at: string
           destination: string | null
+          group_members: Json | null
           id: string
           inquiry_description: string | null
+          is_flexible: boolean
+          is_group: boolean
           medical_notes: string | null
+          procedure_categories: string[] | null
           procedures: Json | null
+          procedures_unsure: boolean
           status: string
           travel_end: string | null
           travel_start: string | null
+          travel_window_end: string | null
+          travel_window_start: string | null
           trip_name: string
           updated_at: string
           user_id: string
@@ -1197,15 +1282,23 @@ export type Database = {
         Insert: {
           budget_max?: number | null
           budget_min?: number | null
+          budget_range?: string | null
           created_at?: string
           destination?: string | null
+          group_members?: Json | null
           id?: string
           inquiry_description?: string | null
+          is_flexible?: boolean
+          is_group?: boolean
           medical_notes?: string | null
+          procedure_categories?: string[] | null
           procedures?: Json | null
+          procedures_unsure?: boolean
           status?: string
           travel_end?: string | null
           travel_start?: string | null
+          travel_window_end?: string | null
+          travel_window_start?: string | null
           trip_name: string
           updated_at?: string
           user_id: string
@@ -1213,15 +1306,23 @@ export type Database = {
         Update: {
           budget_max?: number | null
           budget_min?: number | null
+          budget_range?: string | null
           created_at?: string
           destination?: string | null
+          group_members?: Json | null
           id?: string
           inquiry_description?: string | null
+          is_flexible?: boolean
+          is_group?: boolean
           medical_notes?: string | null
+          procedure_categories?: string[] | null
           procedures?: Json | null
+          procedures_unsure?: boolean
           status?: string
           travel_end?: string | null
           travel_start?: string | null
+          travel_window_end?: string | null
+          travel_window_start?: string | null
           trip_name?: string
           updated_at?: string
           user_id?: string
