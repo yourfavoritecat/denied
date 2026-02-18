@@ -116,7 +116,7 @@ const Creators = () => {
 };
 
 const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
-  <Link to={`/c/${creator.handle}`} className="group block">
+  <Link to={`/${creator.handle}`} className="group block">
     <div
       className="rounded-2xl overflow-hidden border hover:border-primary/30 transition-all duration-200 cursor-pointer h-full"
       style={{

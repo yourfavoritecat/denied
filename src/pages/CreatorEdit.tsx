@@ -355,7 +355,7 @@ const CreatorEdit = () => {
           <div className="flex items-center gap-3">
             {isPublished && (
               <Button variant="outline" size="sm" asChild>
-                <Link to={`/c/${handle}`} target="_blank">
+                <Link to={`/${handle}`} target="_blank">
                   <Eye className="w-4 h-4 mr-1" /> View Page
                 </Link>
               </Button>
@@ -561,7 +561,7 @@ const CreatorEdit = () => {
                     <Eye className="w-4 h-4" /> Your page is live
                   </div>
                   <a
-                    href={`/c/${handle}`}
+                    href={`/${handle}`}
                     target="_blank"
                     rel="noopener"
                     className="text-sm text-primary hover:underline flex items-center gap-1"

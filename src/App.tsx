@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ViewAsProvider } from "@/hooks/useViewAs";
 import { ChatProvider } from "@/hooks/useChatContext";
@@ -34,11 +34,19 @@ import CreatorJoin from "./pages/CreatorJoin";
 import CreatorEdit from "./pages/CreatorEdit";
 import CreatorProfile from "./pages/CreatorProfile";
 import Creators from "./pages/Creators";
+import HandleRouter from "./pages/HandleRouter";
 import BugReportButton from "./components/beta/BugReportButton";
 import TripAssistantWrapper from "./components/chat/TripAssistantWrapper";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+// Redirect /c/:handle → /:handle for backwards compatibility
+const CHandleRedirect = () => {
+  const { handle } = useParams<{ handle: string }>();
+  return <Navigate to={`/${handle}`} replace />;
+};
+
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -62,7 +70,7 @@ const App = () => (
             <Route path="/cookies" element={<Cookies />} />
             <Route path="/apply" element={<ProtectedRoute><Apply /></ProtectedRoute>} />
             <Route path="/join/:code" element={<CreatorJoin />} />
-            <Route path="/c/:handle" element={<CreatorProfile />} />
+            <Route path="/c/:handle" element={<CHandleRedirect />} />
             <Route path="/creators" element={<Creators />} />
             <Route path="/creator/edit" element={<ProtectedRoute><CreatorEdit /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
@@ -77,6 +85,8 @@ const App = () => (
             <Route path="/provider/onboarding" element={<ProtectedRoute><ProviderOnboarding /></ProtectedRoute>} />
             <Route path="/provider-dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            {/* Catch-all handle router — MUST be last */}
+            <Route path="/:handle" element={<HandleRouter />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <ViewAsBanner />
