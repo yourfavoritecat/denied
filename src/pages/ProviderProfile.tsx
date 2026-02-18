@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
@@ -184,6 +184,9 @@ const MediaLightbox = ({ items, initialIndex, open, onClose }: {
 
 const ProviderProfile = () => {
   const { slug } = useParams<{ slug: string }>();
+  const [searchParams] = useSearchParams();
+  const bookingType = searchParams.get("type") === "concierge" ? "concierge" : "direct";
+  const isConcierge = bookingType === "concierge";
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [quoteProcedure, setQuoteProcedure] = useState<string>("");
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -353,7 +356,16 @@ const ProviderProfile = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="pt-16 pb-28">
+      {/* Concierge mode banner */}
+      {isConcierge && (
+        <div className="fixed top-16 left-0 right-0 z-40 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium"
+          style={{ background: 'rgba(255,140,105,0.15)', borderBottom: '1px solid rgba(255,140,105,0.3)', backdropFilter: 'blur(10px)' }}>
+          <span>✨</span>
+          <span style={{ color: '#FF8C69' }}>Concierge mode</span>
+          <span className="text-muted-foreground">— we'll handle your travel coordination</span>
+        </div>
+      )}
+      <main className={`pb-28 ${isConcierge ? "pt-24" : "pt-16"}`}>
         {/* ═══════ HERO ═══════ */}
         <div className="relative max-w-[960px] mx-auto px-4 mt-6">
           <div className="relative rounded-2xl overflow-hidden h-[200px]">
@@ -751,6 +763,7 @@ const ProviderProfile = () => {
         providerSlug={slug || ""}
         providerProcedures={data?.services.map((s: any) => s.procedure_name) || []}
         initialProcedure={quoteProcedure}
+        bookingType={bookingType}
       />
       <LeaveReviewModal
         open={reviewOpen}

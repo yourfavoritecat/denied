@@ -43,6 +43,7 @@ interface GetQuoteWizardProps {
   providerSlug: string;
   providerProcedures?: string[];
   initialProcedure?: string;
+  bookingType?: "concierge" | "direct";
 }
 
 const STEPS = ["Procedures", "Who's going?", "Dates & Details", "Review & Send"];
@@ -67,6 +68,7 @@ const GetQuoteWizard = ({
   providerSlug,
   providerProcedures = [],
   initialProcedure = "",
+  bookingType = "direct",
 }: GetQuoteWizardProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -226,6 +228,8 @@ const GetQuoteWizard = ({
       medical_notes: null,
       trip_brief_id: selectedBriefId || null,
       status: "inquiry",
+      booking_type: bookingType,
+      concierge_fee: bookingType === "concierge" ? 150 : null,
     };
 
     const { data: booking, error: bookingError } = await supabase
