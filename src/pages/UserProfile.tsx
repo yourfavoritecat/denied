@@ -2,16 +2,14 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp, Calendar, MapPin, Heart, Sparkles, Plane, Pencil, Star, Building2, Users } from "lucide-react";
+import { Heart, Sparkles, Plane, Star, MapPin, Pencil, Building2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useReviews } from "@/hooks/useReviews";
 import { useAuth } from "@/hooks/useAuth";
 import ReviewCard from "@/components/reviews/ReviewCard";
-import { providers } from "@/data/providers";
 import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
 import UserBadge, { BadgeType } from "@/components/profile/UserBadge";
 
@@ -57,7 +55,7 @@ const UserProfile = () => {
         .select("user_id, first_name, avatar_url, city, username, created_at, social_verifications")
         .eq("username", userId)
         .maybeSingle();
-      
+
       let badgeType: BadgeType = null;
       if (data) {
         const { data: profileData } = await supabase
@@ -80,14 +78,13 @@ const UserProfile = () => {
         setTripsCount(tripsResult.count || 0);
         if (extrasResult.data) setExtras(extrasResult.data as any);
 
-        // Resolve favorites
         const favs = (favsResult.data as any[]) || [];
         const provSlugs = favs.filter(f => f.target_type === "provider").map(f => f.target_id);
         const creatorHandles = favs.filter(f => f.target_type === "creator").map(f => f.target_id);
 
         const [provData, creatorData] = await Promise.all([
           provSlugs.length > 0 ? supabase.from("providers").select("slug, name, city, cover_photo_url, country").in("slug", provSlugs) : Promise.resolve({ data: [] }),
-          creatorHandles.length > 0 ? supabase.from("creator_profiles").select("handle, display_name, avatar_url, specialties").in("handle", creatorHandles).eq("is_published", true) : Promise.resolve({ data: [] }),
+          creatorHandles.length > 0 ? supabase.from("creator_profiles").select("handle, display_name, avatar_url, specialties, cover_photo_url").in("handle", creatorHandles).eq("is_published", true) : Promise.resolve({ data: [] }),
         ]);
         setFavProviders((provData.data as any[]) || []);
         setFavCreators((creatorData.data as any[]) || []);
@@ -98,10 +95,7 @@ const UserProfile = () => {
   }, [userId]);
 
   const { reviews, loading: reviewsLoading } = useReviews(undefined, profile?.user_id || "__none__");
-
-  const totalHelpfulness = reviews.reduce((sum, r) => sum + r.upvote_count, 0);
   const procedureTags = [...new Set(reviews.map((r) => r.procedure_name))];
-
   const isOwner = user?.id === profile?.user_id;
 
   if (loading) {
@@ -114,13 +108,6 @@ const UserProfile = () => {
       </div>
     );
   }
-
-  const hasAboutContent = (e: ProfileExtras) =>
-    !!(e.bio || (e.hobbies?.length) || (e.fun_facts?.length) || e.favorite_emoji);
-  const hasBeautyContent = (e: ProfileExtras) =>
-    !!(e.beauty_goals || (e.favorite_treatments?.length));
-  const hasTravelContent = (e: ProfileExtras) =>
-    !!(e.travel_style || (e.favorite_destinations?.length) || (e.bucket_list_procedures?.length));
 
   if (!profile) {
     return (
@@ -136,229 +123,375 @@ const UserProfile = () => {
   }
 
   const initials = (profile.first_name || "U").charAt(0).toUpperCase();
+  const trustTier = computeUserTrustTier(profile.social_verifications, tripsCount > 0);
+  const memberYear = new Date(profile.created_at).getFullYear();
+
+  // Travel style tags
+  const travelStyleTags = extras?.travel_style
+    ? extras.travel_style.split(",").map(s => s.trim()).filter(Boolean)
+    : [];
+
+  const hasAboutContent = !!(
+    extras?.bio ||
+    extras?.hobbies?.length ||
+    extras?.fun_facts?.length ||
+    extras?.favorite_emoji ||
+    extras?.beauty_goals ||
+    extras?.favorite_treatments?.length ||
+    extras?.travel_style ||
+    extras?.favorite_destinations?.length ||
+    extras?.bucket_list_procedures?.length
+  );
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-3xl">
-          {/* Profile Header */}
-          <Card className="mb-8">
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row items-center gap-6">
-                <Avatar className="w-20 h-20 text-xl bg-primary text-primary-foreground">
-                  {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.first_name || "User"} />}
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
-                </Avatar>
-                <div className="text-center sm:text-left flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h1 className="text-2xl font-bold mb-1 flex items-center gap-2 flex-wrap">
-                        {profile.first_name || "User"}
-                        <UserTrustBadge
-                          tier={computeUserTrustTier(profile.social_verifications, tripsCount > 0)}
-                          size="lg"
-                        />
-                      </h1>
-                      {profile.badge_type && (
-                        <div className="mb-2">
-                          <UserBadge badgeType={profile.badge_type} size="default" />
+
+      {/* Owner edit banner */}
+      {isOwner && (
+        <div className="sticky top-0 z-40 border-b" style={{ background: 'rgba(94,178,152,0.08)', borderColor: 'rgba(94,178,152,0.2)' }}>
+          <div className="max-w-[960px] mx-auto px-6 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-sm" style={{ color: '#5EB298' }}>
+              <Pencil className="w-4 h-4" />
+              <span>This is your public profile</span>
+            </div>
+            <Button size="sm" variant="outline" asChild style={{ borderColor: 'rgba(94,178,152,0.4)', color: '#5EB298' }}>
+              <Link to="/profile">Edit Profile</Link>
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Cover — gradient, no photo for travelers */}
+      <div
+        className="relative w-full overflow-hidden"
+        style={{
+          height: '180px',
+          paddingTop: '64px',
+          background: 'linear-gradient(135deg, rgba(94,178,152,0.15) 0%, rgba(224,166,147,0.1) 100%)',
+        }}
+      >
+        {/* subtle grid texture overlay */}
+        <div className="absolute inset-0 opacity-[0.03]"
+          style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,1) 40px,rgba(255,255,255,1) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,1) 40px,rgba(255,255,255,1) 41px)' }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+      </div>
+
+      {/* All content below cover */}
+      <div className="max-w-[960px] mx-auto px-6">
+
+        {/* Identity row — avatar overlaps cover */}
+        <div className="flex items-center gap-6 -mt-14 relative z-10 mb-3">
+          <Avatar className="w-32 h-32 shrink-0 border-[3px] border-[#0a0a0a] shadow-lg">
+            {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.first_name || "User"} className="object-cover" />}
+            <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold">{initials}</AvatarFallback>
+          </Avatar>
+
+          {/* Name + badge */}
+          <div className="flex items-center gap-3 flex-wrap pt-14">
+            <h1 className="text-5xl font-bold leading-none tracking-tight">{profile.first_name || "User"}</h1>
+            {profile.badge_type ? (
+              <img
+                src={
+                  profile.badge_type === 'founder' ? '/badges/founder.png?v=3'
+                  : profile.badge_type === 'trusted_creator' ? '/badges/creator.png?v=3'
+                  : '/badges/creator.png?v=3'
+                }
+                alt={profile.badge_type}
+                className="h-10 w-auto"
+                draggable={false}
+              />
+            ) : (
+              <UserTrustBadge tier={trustTier} size="lg" />
+            )}
+          </div>
+        </div>
+
+        {/* Stats line */}
+        <div className="mb-2">
+          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
+            <span className="font-semibold text-white">{reviews.length}</span>
+            {' '}review{reviews.length !== 1 ? 's' : ''}
+            {' · '}
+            <span className="font-semibold text-white">{tripsCount}</span>
+            {' '}trip{tripsCount !== 1 ? 's' : ''} completed
+            {profile.city && (
+              <>
+                {' · '}
+                <span className="font-semibold text-white">{profile.city}</span>
+              </>
+            )}
+            {' · '}
+            member since <span className="font-semibold text-white">{memberYear}</span>
+          </p>
+        </div>
+
+        {/* Bio */}
+        {extras?.bio && (
+          <p className="text-base mb-3 leading-relaxed line-clamp-3" style={{ color: 'rgba(255,255,255,0.7)' }}>
+            {extras.bio}
+          </p>
+        )}
+
+        {/* Tags row */}
+        {(procedureTags.length > 0 || travelStyleTags.length > 0) && (
+          <div className="flex flex-wrap gap-2 mb-0">
+            {procedureTags.slice(0, 4).map((tag) => (
+              <span key={tag} className="text-xs px-2.5 py-1 rounded-full font-medium"
+                style={{ background: 'rgba(94,178,152,0.12)', border: '1px solid rgba(94,178,152,0.25)', color: '#5EB298' }}>
+                {tag}
+              </span>
+            ))}
+            {travelStyleTags.slice(0, 3).map((tag) => (
+              <span key={tag} className="text-xs px-2.5 py-1 rounded-full font-medium"
+                style={{ background: 'rgba(224,166,147,0.12)', border: '1px solid rgba(224,166,147,0.25)', color: '#E0A693' }}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div className="mt-6 pb-16">
+          <Tabs defaultValue="reviews" className="w-full">
+            <TabsList className="w-full grid grid-cols-3 bg-transparent border-b border-border rounded-none h-auto p-0">
+              <TabsTrigger value="reviews" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">
+                Reviews {reviews.length > 0 && <span className="ml-1.5 text-xs opacity-60">({reviews.length})</span>}
+              </TabsTrigger>
+              <TabsTrigger value="favorites" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">
+                Favorites
+              </TabsTrigger>
+              <TabsTrigger value="about" className="rounded-none h-11 text-sm font-medium text-muted-foreground bg-transparent border-b-2 border-transparent data-[state=active]:text-foreground data-[state=active]:bg-transparent data-[state=active]:shadow-none transition-colors">
+                About Me
+              </TabsTrigger>
+            </TabsList>
+
+            <style>{`
+              .traveler-tabs [data-state="active"] { border-bottom-color: #5EB298 !important; }
+            `}</style>
+
+            <div className="traveler-tabs pt-4">
+
+              {/* Reviews tab */}
+              <TabsContent value="reviews">
+                {reviewsLoading ? (
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mt-8" />
+                ) : reviews.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <p className="text-muted-foreground text-sm">no reviews yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {reviews.map((review) => (
+                      <div key={review.id} className="relative">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1.5 px-1">
+                          <Building2 className="w-3 h-3" />
+                          <Link to={`/provider/${review.provider_slug}`} className="hover:text-primary transition-colors font-medium" style={{ color: '#5EB298' }}>
+                            {review.provider_slug}
+                          </Link>
                         </div>
-                      )}
-                    </div>
-                    {isOwner && (
-                      <Button asChild size="sm" variant="outline" className="shrink-0 gap-1.5 text-xs" style={{ borderColor: 'rgba(224,166,147,0.4)', color: '#E0A693' }}>
-                        <Link to="/profile/edit">
-                          <Pencil className="w-3 h-3" /> edit profile
-                        </Link>
-                      </Button>
-                    )}
+                        <ReviewCard review={review} showProviderName providerName={review.provider_slug} />
+                      </div>
+                    ))}
                   </div>
-                  {profile.city && (
-                    <p className="text-muted-foreground flex items-center gap-1 justify-center sm:justify-start mb-3">
-                      <MapPin className="w-4 h-4" /> {profile.city}
-                    </p>
-                  )}
-                  <div className="flex flex-wrap gap-3 justify-center sm:justify-start text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      Member since {new Date(profile.created_at).getFullYear()}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <ThumbsUp className="w-4 h-4" />
-                      {totalHelpfulness} Helpfulness
-                    </span>
-                    <span>{tripsCount} trips completed</span>
-                    <span>{reviews.length} reviews</span>
+                )}
+              </TabsContent>
+
+              {/* Favorites tab */}
+              <TabsContent value="favorites">
+                {favProviders.length === 0 && favCreators.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <p className="text-muted-foreground text-sm">no favorites yet</p>
                   </div>
-                </div>
-              </div>
-              {procedureTags.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  {procedureTags.map((p) => (
-                    <Badge key={p} variant="secondary">{p}</Badge>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Favorite Creators */}
-          {favCreators.length > 0 && (
-            <Card className="mb-6">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Star className="w-4 h-4" style={{ fill: '#E0A693', color: '#E0A693' }} /> favorite creators
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3 flex-wrap">
-                  {favCreators.slice(0, 3).map((c: any) => (
-                    <Link key={c.handle} to={`/c/${c.handle}`} className="flex items-center gap-2 p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
-                      <Avatar className="w-8 h-8 shrink-0">
-                        {c.avatar_url && <AvatarImage src={c.avatar_url} />}
-                        <AvatarFallback className="text-xs bg-primary text-primary-foreground">{c.display_name?.[0]}</AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm font-medium">{c.display_name}</span>
-                    </Link>
-                  ))}
-                  {favCreators.length > 3 && <Link to="/creators" className="text-xs text-primary self-center">view all {favCreators.length}</Link>}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Favorite Providers */}
-          {favProviders.length > 0 && (
-            <Card className="mb-6">
-              <CardHeader className="pb-3">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Heart className="w-4 h-4" style={{ fill: '#5EB298', color: '#5EB298' }} /> favorite providers
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-3 flex-wrap">
-                  {favProviders.slice(0, 3).map((p: any) => (
-                    <Link key={p.slug} to={`/provider/${p.slug}`} className="flex items-center gap-2 p-2 rounded-lg bg-muted hover:bg-muted/80 transition-colors">
-                      <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 bg-card">
-                        {p.cover_photo_url ? <img src={p.cover_photo_url} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-xs font-bold text-muted-foreground">{p.name?.[0]}</div>}
-                      </div>
+                ) : (
+                  <div className="space-y-8">
+                    {/* Favorite Providers */}
+                    {favProviders.length > 0 && (
                       <div>
-                        <p className="text-sm font-medium leading-tight">{p.name}</p>
-                        {p.city && <p className="text-xs text-muted-foreground">{p.city}</p>}
-                      </div>
-                    </Link>
-                  ))}
-                  {favProviders.length > 3 && <span className="text-xs text-muted-foreground self-center">+{favProviders.length - 3} more</span>}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Public About Me Sections */}
-          {extras && (
-            <>
-              {hasAboutContent(extras) && (
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Heart className="w-5 h-5 text-secondary" /> about me
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {extras.bio && <p className="text-foreground">{extras.bio}</p>}
-                    {extras.hobbies && extras.hobbies.length > 0 && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">hobbies</p>
-                        <div className="flex flex-wrap gap-1.5">{extras.hobbies.map(h => <Badge key={h} variant="outline">{h}</Badge>)}</div>
-                      </div>
-                    )}
-                    {extras.fun_facts && extras.fun_facts.length > 0 && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">fun facts</p>
-                        <div className="flex flex-wrap gap-1.5">{extras.fun_facts.map(f => <Badge key={f} variant="outline">{f}</Badge>)}</div>
-                      </div>
-                    )}
-                    {extras.favorite_emoji && <p className="text-sm">favorite emoji: {extras.favorite_emoji}</p>}
-                  </CardContent>
-                </Card>
-              )}
-
-              {hasBeautyContent(extras) && (
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Sparkles className="w-5 h-5 text-secondary" /> medspa regulars
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {extras.favorite_treatments && extras.favorite_treatments.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5">{extras.favorite_treatments.map(t => <Badge key={t} variant="outline">{t}</Badge>)}</div>
-                    )}
-                    {extras.beauty_goals && <p className="text-sm"><span className="text-muted-foreground">goals:</span> {extras.beauty_goals}</p>}
-                  </CardContent>
-                </Card>
-              )}
-
-              {hasTravelContent(extras) && (
-                <Card className="mb-6">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-lg">
-                      <Plane className="w-5 h-5 text-secondary" /> medical & dental tourism personality
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    {extras.travel_style && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">travel style</p>
-                        <div className="flex flex-wrap gap-1.5">
-                          {extras.travel_style.split(",").filter(Boolean).map(s => (
-                            <Badge key={s} variant="outline">{s}</Badge>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <Heart className="w-3 h-3 inline mr-1.5" style={{ color: '#5EB298' }} />
+                          favorite providers
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {favProviders.map((p: any) => (
+                            <Link key={p.slug} to={`/provider/${p.slug}`}
+                              className="rounded-xl overflow-hidden border hover:border-primary/30 transition-all duration-200 group"
+                              style={{ background: 'rgba(94,178,152,0.06)', borderColor: 'rgba(94,178,152,0.12)' }}>
+                              <div className="h-24 overflow-hidden bg-muted">
+                                {p.cover_photo_url
+                                  ? <img src={p.cover_photo_url} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                  : <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(94,178,152,0.1)' }}>
+                                      <span className="text-2xl font-bold opacity-20">{p.name?.[0]}</span>
+                                    </div>
+                                }
+                              </div>
+                              <div className="p-2.5">
+                                <p className="text-sm font-semibold truncate">{p.name}</p>
+                                {p.city && (
+                                  <p className="text-xs text-muted-foreground flex items-center gap-0.5 mt-0.5">
+                                    <MapPin className="w-3 h-3 shrink-0" />{p.city}
+                                  </p>
+                                )}
+                              </div>
+                            </Link>
                           ))}
                         </div>
                       </div>
                     )}
-                    {extras.favorite_destinations && extras.favorite_destinations.length > 0 && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">favorite destinations for budget friendly procedures & care</p>
-                        <div className="flex flex-wrap gap-1.5">{extras.favorite_destinations.map(d => <Badge key={d} variant="outline">{d}</Badge>)}</div>
-                      </div>
-                    )}
-                    {extras.bucket_list_procedures && extras.bucket_list_procedures.length > 0 && (
-                      <div>
-                        <p className="text-sm text-muted-foreground mb-1">bucket list procedures</p>
-                        <div className="flex flex-wrap gap-1.5">{extras.bucket_list_procedures.map(p => <Badge key={p} variant="outline">{p}</Badge>)}</div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </>
-          )}
 
-          {/* Reviews */}
-          <h2 className="text-xl font-bold mb-4">Reviews ({reviews.length})</h2>
-          {reviewsLoading ? (
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
-          ) : reviews.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No reviews yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {reviews.map((review) => {
-                const provider = providers.find((p) => p.slug === review.provider_slug);
-                return (
-                  <ReviewCard
-                    key={review.id}
-                    review={review}
-                    showProviderName
-                    providerName={provider?.name}
-                  />
-                );
-              })}
+                    {/* Favorite Creators */}
+                    {favCreators.length > 0 && (
+                      <div>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <Star className="w-3 h-3 inline mr-1.5" style={{ color: '#E0A693' }} />
+                          favorite creators
+                        </h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {favCreators.map((c: any) => (
+                            <Link key={c.handle} to={`/c/${c.handle}`}
+                              className="rounded-xl overflow-hidden border hover:border-secondary/30 transition-all duration-200 group"
+                              style={{ background: 'rgba(224,166,147,0.06)', borderColor: 'rgba(224,166,147,0.12)' }}>
+                              <div className="h-24 overflow-hidden bg-muted">
+                                {c.cover_photo_url
+                                  ? <img src={c.cover_photo_url} alt={c.display_name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                  : <div className="w-full h-full flex items-center justify-center" style={{ background: 'rgba(224,166,147,0.1)' }}>
+                                      <Avatar className="w-12 h-12">
+                                        {c.avatar_url && <img src={c.avatar_url} className="w-full h-full object-cover rounded-full" />}
+                                        <AvatarFallback className="bg-secondary text-secondary-foreground">{c.display_name?.[0]}</AvatarFallback>
+                                      </Avatar>
+                                    </div>
+                                }
+                              </div>
+                              <div className="p-2.5">
+                                <p className="text-sm font-semibold truncate">{c.display_name}</p>
+                                {c.specialties?.[0] && (
+                                  <p className="text-xs text-muted-foreground truncate mt-0.5">{c.specialties[0]}</p>
+                                )}
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </TabsContent>
+
+              {/* About Me tab */}
+              <TabsContent value="about">
+                {!hasAboutContent ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <p className="text-muted-foreground text-sm">nothing shared yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    {/* About section */}
+                    {(extras?.bio || extras?.hobbies?.length || extras?.fun_facts?.length || extras?.favorite_emoji) && (
+                      <div>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: 'rgba(255,255,255,0.4)' }}>about</h3>
+                        <div className="space-y-3">
+                          {extras?.bio && <p className="text-base leading-relaxed" style={{ color: 'rgba(255,255,255,0.75)' }}>{extras.bio}</p>}
+                          {extras?.hobbies && extras.hobbies.length > 0 && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-2">hobbies</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {extras.hobbies.map(h => (
+                                  <span key={h} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>{h}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {extras?.fun_facts && extras.fun_facts.length > 0 && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-2">fun facts</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {extras.fun_facts.map(f => (
+                                  <span key={f} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>{f}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {extras?.favorite_emoji && (
+                            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>favorite emoji: {extras.favorite_emoji}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* MedSpa / treatments section */}
+                    {(extras?.beauty_goals || extras?.favorite_treatments?.length) && (
+                      <div>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <Sparkles className="w-3 h-3" style={{ color: '#E0A693' }} /> medspa regulars
+                        </h3>
+                        <div className="space-y-3">
+                          {extras?.favorite_treatments && extras.favorite_treatments.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5">
+                              {extras.favorite_treatments.map(t => (
+                                <span key={t} className="text-xs px-2.5 py-1 rounded-full font-medium"
+                                  style={{ background: 'rgba(224,166,147,0.12)', border: '1px solid rgba(224,166,147,0.25)', color: '#E0A693' }}>{t}</span>
+                              ))}
+                            </div>
+                          )}
+                          {extras?.beauty_goals && (
+                            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                              <span className="text-muted-foreground">goals: </span>{extras.beauty_goals}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Travel personality section */}
+                    {(extras?.travel_style || extras?.favorite_destinations?.length || extras?.bucket_list_procedures?.length) && (
+                      <div>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-4 flex items-center gap-1.5" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          <Plane className="w-3 h-3" style={{ color: '#5EB298' }} /> tourism personality
+                        </h3>
+                        <div className="space-y-3">
+                          {extras?.travel_style && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-2">travel style</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {extras.travel_style.split(",").filter(Boolean).map(s => (
+                                  <span key={s} className="text-xs px-2.5 py-1 rounded-full font-medium"
+                                    style={{ background: 'rgba(94,178,152,0.12)', border: '1px solid rgba(94,178,152,0.25)', color: '#5EB298' }}>{s.trim()}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {extras?.favorite_destinations && extras.favorite_destinations.length > 0 && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-2">favorite destinations</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {extras.favorite_destinations.map(d => (
+                                  <span key={d} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>{d}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {extras?.bucket_list_procedures && extras.bucket_list_procedures.length > 0 && (
+                            <div>
+                              <p className="text-xs text-muted-foreground mb-2">bucket list procedures</p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {extras.bucket_list_procedures.map(p => (
+                                  <span key={p} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>{p}</span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </TabsContent>
+
             </div>
-          )}
+          </Tabs>
         </div>
-      </main>
+      </div>
+
       <Footer />
     </div>
   );
