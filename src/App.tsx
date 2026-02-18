@@ -35,6 +35,7 @@ import CreatorEdit from "./pages/CreatorEdit";
 import CreatorProfile from "./pages/CreatorProfile";
 import Creators from "./pages/Creators";
 import HandleRouter from "./pages/HandleRouter";
+import BookingPaths from "./pages/BookingPaths";
 import BugReportButton from "./components/beta/BugReportButton";
 import TripAssistantWrapper from "./components/chat/TripAssistantWrapper";
 import NotFound from "./pages/NotFound";
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/provider/onboarding" element={<ProtectedRoute><ProviderOnboarding /></ProtectedRoute>} />
             <Route path="/provider-dashboard" element={<ProtectedRoute><ProviderDashboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+            <Route path="/book" element={<BookingPaths />} />
             {/* Catch-all handle router — MUST be last */}
             <Route path="/:handle" element={<HandleRouter />} />
             <Route path="*" element={<NotFound />} />
