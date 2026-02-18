@@ -227,7 +227,7 @@ const CreatorJoin = () => {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
-          <img src={logo} alt="Denied" className="h-12 mx-auto mb-8" />
+          <img src={logo} alt="Denied" className="h-12 mx-auto mb-8" style={{ mixBlendMode: 'screen' }} />
           <Card className="shadow-hero border-border/50">
             <CardContent className="py-12">
               <AlertTriangle className="w-12 h-12 mx-auto text-secondary mb-4" />
@@ -250,7 +250,7 @@ const CreatorJoin = () => {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="w-full max-w-md">
-          <img src={logo} alt="Denied" className="h-12 mx-auto mb-8" />
+          <img src={logo} alt="Denied" className="h-12 mx-auto mb-8" style={{ mixBlendMode: 'screen' }} />
           <Card className="shadow-hero border-border/50">
             <CardHeader className="text-center">
               <Badge className="mx-auto mb-2 bg-secondary/10 text-secondary border-secondary/20">
@@ -300,7 +300,7 @@ const CreatorJoin = () => {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <img src={logo} alt="Denied" className="h-12" />
+          <img src={logo} alt="Denied" className="h-12" style={{ mixBlendMode: 'screen' }} />
         </div>
 
         <Card className="shadow-hero border-border/50">

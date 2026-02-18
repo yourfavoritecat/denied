@@ -90,6 +90,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
           src={logo}
           alt="Denied"
           className="w-80 md:w-[400px] lg:w-[500px] h-auto mb-10"
+          style={{ mixBlendMode: 'screen' }}
         />
 
         {/* Tagline */}

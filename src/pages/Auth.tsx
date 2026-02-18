@@ -134,7 +134,7 @@ const AuthPage = () => {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <img src={logo} alt="Denied" className="h-12" />
+          <img src={logo} alt="Denied" className="h-12" style={{ mixBlendMode: 'screen' }} />
         </div>
 
         <Card className="shadow-hero border-border/50">

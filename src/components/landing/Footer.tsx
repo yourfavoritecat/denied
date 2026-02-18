@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 mb-10">
           <div>
             <Link to="/" className="mb-4 block">
-              <img src={logo} alt="Denied Logo" className="h-10 w-auto" />
+              <img src={logo} alt="Denied Logo" className="h-10 w-auto" style={{ mixBlendMode: 'screen' }} />
             </Link>
             <p className="text-white/50 text-sm leading-relaxed">
               Fighting back against the broken healthcare system. One procedure at a time.

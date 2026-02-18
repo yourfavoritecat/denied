@@ -126,7 +126,7 @@ const Apply = () => {
       <div className="max-w-2xl mx-auto">
         <div className="flex justify-center mb-8">
           <Link to="/">
-            <img src={logo} alt="Denied" className="h-10" />
+            <img src={logo} alt="Denied" className="h-10" style={{ mixBlendMode: 'screen' }} />
           </Link>
         </div>
 

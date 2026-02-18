@@ -73,6 +73,7 @@ const HeroSection = () => {
             src={logo} 
             alt="Denied Logo" 
             className="w-72 md:w-96 lg:w-[500px] h-auto drop-shadow-[0_8px_32px_hsl(15_100%_71%/0.15)]"
+            style={{ mixBlendMode: 'screen' }}
           />
         </div>
         
