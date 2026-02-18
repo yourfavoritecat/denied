@@ -441,28 +441,80 @@ const CreatorEdit = () => {
         {/* Profile Theme */}
         <section className="space-y-3">
           <Label className="text-base font-semibold">Profile Theme</Label>
-          <p className="text-xs text-muted-foreground">Choose the accent color for your public creator page.</p>
+          <p className="text-xs text-muted-foreground">Each theme changes your whole profile — card colors, borders, tags, and accent tones.</p>
           <div className="flex gap-3">
             {([
-              { value: "mint", label: "Mint", bg: "rgba(94,178,152,0.15)", border: "#5EB298", dot: "#5EB298" },
-              { value: "peach", label: "Peach", bg: "rgba(224,166,147,0.15)", border: "#E0A693", dot: "#E0A693" },
-              { value: "pearl", label: "Pearl", bg: "rgba(255,255,255,0.08)", border: "#D4C5A9", dot: "#D4C5A9" },
-            ] as const).map((t) => (
-              <button
-                key={t.value}
-                onClick={() => setProfileTheme(t.value)}
-                className="flex-1 rounded-xl p-3 flex flex-col items-center gap-2 transition-all border-2"
-                style={{
-                  background: t.bg,
-                  borderColor: profileTheme === t.value ? t.border : "transparent",
-                  outline: profileTheme === t.value ? `2px solid ${t.border}40` : "none",
-                }}
-              >
-                <div className="w-5 h-5 rounded-full" style={{ background: t.dot }} />
-                <span className="text-xs font-medium">{t.label}</span>
-                {profileTheme === t.value && <span className="text-[10px]" style={{ color: t.dot }}>active</span>}
-              </button>
-            ))}
+              {
+                value: "mint" as const,
+                label: "Mint",
+                accent: "#5EB298",
+                cardBg: "rgba(94,178,152,0.08)",
+                cardBorder: "rgba(94,178,152,0.12)",
+                tagBg: "rgba(94,178,152,0.15)",
+                tagBorder: "rgba(94,178,152,0.3)",
+                pageBg: "#0a0a0a",
+                buttonBg: "#5EB298",
+              },
+              {
+                value: "peach" as const,
+                label: "Peach",
+                accent: "#E0A693",
+                cardBg: "rgba(224,166,147,0.08)",
+                cardBorder: "rgba(224,166,147,0.12)",
+                tagBg: "rgba(224,166,147,0.15)",
+                tagBorder: "rgba(224,166,147,0.3)",
+                pageBg: "#0a0a0a",
+                buttonBg: "#E0A693",
+              },
+              {
+                value: "pearl" as const,
+                label: "Pearl",
+                accent: "#D4C5A9",
+                cardBg: "rgba(255,255,255,0.05)",
+                cardBorder: "rgba(255,255,255,0.10)",
+                tagBg: "rgba(212,197,169,0.12)",
+                tagBorder: "rgba(212,197,169,0.25)",
+                pageBg: "#121212",
+                buttonBg: "#D4C5A9",
+              },
+            ]).map((t) => {
+              const isActive = profileTheme === t.value;
+              return (
+                <button
+                  key={t.value}
+                  onClick={() => setProfileTheme(t.value)}
+                  className="flex-1 rounded-xl p-3 flex flex-col gap-2.5 transition-all text-left"
+                  style={{
+                    background: t.pageBg,
+                    border: `2px solid ${isActive ? t.accent : 'rgba(255,255,255,0.08)'}`,
+                    outline: isActive ? `3px solid ${t.accent}30` : 'none',
+                    outlineOffset: '2px',
+                  }}
+                >
+                  {/* Mock card preview */}
+                  <div className="w-full rounded-lg p-2.5" style={{ background: t.cardBg, border: `1px solid ${t.cardBorder}` }}>
+                    {/* Mock header bar */}
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <div className="w-5 h-5 rounded-full" style={{ background: t.accent, opacity: 0.9 }} />
+                      <div className="h-1.5 rounded-full flex-1" style={{ background: `${t.accent}40` }} />
+                    </div>
+                    {/* Mock tag */}
+                    <div className="inline-flex rounded-full px-2 py-0.5 mb-1.5" style={{ background: t.tagBg, border: `1px solid ${t.tagBorder}` }}>
+                      <div className="h-1 w-8 rounded-full" style={{ background: t.accent }} />
+                    </div>
+                    {/* Mock button */}
+                    <div className="w-full rounded-full h-3" style={{ background: t.buttonBg, opacity: 0.85 }} />
+                  </div>
+                  {/* Label row */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold" style={{ color: isActive ? t.accent : 'rgba(255,255,255,0.7)' }}>{t.label}</span>
+                    {isActive && (
+                      <span className="text-[10px] rounded-full px-1.5 py-0.5 font-medium" style={{ background: `${t.accent}20`, color: t.accent }}>active</span>
+                    )}
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </section>
 
