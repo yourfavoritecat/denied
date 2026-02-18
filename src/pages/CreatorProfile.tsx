@@ -17,7 +17,7 @@ import RequestQuoteModal from "@/components/providers/RequestQuoteModal";
 import ReviewCard, { type ReviewData } from "@/components/reviews/ReviewCard";
 import UserBadge from "@/components/profile/UserBadge";
 import Navbar from "@/components/layout/Navbar";
-import logo from "@/assets/logo-clean.png";
+import logo from "@/assets/logo-new.png";
 
 /* ── Types ── */
 
