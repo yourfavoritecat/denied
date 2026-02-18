@@ -66,11 +66,19 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
         isCreator = !!(profileData as any)?.is_creator;
       }
 
-      // If this user is a creator and we're on /user/:username, redirect to /:handle
-      if (isCreator && (data as any)?.username) {
-        setCreatorHandle((data as any).username);
-        setLoading(false);
-        return;
+      // If this user is a creator, look up their actual creator handle (may differ from username)
+      if (isCreator && (data as any)?.user_id) {
+        const { data: cpData } = await supabase
+          .from("creator_profiles")
+          .select("handle")
+          .eq("user_id", (data as any).user_id)
+          .eq("is_published", true)
+          .maybeSingle();
+        if (cpData?.handle) {
+          setCreatorHandle(cpData.handle);
+          setLoading(false);
+          return;
+        }
       }
 
       const fullProfile = data ? { ...(data as any), badge_type: badgeType, status: statusVal } : null;
