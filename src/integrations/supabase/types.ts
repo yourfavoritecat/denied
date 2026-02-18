@@ -75,7 +75,16 @@ export type Database = {
       }
       bookings: {
         Row: {
+          booking_code: string | null
+          booking_type: string
+          checked_in: boolean
+          checked_in_at: string | null
+          checked_in_by: string | null
           commission_amount: number | null
+          commission_rate: number
+          concierge_fee: number | null
+          concierge_fee_paid: boolean
+          confirmed_total: number | null
           created_at: string
           deposit_amount: number | null
           id: string
@@ -83,6 +92,7 @@ export type Database = {
           medical_notes: string | null
           preferred_dates: Json | null
           procedures: Json | null
+          procedures_confirmed: Json | null
           provider_estimated_dates: string | null
           provider_message: string | null
           provider_slug: string
@@ -95,7 +105,16 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          booking_code?: string | null
+          booking_type?: string
+          checked_in?: boolean
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           commission_amount?: number | null
+          commission_rate?: number
+          concierge_fee?: number | null
+          concierge_fee_paid?: boolean
+          confirmed_total?: number | null
           created_at?: string
           deposit_amount?: number | null
           id?: string
@@ -103,6 +122,7 @@ export type Database = {
           medical_notes?: string | null
           preferred_dates?: Json | null
           procedures?: Json | null
+          procedures_confirmed?: Json | null
           provider_estimated_dates?: string | null
           provider_message?: string | null
           provider_slug: string
@@ -115,7 +135,16 @@ export type Database = {
           user_id: string
         }
         Update: {
+          booking_code?: string | null
+          booking_type?: string
+          checked_in?: boolean
+          checked_in_at?: string | null
+          checked_in_by?: string | null
           commission_amount?: number | null
+          commission_rate?: number
+          concierge_fee?: number | null
+          concierge_fee_paid?: boolean
+          confirmed_total?: number | null
           created_at?: string
           deposit_amount?: number | null
           id?: string
@@ -123,6 +152,7 @@ export type Database = {
           medical_notes?: string | null
           preferred_dates?: Json | null
           procedures?: Json | null
+          procedures_confirmed?: Json | null
           provider_estimated_dates?: string | null
           provider_message?: string | null
           provider_slug?: string
@@ -188,6 +218,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      commission_invoices: {
+        Row: {
+          booking_id: string
+          commission_amount: number
+          commission_rate: number
+          created_at: string
+          id: string
+          paid_at: string | null
+          procedure_total: number
+          provider_slug: string
+          status: string
+        }
+        Insert: {
+          booking_id: string
+          commission_amount: number
+          commission_rate: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          procedure_total: number
+          provider_slug: string
+          status?: string
+        }
+        Update: {
+          booking_id?: string
+          commission_amount?: number
+          commission_rate?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          procedure_total?: number
+          provider_slug?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "commission_invoices_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       content_flags: {
         Row: {
