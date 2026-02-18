@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo-new.png";
+import logo from "@/assets/final-new-logo.png";
 
 const TikTokIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
@@ -89,7 +89,7 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
           <img
             src={logo}
             alt="Denied"
-            className="w-80 md:w-[400px] lg:w-[500px] h-auto relative"
+            className="w-[420px] md:w-[520px] lg:w-[620px] h-auto relative"
             style={{ mixBlendMode: 'screen' }}
           />
         </div>

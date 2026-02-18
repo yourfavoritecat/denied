@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
 import { CheckCircle, ArrowLeft } from "lucide-react";
-import logo from "@/assets/logo-new.png";
+import logo from "@/assets/final-new-logo.png";
 
 const BUSINESS_TYPES = [
   "Dental Clinic",
