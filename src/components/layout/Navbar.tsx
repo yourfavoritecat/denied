@@ -79,7 +79,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="Denied Logo" className="h-10 w-auto" />
+            <img src={logo} alt="Denied Logo" className="h-10 w-auto" style={{ mixBlendMode: 'screen' }} />
           </Link>
 
           {/* Desktop nav */}

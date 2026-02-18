@@ -502,7 +502,7 @@ const CreatorProfile = () => {
       <footer className="border-t" style={{ borderColor: theme.divider, background: theme.pageBg }}>
         <div className="max-w-[960px] mx-auto px-6 py-10 text-center">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <img src={logo} alt="denied.care" className="h-5 w-auto" />
+            <img src={logo} alt="denied.care" className="h-5 w-auto" style={{ mixBlendMode: 'screen' }} />
             <span>denied.care</span>
           </Link>
         </div>

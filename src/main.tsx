@@ -24,6 +24,7 @@ const SplashScreen = ({ onComplete }: { onComplete: () => void }) => {
         src="/splash-logo.png"
         alt="Denied"
         className="w-72 md:w-96 lg:w-[460px] h-auto animate-splash-glow"
+        style={{ mixBlendMode: 'screen' }}
       />
     </div>
   );
