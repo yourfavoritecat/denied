@@ -6,9 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Star, ThumbsUp, BadgeCheck, CheckCircle, Play, Pause, PenLine, ChevronLeft, ChevronRight, X, Lock, Calendar, Check } from "lucide-react";
+import { Star, ThumbsUp, BadgeCheck, CheckCircle, Play, Pause, PenLine, ChevronLeft, ChevronRight, X, Lock, Calendar } from "lucide-react";
+import LeaveReviewModal from "@/components/reviews/LeaveReviewModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -121,14 +120,14 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [privateProfileOpen, setPrivateProfileOpen] = useState(false);
   const [memberSince, setMemberSince] = useState<string | null>(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [procedures, setProcedures] = useState<string[]>([]);
 
-  // Inline edit state
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(review.title);
-  const [editText, setEditText] = useState(review.review_text);
-  const [isSaving, setIsSaving] = useState(false);
+  // Local state to reflect edits without full reload
   const [localTitle, setLocalTitle] = useState(review.title);
   const [localText, setLocalText] = useState(review.review_text);
+  const [localPhotos, setLocalPhotos] = useState(review.photos);
+  const [localVideos, setLocalVideos] = useState(review.videos);
   const [localIsEdited, setLocalIsEdited] = useState(review.is_edited ?? false);
   const [localUpdatedAt, setLocalUpdatedAt] = useState(review.updated_at);
 
@@ -165,22 +164,19 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
     setIsUpvoting(false);
   };
 
-  const handleSaveEdit = async () => {
-    if (!editTitle.trim() || !editText.trim()) return;
-    setIsSaving(true);
-    const now = new Date().toISOString();
-    const { error } = await supabase.from("reviews").update({ title: editTitle.trim(), review_text: editText.trim(), is_edited: true, updated_at: now }).eq("id", review.id);
-    if (error) {
-      toast({ title: "Failed to save", variant: "destructive" });
-    } else {
-      setLocalTitle(editTitle.trim());
-      setLocalText(editText.trim());
-      setLocalIsEdited(true);
-      setLocalUpdatedAt(now);
-      setIsEditing(false);
-      toast({ title: "Review updated" });
-    }
-    setIsSaving(false);
+  const openEdit = async () => {
+    // Fetch provider procedures for the edit modal
+    const { data } = await supabase.from("provider_services").select("procedure_name").eq("provider_slug", review.provider_slug);
+    const fetched = (data || []).map((r: any) => r.procedure_name);
+    // Always include the current procedure in case it's not listed
+    const allProcs = fetched.includes(review.procedure_name) ? fetched : [review.procedure_name, ...fetched];
+    setProcedures(allProcs.length > 0 ? allProcs : [review.procedure_name]);
+    setEditModalOpen(true);
+  };
+
+  const handleReviewUpdated = () => {
+    // Trigger a page reload to reflect all changes (photos, videos, text)
+    window.location.reload();
   };
 
   const profileLink = isPublic && username ? `/user/${username}` : null;
@@ -229,10 +225,10 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  {isAuthor && !isEditing && (
+                  {isAuthor && (
                     <button
                       className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={() => { setEditTitle(localTitle); setEditText(localText); setIsEditing(true); }}
+                      onClick={openEdit}
                     >
                       <PenLine className="w-3 h-3" /> edit
                     </button>
@@ -257,35 +253,10 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
                 )}
               </div>
 
-              {isEditing ? (
-                <div className="space-y-2 mb-2">
-                  <Input
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    placeholder="Review title"
-                    className="text-sm font-semibold"
-                  />
-                  <Textarea
-                    value={editText}
-                    onChange={(e) => setEditText(e.target.value)}
-                    placeholder="Your review"
-                    className="text-sm min-h-[80px]"
-                  />
-                  <div className="flex gap-2">
-                    <Button size="sm" onClick={handleSaveEdit} disabled={isSaving} className="gap-1 text-xs h-7">
-                      <Check className="w-3 h-3" /> {isSaving ? "Saving…" : "Save"}
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)} className="text-xs h-7">Cancel</Button>
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <h4 className="font-semibold mb-1">{localTitle}</h4>
-                  <p className="text-muted-foreground leading-relaxed text-sm">{localText}</p>
-                </>
-              )}
+              <h4 className="font-semibold mb-1">{localTitle}</h4>
+              <p className="text-muted-foreground leading-relaxed text-sm">{localText}</p>
 
-              {editedDate && !isEditing && (
+              {editedDate && (
                 <p className="text-xs text-muted-foreground mt-1 italic">edited {editedDate}</p>
               )}
 
@@ -349,8 +320,29 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
         </CardContent>
       </Card>
 
-      {review.photos.length > 0 && (
-        <PhotoLightbox photos={review.photos} initialIndex={lightboxIndex} open={lightboxOpen} onClose={() => setLightboxOpen(false)} />
+      {localPhotos.length > 0 && (
+        <PhotoLightbox photos={localPhotos} initialIndex={lightboxIndex} open={lightboxOpen} onClose={() => setLightboxOpen(false)} />
+      )}
+
+      {/* Edit modal — full LeaveReviewModal with photo/video support */}
+      {isAuthor && editModalOpen && (
+        <LeaveReviewModal
+          open={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          providerSlug={review.provider_slug}
+          providerName={providerName || review.provider_slug}
+          procedures={procedures}
+          onReviewSubmitted={handleReviewUpdated}
+          editReview={{
+            ...review,
+            photos: localPhotos,
+            videos: localVideos,
+            title: localTitle,
+            review_text: localText,
+            is_edited: localIsEdited,
+            updated_at: localUpdatedAt,
+          }}
+        />
       )}
 
       <Dialog open={privateProfileOpen} onOpenChange={setPrivateProfileOpen}>
