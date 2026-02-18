@@ -1,72 +1,127 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Heart, MapPin, Star, X } from "lucide-react";
+import { Heart, MapPin, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-const initialSavedProviders = [
-  { id: 1, name: "Dental Excellence Tijuana", location: "Tijuana, Mexico", rating: 4.9 },
-  { id: 2, name: "Cancun Smile Center", location: "Cancun, Mexico", rating: 4.8 },
-];
+interface FavProvider {
+  slug: string;
+  name: string;
+  city: string | null;
+  country: string | null;
+  cover_photo_url: string | null;
+  specialties: string[] | null;
+}
 
 const SavedProvidersTab = () => {
-  const [savedProviders, setSavedProviders] = useState(initialSavedProviders);
+  const { user } = useAuth();
+  const [providers, setProviders] = useState<FavProvider[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleRemove = (id: number, name: string) => {
-    setSavedProviders((prev) => prev.filter((p) => p.id !== id));
-    toast({ title: "Provider removed", description: `${name} has been removed from your favorites.` });
+  useEffect(() => {
+    if (!user) { setLoading(false); return; }
+    load();
+  }, [user]);
+
+  const load = async () => {
+    setLoading(true);
+    const { data: favs } = await supabase
+      .from("favorites" as any)
+      .select("target_id")
+      .eq("user_id", user!.id)
+      .eq("target_type", "provider");
+
+    const slugs = ((favs as any[]) || []).map((f: any) => f.target_id);
+    if (slugs.length === 0) { setProviders([]); setLoading(false); return; }
+
+    const { data: provData } = await supabase
+      .from("providers")
+      .select("slug, name, city, country, cover_photo_url, specialties")
+      .in("slug", slugs);
+
+    setProviders((provData as FavProvider[]) || []);
+    setLoading(false);
   };
 
+  const handleRemove = async (slug: string, name: string) => {
+    await supabase
+      .from("favorites" as any)
+      .delete()
+      .eq("user_id", user!.id)
+      .eq("target_id", slug)
+      .eq("target_type", "provider");
+    setProviders((prev) => prev.filter((p) => p.slug !== slug));
+    toast({ title: "Removed", description: `${name} removed from your favorites.` });
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (providers.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <Heart className="w-10 h-10 text-muted-foreground/30 mb-3" />
+        <p className="text-muted-foreground text-sm">No favorite providers yet.</p>
+        <p className="text-muted-foreground text-xs mt-1">Browse providers and tap the heart to save your favorites.</p>
+        <Button asChild variant="outline" size="sm" className="mt-4">
+          <Link to="/search">Browse Providers</Link>
+        </Button>
+      </div>
+    );
+  }
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Heart className="w-5 h-5" />
-          Favorite Providers
-        </CardTitle>
-        <CardDescription>Providers you've saved as favorites</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {savedProviders.length > 0 ? (
-          <div className="space-y-4">
-            {savedProviders.map((provider) => (
-              <div
-                key={provider.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div>
-                  <h4 className="font-semibold">{provider.name}</h4>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <MapPin className="w-4 h-4" />
-                    {provider.location}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-secondary text-secondary" />
-                    <span className="font-medium">{provider.rating}</span>
-                  </div>
-                  <Button size="sm">View</Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleRemove(provider.id, provider.name)}
-                    aria-label={`Remove ${provider.name}`}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
+    <div className="grid sm:grid-cols-2 gap-3">
+      {providers.map((prov) => (
+        <div
+          key={prov.slug}
+          className="rounded-xl overflow-hidden border"
+          style={{ background: 'rgba(94,178,152,0.05)', border: '1px solid rgba(94,178,152,0.12)' }}
+        >
+          {/* Cover */}
+          <div className="h-24 bg-muted overflow-hidden relative">
+            {prov.cover_photo_url ? (
+              <img src={prov.cover_photo_url} alt={prov.name} className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-muted">
+                <span className="text-3xl font-bold text-muted-foreground/20">{prov.name[0]}</span>
               </div>
-            ))}
+            )}
           </div>
-        ) : (
-          <p className="text-center text-muted-foreground py-8">
-            No favorite providers yet. Start browsing to save your favorites!
-          </p>
-        )}
-      </CardContent>
-    </Card>
+          {/* Info */}
+          <div className="p-3">
+            <h4 className="font-semibold text-sm truncate">{prov.name}</h4>
+            {(prov.city || prov.country) && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                <MapPin className="w-3 h-3 shrink-0" />
+                <span className="truncate">{[prov.city, prov.country].filter(Boolean).join(", ")}</span>
+              </div>
+            )}
+            <div className="flex items-center gap-2 mt-2">
+              <Button asChild size="sm" variant="outline" className="flex-1 h-7 text-xs">
+                <Link to={`/provider/${prov.slug}`}>View</Link>
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-muted-foreground hover:text-destructive shrink-0"
+                onClick={() => handleRemove(prov.slug, prov.name)}
+                aria-label={`Remove ${prov.name}`}
+              >
+                <Heart className="w-3.5 h-3.5 fill-current" style={{ color: '#5EB298' }} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 
