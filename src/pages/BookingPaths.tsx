@@ -157,7 +157,7 @@ const BookingPaths = () => {
                   <p className="text-2xl font-bold text-secondary">$150 <span className="text-sm font-normal text-muted-foreground">/ trip</span></p>
                 </div>
                 <Button
-                  onClick={() => navigate("/search")}
+                  onClick={() => navigate("/search?type=concierge")}
                   className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-semibold"
                 >
                   Book with concierge
@@ -202,7 +202,7 @@ const BookingPaths = () => {
                   <p className="text-2xl font-bold text-primary">$0 <span className="text-sm font-normal text-muted-foreground">/ always</span></p>
                 </div>
                 <Button
-                  onClick={() => navigate("/search")}
+                  onClick={() => navigate("/search?type=direct")}
                   variant="outline"
                   className="border-primary/40 text-primary hover:bg-primary/10 font-semibold"
                 >

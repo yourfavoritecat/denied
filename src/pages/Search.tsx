@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
@@ -51,6 +51,10 @@ const CATEGORY_IMAGES: Record<string, string> = {
 type SortOption = "default" | "price-low" | "price-high" | "rating" | "reviews";
 
 const SearchPage = () => {
+  const [searchParams] = useSearchParams();
+  const bookingType = searchParams.get("type") === "concierge" ? "concierge" : "direct";
+  const isConcierge = bookingType === "concierge";
+
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("default");
   const [dbProviders, setDbProviders] = useState<DBProvider[]>([]);
@@ -190,7 +194,16 @@ const SearchPage = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="pt-20 pb-16">
+      {/* Concierge mode banner */}
+      {isConcierge && (
+        <div className="fixed top-16 left-0 right-0 z-40 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium"
+          style={{ background: 'rgba(255,140,105,0.15)', borderBottom: '1px solid rgba(255,140,105,0.3)', backdropFilter: 'blur(10px)' }}>
+          <span>✨</span>
+          <span style={{ color: '#FF8C69' }}>Concierge mode</span>
+          <span className="text-muted-foreground">— we'll handle your travel coordination</span>
+        </div>
+      )}
+      <main className={`pb-16 ${isConcierge ? "pt-28" : "pt-20"}`}>
         <div className="container mx-auto px-4">
           {/* Hero Banner */}
           <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: 180 }}>
@@ -278,7 +291,7 @@ const SearchPage = () => {
                     viewport={{ once: true, margin: "-40px" }}
                     transition={{ duration: 0.45, delay: (index % 6) * 0.08 }}
                   >
-                    <Link to={`/provider/${provider.slug}`}>
+                    <Link to={`/provider/${provider.slug}${isConcierge ? "?type=concierge" : ""}`}>
                       <Card className="overflow-hidden border border-border/50 shadow-elevated hover:shadow-floating tactile-lift cursor-pointer h-full group bg-card">
                         <div className="aspect-[16/10] relative overflow-hidden">
                           <img
