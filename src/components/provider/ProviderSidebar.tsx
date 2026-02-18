@@ -1,7 +1,7 @@
-import { BarChart3, MessageSquare, DollarSign, Plane, History, Building2, Settings } from "lucide-react";
+import { BarChart3, MessageSquare, DollarSign, Plane, History, Building2, ScanLine } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type ProviderSection = "home" | "inquiries" | "quoted" | "active" | "past";
+export type ProviderSection = "home" | "inquiries" | "quoted" | "active" | "past" | "checkin";
 
 const sections: { id: ProviderSection; label: string; icon: React.ElementType }[] = [
   { id: "home", label: "Home", icon: BarChart3 },
@@ -9,6 +9,7 @@ const sections: { id: ProviderSection; label: string; icon: React.ElementType }[
   { id: "quoted", label: "Quoted", icon: DollarSign },
   { id: "active", label: "Active Trips", icon: Plane },
   { id: "past", label: "Past", icon: History },
+  { id: "checkin", label: "Check In", icon: ScanLine },
 ];
 
 interface Props {

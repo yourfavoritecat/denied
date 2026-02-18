@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { providers } from "@/data/providers";
 import ProviderSidebar, { type ProviderSection } from "@/components/provider/ProviderSidebar";
 import ProviderHome from "@/components/provider/ProviderHome";
+import CheckInScanner from "@/components/provider/CheckInScanner";
 
 interface PatientProfile {
   first_name: string | null;
@@ -396,7 +397,10 @@ const ProviderDashboard = () => {
             onNavigate={(s) => setSection(s as ProviderSection)}
           />
         )}
-        {section !== "home" && renderBookingList(section)}
+        {section === "checkin" && (
+          <CheckInScanner providerSlug={providerSlug} />
+        )}
+        {section !== "home" && section !== "checkin" && renderBookingList(section)}
       </main>
 
       {/* Quote Dialog */}
