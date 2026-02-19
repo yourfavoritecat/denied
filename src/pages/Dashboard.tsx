@@ -106,10 +106,10 @@ const Dashboard = () => {
             style={{ height: 220 }}
           >
             <img
-              src="/images/hero-dashboard.jpg"
+              src="/images/hero-profile.jpg"
               alt=""
               className="w-full h-full object-cover"
-              style={{ objectPosition: 'center 40%' }}
+              style={{ objectPosition: 'center 30%' }}
             />
             <div
               className="absolute inset-0"

@@ -186,18 +186,18 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
         </div>
       )}
 
-      {/* Cover — gradient, no photo for travelers */}
+      {/* Cover — photo banner */}
       <div
         className="relative w-full overflow-hidden"
-        style={{
-          height: '180px',
-          paddingTop: '64px',
-          background: 'linear-gradient(135deg, rgba(80,255,144,0.1) 0%, rgba(255,140,105,0.07) 100%)',
-        }}
+        style={{ height: '200px', paddingTop: '64px' }}
       >
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: 'repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,1) 40px,rgba(255,255,255,1) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,1) 40px,rgba(255,255,255,1) 41px)' }} />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+        <img
+          src="/images/hero-profile.jpg"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectPosition: 'center 25%' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
       </div>
 
       {/* All content below cover */}
