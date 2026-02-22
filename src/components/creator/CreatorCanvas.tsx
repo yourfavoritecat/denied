@@ -686,6 +686,32 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             >
 
               <div className="flex flex-col items-center text-center relative">
+                {/* edit my page button — only for owner */}
+                {user && userId === user.id && (
+                  <button
+                    onClick={() => navigate("/creator/edit")}
+                    className="absolute top-0 right-0 rounded-full"
+                    style={{
+                      fontSize: 11,
+                      letterSpacing: 1,
+                      padding: "6px 16px",
+                      background: `rgba(${rgb},0.15)`,
+                      border: `1px solid rgba(${rgb},0.35)`,
+                      color: accent,
+                      transition: "all 300ms ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = `0 0 12px rgba(${rgb},0.2)`;
+                      e.currentTarget.style.borderColor = `rgba(${rgb},0.6)`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.borderColor = `rgba(${rgb},0.35)`;
+                    }}
+                  >
+                    edit my page
+                  </button>
+                )}
                 {/* avatar */}
                 <div className="mb-3">
                   <Avatar

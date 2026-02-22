@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -24,6 +24,7 @@ import logo from "@/assets/final-new-logo.png";
 const Navbar = () => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAdmin } = useAdmin();
   const { viewAs } = useViewAs();
@@ -44,12 +45,12 @@ const Navbar = () => {
   const isProvider = (actualProvider && viewAs !== "traveler" && viewAs !== "creator" && viewAs !== "visitor") || (isAdmin && viewAs === "provider");
   const showProviderDashboard = isProvider || (isAdmin && viewAs === "admin");
   const showAdminLink = isAdmin && viewAs === "admin";
-  const showCreatorLink = isCreator || (isAdmin && (viewAs === "admin" || viewAs === "creator"));
+  const showCreatorLink = (isCreator && !!creatorHandle) || (isAdmin && (viewAs === "admin" || viewAs === "creator"));
 
   const visitorMode = isAdmin && viewAs === "visitor";
 
-  // Build the profile link — creators go to /creator/edit, others to /profile
-  const myProfileUrl = (isCreator && creatorHandle) ? "/creator/edit" : "/profile";
+  // Build the "my page" link — goes to public creator profile
+  const myPageUrl = creatorHandle ? `/c/${creatorHandle}` : "/creator/edit";
 
   const navLinks = visitorMode
     ? [
@@ -60,9 +61,16 @@ const Navbar = () => {
         { to: "/search", icon: Search, label: "Providers" },
         { to: "/creators", icon: Users, label: "Creators" },
         { to: "/my-trips", icon: Plane, label: "My Trips" },
-        ...(showCreatorLink ? [{ to: "/creator/edit", icon: User, label: "My Page" }] : []),
+        ...(showCreatorLink ? [{ to: myPageUrl, icon: User, label: "My Page" }] : []),
         { to: "/profile", icon: SettingsIcon, label: "Settings" },
       ];
+
+  /* check if a nav link is active */
+  const isLinkActive = (to: string) => {
+    if (to === "/dashboard") return location.pathname === "/dashboard";
+    if (to.startsWith("/c/")) return location.pathname === to;
+    return location.pathname.startsWith(to);
+  };
 
   const handleMobileNav = (to: string) => {
     setMobileOpen(false);
@@ -79,12 +87,36 @@ const Navbar = () => {
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-2 lg:gap-6 xl:gap-8 min-w-0">
-            {navLinks.map((link) => (
-              <Link key={link.to} to={link.to} className="flex items-center gap-1 lg:gap-2 text-white/80 hover:text-white transition-colors whitespace-nowrap text-xs lg:text-sm">
-                <link.icon className="w-4 h-4 shrink-0" />
-                {link.label}
-              </Link>
-            ))}
+            {navLinks.map((link) => {
+              const active = isLinkActive(link.to);
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className="flex items-center gap-1 lg:gap-2 whitespace-nowrap text-xs lg:text-sm"
+                  style={{
+                    color: active ? "#3BF07A" : "rgba(255,255,255,0.8)",
+                    textShadow: active ? "0 0 8px rgba(59,240,122,0.2)" : "none",
+                    transition: "all 300ms ease",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!active) {
+                      e.currentTarget.style.color = "#3BF07A";
+                      e.currentTarget.style.textShadow = "0 0 10px rgba(59,240,122,0.3), 0 0 20px rgba(59,240,122,0.15)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) {
+                      e.currentTarget.style.color = "rgba(255,255,255,0.8)";
+                      e.currentTarget.style.textShadow = "none";
+                    }
+                  }}
+                >
+                  <link.icon className="w-4 h-4 shrink-0" />
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
           <div className="flex items-center gap-3">
@@ -92,7 +124,21 @@ const Navbar = () => {
               size="sm"
               variant="outline"
               className="hidden sm:flex items-center gap-1.5 whitespace-nowrap text-[13px] h-7 px-[18px] py-1.5"
-              style={{ borderColor: 'rgba(224,166,147,0.5)', color: '#E0A693' }}
+              style={{
+                borderColor: 'rgba(59,240,122,0.4)',
+                color: '#3BF07A',
+                transition: 'all 300ms ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow = "0 0 15px rgba(59,240,122,0.25), 0 0 30px rgba(59,240,122,0.12)";
+                e.currentTarget.style.borderColor = "rgba(59,240,122,0.6)";
+                e.currentTarget.style.transform = "scale(1.03)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "none";
+                e.currentTarget.style.borderColor = "rgba(59,240,122,0.4)";
+                e.currentTarget.style.transform = "scale(1)";
+              }}
               onClick={() => navigate(user ? "/my-trips?plan=new" : "/auth")}
             >
               <PlusCircle className="w-3.5 h-3.5 shrink-0" />
@@ -119,7 +165,7 @@ const Navbar = () => {
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate(myProfileUrl)}>
+                    <DropdownMenuItem onClick={() => navigate(creatorHandle ? `/c/${creatorHandle}` : "/profile")}>
                       <User className="w-4 h-4 mr-2" /> Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/settings")}>
@@ -187,20 +233,24 @@ const Navbar = () => {
                   )}
 
                   <div className="space-y-1">
-                    {navLinks.map((link) => (
-                      <button
-                        key={link.to}
-                        onClick={() => handleMobileNav(link.to)}
-                        className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-foreground hover:bg-muted transition-colors text-sm"
-                      >
-                        <link.icon className="w-5 h-5" />
-                        {link.label}
-                      </button>
-                    ))}
+                    {navLinks.map((link) => {
+                      const active = isLinkActive(link.to);
+                      return (
+                        <button
+                          key={link.to}
+                          onClick={() => handleMobileNav(link.to)}
+                          className="flex items-center gap-3 w-full px-3 py-3 rounded-lg hover:bg-muted transition-colors text-sm"
+                          style={{ color: active ? "#3BF07A" : undefined }}
+                        >
+                          <link.icon className="w-5 h-5" />
+                          {link.label}
+                        </button>
+                      );
+                    })}
                     <button
                       onClick={() => handleMobileNav(user ? "/my-trips?plan=new" : "/auth")}
                       className="flex items-center gap-3 w-full px-3 py-3 rounded-lg font-semibold hover:bg-muted transition-colors text-sm"
-                      style={{ color: '#E0A693' }}
+                      style={{ color: '#3BF07A' }}
                     >
                       <PlusCircle className="w-5 h-5" />
                       Plan a Trip

@@ -170,8 +170,16 @@ export default function TripAssistantChat() {
             animate={{ scale: 1 }}
             exit={{ scale: 0 }}
             onClick={() => setOpen(true)}
-            className="fixed bottom-6 left-6 z-50 h-14 w-14 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
-            style={{ backgroundColor: "#50FF90" }}
+            className="fixed bottom-6 left-6 z-50 h-14 w-14 rounded-full shadow-lg flex items-center justify-center"
+            style={{ backgroundColor: "#50FF90", transition: "all 300ms ease" }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = "0 0 15px rgba(59,240,122,0.3), 0 0 30px rgba(59,240,122,0.15)";
+              e.currentTarget.style.transform = "scale(1.08)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0,0,0,0.1)";
+              e.currentTarget.style.transform = "scale(1)";
+            }}
             aria-label="Open trip assistant"
           >
             <MessageCircle className="h-6 w-6 text-black" />
