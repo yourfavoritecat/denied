@@ -556,14 +556,57 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
       border: `1px solid ${tc.cardBorder}`,
       borderRadius: isMobile ? 14 : 16,
       boxShadow: tc.insetGlow,
+      transition: "all 300ms ease",
     };
 
     const glossyCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(-2px)";
+      e.currentTarget.style.borderColor = `rgba(${rgb},0.6)`;
+      e.currentTarget.style.boxShadow = `${tc.insetGlow}, 0 0 20px rgba(${rgb},0.1), 0 0 40px rgba(${rgb},0.05)`;
     };
     const glossyCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
+      e.currentTarget.style.borderColor = tc.cardBorder;
+      e.currentTarget.style.boxShadow = tc.insetGlow;
     };
+
+    /* identity card hover */
+    const identityCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "translateY(-2px)";
+      e.currentTarget.style.borderColor = `rgba(${rgb},0.7)`;
+      e.currentTarget.style.boxShadow = `${tc.insetGlow}, 0 0 30px rgba(${rgb},0.15), 0 0 60px rgba(${rgb},0.08)`;
+    };
+    const identityCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "translateY(0)";
+      e.currentTarget.style.borderColor = tc.cardBorder;
+      e.currentTarget.style.boxShadow = tc.insetGlow;
+    };
+
+    /* stats bar hover */
+    const statsBarHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
+      e.currentTarget.style.boxShadow = `0 0 20px rgba(${rgb},0.1)`;
+    };
+    const statsBarLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.borderColor = tc.statsBorder;
+      e.currentTarget.style.boxShadow = "none";
+    };
+
+    /* content thumbnail hover */
+    const thumbHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
+      e.currentTarget.style.boxShadow = `0 0 15px rgba(${rgb},0.15)`;
+      e.currentTarget.style.transform = "scale(1.03)";
+    };
+    const thumbLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
+      e.currentTarget.style.boxShadow = "none";
+      e.currentTarget.style.transform = "scale(1)";
+    };
+
+    /* outer shell hover glow (1.5x intensified) */
+    const shellOuterGlowHover = `0 0 60px rgba(${rgb},0.3), 0 0 120px rgba(${rgb},0.15), 0 0 180px rgba(${rgb},0.08)`;
+
 
     /* ── build mixed feed timeline ── */
     type FeedItem = { type: "review" | "content" | "trip" | "joined"; date: string; data?: any };
@@ -617,7 +660,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               border: isMobile ? "none" : `1px solid ${tc.shellBorder}`,
               boxShadow: isMobile ? "none" : tc.outerGlow,
               background: tc.shellBg,
+              transition: "all 300ms ease",
             }}
+            onMouseEnter={(e) => { if (!isMobile) e.currentTarget.style.boxShadow = shellOuterGlowHover; }}
+            onMouseLeave={(e) => { if (!isMobile) e.currentTarget.style.boxShadow = tc.outerGlow; }}
           >
             {/* grain texture overlay */}
             <div
@@ -635,6 +681,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             <div
               className="relative z-[2]"
               style={{ margin: isMobile ? "8px 8px 0" : "16px 16px 0", ...glossyCard, padding: isMobile ? "28px 20px 20px" : "40px 36px 28px" }}
+              onMouseEnter={identityCardHover}
+              onMouseLeave={identityCardLeave}
             >
 
               <div className="flex flex-col items-center text-center relative">
@@ -764,7 +812,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 borderTop: `1px solid ${tc.statsBorder}`,
                 borderBottom: `1px solid ${tc.statsBorder}`,
                 background: tc.statsBg,
+                transition: "all 300ms ease",
               }}
+              onMouseEnter={statsBarHover}
+              onMouseLeave={statsBarLeave}
             >
               {[
                 { label: "reviews", value: stats.reviews },
@@ -797,24 +848,17 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   {contentItems.map((item: any) => (
                     <div
                       key={item.id}
-                      className="relative flex-shrink-0 overflow-hidden transition-all duration-200 group"
+                      className="relative flex-shrink-0 overflow-hidden group"
                       style={{
                         width: isMobile ? 120 : 140,
                         height: isMobile ? 120 : 140,
                         borderRadius: 14,
                         background: "#111",
                         border: "1px solid rgba(255,255,255,0.04)",
+                        transition: "all 300ms ease",
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
-                        e.currentTarget.style.transform = "scale(1.02)";
-                        e.currentTarget.style.boxShadow = `0 0 12px rgba(${rgb},0.12)`;
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
-                        e.currentTarget.style.transform = "scale(1)";
-                        e.currentTarget.style.boxShadow = "none";
-                      }}
+                      onMouseEnter={thumbHover}
+                      onMouseLeave={thumbLeave}
                     >
                       <img src={item.media_url} alt={item.caption || "content"} className="w-full h-full object-cover" />
                       {item.media_type === "video" && (
@@ -858,7 +902,11 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             />
 
             {/* ── section 5: tab bar + content — wrapped in glossy-card ── */}
-            <div style={{ margin: isMobile ? "0 8px 8px" : "0 16px 16px", ...glossyCard, padding: isMobile ? "20px 16px" : 28 }}>
+            <div
+              style={{ margin: isMobile ? "0 8px 8px" : "0 16px 16px", ...glossyCard, padding: isMobile ? "20px 16px" : 28 }}
+              onMouseEnter={identityCardHover}
+              onMouseLeave={identityCardLeave}
+            >
               {/* tab bar */}
               <div
                 className="flex"
