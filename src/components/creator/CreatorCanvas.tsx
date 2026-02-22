@@ -12,6 +12,7 @@ import {
   Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink,
 } from "lucide-react";
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
+import Navbar from "@/components/layout/Navbar";
 
 /* ── custom svg icons ── */
 const TikTokIcon = ({ className }: { className?: string }) => (
@@ -304,17 +305,23 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   /* ── loading / not found ── */
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "#060606" }}>
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: "#3BF07A" }} />
+      <div className="min-h-screen" style={{ background: "#060606" }}>
+        <Navbar />
+        <div className="flex items-center justify-center pt-32">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: "#3BF07A" }} />
+        </div>
       </div>
     );
   }
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4" style={{ background: "#060606" }}>
-        <h1 className="text-2xl font-bold text-white">creator not found</h1>
-        <p className="text-sm" style={{ color: "#B0B0B0" }}>this profile doesn't exist or isn't published yet.</p>
+      <div className="min-h-screen" style={{ background: "#060606" }}>
+        <Navbar />
+        <div className="flex flex-col items-center justify-center gap-4 px-4 pt-32">
+          <h1 className="text-2xl font-bold text-white">creator not found</h1>
+          <p className="text-sm" style={{ color: "#B0B0B0" }}>this profile doesn't exist or isn't published yet.</p>
+        </div>
       </div>
     );
   }
@@ -414,9 +421,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
   return (
     <div className="min-h-screen" style={{ background: "#060606" }}>
+      <Navbar />
       {/* ── sticky top bar (editing only) ── */}
       {isEditing && (
-        <div className="sticky top-0 z-50" style={{ background: "#0A0A0A" }}>
+        <div className="sticky top-16 z-40" style={{ background: "#0A0A0A" }}>
           <div
             className="flex items-center justify-between h-12 px-5 md:px-12 max-w-[640px] mx-auto"
           >
@@ -470,8 +478,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
       {/* ── content ── */}
       <div
-        className="mx-auto"
-        style={{ maxWidth: 640, padding: isMobile ? "40px 20px 0" : "48px 48px 0" }}
+        className="mx-auto pt-16"
+        style={{ maxWidth: 640, paddingLeft: isMobile ? 20 : 48, paddingRight: isMobile ? 20 : 48, paddingBottom: 0 }}
       >
         {/* ── section 1: avatar + identity ── */}
         <div className="flex flex-col items-center text-center mb-6">
