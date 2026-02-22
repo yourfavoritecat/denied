@@ -35,10 +35,47 @@ const AuthPage = () => {
   const redirectTo = searchParams.get("redirect");
   const loginOnly = searchParams.get("mode") === "login";
 
+  // Helper to perform role-based redirect
+  const doRedirect = async (userId: string) => {
+    if (redirectTo) {
+      navigate(redirectTo, { replace: true });
+      return;
+    }
+
+    // Check admin role
+    const { data: adminRole } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (adminRole) {
+      navigate("/admin", { replace: true });
+    } else {
+      // Check provider
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("provider_slug, onboarding_complete")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (prof?.provider_slug) {
+        if (!prof.onboarding_complete) {
+          navigate("/provider/onboarding", { replace: true });
+        } else {
+          navigate("/provider-dashboard", { replace: true });
+        }
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
+    }
+  };
+
+  // If user is already logged in when page loads, redirect immediately
   useEffect(() => {
     if (!user || adminLoading) return;
 
-    // If there's a redirect URL, go there first
     if (redirectTo) {
       navigate(redirectTo, { replace: true });
       return;
@@ -63,19 +100,34 @@ const AuthPage = () => {
     }
   }, [user, profile, isAdmin, adminLoading, navigate, viewAs, redirectTo]);
 
+  // Listen for SIGNED_IN event to handle post-login redirect reliably
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_IN" && session?.user) {
+          // Use setTimeout to avoid Supabase deadlock with async calls inside listener
+          setTimeout(() => {
+            doRedirect(session.user.id).finally(() => setIsLoading(false));
+          }, 0);
+        }
+      }
+    );
+    return () => subscription.unsubscribe();
+  }, [redirectTo, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setIsLoading(false);
     if (error) {
+      setIsLoading(false);
       if (loginOnly) {
         toast({ title: "login failed", description: "denied.care is invite-only right now. join the waitlist to get early access.", variant: "destructive" });
       } else {
         toast({ title: "Login failed", description: error.message, variant: "destructive" });
       }
     }
-    // Navigation handled by useEffect above
+    // Keep isLoading true on success — onAuthStateChange will handle redirect
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -134,6 +186,15 @@ const AuthPage = () => {
       toast({ title: "Apple login failed", description: error.message, variant: "destructive" });
     }
   };
+
+  // Show loading spinner when login is processing (waiting for auth state)
+  if (isLoading && !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
