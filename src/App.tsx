@@ -60,7 +60,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Launch />} />
-            <Route path="/admin-login" element={<Launch showLogin />} />
+            <Route path="/admin-login" element={<Launch />} />
             <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
