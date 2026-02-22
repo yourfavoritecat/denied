@@ -432,7 +432,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             width: 280,
             background: "#111111",
             border: "1px solid transparent",
-            backgroundImage: "linear-gradient(#111111, #111111), linear-gradient(135deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))",
+            backgroundImage: "linear-gradient(#111111, #111111), linear-gradient(135deg, rgba(255,107,74,0.35), rgba(59,240,122,0.35))",
             backgroundOrigin: "border-box",
             backgroundClip: "padding-box, border-box",
             borderRadius: 12,
@@ -466,20 +466,20 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     const glossyCard: React.CSSProperties = {
       background: "#0A0A0A",
       border: "1px solid transparent",
-      backgroundImage: "linear-gradient(#0A0A0A, #0A0A0A), linear-gradient(135deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))",
+      backgroundImage: "linear-gradient(#0A0A0A, #0A0A0A), linear-gradient(135deg, rgba(255,107,74,0.35), rgba(59,240,122,0.35))",
       backgroundOrigin: "border-box",
       backgroundClip: "padding-box, border-box",
       borderRadius: isMobile ? 14 : 16,
-      boxShadow: "0 0 20px rgba(0,0,0,0.4), 0 0 8px rgba(59,240,122,0.04), inset 0 1px 0 rgba(255,255,255,0.03)",
+      boxShadow: "0 0 20px rgba(0,0,0,0.4), 0 0 12px rgba(59,240,122,0.08), 0 0 40px rgba(59,240,122,0.03), inset 0 1px 0 rgba(255,255,255,0.03)",
     };
 
     const glossyCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(-2px)";
-      e.currentTarget.style.boxShadow = "0 0 24px rgba(0,0,0,0.5), 0 0 12px rgba(59,240,122,0.08), inset 0 1px 0 rgba(255,255,255,0.03)";
+      e.currentTarget.style.boxShadow = "0 0 24px rgba(0,0,0,0.5), 0 0 16px rgba(59,240,122,0.15), 0 0 40px rgba(59,240,122,0.06), inset 0 1px 0 rgba(255,255,255,0.03)";
     };
     const glossyCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.boxShadow = "0 0 20px rgba(0,0,0,0.4), 0 0 8px rgba(59,240,122,0.04), inset 0 1px 0 rgba(255,255,255,0.03)";
+      e.currentTarget.style.boxShadow = "0 0 20px rgba(0,0,0,0.4), 0 0 12px rgba(59,240,122,0.08), 0 0 40px rgba(59,240,122,0.03), inset 0 1px 0 rgba(255,255,255,0.03)";
     };
 
     /* ── build mixed feed timeline ── */
@@ -564,7 +564,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     fontSize: isMobile ? 80 : 120,
                     fontWeight: 700,
                     color: "transparent",
-                    backgroundImage: "linear-gradient(135deg, rgba(59,240,122,0.06), rgba(255,107,74,0.05))",
+                    backgroundImage: "linear-gradient(135deg, rgba(59,240,122,0.08), rgba(255,107,74,0.07))",
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                     lineHeight: 1,
@@ -700,7 +700,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 padding: isMobile ? "18px 20px" : "18px 36px",
                 borderTop: "1px solid transparent",
                 borderBottom: "1px solid transparent",
-                borderImage: "linear-gradient(90deg, transparent, rgba(255,107,74,0.15), rgba(59,240,122,0.15), transparent) 1",
+                borderImage: "linear-gradient(90deg, transparent, rgba(255,107,74,0.35), rgba(59,240,122,0.35), transparent) 1",
                 background: "rgba(0,0,0,0.3)",
                 boxShadow: "0 0 16px rgba(59,240,122,0.03)",
               }}
@@ -1168,7 +1168,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
         {/* glossy bottom border */}
         <div
           className="h-px"
-          style={{ background: "linear-gradient(90deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))" }}
+          style={{ background: "linear-gradient(90deg, rgba(255,107,74,0.35), rgba(59,240,122,0.35))" }}
         />
         {/* progress bar */}
         <div className="h-0.5" style={{ background: "#111111" }}>
