@@ -353,9 +353,9 @@ const CreatorProfile = () => {
       )}
 
       {/* ── Hero Cover ── */}
-      <div className="relative w-full overflow-hidden" style={{ height: '220px', paddingTop: '64px' }}>
+      <div className="relative w-full overflow-hidden h-[200px] md:h-[350px]" style={{ paddingTop: '64px' }}>
         <img
-          src={profile.cover_photo_url || '/images/hero-creator.jpg'}
+          src={profile.cover_photo_url || '/covers/black-green-stars.jpg'}
           alt=""
           className="w-full h-full object-cover object-center"
           style={{ position: 'absolute', inset: 0, height: '100%' }}
