@@ -464,22 +464,22 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
     /* glossy card style helper */
     const glossyCard: React.CSSProperties = {
-      background: "#0A0A0A",
+      background: "linear-gradient(145deg, rgba(59,240,122,0.06) 0%, rgba(10,10,10,1) 40%, rgba(255,107,74,0.03) 100%)",
       border: "1px solid transparent",
-      backgroundImage: "linear-gradient(#0A0A0A, #0A0A0A), linear-gradient(135deg, rgba(255,107,74,0.35), rgba(59,240,122,0.35))",
+      backgroundImage: "linear-gradient(145deg, rgba(59,240,122,0.06) 0%, rgba(10,10,10,1) 40%, rgba(255,107,74,0.03) 100%), linear-gradient(135deg, rgba(255,107,74,0.5), rgba(59,240,122,0.55))",
       backgroundOrigin: "border-box",
       backgroundClip: "padding-box, border-box",
       borderRadius: isMobile ? 14 : 16,
-      boxShadow: "0 0 20px rgba(0,0,0,0.4), 0 0 12px rgba(59,240,122,0.08), 0 0 40px rgba(59,240,122,0.03), inset 0 1px 0 rgba(255,255,255,0.03)",
+      boxShadow: "0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(59,240,122,0.1), 0 0 60px rgba(59,240,122,0.04), inset 0 1px 0 rgba(255,255,255,0.05)",
     };
 
     const glossyCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(-2px)";
-      e.currentTarget.style.boxShadow = "0 0 24px rgba(0,0,0,0.5), 0 0 16px rgba(59,240,122,0.15), 0 0 40px rgba(59,240,122,0.06), inset 0 1px 0 rgba(255,255,255,0.03)";
+      e.currentTarget.style.boxShadow = "0 0 30px rgba(0,0,0,0.5), 0 0 24px rgba(59,240,122,0.18), 0 0 60px rgba(59,240,122,0.08), inset 0 1px 0 rgba(255,255,255,0.06)";
     };
     const glossyCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.boxShadow = "0 0 20px rgba(0,0,0,0.4), 0 0 12px rgba(59,240,122,0.08), 0 0 40px rgba(59,240,122,0.03), inset 0 1px 0 rgba(255,255,255,0.03)";
+      e.currentTarget.style.boxShadow = "0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(59,240,122,0.1), 0 0 60px rgba(59,240,122,0.04), inset 0 1px 0 rgba(255,255,255,0.05)";
     };
 
     /* ── build mixed feed timeline ── */
@@ -533,7 +533,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               borderRadius: isMobile ? 0 : 16,
               border: isMobile ? "none" : "1px solid rgba(255,107,74,0.06)",
               boxShadow: isMobile ? "none" : "0 0 60px rgba(0,0,0,0.4)",
-              background: "#060606",
+              background: "linear-gradient(160deg, rgba(59,240,122,0.03) 0%, #060606 30%, #060606 70%, rgba(255,107,74,0.02) 100%)",
             }}
           >
             {/* grain texture overlay */}
@@ -564,7 +564,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     fontSize: isMobile ? 80 : 120,
                     fontWeight: 700,
                     color: "transparent",
-                    backgroundImage: "linear-gradient(135deg, rgba(59,240,122,0.08), rgba(255,107,74,0.07))",
+                    backgroundImage: "linear-gradient(135deg, rgba(59,240,122,0.12), rgba(255,107,74,0.09))",
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                     lineHeight: 1,
@@ -580,8 +580,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   className="inline-flex items-center gap-1.5 rounded-full mb-5"
                   style={{
                     padding: "6px 16px",
-                    background: "linear-gradient(135deg, rgba(59,240,122,0.12), rgba(255,107,74,0.08))",
-                    border: "1px solid rgba(59,240,122,0.18)",
+                    background: "linear-gradient(135deg, rgba(59,240,122,0.2), rgba(255,107,74,0.15))",
+                    border: "1px solid rgba(59,240,122,0.35)",
                   }}
                 >
                   <div
@@ -644,8 +644,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         className="rounded-full"
                         style={{
                           padding: "5px 13px", fontSize: 11, fontWeight: 500,
-                          background: `rgba(${rgb},0.10)`, color: accent,
-                          border: `1px solid rgba(${rgb},0.12)`,
+                          background: `rgba(${rgb},0.15)`, color: accent,
+                          border: `1px solid rgba(${rgb},0.25)`,
                         }}
                       >
                         {s}
@@ -700,8 +700,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 padding: isMobile ? "18px 20px" : "18px 36px",
                 borderTop: "1px solid transparent",
                 borderBottom: "1px solid transparent",
-                borderImage: "linear-gradient(90deg, transparent, rgba(255,107,74,0.35), rgba(59,240,122,0.35), transparent) 1",
-                background: "rgba(0,0,0,0.3)",
+                borderImage: "linear-gradient(90deg, transparent, rgba(255,107,74,0.5), rgba(59,240,122,0.55), transparent) 1",
+                background: "linear-gradient(135deg, rgba(59,240,122,0.04) 0%, rgba(0,0,0,0.4) 50%, rgba(255,107,74,0.02) 100%)",
                 boxShadow: "0 0 16px rgba(59,240,122,0.03)",
               }}
             >
@@ -867,8 +867,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                               {item.data.review_text && (
                                 <div
                                   style={{
-                                    marginTop: 10, padding: "14px 18px", background: "#0A0A0A",
-                                    borderRadius: 12, borderLeft: "2px solid rgba(59,240,122,0.25)",
+                                    marginTop: 10, padding: "14px 18px", background: "linear-gradient(135deg, rgba(59,240,122,0.04), rgba(10,10,10,1))",
+                                    borderRadius: 12, borderLeft: "2px solid rgba(59,240,122,0.4)",
                                   }}
                                 >
                                   <p style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>
