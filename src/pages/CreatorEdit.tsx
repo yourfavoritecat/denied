@@ -1,211 +1,191 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
-  Camera, Instagram, Globe, Star, Plus, X, GripVertical, ArrowUp, ArrowDown,
-  ExternalLink, Eye, EyeOff, Trash2, Play, Image as ImageIcon, Save, Check, Clock, Lightbulb
+  Camera, Instagram, Globe, Check, X, Copy, Plus,
 } from "lucide-react";
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
-import ReviewCard, { type ReviewData } from "@/components/reviews/ReviewCard";
-import SuggestProviderModal from "@/components/creator/SuggestProviderModal";
-import { COVER_OPTIONS, DEFAULT_COVER_URL } from "@/data/coverOptions";
+import CreatorProfilePreview, { ACCENT_THEMES } from "@/components/creator/CreatorProfilePreview";
 
-interface CreatorProfile {
-  id: string;
-  user_id: string;
-  handle: string;
-  display_name: string;
-  bio: string | null;
-  avatar_url: string | null;
-  cover_photo_url: string | null;
-  social_links: Record<string, string>;
-  featured_providers: string[];
-  is_published: boolean;
-}
+/* ── Icons ── */
+const TikTokIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-1-.08 6.27 6.27 0 0 0-6.27 6.27 6.27 6.27 0 0 0 6.27 6.27 6.27 6.27 0 0 0 6.27-6.27V8.97a8.16 8.16 0 0 0 4.04 1.05V6.69h-.01z" />
+  </svg>
+);
+const YouTubeIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.54 3.5 12 3.5 12 3.5s-7.54 0-9.38.56A3.02 3.02 0 0 0 .5 6.2 31.68 31.68 0 0 0 0 12a31.68 31.68 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.12 2.14c1.84.56 9.38.56 9.38.56s7.54 0 9.38-.56a3.02 3.02 0 0 0 2.12-2.14A31.68 31.68 0 0 0 24 12a31.68 31.68 0 0 0-.5-5.8zM9.55 15.57V8.43L15.82 12l-6.27 3.57z" />
+  </svg>
+);
+const TwitterIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
 
-interface CreatorContentItem {
-  id: string;
-  creator_id: string;
-  provider_slug: string | null;
-  media_url: string;
-  media_type: string;
-  caption: string | null;
-  procedure_tags: string[];
-  sort_order: number;
-}
+/* ── Constants ── */
+const SPECIALTY_OPTIONS = [
+  "dental", "cosmetic", "skincare", "bariatric", "fertility",
+  "wellness", "recovery tips", "travel hacks", "budget tips",
+];
 
-interface ProviderInfo {
-  slug: string;
-  name: string;
-  city: string | null;
-  cover_photo_url: string | null;
-}
+const THEME_SWATCHES = [
+  { key: "mint", color: "#3BF07A", label: "mint" },
+  { key: "coral", color: "#FF6B4A", label: "coral" },
+  { key: "lavender", color: "#C4A8FF", label: "lavender" },
+  { key: "gold", color: "#FFD700", label: "gold" },
+  { key: "ice", color: "#7DF9FF", label: "ice" },
+];
 
+/* ── Helpers ── */
+const normalizeSocial = (value: string, baseUrl: string): string => {
+  const v = value.trim();
+  if (!v) return v;
+  if (/^https?:\/\//i.test(v)) return v;
+  if (/^www\./i.test(v)) return `https://${v}`;
+  const handle = v.replace(/^@/, "");
+  if (handle.includes("/")) return `https://${handle}`;
+  return `${baseUrl}${handle}`;
+};
+
+/* ── Gradient border style ── */
+const glossyBorderStyle = {
+  background: '#111111',
+  border: '1px solid transparent',
+  backgroundClip: 'padding-box',
+  boxShadow: 'inset 0 0 0 1px rgba(255,107,74,0.08), inset 0 0 0 1px rgba(59,240,122,0.08)',
+};
+
+const inputStyle = {
+  ...glossyBorderStyle,
+  borderRadius: '16px',
+  padding: '12px 16px',
+  color: '#FFFFFF',
+  fontSize: '14px',
+  outline: 'none',
+  width: '100%',
+  transition: 'box-shadow 0.2s',
+};
+
+const inputFocusClass = "focus:shadow-[0_0_0_2px_rgba(59,240,122,0.3)]";
+
+/* ── Main Component ── */
 const CreatorEdit = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [creatorProfile, setCreatorProfile] = useState<CreatorProfile | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
 
   // Form state
   const [displayName, setDisplayName] = useState("");
   const [handle, setHandle] = useState("");
   const [bio, setBio] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [coverPhotoUrl, setCoverPhotoUrl] = useState<string | null>(null);
-  const [socialLinks, setSocialLinks] = useState({ instagram: "", tiktok: "", youtube: "" });
+  const [specialties, setSpecialties] = useState<string[]>([]);
+  const [socialLinks, setSocialLinks] = useState<Record<string, string>>({
+    instagram: "", tiktok: "", youtube: "", twitter: "", website: "",
+  });
+  const [accentTheme, setAccentTheme] = useState("mint");
   const [isPublished, setIsPublished] = useState(false);
-  const [featuredProviders, setFeaturedProviders] = useState<string[]>([]);
-  const [profileTheme, setProfileTheme] = useState<"mint" | "peach" | "pearl">("mint");
 
-  // Provider data
-  const [providerMap, setProviderMap] = useState<Record<string, ProviderInfo>>({});
-  const [allProviders, setAllProviders] = useState<ProviderInfo[]>([]);
-  const [providerSearchOpen, setProviderSearchOpen] = useState(false);
+  // Handle availability
+  const [handleAvailable, setHandleAvailable] = useState<boolean | null>(null);
+  const [checkingHandle, setCheckingHandle] = useState(false);
+  const originalHandle = useRef("");
 
-  // Content
-  const [content, setContent] = useState<CreatorContentItem[]>([]);
-  const [uploading, setUploading] = useState(false);
-
-  // Reviews
-  const [reviews, setReviews] = useState<ReviewData[]>([]);
+  // Save state
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hasLoadedRef = useRef(false);
 
   // Avatar crop
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
-  const coverInputRef = useRef<HTMLInputElement>(null);
-  const contentInputRef = useRef<HTMLInputElement>(null);
 
-  // Lightbox
-  const [lightboxItem, setLightboxItem] = useState<CreatorContentItem | null>(null);
+  // Mobile preview
+  const [mobilePreviewOpen, setMobilePreviewOpen] = useState(false);
 
-  // Suggestions
-  const [suggestOpen, setSuggestOpen] = useState(false);
-  const [pendingSuggestions, setPendingSuggestions] = useState<any[]>([]);
-
-  // Load everything
+  // Load profile
   useEffect(() => {
     if (!user) return;
-    loadData();
+    (async () => {
+      const { data: cp } = await supabase
+        .from("creator_profiles")
+        .select("*")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!cp) {
+        navigate("/dashboard", { replace: true });
+        return;
+      }
+
+      const p = cp as any;
+      setProfileId(p.id);
+      setDisplayName(p.display_name || "");
+      setHandle(p.handle || "");
+      originalHandle.current = p.handle || "";
+      setBio(p.bio || "");
+      setAvatarUrl(p.avatar_url || null);
+      setSpecialties(p.specialties || []);
+      setAccentTheme(p.profile_theme || "mint");
+      setIsPublished(p.is_published || false);
+
+      const sl = p.social_links || {};
+      setSocialLinks({
+        instagram: sl.instagram || "",
+        tiktok: sl.tiktok || "",
+        youtube: sl.youtube || "",
+        twitter: sl.twitter || "",
+        website: sl.website || "",
+      });
+
+      setLoading(false);
+      // Mark loaded so auto-save doesn't fire on initial hydration
+      setTimeout(() => { hasLoadedRef.current = true; }, 100);
+    })();
   }, [user]);
 
-  const loadData = async () => {
-    if (!user) return;
-
-    // Fetch creator profile
-    const { data: cp } = await supabase
-      .from("creator_profiles")
-      .select("*")
-      .eq("user_id", user.id)
-      .maybeSingle();
-
-    if (!cp) {
-      navigate("/dashboard", { replace: true });
+  // Handle availability check
+  useEffect(() => {
+    if (!handle || handle === originalHandle.current) {
+      setHandleAvailable(handle ? true : null);
       return;
     }
+    setCheckingHandle(true);
+    const timer = setTimeout(async () => {
+      const { data } = await supabase
+        .from("creator_profiles")
+        .select("id")
+        .eq("handle", handle)
+        .maybeSingle();
+      setHandleAvailable(!data);
+      setCheckingHandle(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [handle]);
 
-    const profile = cp as unknown as CreatorProfile;
-    setCreatorProfile(profile);
-    setDisplayName(profile.display_name);
-    setHandle(profile.handle);
-    setBio(profile.bio || "");
-    setAvatarUrl(profile.avatar_url);
-    setCoverPhotoUrl(profile.cover_photo_url);
-    setSocialLinks({
-      instagram: profile.social_links?.instagram || "",
-      tiktok: profile.social_links?.tiktok || "",
-      youtube: profile.social_links?.youtube || "",
-    });
-    setIsPublished(profile.is_published);
-    setFeaturedProviders(profile.featured_providers || []);
-    setProfileTheme(((profile as any).profile_theme as "mint" | "peach" | "pearl") || "mint");
-
-    // Fetch content
-    const { data: contentData } = await supabase
-      .from("creator_content")
-      .select("*")
-      .eq("creator_id", profile.id)
-      .order("sort_order", { ascending: true });
-    setContent((contentData as unknown as CreatorContentItem[]) || []);
-
-    // Fetch all providers for search
-    const { data: providers } = await supabase
-      .from("providers")
-      .select("slug, name, city, cover_photo_url")
-      .order("name");
-    const provList = (providers as ProviderInfo[]) || [];
-    setAllProviders(provList);
-    const pMap: Record<string, ProviderInfo> = {};
-    provList.forEach((p) => (pMap[p.slug] = p));
-    setProviderMap(pMap);
-
-    // Fetch reviews
-    const { data: reviewData } = await supabase
-      .from("reviews")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-
-    if (reviewData) {
-      setReviews(
-        (reviewData as any[]).map((r) => ({
-          ...r,
-          photos: r.photos || [],
-          videos: r.videos || [],
-          upvote_count: 0,
-          user_has_upvoted: false,
-          vibe_tags: r.vibe_tags || [],
-        }))
-      );
-    }
-
-    // Load pending suggestions
-    const { data: sugData } = await supabase
-      .from("provider_suggestions" as any)
-      .select("*")
-      .eq("creator_id", profile.id)
-      .eq("status", "pending")
-      .order("created_at", { ascending: false });
-    setPendingSuggestions(sugData || []);
-
-    setLoading(false);
-  };
-
-  const handleSave = async () => {
-    if (!creatorProfile || !user) return;
-    setSaving(true);
-
-    // Normalize social links so they are always valid https:// URLs
-    const normalizeSocial = (value: string, baseUrl: string): string => {
-      const v = value.trim();
-      if (!v) return v;
-      if (/^https?:\/\//i.test(v)) return v;
-      if (/^www\./i.test(v)) return `https://${v}`;
-      const handle = v.replace(/^@/, "");
-      if (handle.includes("/")) return `https://${handle}`;
-      return `${baseUrl}${handle}`;
-    };
+  // Auto-save with debounce
+  const doSave = useCallback(async () => {
+    if (!profileId || !user) return;
+    setSaveStatus("saving");
 
     const normalizedSocialLinks = {
       instagram: normalizeSocial(socialLinks.instagram, "https://www.instagram.com/"),
       tiktok: normalizeSocial(socialLinks.tiktok, "https://www.tiktok.com/@"),
       youtube: normalizeSocial(socialLinks.youtube, "https://www.youtube.com/@"),
+      twitter: normalizeSocial(socialLinks.twitter, "https://x.com/"),
+      website: socialLinks.website.trim(),
     };
 
     const { error } = await supabase
@@ -215,30 +195,37 @@ const CreatorEdit = () => {
         handle,
         bio: bio || null,
         avatar_url: avatarUrl,
-        cover_photo_url: coverPhotoUrl,
+        specialties,
         social_links: normalizedSocialLinks,
-        featured_providers: featuredProviders,
         is_published: isPublished,
-        profile_theme: profileTheme,
+        profile_theme: accentTheme,
       } as any)
-      .eq("id", creatorProfile.id);
+      .eq("id", profileId);
 
     if (error) {
-      toast({ title: "Save failed", description: error.message, variant: "destructive" });
-      setSaving(false);
-      return;
+      setSaveStatus("idle");
+      toast({ title: "save failed", description: error.message, variant: "destructive" });
+    } else {
+      setSaveStatus("saved");
+      if (handle !== originalHandle.current) originalHandle.current = handle;
+      setTimeout(() => setSaveStatus("idle"), 2500);
     }
-    toast({ title: "Profile saved! ✨" });
-    setSaving(false);
-    navigate(`/${handle}`);
-  };
+  }, [profileId, user, displayName, handle, bio, avatarUrl, specialties, socialLinks, isPublished, accentTheme]);
+
+  // Trigger auto-save on any field change
+  useEffect(() => {
+    if (!hasLoadedRef.current) return;
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => doSave(), 800);
+    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
+  }, [displayName, handle, bio, avatarUrl, specialties, socialLinks, isPublished, accentTheme, doSave]);
 
   // Avatar upload
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "Image too large", description: "Max 10MB", variant: "destructive" });
+      toast({ title: "image too large", description: "max 10mb", variant: "destructive" });
       return;
     }
     const reader = new FileReader();
@@ -256,599 +243,359 @@ const CreatorEdit = () => {
       upsert: true,
     });
     if (error) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
+      toast({ title: "upload failed", description: error.message, variant: "destructive" });
       return;
     }
     const { data: urlData } = supabase.storage.from("profile-media").getPublicUrl(path);
     setAvatarUrl(urlData.publicUrl);
-    toast({ title: "Avatar uploaded! 📸" });
   };
 
-  // Cover photo upload
-  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
-    const path = `${user.id}/creator/cover-${Date.now()}.${file.name.split(".").pop()}`;
-    const { error } = await supabase.storage.from("profile-media").upload(path, file, {
-      contentType: file.type,
-      upsert: true,
-    });
-    if (error) {
-      toast({ title: "Upload failed", description: error.message, variant: "destructive" });
-      return;
-    }
-    const { data: urlData } = supabase.storage.from("profile-media").getPublicUrl(path);
-    setCoverPhotoUrl(urlData.publicUrl);
-    toast({ title: "Cover photo updated!" });
-    e.target.value = "";
+  const toggleSpecialty = (s: string) => {
+    setSpecialties((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : prev.length < 5 ? [...prev, s] : prev
+    );
   };
 
-  // Content upload
-  const handleContentUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!user || !creatorProfile) return;
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    setUploading(true);
-
-    for (const file of files) {
-      const isVideo = file.type.startsWith("video/");
-      const ext = file.name.split(".").pop() || "bin";
-      const path = `${user.id}/creator/${Date.now()}-${crypto.randomUUID()}.${ext}`;
-
-      const { error } = await supabase.storage.from("profile-media").upload(path, file, {
-        contentType: file.type,
-      });
-      if (error) {
-        toast({ title: `Failed: ${file.name}`, description: error.message, variant: "destructive" });
-        continue;
-      }
-
-      const { data: urlData } = supabase.storage.from("profile-media").getPublicUrl(path);
-      await supabase.from("creator_content").insert({
-        creator_id: creatorProfile.id,
-        media_url: urlData.publicUrl,
-        media_type: isVideo ? "video" : "photo",
-        sort_order: content.length,
-      } as any);
-    }
-
-    setUploading(false);
-    toast({ title: "Content uploaded! 📸" });
-    // Reload content
-    const { data } = await supabase
-      .from("creator_content")
-      .select("*")
-      .eq("creator_id", creatorProfile.id)
-      .order("sort_order", { ascending: true });
-    setContent((data as unknown as CreatorContentItem[]) || []);
-    e.target.value = "";
+  const copyUrl = () => {
+    navigator.clipboard.writeText(`denied.care/c/${handle}`);
+    toast({ title: "copied!" });
   };
 
-  const handleDeleteContent = async (id: string) => {
-    await supabase.from("creator_content").delete().eq("id", id);
-    setContent((prev) => prev.filter((c) => c.id !== id));
-    setLightboxItem(null);
-    toast({ title: "Content removed" });
-  };
-
-  // Provider management
-  const addProvider = (slug: string) => {
-    if (!featuredProviders.includes(slug)) {
-      setFeaturedProviders([...featuredProviders, slug]);
-    }
-    setProviderSearchOpen(false);
-  };
-
-  const removeProvider = (slug: string) => {
-    setFeaturedProviders(featuredProviders.filter((s) => s !== slug));
-  };
-
-  const moveProvider = (index: number, direction: "up" | "down") => {
-    const newList = [...featuredProviders];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= newList.length) return;
-    [newList[index], newList[targetIndex]] = [newList[targetIndex], newList[index]];
-    setFeaturedProviders(newList);
-  };
+  // Progress computation
+  const progressSections = [
+    { label: "photo", done: !!avatarUrl },
+    { label: "info", done: !!displayName && !!handle },
+    { label: "specialties", done: specialties.length > 0 },
+    { label: "links", done: Object.values(socialLinks).some((v) => v.trim()) },
+    { label: "theme", done: true }, // always has a default
+  ];
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#060606' }}>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: '#3BF07A' }} />
       </div>
     );
   }
 
-  if (!creatorProfile) return null;
+  const rightPanel = (
+    <div className="flex flex-col h-full">
+      {/* Save status + Progress */}
+      <div className="px-6 pt-5 pb-3 space-y-3">
+        {/* Save status */}
+        <div className="flex items-center gap-1.5 text-xs" style={{ color: '#B0B0B0' }}>
+          {saveStatus === "saving" && <span>saving...</span>}
+          {saveStatus === "saved" && (
+            <>
+              <Check className="w-3 h-3" style={{ color: '#3BF07A' }} />
+              <span>all changes saved</span>
+            </>
+          )}
+          {saveStatus === "idle" && <span>&nbsp;</span>}
+        </div>
 
-  return (
-    <div className="min-h-screen pb-24">
-      {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">creator profile</h1>
-            <p className="text-sm text-muted-foreground">Build your public page</p>
-          </div>
-          <div className="flex items-center gap-3">
-            {isPublished && (
-              <Button variant="outline" size="sm" asChild>
-                <Link to={`/${handle}`} target="_blank">
-                  <Eye className="w-4 h-4 mr-1" /> View Page
-                </Link>
-              </Button>
-            )}
-          </div>
+        {/* Progress dots */}
+        <div className="flex items-center gap-2">
+          {progressSections.map((s) => (
+            <div key={s.label} className="flex items-center gap-1.5">
+              <div
+                className="w-2 h-2 rounded-full transition-colors"
+                style={{
+                  background: s.done ? '#3BF07A' : 'rgba(255,255,255,0.15)',
+                  boxShadow: s.done ? '0 0 6px rgba(59,240,122,0.4)' : 'none',
+                }}
+              />
+              <span className="text-[10px] tracking-wide" style={{ color: s.done ? '#3BF07A' : '#666' }}>{s.label}</span>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-        {/* Live Preview Banner */}
-        <section className="space-y-2">
-          <span className="text-xs text-muted-foreground uppercase tracking-wide">preview</span>
-          <div className="relative w-full h-[200px] rounded-lg overflow-hidden">
-            <img
-              src={coverPhotoUrl || DEFAULT_COVER_URL}
-              alt="Cover preview"
-              className="w-full h-full object-cover object-center"
-            />
-            {/* Avatar overlapping bottom edge */}
-            <div className="absolute bottom-0 left-6 translate-y-1/2">
-              <Avatar className="w-20 h-20 border-4 border-card bg-primary text-primary-foreground">
-                {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" className="object-cover" />}
-                <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                  {displayName?.[0]?.toUpperCase() || "C"}
-                </AvatarFallback>
+      {/* Scrollable sections */}
+      <div className="flex-1 overflow-y-auto px-6 pb-8 space-y-7">
+
+        {/* ── Section 1: Profile Photo ── */}
+        <section className="space-y-3">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, rgba(59,240,122,0.2) 0%, transparent 100%)' }} />
+          <label className="text-xs font-medium tracking-wide" style={{ color: '#FFFFFF' }}>profile photo</label>
+          <div className="flex items-center gap-4">
+            <div className="relative group cursor-pointer" onClick={() => avatarInputRef.current?.click()}>
+              <Avatar className="w-24 h-24" style={{ border: '2px solid rgba(59,240,122,0.2)' }}>
+                {avatarUrl ? (
+                  <AvatarImage src={avatarUrl} alt="avatar" className="object-cover" />
+                ) : (
+                  <AvatarFallback style={{ background: '#111111', color: '#666' }}>
+                    <Plus className="w-6 h-6" />
+                  </AvatarFallback>
+                )}
               </Avatar>
-            </div>
-            {/* Name + handle overlay */}
-            <div className="absolute bottom-3 left-32 text-white drop-shadow-lg">
-              <p className="font-bold text-lg leading-tight">{displayName || "Your Name"}</p>
-              <p className="text-sm opacity-80">@{handle || "handle"}</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Cover Photo Gallery Picker */}
-        <section className="space-y-3">
-          <Label className="text-base font-semibold">choose your cover</Label>
-          <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-            {COVER_OPTIONS.map((option) => {
-              const isSelected = (coverPhotoUrl || DEFAULT_COVER_URL) === option.url;
-              return (
-                <button
-                  key={option.id}
-                  onClick={() => setCoverPhotoUrl(option.url)}
-                  className={`aspect-[2/1] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
-                    isSelected
-                      ? "ring-2 ring-[#3BF07A] scale-105"
-                      : "opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  <img
-                    src={option.url}
-                    alt={option.label}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              );
-            })}
-          </div>
-          <button
-            onClick={() => coverInputRef.current?.click()}
-            className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
-          >
-            or upload your own
-          </button>
-          <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
-        </section>
-
-        {/* Avatar + Basic Info */}
-        <section className="flex gap-6 items-start">
-          <div className="relative group shrink-0">
-            <Avatar className="w-24 h-24 bg-primary text-primary-foreground">
-              {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" className="object-cover" />}
-              <AvatarFallback className="bg-primary text-primary-foreground text-2xl">
-                {displayName?.[0]?.toUpperCase() || "C"}
-              </AvatarFallback>
-            </Avatar>
-            <button
-              onClick={() => avatarInputRef.current?.click()}
-              className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center cursor-pointer"
-            >
-              <Camera className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-            </button>
-            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
-          </div>
-
-          <div className="flex-1 space-y-4">
-            <div className="space-y-2">
-              <Label>Display Name</Label>
-              <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" />
-            </div>
-            <div className="space-y-2">
-              <Label>Handle</Label>
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground whitespace-nowrap">denied.care/c/</span>
-                <Input
-                  value={handle}
-                  onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
-                />
+              <div className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
+                <Camera className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
+              <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
             </div>
-          </div>
-        </section>
-
-        {/* Bio */}
-        <section className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label>Bio</Label>
-            <span className="text-xs text-muted-foreground">{bio.length}/300</span>
-          </div>
-          <Textarea
-            value={bio}
-            onChange={(e) => setBio(e.target.value.slice(0, 300))}
-            placeholder="Tell people about yourself and your medical tourism journey..."
-            rows={3}
-          />
-        </section>
-
-        {/* Profile Theme */}
-        <section className="space-y-3">
-          <Label className="text-base font-semibold">Profile Theme</Label>
-          <p className="text-xs text-muted-foreground">Each theme changes your whole profile — card colors, borders, tags, and accent tones.</p>
-          <div className="flex gap-3">
-            {([
-              {
-                value: "mint" as const,
-                label: "Mint",
-                accent: "#50FF90",
-                cardBg: "rgba(80,255,144,0.06)",
-                cardBorder: "rgba(80,255,144,0.12)",
-                tagBg: "rgba(80,255,144,0.1)",
-                tagBorder: "rgba(80,255,144,0.25)",
-                pageBg: "#1a1714",
-                buttonBg: "#50FF90",
-              },
-              {
-                value: "peach" as const,
-                label: "Peach",
-                accent: "#E0A693",
-                cardBg: "rgba(224,166,147,0.08)",
-                cardBorder: "rgba(224,166,147,0.12)",
-                tagBg: "rgba(224,166,147,0.15)",
-                tagBorder: "rgba(224,166,147,0.3)",
-                pageBg: "#0a0a0a",
-                buttonBg: "#E0A693",
-              },
-              {
-                value: "pearl" as const,
-                label: "Pearl",
-                accent: "#D4C5A9",
-                cardBg: "rgba(255,255,255,0.05)",
-                cardBorder: "rgba(255,255,255,0.10)",
-                tagBg: "rgba(212,197,169,0.12)",
-                tagBorder: "rgba(212,197,169,0.25)",
-                pageBg: "#121212",
-                buttonBg: "#D4C5A9",
-              },
-            ]).map((t) => {
-              const isActive = profileTheme === t.value;
-              return (
-                <button
-                  key={t.value}
-                  onClick={() => setProfileTheme(t.value)}
-                  className="flex-1 rounded-xl p-3 flex flex-col gap-2.5 transition-all text-left"
-                  style={{
-                    background: t.pageBg,
-                    border: `2px solid ${isActive ? t.accent : 'rgba(255,255,255,0.08)'}`,
-                    outline: isActive ? `3px solid ${t.accent}30` : 'none',
-                    outlineOffset: '2px',
-                  }}
-                >
-                  {/* Mock card preview */}
-                  <div className="w-full rounded-lg p-2.5" style={{ background: t.cardBg, border: `1px solid ${t.cardBorder}` }}>
-                    {/* Mock header bar */}
-                    <div className="flex items-center gap-1.5 mb-2">
-                      <div className="w-5 h-5 rounded-full" style={{ background: t.accent, opacity: 0.9 }} />
-                      <div className="h-1.5 rounded-full flex-1" style={{ background: `${t.accent}40` }} />
-                    </div>
-                    {/* Mock tag */}
-                    <div className="inline-flex rounded-full px-2 py-0.5 mb-1.5" style={{ background: t.tagBg, border: `1px solid ${t.tagBorder}` }}>
-                      <div className="h-1 w-8 rounded-full" style={{ background: t.accent }} />
-                    </div>
-                    {/* Mock button */}
-                    <div className="w-full rounded-full h-3" style={{ background: t.buttonBg, opacity: 0.85 }} />
-                  </div>
-                  {/* Label row */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold" style={{ color: isActive ? t.accent : 'rgba(255,255,255,0.7)' }}>{t.label}</span>
-                    {isActive && (
-                      <span className="text-[10px] rounded-full px-1.5 py-0.5 font-medium" style={{ background: `${t.accent}20`, color: t.accent }}>active</span>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Social Links */}
-        <section className="space-y-4">
-          <Label className="text-base font-semibold">Social Links</Label>
-          <div className="grid gap-3">
-            <div className="flex items-center gap-2">
-              <Instagram className="w-4 h-4 text-muted-foreground shrink-0" />
-              <Input
-                value={socialLinks.instagram}
-                onChange={(e) => setSocialLinks({ ...socialLinks, instagram: e.target.value })}
-                placeholder="https://instagram.com/yourhandle"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-muted-foreground shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-1-.08 6.27 6.27 0 0 0-6.27 6.27 6.27 6.27 0 0 0 6.27 6.27 6.27 6.27 0 0 0 6.27-6.27V8.97a8.16 8.16 0 0 0 4.04 1.05V6.69h-.01z" />
-              </svg>
-              <Input
-                value={socialLinks.tiktok}
-                onChange={(e) => setSocialLinks({ ...socialLinks, tiktok: e.target.value })}
-                placeholder="https://tiktok.com/@yourhandle"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-muted-foreground shrink-0" />
-              <Input
-                value={socialLinks.youtube}
-                onChange={(e) => setSocialLinks({ ...socialLinks, youtube: e.target.value })}
-                placeholder="https://youtube.com/@yourhandle"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Publish Toggle */}
-        <Card className={isPublished ? "border-primary/30 bg-primary/5" : "border-border"}>
-          <CardContent className="py-4 flex items-center justify-between">
             <div>
-              {isPublished ? (
-                <>
-                  <div className="flex items-center gap-2 font-semibold text-primary">
-                    <Eye className="w-4 h-4" /> Your page is live
-                  </div>
-                  <a
-                    href={`/${handle}`}
-                    target="_blank"
-                    rel="noopener"
-                    className="text-sm text-primary hover:underline flex items-center gap-1"
-                  >
-                    denied.care/c/{handle} <ExternalLink className="w-3 h-3" />
-                  </a>
-                </>
-              ) : (
-                <div className="flex items-center gap-2 text-muted-foreground">
-                  <EyeOff className="w-4 h-4" /> Your page is not visible yet
-                </div>
+              <p className="text-sm font-medium text-white">{displayName || "your name"}</p>
+              <p className="text-xs" style={{ color: '#B0B0B0' }}>@{handle || "handle"}</p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Section 2: Basic Info ── */}
+        <section className="space-y-4">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, rgba(59,240,122,0.2) 0%, transparent 100%)' }} />
+          <label className="text-xs font-medium tracking-wide" style={{ color: '#FFFFFF' }}>basic info</label>
+
+          {/* Display Name */}
+          <div className="space-y-1.5">
+            <label className="text-xs" style={{ color: '#B0B0B0' }}>display name</label>
+            <input
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="your name"
+              className={inputFocusClass}
+              style={{ ...inputStyle, '::placeholder': { color: '#666' } } as any}
+            />
+          </div>
+
+          {/* Handle */}
+          <div className="space-y-1.5">
+            <label className="text-xs" style={{ color: '#B0B0B0' }}>handle</label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm" style={{ color: '#666' }}>@</span>
+              <input
+                value={handle}
+                onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                className={inputFocusClass}
+                style={{ ...inputStyle, paddingLeft: '32px' } as any}
+              />
+              {handle && !checkingHandle && handleAvailable !== null && (
+                <span className="absolute right-4 top-1/2 -translate-y-1/2">
+                  {handleAvailable ? (
+                    <Check className="w-4 h-4" style={{ color: '#3BF07A' }} />
+                  ) : (
+                    <X className="w-4 h-4" style={{ color: '#FF6B4A' }} />
+                  )}
+                </span>
               )}
             </div>
-            <Switch checked={isPublished} onCheckedChange={setIsPublished} />
-          </CardContent>
-        </Card>
-
-        {/* Featured Providers */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold">My Favorite Providers</Label>
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setSuggestOpen(true)}>
-                <Lightbulb className="w-4 h-4" /> Suggest New
-              </Button>
-              <Popover open={providerSearchOpen} onOpenChange={setProviderSearchOpen}>
-                <PopoverTrigger asChild>
-                  <Button size="sm" variant="outline" className="gap-1.5">
-                    <Plus className="w-4 h-4" /> Add Provider
-                  </Button>
-                </PopoverTrigger>
-              <PopoverContent className="p-0 w-[300px]" align="end">
-                <Command>
-                  <CommandInput placeholder="Search providers..." />
-                  <CommandList>
-                    <CommandEmpty>No providers found</CommandEmpty>
-                    <CommandGroup>
-                      {allProviders
-                        .filter((p) => !featuredProviders.includes(p.slug))
-                        .map((p) => (
-                          <CommandItem key={p.slug} onSelect={() => addProvider(p.slug)}>
-                            <div>
-                              <div className="font-medium">{p.name}</div>
-                              {p.city && <div className="text-xs text-muted-foreground">{p.city}</div>}
-                            </div>
-                          </CommandItem>
-                        ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-              </Popover>
-            </div>
           </div>
 
-          {/* Pending Suggestions */}
-          {pendingSuggestions.length > 0 && (
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">Pending Suggestions</Label>
-              {pendingSuggestions.map((s: any) => (
-                <Card key={s.id} className="border-border/50 bg-muted/30">
-                  <CardContent className="py-3 flex items-center gap-3">
-                    <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate text-sm">{s.name}</div>
-                      {s.city && <div className="text-xs text-muted-foreground">{s.city}</div>}
-                    </div>
-                    <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
-                      Awaiting review
-                    </Badge>
-                  </CardContent>
-                </Card>
-              ))}
+          {/* Bio */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <label className="text-xs" style={{ color: '#B0B0B0' }}>bio</label>
+              <span className="text-[10px]" style={{ color: '#666' }}>{bio.length}/160</span>
             </div>
-          )}
-
-          {featuredProviders.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="py-8 text-center text-muted-foreground">
-                <Star className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                <p>No favorite providers yet</p>
-                <p className="text-sm">Add providers you endorse to feature them on your page</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-2">
-              {featuredProviders.map((slug, i) => {
-                const p = providerMap[slug];
-                return (
-                  <Card key={slug} className="border-border/50">
-                    <CardContent className="py-3 flex items-center gap-3">
-                      <div className="flex flex-col gap-1">
-                        <button
-                          onClick={() => moveProvider(i, "up")}
-                          disabled={i === 0}
-                          className="text-muted-foreground hover:text-foreground disabled:opacity-20"
-                        >
-                          <ArrowUp className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          onClick={() => moveProvider(i, "down")}
-                          disabled={i === featuredProviders.length - 1}
-                          className="text-muted-foreground hover:text-foreground disabled:opacity-20"
-                        >
-                          <ArrowDown className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      {p?.cover_photo_url && (
-                        <img
-                          src={p.cover_photo_url}
-                          alt=""
-                          className="w-12 h-12 rounded-lg object-cover bg-muted"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="font-medium truncate">{p?.name || slug}</div>
-                        {p?.city && <div className="text-xs text-muted-foreground">{p.city}</div>}
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-muted-foreground hover:text-destructive shrink-0"
-                        onClick={() => removeProvider(slug)}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          )}
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value.slice(0, 160))}
+              placeholder="tell people why you're here"
+              rows={3}
+              className={inputFocusClass}
+              style={{ ...inputStyle, minHeight: '80px', resize: 'vertical', '::placeholder': { color: '#666' } } as any}
+            />
+          </div>
         </section>
 
-        {/* Content Gallery */}
-        <section className="space-y-4">
+        {/* ── Section 3: Specialties ── */}
+        <section className="space-y-3">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, rgba(59,240,122,0.2) 0%, transparent 100%)' }} />
           <div className="flex items-center justify-between">
-            <Label className="text-base font-semibold">My Content</Label>
-            <label className="cursor-pointer">
-              <Button size="sm" variant="outline" className="gap-1.5" asChild disabled={uploading}>
-                <span>
-                  <Plus className="w-4 h-4" />
-                  {uploading ? "Uploading..." : "Add Photos/Videos"}
-                </span>
-              </Button>
-              <input
-                ref={contentInputRef}
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                className="hidden"
-                onChange={handleContentUpload}
-                disabled={uploading}
-              />
-            </label>
+            <label className="text-xs font-medium tracking-wide" style={{ color: '#FFFFFF' }}>specialties</label>
+            <span className="text-[10px]" style={{ color: '#666' }}>{specialties.length}/5</span>
           </div>
-
-          {content.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="py-8 text-center text-muted-foreground">
-                <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                <p>No content yet</p>
-                <p className="text-sm">Upload photos and videos from your experiences</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-              {content.map((item) => (
+          <div className="flex flex-wrap gap-2">
+            {SPECIALTY_OPTIONS.map((s) => {
+              const selected = specialties.includes(s);
+              return (
                 <button
-                  key={item.id}
-                  onClick={() => setLightboxItem(item)}
-                  className="relative aspect-square rounded-lg overflow-hidden bg-muted group"
+                  key={s}
+                  onClick={() => toggleSpecialty(s)}
+                  className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                  style={{
+                    background: selected ? '#3BF07A' : '#111111',
+                    color: selected ? '#0A0A0A' : '#B0B0B0',
+                    border: selected ? '1px solid #3BF07A' : '1px solid rgba(255,107,74,0.08)',
+                    boxShadow: selected ? 'none' : 'inset 0 0 0 1px rgba(59,240,122,0.08)',
+                  }}
                 >
-                  {item.media_type === "video" ? (
-                    <>
-                      <video src={item.media_url} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                        <Play className="w-6 h-6 text-white drop-shadow-lg" />
-                      </div>
-                    </>
-                  ) : (
-                    <img src={item.media_url} alt="" className="w-full h-full object-cover" loading="lazy" />
-                  )}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
-                  {item.provider_slug && (
-                    <Badge className="absolute bottom-1 left-1 text-[10px] bg-black/60 text-white border-0">
-                      {providerMap[item.provider_slug]?.name || item.provider_slug}
-                    </Badge>
-                  )}
+                  {s}
                 </button>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
         </section>
 
-        {/* Reviews */}
-        <section className="space-y-4">
-          <Label className="text-base font-semibold">My Reviews</Label>
-          {reviews.length === 0 ? (
-            <Card className="border-dashed">
-              <CardContent className="py-8 text-center text-muted-foreground">
-                <Star className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                <p>No reviews yet</p>
-                <p className="text-sm">Leave reviews on provider pages — they'll appear here automatically</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {reviews.map((review) => (
-                <ReviewCard
-                  key={review.id}
-                  review={review}
-                  showProviderName
-                  providerName={providerMap[review.provider_slug]?.name || review.provider_slug}
-                />
-              ))}
+        {/* ── Section 4: Social Links ── */}
+        <section className="space-y-3">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, rgba(59,240,122,0.2) 0%, transparent 100%)' }} />
+          <label className="text-xs font-medium tracking-wide" style={{ color: '#FFFFFF' }}>social links</label>
+
+          {[
+            { key: "instagram", icon: <Instagram className="w-4 h-4" />, placeholder: "instagram handle or url" },
+            { key: "tiktok", icon: <TikTokIcon className="w-4 h-4" />, placeholder: "tiktok handle or url" },
+            { key: "youtube", icon: <YouTubeIcon className="w-4 h-4" />, placeholder: "youtube channel url" },
+            { key: "twitter", icon: <TwitterIcon className="w-4 h-4" />, placeholder: "x / twitter handle" },
+            { key: "website", icon: <Globe className="w-4 h-4" />, placeholder: "your website url" },
+          ].map(({ key, icon, placeholder }) => (
+            <div key={key} className="flex items-center gap-3">
+              <div className="shrink-0" style={{ color: '#666' }}>{icon}</div>
+              <input
+                value={socialLinks[key] || ""}
+                onChange={(e) => setSocialLinks({ ...socialLinks, [key]: e.target.value })}
+                placeholder={placeholder}
+                className={inputFocusClass}
+                style={{ ...inputStyle } as any}
+              />
             </div>
-          )}
+          ))}
+        </section>
+
+        {/* ── Section 5: Accent Theme ── */}
+        <section className="space-y-3">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, rgba(59,240,122,0.2) 0%, transparent 100%)' }} />
+          <label className="text-xs font-medium tracking-wide" style={{ color: '#FFFFFF' }}>choose your vibe</label>
+          <div className="flex items-center gap-3">
+            {THEME_SWATCHES.map((t) => {
+              const isActive = accentTheme === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setAccentTheme(t.key)}
+                  className="relative w-10 h-10 rounded-full flex items-center justify-center transition-all"
+                  style={{
+                    background: t.color,
+                    boxShadow: isActive ? `0 0 0 3px #060606, 0 0 0 5px ${t.color}, 0 0 15px ${t.color}40` : 'none',
+                  }}
+                  title={t.label}
+                >
+                  {isActive && <Check className="w-4 h-4" style={{ color: '#000' }} />}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* ── Section 6: Publish Toggle ── */}
+        <section className="space-y-3">
+          <div className="h-px" style={{ background: 'linear-gradient(90deg, rgba(59,240,122,0.2) 0%, transparent 100%)' }} />
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-xs font-medium tracking-wide" style={{ color: '#FFFFFF' }}>make my page public</label>
+              <p className="text-[10px] mt-0.5" style={{ color: isPublished ? '#3BF07A' : '#B0B0B0' }}>
+                {isPublished ? "your page is live" : "your page is hidden"}
+              </p>
+            </div>
+            <Switch checked={isPublished} onCheckedChange={setIsPublished} />
+          </div>
         </section>
       </div>
+    </div>
+  );
 
-      {/* Sticky Save Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50">
-        <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            {saving ? "Saving..." : "All changes require saving"}
-          </p>
-          <Button onClick={handleSave} disabled={saving} className="gap-2">
-            <Save className="w-4 h-4" />
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
+  return (
+    <div className="min-h-screen" style={{ background: '#060606' }}>
+      <div className="max-w-[1200px] mx-auto">
+        {isMobile ? (
+          /* ── Mobile: single column ── */
+          <div className="min-h-screen flex flex-col" style={{ background: '#0A0A0A' }}>
+            {rightPanel}
+
+            {/* Sticky preview button */}
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+              <button
+                onClick={() => setMobilePreviewOpen(true)}
+                className="px-6 py-2.5 rounded-full text-sm font-semibold text-black shadow-lg"
+                style={{
+                  background: 'linear-gradient(135deg, #3BF07A, #2DD468)',
+                  boxShadow: '0 4px 20px rgba(59,240,122,0.3)',
+                }}
+              >
+                preview my page
+              </button>
+            </div>
+
+            {/* Full-screen preview modal */}
+            <Dialog open={mobilePreviewOpen} onOpenChange={setMobilePreviewOpen}>
+              <DialogContent className="max-w-full h-full p-0 border-none rounded-none" style={{ background: '#060606' }}>
+                <button
+                  onClick={() => setMobilePreviewOpen(false)}
+                  className="absolute top-4 right-4 z-10 p-2 rounded-full"
+                  style={{ background: 'rgba(255,255,255,0.1)', color: '#FFFFFF' }}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div className="p-4 pt-14 overflow-y-auto h-full">
+                  <p className="text-[10px] tracking-[0.2em] mb-2" style={{ color: '#B0B0B0' }}>live preview</p>
+                  <CreatorProfilePreview
+                    displayName={displayName}
+                    handle={handle}
+                    bio={bio}
+                    avatarUrl={avatarUrl}
+                    specialties={specialties}
+                    socialLinks={socialLinks}
+                    accentTheme={accentTheme}
+                    isPublished={isPublished}
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+        ) : (
+          /* ── Desktop: split panel ── */
+          <div className="flex min-h-screen">
+            {/* Left: Live Preview (55%) */}
+            <div className="w-[55%] p-8 flex flex-col">
+              <p className="text-[10px] tracking-[0.2em] mb-3" style={{ color: '#B0B0B0' }}>live preview</p>
+
+              {/* Device frame */}
+              <div
+                className="flex-1 rounded-2xl overflow-hidden"
+                style={{
+                  border: '1px solid transparent',
+                  backgroundClip: 'padding-box',
+                  boxShadow: `
+                    inset 0 0 0 1px rgba(255,107,74,0.15),
+                    inset 0 0 0 1px rgba(59,240,122,0.15),
+                    0 4px 40px rgba(0,0,0,0.5),
+                    0 0 80px rgba(59,240,122,0.05)
+                  `,
+                }}
+              >
+                <CreatorProfilePreview
+                  displayName={displayName}
+                  handle={handle}
+                  bio={bio}
+                  avatarUrl={avatarUrl}
+                  specialties={specialties}
+                  socialLinks={socialLinks}
+                  accentTheme={accentTheme}
+                  isPublished={isPublished}
+                />
+              </div>
+
+              {/* Public URL */}
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-sm font-medium" style={{ color: '#3BF07A' }}>
+                  denied.care/c/{handle || "handle"}
+                </span>
+                <button
+                  onClick={copyUrl}
+                  className="p-1 rounded hover:bg-white/5 transition-colors"
+                  style={{ color: '#3BF07A' }}
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Builder Controls (45%) */}
+            <div className="w-[45%] min-h-screen" style={{ background: '#0A0A0A' }}>
+              {rightPanel}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Avatar Crop Modal */}
@@ -860,41 +607,6 @@ const CreatorEdit = () => {
           onConfirm={handleAvatarCrop}
         />
       )}
-
-      {/* Content Lightbox */}
-      <Dialog open={!!lightboxItem} onOpenChange={() => setLightboxItem(null)}>
-        <DialogContent className="max-w-2xl p-0 bg-black/95 border-none">
-          {lightboxItem && (
-            <div className="relative">
-              <button
-                onClick={() => setLightboxItem(null)}
-                className="absolute top-3 right-3 z-10 text-white/70 hover:text-white"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <button
-                onClick={() => handleDeleteContent(lightboxItem.id)}
-                className="absolute top-3 left-3 z-10 text-white/70 hover:text-red-400 transition-colors"
-              >
-                <Trash2 className="w-5 h-5" />
-              </button>
-              {lightboxItem.media_type === "video" ? (
-                <video src={lightboxItem.media_url} controls autoPlay className="w-full max-h-[80vh] object-contain" />
-              ) : (
-                <img src={lightboxItem.media_url} alt="" className="w-full max-h-[80vh] object-contain" />
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Suggest Provider Modal */}
-      <SuggestProviderModal
-        open={suggestOpen}
-        onOpenChange={setSuggestOpen}
-        creatorId={creatorProfile.id}
-        onSubmitted={loadData}
-      />
     </div>
   );
 };
