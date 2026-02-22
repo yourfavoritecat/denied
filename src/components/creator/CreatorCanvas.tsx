@@ -7,12 +7,13 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
   Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink,
 } from "lucide-react";
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
 
-/* ── Icons ── */
+/* ── custom svg icons ── */
 const TikTokIcon = ({ className }: { className?: string }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor">
     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-1-.08 6.27 6.27 0 0 0-6.27 6.27 6.27 6.27 0 0 0 6.27 6.27 6.27 6.27 0 0 0 6.27-6.27V8.97a8.16 8.16 0 0 0 4.04 1.05V6.69h-.01z" />
@@ -29,18 +30,18 @@ const TwitterIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-/* ── Constants ── */
+/* ── constants ── */
 const SPECIALTY_OPTIONS = [
   "dental", "cosmetic", "skincare", "bariatric", "fertility",
   "wellness", "recovery tips", "travel hacks", "budget tips",
 ];
 
 const THEMES: Record<string, { color: string; rgb: string }> = {
-  mint: { color: '#3BF07A', rgb: '59,240,122' },
-  coral: { color: '#FF6B4A', rgb: '255,107,74' },
-  lavender: { color: '#C4A8FF', rgb: '196,168,255' },
-  gold: { color: '#FFD700', rgb: '255,215,0' },
-  ice: { color: '#7DF9FF', rgb: '125,249,255' },
+  mint: { color: "#3BF07A", rgb: "59,240,122" },
+  coral: { color: "#FF6B4A", rgb: "255,107,74" },
+  lavender: { color: "#C4A8FF", rgb: "196,168,255" },
+  gold: { color: "#FFD700", rgb: "255,215,0" },
+  ice: { color: "#7DF9FF", rgb: "125,249,255" },
 };
 
 const SOCIAL_PLATFORMS = [
@@ -51,7 +52,7 @@ const SOCIAL_PLATFORMS = [
   { key: "website", icon: Globe, baseUrl: "", label: "website" },
 ];
 
-/* ── Helpers ── */
+/* ── helpers ── */
 const normalizeSocial = (value: string, baseUrl: string): string => {
   const v = value.trim();
   if (!v) return v;
@@ -63,10 +64,40 @@ const normalizeSocial = (value: string, baseUrl: string): string => {
   return `${baseUrl}${handle}`;
 };
 
-/* ── Component ── */
+/* ── social link input ── */
+const SocialInput = ({
+  value,
+  label,
+  accent,
+  onChange,
+}: {
+  value: string;
+  label: string;
+  accent: string;
+  onChange: (v: string) => void;
+}) => (
+  <div className="p-3">
+    <label className="text-[10px] tracking-wide mb-2 block" style={{ color: "#B0B0B0" }}>
+      {label} url
+    </label>
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={`paste your ${label} url`}
+      className="w-full bg-transparent outline-none text-sm"
+      style={{ color: "#FFFFFF", borderBottom: "1px solid #333", paddingBottom: 4 }}
+      onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
+      onBlur={(e) => (e.currentTarget.style.borderBottomColor = "#333")}
+      onKeyDown={(e) => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+      autoFocus
+    />
+  </div>
+);
+
+/* ── component ── */
 interface Props {
   isEditing: boolean;
-  handleParam?: string; // for public view
+  handleParam?: string;
 }
 
 const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
@@ -79,7 +110,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   const [notFound, setNotFound] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
 
-  // Data
+  /* data */
   const [displayName, setDisplayName] = useState("");
   const [handle, setHandle] = useState("");
   const [bio, setBio] = useState("");
@@ -91,23 +122,24 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   const [accentTheme, setAccentTheme] = useState("mint");
   const [isPublished, setIsPublished] = useState(false);
 
-  // Editing state
+  /* editing ui */
   const [editingField, setEditingField] = useState<string | null>(null);
   const [handleAvailable, setHandleAvailable] = useState<boolean | null>(null);
   const [checkingHandle, setCheckingHandle] = useState(false);
   const originalHandle = useRef("");
 
-  // Save
+  /* save */
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hasLoadedRef = useRef(false);
   const statusFadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSavePayload = useRef<any>(null);
 
-  // Avatar
+  /* avatar */
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  // Refs for inputs
+  /* input refs */
   const nameInputRef = useRef<HTMLInputElement>(null);
   const handleInputRef = useRef<HTMLInputElement>(null);
   const bioRef = useRef<HTMLTextAreaElement>(null);
@@ -116,7 +148,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   const accent = theme.color;
   const rgb = theme.rgb;
 
-  // Load profile
+  /* ── load profile ── */
   useEffect(() => {
     (async () => {
       if (isEditing) {
@@ -163,7 +195,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     setTimeout(() => { hasLoadedRef.current = true; }, 100);
   };
 
-  // Handle availability
+  /* ── handle availability ── */
   useEffect(() => {
     if (!isEditing) return;
     if (!handle || handle === originalHandle.current) {
@@ -177,7 +209,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     return () => clearTimeout(t);
   }, [handle, isEditing]);
 
-  // Auto-save
+  /* ── auto-save ── */
   const doSave = useCallback(async () => {
     if (!profileId || !user) return;
     setSaveStatus("saving");
@@ -188,13 +220,15 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
       twitter: normalizeSocial(socialLinks.twitter, "https://x.com/"),
       website: socialLinks.website.trim(),
     };
+    const payload = {
+      display_name: displayName, handle, bio: bio || null,
+      avatar_url: avatarUrl, specialties, social_links: normalized,
+      is_published: isPublished, profile_theme: accentTheme,
+    };
+    lastSavePayload.current = payload;
     const { error } = await supabase
       .from("creator_profiles")
-      .update({
-        display_name: displayName, handle, bio: bio || null,
-        avatar_url: avatarUrl, specialties, social_links: normalized,
-        is_published: isPublished, profile_theme: accentTheme,
-      } as any)
+      .update(payload as any)
       .eq("id", profileId);
     if (error) {
       setSaveStatus("error");
@@ -207,6 +241,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     }
   }, [profileId, user, displayName, handle, bio, avatarUrl, specialties, socialLinks, isPublished, accentTheme]);
 
+  const retrySave = () => doSave();
+
   useEffect(() => {
     if (!isEditing || !hasLoadedRef.current) return;
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -214,7 +250,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
   }, [displayName, handle, bio, avatarUrl, specialties, socialLinks, isPublished, accentTheme, doSave]);
 
-  // Avatar upload
+  /* ── avatar upload ── */
   const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -240,58 +276,156 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   };
 
   const toggleSpecialty = (s: string) => {
-    setSpecialties(prev => prev.includes(s) ? prev.filter(x => x !== s) : prev.length < 5 ? [...prev, s] : prev);
+    setSpecialties((prev) =>
+      prev.includes(s) ? prev.filter((x) => x !== s) : prev.length < 5 ? [...prev, s] : prev
+    );
   };
 
   const copyUrl = () => {
-    navigator.clipboard.writeText(`denied.care/c/${handle}`);
+    navigator.clipboard.writeText(`denied.care/${handle}`);
     toast({ title: "copied!" });
   };
 
-  // Progress
+  /* ── progress ── */
   const completeness = [
     !!avatarUrl, !!displayName, !!bio,
     specialties.length > 0,
-    Object.values(socialLinks).some(v => v.trim()),
+    Object.values(socialLinks).some((v) => v.trim()),
   ];
   const progress = (completeness.filter(Boolean).length / completeness.length) * 100;
 
-  // Focus input on edit mode change
+  /* ── focus input on edit mode ── */
   useEffect(() => {
     if (editingField === "name") nameInputRef.current?.focus();
     if (editingField === "handle") handleInputRef.current?.focus();
     if (editingField === "bio") bioRef.current?.focus();
   }, [editingField]);
 
+  /* ── loading / not found ── */
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#060606' }}>
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: '#3BF07A' }} />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#060606" }}>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: "#3BF07A" }} />
       </div>
     );
   }
 
   if (notFound) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4" style={{ background: '#060606' }}>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-4" style={{ background: "#060606" }}>
         <h1 className="text-2xl font-bold text-white">creator not found</h1>
-        <p className="text-sm" style={{ color: '#B0B0B0' }}>this profile doesn't exist or isn't published yet.</p>
+        <p className="text-sm" style={{ color: "#B0B0B0" }}>this profile doesn't exist or isn't published yet.</p>
       </div>
     );
   }
 
-  const hasSocials = Object.values(socialLinks).some(v => v.trim());
+  /* ── social icon renderer ── */
+  const renderSocialIcon = (platform: typeof SOCIAL_PLATFORMS[0]) => {
+    const value = socialLinks[platform.key] || "";
+    const filled = !!value.trim();
+    const IconComp = platform.icon;
+    const CustomIcon = platform.iconCustom;
+
+    if (!isEditing && !filled) return null;
+
+    const iconEl = (
+      <div className="relative">
+        {CustomIcon ? <CustomIcon className="w-5 h-5" /> : IconComp ? <IconComp className="w-5 h-5" /> : null}
+        {isEditing && !filled && (
+          <div
+            className="absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center"
+            style={{ background: accent, fontSize: 8, color: "#0A0A0A" }}
+          >
+            <Plus className="w-2 h-2" />
+          </div>
+        )}
+      </div>
+    );
+
+    /* read-only link */
+    if (!isEditing && filled) {
+      const url = normalizeSocial(value, platform.baseUrl);
+      return (
+        <a
+          key={platform.key}
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="transition-colors duration-200"
+          style={{ color: "#B0B0B0" }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#B0B0B0")}
+        >
+          {iconEl}
+        </a>
+      );
+    }
+
+    /* editable — mobile uses drawer, desktop uses popover */
+    const inputContent = (
+      <SocialInput
+        value={value}
+        label={platform.label}
+        accent={accent}
+        onChange={(v) => setSocialLinks({ ...socialLinks, [platform.key]: v })}
+      />
+    );
+
+    if (isMobile) {
+      return (
+        <Drawer key={platform.key}>
+          <DrawerTrigger asChild>
+            <button className="transition-colors duration-200 p-1" style={{ color: filled ? accent : "#333" }}>
+              {iconEl}
+            </button>
+          </DrawerTrigger>
+          <DrawerContent style={{ background: "#111111", border: "1px solid rgba(255,107,74,0.1)" }}>
+            <div className="px-4 pb-8 pt-2">{inputContent}</div>
+          </DrawerContent>
+        </Drawer>
+      );
+    }
+
+    return (
+      <Popover key={platform.key}>
+        <PopoverTrigger asChild>
+          <button className="transition-colors duration-200 p-1" style={{ color: filled ? accent : "#333" }}>
+            {iconEl}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="p-0"
+          style={{
+            width: 280,
+            background: "#111111",
+            border: "1px solid transparent",
+            backgroundImage: "linear-gradient(#111111, #111111), linear-gradient(135deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))",
+            backgroundOrigin: "border-box",
+            backgroundClip: "padding-box, border-box",
+            borderRadius: 12,
+            boxShadow: "0 8px 30px rgba(0,0,0,0.5)",
+          }}
+        >
+          {inputContent}
+        </PopoverContent>
+      </Popover>
+    );
+  };
 
   return (
-    <div className="min-h-screen" style={{ background: '#060606' }}>
-      {/* ── Sticky top bar (editing only) ── */}
+    <div className="min-h-screen" style={{ background: "#060606" }}>
+      {/* ── sticky top bar (editing only) ── */}
       {isEditing && (
-        <div className="sticky top-0 z-50" style={{ background: '#0A0A0A' }}>
-          <div className="flex items-center justify-between h-12 px-5 md:px-12 max-w-[640px] mx-auto">
+        <div className="sticky top-0 z-50" style={{ background: "#0A0A0A" }}>
+          <div
+            className="flex items-center justify-between h-12 px-5 md:px-12 max-w-[640px] mx-auto"
+          >
             {!isMobile && (
-              <span className="text-xs tracking-[0.15em]" style={{ color: '#B0B0B0' }}>editing your page</span>
+              <span className="text-xs tracking-[0.15em]" style={{ color: "#B0B0B0" }}>
+                editing your page
+              </span>
             )}
-            <div className="text-xs flex items-center gap-1" style={{ color: '#B0B0B0' }}>
+            <div className="text-xs flex items-center gap-1 mx-auto md:mx-0" style={{ color: "#B0B0B0" }}>
               {saveStatus === "saving" && <span>saving...</span>}
               {saveStatus === "saved" && (
                 <>
@@ -300,11 +434,11 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 </>
               )}
               {saveStatus === "error" && (
-                <button onClick={doSave} className="flex items-center gap-1" style={{ color: '#FF6B4A' }}>
+                <button onClick={retrySave} className="flex items-center gap-1" style={{ color: "#FF6B4A" }}>
                   save failed — tap to retry
                 </button>
               )}
-              {saveStatus === "idle" && <span className="opacity-0">·</span>}
+              {saveStatus === "idle" && <span className="opacity-0 select-none">·</span>}
             </div>
             {!isMobile && (
               <a
@@ -319,139 +453,130 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               </a>
             )}
           </div>
-          {/* Glossy bottom border */}
-          <div className="h-px" style={{ background: 'linear-gradient(90deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))' }} />
-          {/* Progress bar */}
-          <div className="h-0.5" style={{ background: '#111111' }}>
+          {/* glossy bottom border */}
+          <div
+            className="h-px"
+            style={{ background: "linear-gradient(90deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))" }}
+          />
+          {/* progress bar */}
+          <div className="h-0.5" style={{ background: "#111111" }}>
             <div
               className="h-full transition-all duration-500"
-              style={{
-                width: `${progress}%`,
-                background: `linear-gradient(90deg, ${accent}, #FF6B4A)`,
-              }}
+              style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${accent}, #FF6B4A)` }}
             />
           </div>
         </div>
       )}
 
-      {/* ── Content ── */}
+      {/* ── content ── */}
       <div
         className="mx-auto"
-        style={{
-          maxWidth: '640px',
-          padding: isMobile ? '40px 20px 0' : '48px 48px 0',
-        }}
+        style={{ maxWidth: 640, padding: isMobile ? "40px 20px 0" : "48px 48px 0" }}
       >
-
-        {/* ── Section 1: Avatar + Identity ── */}
+        {/* ── section 1: avatar + identity ── */}
         <div className="flex flex-col items-center text-center mb-6">
-          {/* Avatar */}
+          {/* avatar */}
           <div
             className="relative group mb-3 rounded-full"
             style={{
               width: isMobile ? 96 : 120,
               height: isMobile ? 96 : 120,
-              cursor: isEditing ? 'pointer' : 'default',
+              cursor: isEditing ? "pointer" : "default",
             }}
             onClick={() => isEditing && avatarInputRef.current?.click()}
           >
-            <Avatar
-              className="w-full h-full"
-              style={isEditing ? {
-                transition: 'box-shadow 0.2s',
-                boxShadow: 'none',
-              } : undefined}
-            >
+            <Avatar className="w-full h-full">
               {avatarUrl ? (
                 <AvatarImage src={avatarUrl} alt={displayName} className="object-cover" />
               ) : (
                 <AvatarFallback
                   className="flex flex-col items-center justify-center gap-1"
-                  style={{ background: '#111111', color: '#B0B0B0' }}
+                  style={{ background: "#111111", color: "#B0B0B0" }}
                 >
                   <Camera className="w-6 h-6" />
                   {isEditing && <span className="text-[10px]">add photo</span>}
                 </AvatarFallback>
               )}
             </Avatar>
+            {/* hover overlay */}
+            {isEditing && avatarUrl && (
+              <div
+                className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-0.5"
+                style={{ background: "rgba(0,0,0,0.5)" }}
+              >
+                <Camera className="w-5 h-5 text-white" />
+                <span className="text-[9px] text-white">change</span>
+              </div>
+            )}
+            {/* glow ring on hover */}
             {isEditing && (
               <div
-                className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center"
-                style={{
-                  background: 'rgba(0,0,0,0.4)',
-                  boxShadow: `0 0 0 3px rgba(${rgb},0.3)`,
-                }}
-              >
-                <Camera className="w-6 h-6 text-white" />
-              </div>
+                className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all pointer-events-none"
+                style={{ boxShadow: `0 0 0 3px rgba(${rgb},0.3)` }}
+              />
             )}
             {isEditing && (
               <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
             )}
           </div>
 
-          {/* Display Name */}
+          {/* display name */}
           {editingField === "name" ? (
             <input
               ref={nameInputRef}
               value={displayName}
-              onChange={e => setDisplayName(e.target.value)}
+              onChange={(e) => setDisplayName(e.target.value)}
               onBlur={() => setEditingField(null)}
-              onKeyDown={e => e.key === "Enter" && setEditingField(null)}
+              onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
               className="bg-transparent text-center outline-none w-full transition-all duration-200"
               style={{
-                color: '#FFFFFF',
-                fontSize: isMobile ? '20px' : '24px',
+                color: "#FFFFFF",
+                fontSize: isMobile ? 20 : 24,
                 fontWeight: 700,
-                borderBottom: `1px solid #333`,
+                borderBottom: "1px solid #333",
                 paddingBottom: 2,
               }}
-              onFocus={e => e.currentTarget.style.borderBottomColor = accent}
+              onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
               placeholder="your name"
             />
           ) : (
             <h1
               className="transition-all duration-200"
               style={{
-                color: displayName ? '#FFFFFF' : '#444',
-                fontSize: isMobile ? '20px' : '24px',
+                color: displayName ? "#FFFFFF" : "#444",
+                fontSize: isMobile ? 20 : 24,
                 fontWeight: 700,
-                cursor: isEditing ? 'text' : 'default',
-                borderBottom: isEditing ? '1px dashed transparent' : 'none',
+                cursor: isEditing ? "text" : "default",
+                borderBottom: isEditing ? "1px dashed transparent" : "none",
               }}
-              onMouseEnter={e => { if (isEditing) e.currentTarget.style.borderBottomColor = '#333'; }}
-              onMouseLeave={e => { if (isEditing) e.currentTarget.style.borderBottomColor = 'transparent'; }}
+              onMouseEnter={(e) => { if (isEditing) e.currentTarget.style.borderBottomColor = "#333"; }}
+              onMouseLeave={(e) => { if (isEditing) e.currentTarget.style.borderBottomColor = "transparent"; }}
               onClick={() => isEditing && setEditingField("name")}
             >
               {displayName || (isEditing ? "your name" : "")}
             </h1>
           )}
 
-          {/* Handle */}
+          {/* handle */}
           {editingField === "handle" ? (
             <div className="flex items-center gap-0 mt-1 relative">
-              <span className="text-sm" style={{ color: '#666' }}>@</span>
+              <span className="text-sm" style={{ color: "#666" }}>@</span>
               <input
                 ref={handleInputRef}
                 value={handle}
-                onChange={e => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
+                onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""))}
                 onBlur={() => setEditingField(null)}
-                onKeyDown={e => e.key === "Enter" && setEditingField(null)}
+                onKeyDown={(e) => e.key === "Enter" && setEditingField(null)}
                 className="bg-transparent text-sm outline-none transition-all duration-200"
-                style={{
-                  color: '#B0B0B0',
-                  borderBottom: `1px solid #333`,
-                  paddingBottom: 1,
-                  minWidth: 60,
-                }}
-                onFocus={e => e.currentTarget.style.borderBottomColor = accent}
+                style={{ color: "#B0B0B0", borderBottom: "1px solid #333", paddingBottom: 1, minWidth: 60 }}
+                onFocus={(e) => (e.currentTarget.style.borderBottomColor = accent)}
               />
               {handle && !checkingHandle && handleAvailable !== null && (
                 <span className="ml-1">
                   {handleAvailable ? (
-                    <Check className="w-3 h-3" style={{ color: '#3BF07A' }} />
+                    <Check className="w-3 h-3" style={{ color: "#3BF07A" }} />
                   ) : (
-                    <X className="w-3 h-3" style={{ color: '#FF6B4A' }} />
+                    <X className="w-3 h-3" style={{ color: "#FF6B4A" }} />
                   )}
                 </span>
               )}
@@ -460,46 +585,46 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             <p
               className="text-sm mt-1 transition-all duration-200"
               style={{
-                color: '#B0B0B0',
-                cursor: isEditing ? 'text' : 'default',
-                borderBottom: isEditing ? '1px dashed transparent' : 'none',
+                color: "#B0B0B0",
+                cursor: isEditing ? "text" : "default",
+                borderBottom: isEditing ? "1px dashed transparent" : "none",
               }}
-              onMouseEnter={e => { if (isEditing) e.currentTarget.style.borderBottomColor = '#333'; }}
-              onMouseLeave={e => { if (isEditing) e.currentTarget.style.borderBottomColor = 'transparent'; }}
+              onMouseEnter={(e) => { if (isEditing) e.currentTarget.style.borderBottomColor = "#333"; }}
+              onMouseLeave={(e) => { if (isEditing) e.currentTarget.style.borderBottomColor = "transparent"; }}
               onClick={() => isEditing && setEditingField("handle")}
             >
               @{handle || (isEditing ? "handle" : "")}
             </p>
           )}
 
-          {isEditing && isMobile && editingField !== "name" && editingField !== "handle" && (
-            <span className="text-[9px] mt-1" style={{ color: '#444' }}>tap to edit</span>
+          {isEditing && isMobile && !editingField && (
+            <span className="text-[9px] mt-1" style={{ color: "#444" }}>tap to edit</span>
           )}
         </div>
 
-        {/* ── Section 2: Bio ── */}
-        <div className="mb-8 text-center">
+        {/* ── section 2: bio ── */}
+        <div className="mb-8 text-center" style={{ marginTop: 24 }}>
           {editingField === "bio" ? (
             <div className="relative">
               <textarea
                 ref={bioRef}
                 value={bio}
-                onChange={e => setBio(e.target.value.slice(0, 160))}
+                onChange={(e) => setBio(e.target.value.slice(0, 160))}
                 onBlur={() => setEditingField(null)}
                 rows={3}
                 placeholder="tell people why you're here"
                 className="w-full bg-transparent text-center outline-none resize-none transition-all duration-200"
                 style={{
-                  color: '#B0B0B0',
-                  fontSize: '16px',
+                  color: "#B0B0B0",
+                  fontSize: 16,
                   lineHeight: 1.6,
-                  border: `1px solid #333`,
+                  border: "1px solid #333",
                   borderRadius: 8,
-                  padding: '8px 12px',
+                  padding: "8px 12px",
                 }}
-                onFocus={e => e.currentTarget.style.borderColor = accent}
+                onFocus={(e) => (e.currentTarget.style.borderColor = accent)}
               />
-              <span className="absolute bottom-2 right-3 text-[10px]" style={{ color: '#444' }}>
+              <span className="absolute bottom-2 right-3 text-[10px]" style={{ color: "#444" }}>
                 {bio.length}/160
               </span>
             </div>
@@ -507,29 +632,34 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             <p
               className="leading-relaxed transition-all duration-200"
               style={{
-                color: bio ? '#B0B0B0' : '#444',
-                fontSize: '16px',
-                cursor: isEditing ? 'text' : 'default',
-                border: isEditing ? '1px dashed transparent' : 'none',
+                color: bio ? "#B0B0B0" : "#444",
+                fontSize: 16,
+                cursor: isEditing ? "text" : "default",
+                border: isEditing ? "1px dashed transparent" : "none",
                 borderRadius: 8,
-                padding: isEditing ? '8px 12px' : 0,
+                padding: isEditing ? "8px 12px" : 0,
               }}
-              onMouseEnter={e => { if (isEditing) e.currentTarget.style.borderColor = '#333'; }}
-              onMouseLeave={e => { if (isEditing) e.currentTarget.style.borderColor = 'transparent'; }}
+              onMouseEnter={(e) => { if (isEditing) e.currentTarget.style.borderColor = "#333"; }}
+              onMouseLeave={(e) => { if (isEditing) e.currentTarget.style.borderColor = "transparent"; }}
               onClick={() => isEditing && setEditingField("bio")}
             >
               {bio || (isEditing ? "tell people why you're here" : "")}
             </p>
           )}
           {isEditing && isMobile && editingField !== "bio" && (
-            <span className="text-[9px]" style={{ color: '#444' }}>tap to edit</span>
+            <span className="text-[9px]" style={{ color: "#444" }}>tap to edit</span>
           )}
         </div>
 
-        {/* ── Section 3: Specialties ── */}
-        <div className="mb-8">
-          <div className="flex flex-wrap gap-2 justify-center items-center">
-            {(isEditing ? SPECIALTY_OPTIONS : specialties).map(s => {
+        {/* ── section 3: specialties ── */}
+        <div className="mb-8" style={{ marginTop: 32 }}>
+          {isEditing && (
+            <div className="flex justify-end mb-2">
+              <span className="text-[10px]" style={{ color: "#444" }}>{specialties.length}/5</span>
+            </div>
+          )}
+          <div className="flex flex-wrap gap-2 justify-center">
+            {(isEditing ? SPECIALTY_OPTIONS : specialties).map((s) => {
               const selected = specialties.includes(s);
               if (!isEditing && !selected) return null;
               return (
@@ -539,129 +669,39 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   disabled={!isEditing}
                   className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
                   style={{
-                    background: selected ? accent : '#111111',
-                    color: selected ? '#0A0A0A' : '#B0B0B0',
-                    border: selected ? `1px solid ${accent}` : '1px solid transparent',
+                    background: selected ? accent : "#111111",
+                    color: selected ? "#0A0A0A" : "#B0B0B0",
+                    border: selected ? `1px solid ${accent}` : "1px solid transparent",
                     boxShadow: selected
                       ? `0 2px 8px rgba(${rgb},0.2)`
-                      : 'inset 0 0 0 1px rgba(255,107,74,0.08), inset 0 0 0 1px rgba(59,240,122,0.08)',
-                    cursor: isEditing ? 'pointer' : 'default',
+                      : "inset 0 0 0 1px rgba(255,107,74,0.08), inset 0 0 0 1px rgba(59,240,122,0.08)",
+                    cursor: isEditing ? "pointer" : "default",
                   }}
                 >
                   {s}
                 </button>
               );
             })}
-            {isEditing && (
-              <span className="text-[10px] ml-1" style={{ color: '#444' }}>{specialties.length}/5</span>
-            )}
           </div>
         </div>
 
-        {/* ── Section 4: Social Links ── */}
-        <div className="mb-8">
+        {/* ── section 4: social links ── */}
+        <div className="mb-8" style={{ marginTop: 32 }}>
           <div className="flex items-center justify-center gap-4">
-            {SOCIAL_PLATFORMS.map(platform => {
-              const value = socialLinks[platform.key] || "";
-              const filled = !!value.trim();
-              const IconComp = platform.icon;
-              const CustomIcon = platform.iconCustom;
-
-              if (!isEditing && !filled) return null;
-
-              const iconEl = (
-                <div className="relative">
-                  {CustomIcon ? (
-                    <CustomIcon className="w-5 h-5" />
-                  ) : IconComp ? (
-                    <IconComp className="w-5 h-5" />
-                  ) : null}
-                  {isEditing && !filled && (
-                    <div
-                      className="absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center"
-                      style={{ background: '#333', fontSize: 8, color: '#B0B0B0' }}
-                    >
-                      <Plus className="w-2 h-2" />
-                    </div>
-                  )}
-                </div>
-              );
-
-              if (!isEditing && filled) {
-                const url = normalizeSocial(value, platform.baseUrl);
-                return (
-                  <a
-                    key={platform.key}
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="transition-colors duration-200"
-                    style={{ color: '#B0B0B0' }}
-                    onMouseEnter={e => e.currentTarget.style.color = accent}
-                    onMouseLeave={e => e.currentTarget.style.color = '#B0B0B0'}
-                  >
-                    {iconEl}
-                  </a>
-                );
-              }
-
-              return (
-                <Popover key={platform.key}>
-                  <PopoverTrigger asChild>
-                    <button
-                      className="transition-colors duration-200 p-1"
-                      style={{ color: filled ? accent : '#333' }}
-                    >
-                      {iconEl}
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent
-                    className="p-3"
-                    style={{
-                      width: 280,
-                      background: '#111111',
-                      border: '1px solid transparent',
-                      boxShadow: 'inset 0 0 0 1px rgba(255,107,74,0.08), inset 0 0 0 1px rgba(59,240,122,0.08), 0 8px 30px rgba(0,0,0,0.5)',
-                      borderRadius: 12,
-                    }}
-                  >
-                    <label className="text-[10px] tracking-wide mb-2 block" style={{ color: '#B0B0B0' }}>
-                      {platform.label} url
-                    </label>
-                    <input
-                      value={value}
-                      onChange={e => setSocialLinks({ ...socialLinks, [platform.key]: e.target.value })}
-                      placeholder={`paste ${platform.label} link`}
-                      className="w-full bg-transparent outline-none text-sm"
-                      style={{
-                        color: '#FFFFFF',
-                        borderBottom: `1px solid #333`,
-                        paddingBottom: 4,
-                      }}
-                      onFocus={e => e.currentTarget.style.borderBottomColor = accent}
-                      onBlur={e => e.currentTarget.style.borderBottomColor = '#333'}
-                      onKeyDown={e => {
-                        if (e.key === "Enter") (e.target as HTMLInputElement).blur();
-                      }}
-                    />
-                  </PopoverContent>
-                </Popover>
-              );
-            })}
+            {SOCIAL_PLATFORMS.map(renderSocialIcon)}
           </div>
           {isEditing && isMobile && (
-            <p className="text-[9px] text-center mt-2" style={{ color: '#444' }}>tap icons to add links</p>
+            <p className="text-[9px] text-center mt-2" style={{ color: "#444" }}>tap icons to add links</p>
           )}
         </div>
 
-        {/* ── Section 5: Accent Theme (editing only) ── */}
+        {/* ── section 5: accent theme (editing only) ── */}
         {isEditing && (
-          <div className="mb-12">
-            {/* Divider */}
+          <div className="mb-12" style={{ marginTop: 48 }}>
             <div className="flex justify-center mb-6">
               <div className="h-px w-[200px]" style={{ background: `linear-gradient(90deg, rgba(${rgb},0.3), transparent)` }} />
             </div>
-            <p className="text-xs tracking-[0.15em] text-center mb-4" style={{ color: '#B0B0B0' }}>
+            <p className="text-xs tracking-[0.15em] text-center mb-4" style={{ color: "#B0B0B0" }}>
               choose your vibe
             </p>
             <div className="flex items-center justify-center gap-3">
@@ -674,12 +714,13 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     className="relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
                     style={{
                       background: t.color,
+                      border: isActive ? "none" : "2px solid #333",
                       boxShadow: isActive
                         ? `0 0 0 3px #060606, 0 0 0 5px ${t.color}, 0 0 12px ${t.color}40`
-                        : 'none',
+                        : "none",
                     }}
                   >
-                    {isActive && <Check className="w-4 h-4" style={{ color: '#000' }} />}
+                    {isActive && <Check className="w-4 h-4" style={{ color: "#000" }} />}
                   </button>
                 );
               })}
@@ -687,36 +728,33 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
           </div>
         )}
 
-        {/* ── Section 6: Publish Toggle (editing only) ── */}
+        {/* ── section 6: publish toggle (editing only) ── */}
         {isEditing && (
-          <div className="mb-8 flex flex-col items-center gap-3">
+          <div className="mb-8 flex flex-col items-center gap-3" style={{ marginTop: 48 }}>
             <div className="flex items-center gap-3">
-              <span className="text-sm" style={{ color: '#B0B0B0' }}>make my page public</span>
-              <Switch
-                checked={isPublished}
-                onCheckedChange={setIsPublished}
-              />
+              <span className="text-sm" style={{ color: "#B0B0B0" }}>make my page public</span>
+              <Switch checked={isPublished} onCheckedChange={setIsPublished} />
             </div>
             {isPublished ? (
               <div className="flex items-center gap-1.5">
                 <span className="text-xs" style={{ color: accent }}>
-                  your page is live at denied.care/c/{handle || "handle"}
+                  your page is live at denied.care/{handle || "handle"}
                 </span>
                 <button onClick={copyUrl} className="p-0.5 hover:opacity-70 transition-opacity" style={{ color: accent }}>
                   <Copy className="w-3 h-3" />
                 </button>
               </div>
             ) : (
-              <span className="text-xs" style={{ color: '#666' }}>your page is hidden</span>
+              <span className="text-xs" style={{ color: "#666" }}>your page is hidden</span>
             )}
           </div>
         )}
 
-        {/* ── Section 7: Footer spacer ── */}
+        {/* ── section 7: footer spacer ── */}
         <div style={{ height: 120 }} />
       </div>
 
-      {/* Avatar Crop Modal */}
+      {/* avatar crop modal */}
       {cropSrc && (
         <AvatarCropModal
           open={!!cropSrc}
