@@ -41,7 +41,7 @@ const THEMES: Record<string, { color: string; rgb: string }> = {
   mint: { color: "#3BF07A", rgb: "59,240,122" },
   coral: { color: "#FF6B4A", rgb: "255,107,74" },
   lavender: { color: "#C4A8FF", rgb: "196,168,255" },
-  gold: { color: "#FFD700", rgb: "255,215,0" },
+  gold: { color: "#E1FF00", rgb: "225,255,0" },
   ice: { color: "#7DF9FF", rgb: "125,249,255" },
 };
 
@@ -464,22 +464,22 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
     /* glossy card style helper */
     const glossyCard: React.CSSProperties = {
-      background: "linear-gradient(145deg, rgba(59,240,122,0.06) 0%, rgba(10,10,10,1) 40%, rgba(255,107,74,0.03) 100%)",
+      background: `linear-gradient(145deg, rgba(${rgb},0.06) 0%, rgba(10,10,10,1) 40%, rgba(${rgb},0.03) 100%)`,
       border: "1px solid transparent",
-      backgroundImage: "linear-gradient(145deg, rgba(59,240,122,0.06) 0%, rgba(10,10,10,1) 40%, rgba(255,107,74,0.03) 100%), linear-gradient(135deg, rgba(255,107,74,0.5), rgba(59,240,122,0.55))",
+      backgroundImage: `linear-gradient(145deg, rgba(${rgb},0.06) 0%, rgba(10,10,10,1) 40%, rgba(${rgb},0.03) 100%), linear-gradient(135deg, rgba(${rgb},0.5), rgba(${rgb},0.55))`,
       backgroundOrigin: "border-box",
       backgroundClip: "padding-box, border-box",
       borderRadius: isMobile ? 14 : 16,
-      boxShadow: "0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(59,240,122,0.1), 0 0 60px rgba(59,240,122,0.04), inset 0 1px 0 rgba(255,255,255,0.05)",
+      boxShadow: `0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(${rgb},0.1), 0 0 60px rgba(${rgb},0.04), inset 0 1px 0 rgba(255,255,255,0.05)`,
     };
 
     const glossyCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(-2px)";
-      e.currentTarget.style.boxShadow = "0 0 30px rgba(0,0,0,0.5), 0 0 24px rgba(59,240,122,0.18), 0 0 60px rgba(59,240,122,0.08), inset 0 1px 0 rgba(255,255,255,0.06)";
+      e.currentTarget.style.boxShadow = `0 0 30px rgba(0,0,0,0.5), 0 0 24px rgba(${rgb},0.18), 0 0 60px rgba(${rgb},0.08), inset 0 1px 0 rgba(255,255,255,0.06)`;
     };
     const glossyCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.boxShadow = "0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(59,240,122,0.1), 0 0 60px rgba(59,240,122,0.04), inset 0 1px 0 rgba(255,255,255,0.05)";
+      e.currentTarget.style.boxShadow = `0 0 30px rgba(0,0,0,0.5), 0 0 20px rgba(${rgb},0.1), 0 0 60px rgba(${rgb},0.04), inset 0 1px 0 rgba(255,255,255,0.05)`;
     };
 
     /* ── build mixed feed timeline ── */
@@ -531,9 +531,9 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             className="relative overflow-hidden"
             style={{
               borderRadius: isMobile ? 0 : 16,
-              border: isMobile ? "none" : "1px solid rgba(255,107,74,0.06)",
+              border: isMobile ? "none" : `1px solid rgba(${rgb},0.06)`,
               boxShadow: isMobile ? "none" : "0 0 60px rgba(0,0,0,0.4)",
-              background: "linear-gradient(160deg, rgba(59,240,122,0.03) 0%, #060606 30%, #060606 70%, rgba(255,107,74,0.02) 100%)",
+              background: `linear-gradient(160deg, rgba(${rgb},0.03) 0%, #060606 30%, #060606 70%, rgba(${rgb},0.02) 100%)`,
             }}
           >
             {/* grain texture overlay */}
@@ -564,7 +564,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     fontSize: isMobile ? 80 : 120,
                     fontWeight: 700,
                     color: "transparent",
-                    backgroundImage: "linear-gradient(135deg, rgba(59,240,122,0.12), rgba(255,107,74,0.09))",
+                    backgroundImage: `linear-gradient(135deg, rgba(${rgb},0.12), rgba(${rgb},0.06))`,
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                     lineHeight: 1,
@@ -575,26 +575,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               </div>
 
               <div className="flex flex-col items-center text-center relative" style={{ zIndex: 1 }}>
-                {/* verified badge */}
-                <div
-                  className="inline-flex items-center gap-1.5 rounded-full mb-5"
-                  style={{
-                    padding: "6px 16px",
-                    background: "linear-gradient(135deg, rgba(59,240,122,0.2), rgba(255,107,74,0.15))",
-                    border: "1px solid rgba(59,240,122,0.35)",
-                  }}
-                >
-                  <div
-                    className="rounded-full flex-shrink-0"
-                    style={{ width: 6, height: 6, background: "#3BF07A", boxShadow: "0 0 6px #3BF07A" }}
-                  />
-                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: "#3BF07A", fontWeight: 500 }}>
-                    denied verified creator
-                  </span>
-                </div>
-
                 {/* avatar */}
-                <div className="mb-3.5">
+                <div className="mb-3">
                   <Avatar
                     className="flex-shrink-0"
                     style={{
@@ -612,6 +594,24 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                       </AvatarFallback>
                     )}
                   </Avatar>
+                </div>
+
+                {/* verified badge — below avatar */}
+                <div
+                  className="inline-flex items-center gap-1.5 rounded-full mb-3"
+                  style={{
+                    padding: "6px 16px",
+                    background: `linear-gradient(135deg, rgba(${rgb},0.2), rgba(${rgb},0.1))`,
+                    border: `1px solid rgba(${rgb},0.35)`,
+                  }}
+                >
+                  <div
+                    className="rounded-full flex-shrink-0"
+                    style={{ width: 6, height: 6, background: accent, boxShadow: `0 0 6px ${accent}` }}
+                  />
+                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: accent, fontWeight: 500 }}>
+                    denied verified creator
+                  </span>
                 </div>
 
                 {/* display name */}
@@ -700,9 +700,9 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 padding: isMobile ? "18px 20px" : "18px 36px",
                 borderTop: "1px solid transparent",
                 borderBottom: "1px solid transparent",
-                borderImage: "linear-gradient(90deg, transparent, rgba(255,107,74,0.5), rgba(59,240,122,0.55), transparent) 1",
-                background: "linear-gradient(135deg, rgba(59,240,122,0.04) 0%, rgba(0,0,0,0.4) 50%, rgba(255,107,74,0.02) 100%)",
-                boxShadow: "0 0 16px rgba(59,240,122,0.03)",
+                borderImage: `linear-gradient(90deg, transparent, rgba(${rgb},0.5), rgba(${rgb},0.55), transparent) 1`,
+                background: `linear-gradient(135deg, rgba(${rgb},0.04) 0%, rgba(0,0,0,0.4) 50%, rgba(${rgb},0.02) 100%)`,
+                boxShadow: `0 0 16px rgba(${rgb},0.03)`,
               }}
             >
               {[
@@ -745,9 +745,9 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         border: "1px solid rgba(255,255,255,0.04)",
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(59,240,122,0.25)";
+                        e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
                         e.currentTarget.style.transform = "scale(1.02)";
-                        e.currentTarget.style.boxShadow = "0 0 12px rgba(59,240,122,0.12)";
+                        e.currentTarget.style.boxShadow = `0 0 12px rgba(${rgb},0.12)`;
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
@@ -792,7 +792,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               style={{
                 height: 1,
                 margin: isMobile ? "12px 20px" : "16px 36px",
-                background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.08), rgba(255,107,74,0.06), transparent)",
+                background: `linear-gradient(90deg, transparent, rgba(${rgb},0.08), rgba(${rgb},0.06), transparent)`,
               }}
             />
 
@@ -835,10 +835,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   )}
                   {feedItems.map((item, idx) => {
                     const isLast = idx === feedItems.length - 1;
-                    const dotColor = item.type === "trip" ? "#FF6B4A" : item.type === "joined" ? "#555" : "#3BF07A";
+                    const dotColor = item.type === "trip" ? "#FF6B4A" : item.type === "joined" ? "#555" : accent;
                     const dotShadow = item.type === "trip"
                       ? "0 0 10px rgba(255,107,74,0.3)"
-                      : item.type === "joined" ? "none" : "0 0 10px rgba(59,240,122,0.35)";
+                      : item.type === "joined" ? "none" : `0 0 10px rgba(${rgb},0.35)`;
 
                     return (
                       <div
@@ -862,13 +862,13 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                               </p>
                               <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
                                 {item.data.procedure_name} · <span style={{ color: "#FFD700" }}>{renderStars(item.data.rating)}</span> · {formatDate(item.date)}
-                                {item.data.verified_trip && <span style={{ color: "#3BF07A" }}> · verified visit</span>}
+                                {item.data.verified_trip && <span style={{ color: accent }}> · verified visit</span>}
                               </p>
                               {item.data.review_text && (
                                 <div
                                   style={{
-                                    marginTop: 10, padding: "14px 18px", background: "linear-gradient(135deg, rgba(59,240,122,0.04), rgba(10,10,10,1))",
-                                    borderRadius: 12, borderLeft: "2px solid rgba(59,240,122,0.4)",
+                                    marginTop: 10, padding: "14px 18px", background: `linear-gradient(135deg, rgba(${rgb},0.04), rgba(10,10,10,1))`,
+                                    borderRadius: 12, borderLeft: `2px solid rgba(${rgb},0.4)`,
                                   }}
                                 >
                                   <p style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>
@@ -898,8 +898,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                                     border: "1px solid rgba(255,255,255,0.05)",
                                   }}
                                   onMouseEnter={(e) => {
-                                    e.currentTarget.style.borderColor = "rgba(59,240,122,0.2)";
-                                    e.currentTarget.style.boxShadow = "0 0 10px rgba(59,240,122,0.1)";
+                                    e.currentTarget.style.borderColor = `rgba(${rgb},0.2)`;
+                                    e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.1)`;
                                   }}
                                   onMouseLeave={(e) => {
                                     e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
@@ -988,7 +988,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                             <span
                               className="rounded-full"
                               style={{
-                                background: "rgba(59,240,122,0.08)", color: "#3BF07A",
+                                background: `rgba(${rgb},0.08)`, color: accent,
                                 padding: "2px 8px", fontSize: 10,
                               }}
                             >
@@ -1020,8 +1020,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                             border: "1px solid rgba(255,255,255,0.05)",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = "rgba(59,240,122,0.2)";
-                            e.currentTarget.style.boxShadow = "0 0 12px rgba(59,240,122,0.1)";
+                            e.currentTarget.style.borderColor = `rgba(${rgb},0.2)`;
+                            e.currentTarget.style.boxShadow = `0 0 12px rgba(${rgb},0.1)`;
                             e.currentTarget.style.transform = "scale(1.02)";
                           }}
                           onMouseLeave={(e) => {
@@ -1086,7 +1086,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           style={{
                             width: 44, height: 44, borderRadius: 10,
                             background: "linear-gradient(135deg, #111, #1a1a1a)",
-                            border: "1px solid rgba(59,240,122,0.1)",
+                            border: `1px solid rgba(${rgb},0.1)`,
                             fontSize: 18, color: "#555",
                           }}
                         >
@@ -1101,8 +1101,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         <span
                           className="flex-shrink-0 rounded-full"
                           style={{
-                            fontSize: 10, color: "#3BF07A",
-                            background: "rgba(59,240,122,0.08)",
+                            fontSize: 10, color: accent,
+                            background: `rgba(${rgb},0.08)`,
                             padding: "3px 10px",
                           }}
                         >
