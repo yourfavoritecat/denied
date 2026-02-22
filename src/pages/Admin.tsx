@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import Navbar from "@/components/layout/Navbar";
 import { useAdmin } from "@/hooks/useAdmin";
 import { supabase } from "@/integrations/supabase/client";
 import AdminSidebar, { AdminSection } from "@/components/admin/AdminSidebar";
@@ -78,15 +79,18 @@ const AdminPage = () => {
   const ActiveSection = SECTIONS[section];
 
   return (
-    <div className="min-h-screen flex">
-      <AdminSidebar active={section} onChange={setSection} inboxCount={inboxCount} flagCount={flagCount} />
-      <main className="flex-1 p-4 pt-16 lg:pt-6 lg:p-8 overflow-y-auto">
-        {section === "overview" ? (
-          <OverviewSection onNavigate={(s: string) => setSection(s as AdminSection)} />
-        ) : (
-          <ActiveSection />
-        )}
-      </main>
+    <div className="min-h-screen flex flex-col">
+      <Navbar />
+      <div className="flex flex-1 pt-16">
+        <AdminSidebar active={section} onChange={setSection} inboxCount={inboxCount} flagCount={flagCount} />
+        <main className="flex-1 p-4 pt-4 lg:p-8 overflow-y-auto">
+          {section === "overview" ? (
+            <OverviewSection onNavigate={(s: string) => setSection(s as AdminSection)} />
+          ) : (
+            <ActiveSection />
+          )}
+        </main>
+      </div>
     </div>
   );
 };
