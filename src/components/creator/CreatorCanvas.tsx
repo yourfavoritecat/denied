@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
-  Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink,
+  Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink, Star,
 } from "lucide-react";
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
 import Navbar from "@/components/layout/Navbar";
@@ -65,17 +65,16 @@ const normalizeSocial = (value: string, baseUrl: string): string => {
   return `${baseUrl}${handle}`;
 };
 
-/* ── social link input ── */
+const formatDate = (dateStr: string) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-US", { month: "short", year: "numeric" }).toLowerCase();
+};
+
+/* ── social link input (editing mode) ── */
 const SocialInput = ({
-  value,
-  label,
-  accent,
-  onChange,
+  value, label, accent, onChange,
 }: {
-  value: string;
-  label: string;
-  accent: string;
-  onChange: (v: string) => void;
+  value: string; label: string; accent: string; onChange: (v: string) => void;
 }) => (
   <div className="p-3">
     <label className="text-[10px] tracking-wide mb-2 block" style={{ color: "#B0B0B0" }}>
@@ -110,6 +109,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [profileId, setProfileId] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [createdAt, setCreatedAt] = useState<string | null>(null);
 
   /* data */
   const [displayName, setDisplayName] = useState("");
@@ -122,6 +123,12 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   });
   const [accentTheme, setAccentTheme] = useState("mint");
   const [isPublished, setIsPublished] = useState(false);
+
+  /* public view data */
+  const [stats, setStats] = useState({ reviews: 0, trips: 0, posts: 0, helpful: 0 });
+  const [contentItems, setContentItems] = useState<any[]>([]);
+  const [feedReviews, setFeedReviews] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("feed");
 
   /* editing ui */
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -178,6 +185,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
   const hydrateProfile = (cp: any) => {
     setProfileId(cp.id);
+    setUserId(cp.user_id);
+    setCreatedAt(cp.created_at);
     setDisplayName(cp.display_name || "");
     setHandle(cp.handle || "");
     originalHandle.current = cp.handle || "";
@@ -195,6 +204,45 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     setLoading(false);
     setTimeout(() => { hasLoadedRef.current = true; }, 100);
   };
+
+  /* ── fetch public view data ── */
+  useEffect(() => {
+    if (isEditing || !profileId || !userId) return;
+    (async () => {
+      const [reviewsRes, tripsRes, postsRes, contentRes, feedRes] = await Promise.all([
+        supabase.from("reviews" as any).select("id", { count: "exact", head: true }).eq("user_id", userId),
+        supabase.from("bookings").select("id", { count: "exact", head: true }).eq("user_id", userId).eq("status", "confirmed"),
+        supabase.from("creator_content").select("id", { count: "exact", head: true }).eq("creator_id", profileId),
+        supabase.from("creator_content").select("*").eq("creator_id", profileId).order("created_at", { ascending: false }).limit(10),
+        supabase.from("reviews" as any).select("*").eq("user_id", userId).order("created_at", { ascending: false }),
+      ]);
+
+      setStats({
+        reviews: reviewsRes.count || 0,
+        trips: tripsRes.count || 0,
+        posts: postsRes.count || 0,
+        helpful: 0,
+      });
+      setContentItems(contentRes.data || []);
+
+      // Enrich reviews with provider names
+      const reviews = (feedRes.data as any[]) || [];
+      if (reviews.length > 0) {
+        const slugs = [...new Set(reviews.map((r: any) => r.provider_slug))];
+        const { data: providers } = await supabase
+          .from("providers")
+          .select("slug, name")
+          .in("slug", slugs);
+        const providerMap = new Map((providers || []).map((p: any) => [p.slug, p.name]));
+        setFeedReviews(reviews.map((r: any) => ({
+          ...r,
+          provider_name: providerMap.get(r.provider_slug) || r.provider_slug,
+        })));
+      } else {
+        setFeedReviews([]);
+      }
+    })();
+  }, [isEditing, profileId, userId]);
 
   /* ── handle availability ── */
   useEffect(() => {
@@ -326,19 +374,17 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     );
   }
 
-  /* ── social icon renderer ── */
-  const renderSocialIcon = (platform: typeof SOCIAL_PLATFORMS[0]) => {
+  /* ── social icon renderer (editing mode) ── */
+  const renderSocialIconEditing = (platform: typeof SOCIAL_PLATFORMS[0]) => {
     const value = socialLinks[platform.key] || "";
     const filled = !!value.trim();
     const IconComp = platform.icon;
     const CustomIcon = platform.iconCustom;
 
-    if (!isEditing && !filled) return null;
-
     const iconEl = (
       <div className="relative">
         {CustomIcon ? <CustomIcon className="w-5 h-5" /> : IconComp ? <IconComp className="w-5 h-5" /> : null}
-        {isEditing && !filled && (
+        {!filled && (
           <div
             className="absolute -top-1 -right-1 w-3 h-3 rounded-full flex items-center justify-center"
             style={{ background: accent, fontSize: 8, color: "#0A0A0A" }}
@@ -349,26 +395,6 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
       </div>
     );
 
-    /* read-only link */
-    if (!isEditing && filled) {
-      const url = normalizeSocial(value, platform.baseUrl);
-      return (
-        <a
-          key={platform.key}
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="transition-colors duration-200"
-          style={{ color: "#B0B0B0" }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = accent)}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "#B0B0B0")}
-        >
-          {iconEl}
-        </a>
-      );
-    }
-
-    /* editable — mobile uses drawer, desktop uses popover */
     const inputContent = (
       <SocialInput
         value={value}
@@ -419,62 +445,515 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     );
   };
 
+  /* ══════════════════════════════════════════════════════════════
+     ██ PUBLIC VIEW (isEditing = false)
+     ══════════════════════════════════════════════════════════════ */
+  if (!isEditing) {
+    const filledSocials = SOCIAL_PLATFORMS.filter((p) => (socialLinks[p.key] || "").trim());
+    const hasContent = contentItems.length > 0;
+
+    const renderStars = (rating: number) => {
+      const stars = [];
+      for (let i = 0; i < 5; i++) {
+        stars.push(i < rating ? "★" : "☆");
+      }
+      return stars.join("");
+    };
+
+    const tabs = ["feed", "reviews", "content", "favorite providers"];
+
+    return (
+      <div className="min-h-screen" style={{ background: "#060606" }}>
+        <Navbar />
+        <div
+          className="mx-auto pt-24 pb-0"
+          style={{
+            maxWidth: 680,
+            paddingLeft: isMobile ? 0 : 20,
+            paddingRight: isMobile ? 0 : 20,
+          }}
+        >
+          {/* profile container */}
+          <div
+            className="relative overflow-hidden"
+            style={{
+              borderRadius: isMobile ? 0 : 16,
+              border: isMobile ? "none" : "1px solid rgba(255,107,74,0.06)",
+              boxShadow: isMobile ? "none" : "0 0 60px rgba(0,0,0,0.4)",
+              background: "#060606",
+            }}
+          >
+            {/* grain texture overlay */}
+            <div
+              className="absolute inset-0 pointer-events-none z-[1]"
+              style={{ opacity: 0.025 }}
+            >
+              <svg width="100%" height="100%">
+                <filter id="grain">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch" />
+                </filter>
+                <rect width="100%" height="100%" filter="url(#grain)" />
+              </svg>
+            </div>
+
+            {/* ── section 1: identity ── */}
+            <div
+              className="relative flex flex-col items-center text-center z-[2]"
+              style={{ padding: isMobile ? "28px 20px 20px" : "40px 36px 24px" }}
+            >
+              {/* "denied" glow text */}
+              <div
+                className="absolute inset-0 flex items-center justify-center pointer-events-none select-none"
+                style={{ zIndex: 0 }}
+              >
+                <span
+                  style={{
+                    fontSize: isMobile ? 80 : 120,
+                    fontWeight: 700,
+                    color: "transparent",
+                    backgroundImage: "linear-gradient(135deg, rgba(59,240,122,0.04), rgba(255,107,74,0.03))",
+                    WebkitBackgroundClip: "text",
+                    backgroundClip: "text",
+                    lineHeight: 1,
+                  }}
+                >
+                  denied
+                </span>
+              </div>
+
+              {/* verified badge */}
+              <div
+                className="inline-flex items-center gap-1.5 rounded-full mb-5"
+                style={{
+                  padding: "6px 16px",
+                  background: "linear-gradient(135deg, rgba(59,240,122,0.12), rgba(255,107,74,0.08))",
+                  border: "1px solid rgba(59,240,122,0.18)",
+                  position: "relative",
+                  zIndex: 1,
+                }}
+              >
+                <div
+                  className="rounded-full flex-shrink-0"
+                  style={{
+                    width: 6, height: 6,
+                    background: "#3BF07A",
+                    boxShadow: "0 0 6px #3BF07A",
+                  }}
+                />
+                <span style={{ fontSize: 11, letterSpacing: 1.5, color: "#3BF07A", fontWeight: 500 }}>
+                  denied verified creator
+                </span>
+              </div>
+
+              {/* avatar */}
+              <div className="relative z-[1] mb-3.5">
+                <Avatar
+                  className="flex-shrink-0"
+                  style={{
+                    width: isMobile ? 80 : 96,
+                    height: isMobile ? 80 : 96,
+                    border: "2px solid rgba(59,240,122,0.15)",
+                    boxShadow: "0 0 24px rgba(59,240,122,0.08)",
+                  }}
+                >
+                  {avatarUrl ? (
+                    <AvatarImage src={avatarUrl} alt={displayName} className="object-cover" />
+                  ) : (
+                    <AvatarFallback style={{ background: "#111", color: "#B0B0B0", fontSize: isMobile ? 28 : 32, fontWeight: 700 }}>
+                      {(displayName?.[0] || "?").toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              </div>
+
+              {/* display name */}
+              <h1
+                className="font-bold mb-1 relative z-[1]"
+                style={{ color: "#FFFFFF", fontSize: isMobile ? 20 : 24 }}
+              >
+                {displayName}
+              </h1>
+
+              {/* handle */}
+              <p className="mb-4 relative z-[1]" style={{ color: "#555", fontSize: 14 }}>
+                @{handle}
+              </p>
+
+              {/* bio */}
+              {bio && (
+                <p
+                  className="mb-4 relative z-[1]"
+                  style={{
+                    color: "#999",
+                    fontSize: 14,
+                    lineHeight: 1.7,
+                    textAlign: "center",
+                    maxWidth: 440,
+                    margin: "0 auto 18px",
+                  }}
+                >
+                  {bio}
+                </p>
+              )}
+
+              {/* specialty tags */}
+              {specialties.length > 0 && (
+                <div className="flex flex-wrap gap-2 justify-center mb-4 relative z-[1]">
+                  {specialties.map((s) => (
+                    <span
+                      key={s}
+                      className="rounded-full"
+                      style={{
+                        padding: "5px 13px",
+                        fontSize: 11,
+                        fontWeight: 500,
+                        background: `rgba(${rgb},0.10)`,
+                        color: accent,
+                        border: `1px solid rgba(${rgb},0.12)`,
+                      }}
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* social icons */}
+              {filledSocials.length > 0 && (
+                <div className="flex items-center justify-center gap-3 relative z-[1]">
+                  {filledSocials.map((platform) => {
+                    const url = normalizeSocial(socialLinks[platform.key], platform.baseUrl);
+                    const IconComp = platform.icon;
+                    const CustomIcon = platform.iconCustom;
+                    return (
+                      <a
+                        key={platform.key}
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center rounded-full transition-all duration-200"
+                        style={{
+                          width: 34, height: 34,
+                          background: "#111",
+                          border: "1px solid rgba(255,255,255,0.05)",
+                          color: "#777",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
+                          e.currentTarget.style.color = accent;
+                          e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.12)`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                          e.currentTarget.style.color = "#777";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                      >
+                        {CustomIcon ? <CustomIcon className="w-3" /> : IconComp ? <IconComp className="w-3" /> : null}
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ── section 2: stats bar ── */}
+            <div
+              className="flex items-center justify-center"
+              style={{
+                gap: isMobile ? 20 : 36,
+                padding: isMobile ? "18px 20px" : "18px 36px",
+                borderTop: "1px solid rgba(255,255,255,0.04)",
+                borderBottom: "1px solid rgba(255,255,255,0.04)",
+                background: "rgba(0,0,0,0.3)",
+              }}
+            >
+              {[
+                { label: "reviews", value: stats.reviews },
+                { label: "trips", value: stats.trips },
+                { label: "posts", value: stats.posts },
+                { label: "helpful", value: stats.helpful },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <div className="font-bold" style={{ color: "#FFFFFF", fontSize: isMobile ? 18 : 20 }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize: isMobile ? 9 : 10, letterSpacing: 1, color: "#555" }}>
+                    {s.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* ── section 3: content showcase ── */}
+            {hasContent && (
+              <div style={{ padding: isMobile ? "24px 20px" : "24px 36px" }}>
+                <div style={{ fontSize: 11, letterSpacing: 2, color: "#444", fontWeight: 500, marginBottom: 14 }}>
+                  recent content
+                </div>
+                <div
+                  className="flex gap-2.5 overflow-x-auto"
+                  style={{ scrollbarWidth: "none" }}
+                >
+                  <style>{`.content-scroll::-webkit-scrollbar { display: none; }`}</style>
+                  {contentItems.map((item: any) => (
+                    <div
+                      key={item.id}
+                      className="relative flex-shrink-0 overflow-hidden transition-all duration-200 group"
+                      style={{
+                        width: isMobile ? 120 : 140,
+                        height: isMobile ? 120 : 140,
+                        borderRadius: 14,
+                        background: "#111",
+                        border: "1px solid rgba(255,255,255,0.04)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = "rgba(59,240,122,0.15)";
+                        e.currentTarget.style.transform = "scale(1.02)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                    >
+                      <img
+                        src={item.media_url}
+                        alt={item.caption || "content"}
+                        className="w-full h-full object-cover"
+                      />
+                      {item.media_type === "video" && (
+                        <div
+                          className="absolute inset-0 flex items-center justify-center"
+                        >
+                          <div
+                            className="flex items-center justify-center rounded-full"
+                            style={{
+                              width: 36, height: 36,
+                              background: "rgba(0,0,0,0.7)",
+                              border: "1px solid rgba(255,255,255,0.15)",
+                              color: "#fff",
+                              fontSize: 14,
+                              paddingLeft: 2,
+                            }}
+                          >
+                            ▶
+                          </div>
+                        </div>
+                      )}
+                      {item.caption && (
+                        <div
+                          className="absolute bottom-1.5 left-1.5"
+                          style={{
+                            background: "rgba(0,0,0,0.65)",
+                            padding: "3px 10px",
+                            borderRadius: 8,
+                            fontSize: 10,
+                            color: "#ccc",
+                            backdropFilter: "blur(4px)",
+                            maxWidth: "80%",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {item.caption.slice(0, 20)}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* ── section 4: divider ── */}
+            <div
+              style={{
+                height: 1,
+                margin: isMobile ? "0 20px" : "0 36px",
+                background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.08), rgba(255,107,74,0.06), transparent)",
+              }}
+            />
+
+            {/* ── section 5: tab bar + content ── */}
+            <div style={{ padding: isMobile ? "0 20px 28px" : "0 36px 36px" }}>
+              {/* tab bar */}
+              <div
+                className="flex"
+                style={{
+                  borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  marginBottom: 24,
+                }}
+              >
+                {tabs.map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className="transition-colors duration-200"
+                    style={{
+                      padding: isMobile ? "10px 14px" : "12px 20px",
+                      fontSize: isMobile ? 11 : 12,
+                      letterSpacing: 1.5,
+                      color: activeTab === tab ? accent : "#444",
+                      borderBottom: `2px solid ${activeTab === tab ? accent : "transparent"}`,
+                      cursor: "pointer",
+                      background: "none",
+                    }}
+                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#888"; }}
+                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#444"; }}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+
+              {/* tab content */}
+              {activeTab === "feed" && (
+                <div>
+                  {feedReviews.map((review: any) => (
+                    <div
+                      key={review.id}
+                      className="flex gap-3.5"
+                      style={{
+                        padding: "16px 0",
+                        borderBottom: "1px solid rgba(255,255,255,0.03)",
+                      }}
+                    >
+                      {/* green dot */}
+                      <div
+                        className="flex-shrink-0 rounded-full"
+                        style={{
+                          width: 8, height: 8,
+                          background: "#3BF07A",
+                          boxShadow: "0 0 8px rgba(59,240,122,0.3)",
+                          marginTop: 6,
+                        }}
+                      />
+                      {/* content */}
+                      <div className="flex-1 min-w-0">
+                        <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                          reviewed <span className="font-bold" style={{ color: "#FFFFFF" }}>{review.provider_name}</span>
+                        </p>
+                        <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
+                          {review.procedure_name} · <span style={{ color: "#FFD700" }}>{renderStars(review.rating)}</span> · {formatDate(review.created_at)}
+                        </p>
+                        {review.review_text && (
+                          <div
+                            style={{
+                              marginTop: 8,
+                              padding: "12px 16px",
+                              background: "#0A0A0A",
+                              borderRadius: 12,
+                              borderLeft: "2px solid rgba(59,240,122,0.2)",
+                            }}
+                          >
+                            <p style={{ fontSize: 13, color: "#888", lineHeight: 1.5 }}>
+                              {review.review_text.length > 150
+                                ? review.review_text.slice(0, 150) + "..."
+                                : review.review_text}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* joined event */}
+                  <div
+                    className="flex gap-3.5"
+                    style={{ padding: "16px 0" }}
+                  >
+                    <div
+                      className="flex-shrink-0 rounded-full"
+                      style={{ width: 8, height: 8, background: "#666", marginTop: 6 }}
+                    />
+                    <div>
+                      <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                        joined <span className="font-bold" style={{ color: "#FFFFFF" }}>denied.care</span> as a creator
+                      </p>
+                      <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
+                        {createdAt ? formatDate(createdAt) : ""}
+                      </p>
+                    </div>
+                  </div>
+
+                  {feedReviews.length === 0 && (
+                    <p className="text-center text-sm" style={{ color: "#666", paddingTop: 40 }}>
+                      this creator is just getting started — check back soon!
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {activeTab !== "feed" && (
+                <p className="text-center text-sm" style={{ color: "#444", padding: 40 }}>
+                  coming soon
+                </p>
+              )}
+            </div>
+
+            {/* ── section 6: footer spacer ── */}
+            <div style={{ height: 80 }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     ██ EDITING VIEW (isEditing = true) — unchanged
+     ══════════════════════════════════════════════════════════════ */
   return (
     <div className="min-h-screen" style={{ background: "#060606" }}>
       <Navbar />
       {/* ── sticky top bar (editing only) ── */}
-      {isEditing && (
-        <div className="sticky top-16 z-40" style={{ background: "#0A0A0A" }}>
-          <div
-            className="flex items-center justify-between h-12 px-5 md:px-12 max-w-[640px] mx-auto"
-          >
-            {!isMobile && (
-              <span className="text-xs tracking-[0.15em]" style={{ color: "#B0B0B0" }}>
-                editing your page
-              </span>
+      <div className="sticky top-16 z-40" style={{ background: "#0A0A0A" }}>
+        <div className="flex items-center justify-between h-12 px-5 md:px-12 max-w-[640px] mx-auto">
+          {!isMobile && (
+            <span className="text-xs tracking-[0.15em]" style={{ color: "#B0B0B0" }}>
+              editing your page
+            </span>
+          )}
+          <div className="text-xs flex items-center gap-1 mx-auto md:mx-0" style={{ color: "#B0B0B0" }}>
+            {saveStatus === "saving" && <span>saving...</span>}
+            {saveStatus === "saved" && (
+              <>
+                <span>all changes saved</span>
+                <Check className="w-3 h-3" style={{ color: accent }} />
+              </>
             )}
-            <div className="text-xs flex items-center gap-1 mx-auto md:mx-0" style={{ color: "#B0B0B0" }}>
-              {saveStatus === "saving" && <span>saving...</span>}
-              {saveStatus === "saved" && (
-                <>
-                  <span>all changes saved</span>
-                  <Check className="w-3 h-3" style={{ color: accent }} />
-                </>
-              )}
-              {saveStatus === "error" && (
-                <button onClick={retrySave} className="flex items-center gap-1" style={{ color: "#FF6B4A" }}>
-                  save failed — tap to retry
-                </button>
-              )}
-              {saveStatus === "idle" && <span className="opacity-0 select-none">·</span>}
-            </div>
-            {!isMobile && (
-              <a
-                href={`/${handle || "handle"}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm flex items-center gap-1 hover:opacity-80 transition-opacity"
-                style={{ color: accent }}
-              >
-                view public page
-                <ExternalLink className="w-3 h-3" />
-              </a>
+            {saveStatus === "error" && (
+              <button onClick={retrySave} className="flex items-center gap-1" style={{ color: "#FF6B4A" }}>
+                save failed — tap to retry
+              </button>
             )}
+            {saveStatus === "idle" && <span className="opacity-0 select-none">·</span>}
           </div>
-          {/* glossy bottom border */}
-          <div
-            className="h-px"
-            style={{ background: "linear-gradient(90deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))" }}
-          />
-          {/* progress bar */}
-          <div className="h-0.5" style={{ background: "#111111" }}>
-            <div
-              className="h-full transition-all duration-500"
-              style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${accent}, #FF6B4A)` }}
-            />
-          </div>
+          {!isMobile && (
+            <a
+              href={`/${handle || "handle"}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm flex items-center gap-1 hover:opacity-80 transition-opacity"
+              style={{ color: accent }}
+            >
+              view public page
+              <ExternalLink className="w-3 h-3" />
+            </a>
+          )}
         </div>
-      )}
+        {/* glossy bottom border */}
+        <div
+          className="h-px"
+          style={{ background: "linear-gradient(90deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))" }}
+        />
+        {/* progress bar */}
+        <div className="h-0.5" style={{ background: "#111111" }}>
+          <div
+            className="h-full transition-all duration-500"
+            style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${accent}, #FF6B4A)` }}
+          />
+        </div>
+      </div>
 
       {/* ── content ── */}
       <div
@@ -489,9 +968,9 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             style={{
               width: isMobile ? 96 : 120,
               height: isMobile ? 96 : 120,
-              cursor: isEditing ? "pointer" : "default",
+              cursor: "pointer",
             }}
-            onClick={() => isEditing && avatarInputRef.current?.click()}
+            onClick={() => avatarInputRef.current?.click()}
           >
             <Avatar className="w-full h-full">
               {avatarUrl ? (
@@ -502,12 +981,11 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   style={{ background: "#111111", color: "#B0B0B0" }}
                 >
                   <Camera className="w-6 h-6" />
-                  {isEditing && <span className="text-[10px]">add photo</span>}
+                  <span className="text-[10px]">add photo</span>
                 </AvatarFallback>
               )}
             </Avatar>
-            {/* hover overlay */}
-            {isEditing && avatarUrl && (
+            {avatarUrl && (
               <div
                 className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-0.5"
                 style={{ background: "rgba(0,0,0,0.5)" }}
@@ -516,16 +994,11 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 <span className="text-[9px] text-white">change</span>
               </div>
             )}
-            {/* glow ring on hover */}
-            {isEditing && (
-              <div
-                className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all pointer-events-none"
-                style={{ boxShadow: `0 0 0 3px rgba(${rgb},0.3)` }}
-              />
-            )}
-            {isEditing && (
-              <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
-            )}
+            <div
+              className="absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition-all pointer-events-none"
+              style={{ boxShadow: `0 0 0 3px rgba(${rgb},0.3)` }}
+            />
+            <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
           </div>
 
           {/* display name */}
@@ -554,14 +1027,14 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 color: displayName ? "#FFFFFF" : "#444",
                 fontSize: isMobile ? 20 : 24,
                 fontWeight: 700,
-                cursor: isEditing ? "text" : "default",
-                borderBottom: isEditing ? "1px dashed transparent" : "none",
+                cursor: "text",
+                borderBottom: "1px dashed transparent",
               }}
-              onMouseEnter={(e) => { if (isEditing) e.currentTarget.style.borderBottomColor = "#333"; }}
-              onMouseLeave={(e) => { if (isEditing) e.currentTarget.style.borderBottomColor = "transparent"; }}
-              onClick={() => isEditing && setEditingField("name")}
+              onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = "#333"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = "transparent"; }}
+              onClick={() => setEditingField("name")}
             >
-              {displayName || (isEditing ? "your name" : "")}
+              {displayName || "your name"}
             </h1>
           )}
 
@@ -594,18 +1067,18 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               className="text-sm mt-1 transition-all duration-200"
               style={{
                 color: "#B0B0B0",
-                cursor: isEditing ? "text" : "default",
-                borderBottom: isEditing ? "1px dashed transparent" : "none",
+                cursor: "text",
+                borderBottom: "1px dashed transparent",
               }}
-              onMouseEnter={(e) => { if (isEditing) e.currentTarget.style.borderBottomColor = "#333"; }}
-              onMouseLeave={(e) => { if (isEditing) e.currentTarget.style.borderBottomColor = "transparent"; }}
-              onClick={() => isEditing && setEditingField("handle")}
+              onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = "#333"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = "transparent"; }}
+              onClick={() => setEditingField("handle")}
             >
-              @{handle || (isEditing ? "handle" : "")}
+              @{handle || "handle"}
             </p>
           )}
 
-          {isEditing && isMobile && !editingField && (
+          {isMobile && !editingField && (
             <span className="text-[9px] mt-1" style={{ color: "#444" }}>tap to edit</span>
           )}
         </div>
@@ -642,39 +1115,35 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               style={{
                 color: bio ? "#B0B0B0" : "#444",
                 fontSize: 16,
-                cursor: isEditing ? "text" : "default",
-                border: isEditing ? "1px dashed transparent" : "none",
+                cursor: "text",
+                border: "1px dashed transparent",
                 borderRadius: 8,
-                padding: isEditing ? "8px 12px" : 0,
+                padding: "8px 12px",
               }}
-              onMouseEnter={(e) => { if (isEditing) e.currentTarget.style.borderColor = "#333"; }}
-              onMouseLeave={(e) => { if (isEditing) e.currentTarget.style.borderColor = "transparent"; }}
-              onClick={() => isEditing && setEditingField("bio")}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#333"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.borderColor = "transparent"; }}
+              onClick={() => setEditingField("bio")}
             >
-              {bio || (isEditing ? "tell people why you're here" : "")}
+              {bio || "tell people why you're here"}
             </p>
           )}
-          {isEditing && isMobile && editingField !== "bio" && (
+          {isMobile && editingField !== "bio" && (
             <span className="text-[9px]" style={{ color: "#444" }}>tap to edit</span>
           )}
         </div>
 
         {/* ── section 3: specialties ── */}
         <div className="mb-8" style={{ marginTop: 32 }}>
-          {isEditing && (
-            <div className="flex justify-end mb-2">
-              <span className="text-[10px]" style={{ color: "#444" }}>{specialties.length}/5</span>
-            </div>
-          )}
+          <div className="flex justify-end mb-2">
+            <span className="text-[10px]" style={{ color: "#444" }}>{specialties.length}/5</span>
+          </div>
           <div className="flex flex-wrap gap-2 justify-center">
-            {(isEditing ? SPECIALTY_OPTIONS : specialties).map((s) => {
+            {SPECIALTY_OPTIONS.map((s) => {
               const selected = specialties.includes(s);
-              if (!isEditing && !selected) return null;
               return (
                 <button
                   key={s}
-                  onClick={() => isEditing && toggleSpecialty(s)}
-                  disabled={!isEditing}
+                  onClick={() => toggleSpecialty(s)}
                   className="px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200"
                   style={{
                     background: selected ? accent : "#111111",
@@ -683,7 +1152,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     boxShadow: selected
                       ? `0 2px 8px rgba(${rgb},0.2)`
                       : "inset 0 0 0 1px rgba(255,107,74,0.08), inset 0 0 0 1px rgba(59,240,122,0.08)",
-                    cursor: isEditing ? "pointer" : "default",
+                    cursor: "pointer",
                   }}
                 >
                   {s}
@@ -696,67 +1165,63 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
         {/* ── section 4: social links ── */}
         <div className="mb-8" style={{ marginTop: 32 }}>
           <div className="flex items-center justify-center gap-4">
-            {SOCIAL_PLATFORMS.map(renderSocialIcon)}
+            {SOCIAL_PLATFORMS.map(renderSocialIconEditing)}
           </div>
-          {isEditing && isMobile && (
+          {isMobile && (
             <p className="text-[9px] text-center mt-2" style={{ color: "#444" }}>tap icons to add links</p>
           )}
         </div>
 
-        {/* ── section 5: accent theme (editing only) ── */}
-        {isEditing && (
-          <div className="mb-12" style={{ marginTop: 48 }}>
-            <div className="flex justify-center mb-6">
-              <div className="h-px w-[200px]" style={{ background: `linear-gradient(90deg, rgba(${rgb},0.3), transparent)` }} />
-            </div>
-            <p className="text-xs tracking-[0.15em] text-center mb-4" style={{ color: "#B0B0B0" }}>
-              choose your vibe
-            </p>
-            <div className="flex items-center justify-center gap-3">
-              {Object.entries(THEMES).map(([key, t]) => {
-                const isActive = accentTheme === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setAccentTheme(key)}
-                    className="relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
-                    style={{
-                      background: t.color,
-                      border: isActive ? "none" : "2px solid #333",
-                      boxShadow: isActive
-                        ? `0 0 0 3px #060606, 0 0 0 5px ${t.color}, 0 0 12px ${t.color}40`
-                        : "none",
-                    }}
-                  >
-                    {isActive && <Check className="w-4 h-4" style={{ color: "#000" }} />}
-                  </button>
-                );
-              })}
-            </div>
+        {/* ── section 5: accent theme ── */}
+        <div className="mb-12" style={{ marginTop: 48 }}>
+          <div className="flex justify-center mb-6">
+            <div className="h-px w-[200px]" style={{ background: `linear-gradient(90deg, rgba(${rgb},0.3), transparent)` }} />
           </div>
-        )}
-
-        {/* ── section 6: publish toggle (editing only) ── */}
-        {isEditing && (
-          <div className="mb-8 flex flex-col items-center gap-3" style={{ marginTop: 48 }}>
-            <div className="flex items-center gap-3">
-              <span className="text-sm" style={{ color: "#B0B0B0" }}>make my page public</span>
-              <Switch checked={isPublished} onCheckedChange={setIsPublished} />
-            </div>
-            {isPublished ? (
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs" style={{ color: accent }}>
-                  your page is live at denied.care/{handle || "handle"}
-                </span>
-                <button onClick={copyUrl} className="p-0.5 hover:opacity-70 transition-opacity" style={{ color: accent }}>
-                  <Copy className="w-3 h-3" />
+          <p className="text-xs tracking-[0.15em] text-center mb-4" style={{ color: "#B0B0B0" }}>
+            choose your vibe
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            {Object.entries(THEMES).map(([key, t]) => {
+              const isActive = accentTheme === key;
+              return (
+                <button
+                  key={key}
+                  onClick={() => setAccentTheme(key)}
+                  className="relative w-9 h-9 rounded-full flex items-center justify-center transition-all duration-200"
+                  style={{
+                    background: t.color,
+                    border: isActive ? "none" : "2px solid #333",
+                    boxShadow: isActive
+                      ? `0 0 0 3px #060606, 0 0 0 5px ${t.color}, 0 0 12px ${t.color}40`
+                      : "none",
+                  }}
+                >
+                  {isActive && <Check className="w-4 h-4" style={{ color: "#000" }} />}
                 </button>
-              </div>
-            ) : (
-              <span className="text-xs" style={{ color: "#666" }}>your page is hidden</span>
-            )}
+              );
+            })}
           </div>
-        )}
+        </div>
+
+        {/* ── section 6: publish toggle ── */}
+        <div className="mb-8 flex flex-col items-center gap-3" style={{ marginTop: 48 }}>
+          <div className="flex items-center gap-3">
+            <span className="text-sm" style={{ color: "#B0B0B0" }}>make my page public</span>
+            <Switch checked={isPublished} onCheckedChange={setIsPublished} />
+          </div>
+          {isPublished ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs" style={{ color: accent }}>
+                your page is live at denied.care/{handle || "handle"}
+              </span>
+              <button onClick={copyUrl} className="p-0.5 hover:opacity-70 transition-opacity" style={{ color: accent }}>
+                <Copy className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <span className="text-xs" style={{ color: "#666" }}>your page is hidden</span>
+          )}
+        </div>
 
         {/* ── section 7: footer spacer ── */}
         <div style={{ height: 120 }} />
