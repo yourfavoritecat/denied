@@ -117,11 +117,20 @@ const CreatorJoin = () => {
     const available = await checkHandleAvailability(creatorHandle);
     if (!available) throw new Error(`Handle "${creatorHandle}" is already taken`);
 
-    // Insert creator role
-    const { error: roleError } = await supabase.from("user_roles").insert({ user_id: userId, role: "creator" } as any);
-    if (roleError) {
-      console.error("Failed to insert user_roles:", roleError);
-      throw roleError;
+    // Insert creator role (skip if already exists)
+    const { data: existingRole } = await supabase
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("role", "creator")
+      .maybeSingle();
+
+    if (!existingRole) {
+      const { error: roleError } = await supabase.from("user_roles").insert({ user_id: userId, role: "creator" } as any);
+      if (roleError) {
+        console.error("Failed to insert user_roles:", roleError);
+        throw roleError;
+      }
     }
 
     // Insert creator profile
@@ -185,11 +194,20 @@ const CreatorJoin = () => {
       const userId = signUpData.user.id;
 
       // The profile is auto-created by handle_new_user trigger
-      // Insert creator role
-      const { error: roleError2 } = await supabase.from("user_roles").insert({ user_id: userId, role: "creator" } as any);
-      if (roleError2) {
-        console.error("Failed to insert user_roles:", roleError2);
-        throw roleError2;
+      // Insert creator role (skip if already exists)
+      const { data: existingRole2 } = await supabase
+        .from("user_roles")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("role", "creator")
+        .maybeSingle();
+
+      if (!existingRole2) {
+        const { error: roleError2 } = await supabase.from("user_roles").insert({ user_id: userId, role: "creator" } as any);
+        if (roleError2) {
+          console.error("Failed to insert user_roles:", roleError2);
+          throw roleError2;
+        }
       }
 
       // Insert creator profile
