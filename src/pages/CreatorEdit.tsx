@@ -383,6 +383,32 @@ const CreatorEdit = () => {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
+        {/* Live Preview Banner */}
+        <section className="space-y-2">
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">preview</span>
+          <div className="relative w-full h-[200px] rounded-lg overflow-hidden">
+            <img
+              src={coverPhotoUrl || DEFAULT_COVER_URL}
+              alt="Cover preview"
+              className="w-full h-full object-cover object-center"
+            />
+            {/* Avatar overlapping bottom edge */}
+            <div className="absolute bottom-0 left-6 translate-y-1/2">
+              <Avatar className="w-20 h-20 border-4 border-card bg-primary text-primary-foreground">
+                {avatarUrl && <AvatarImage src={avatarUrl} alt="Avatar" className="object-cover" />}
+                <AvatarFallback className="bg-primary text-primary-foreground text-xl">
+                  {displayName?.[0]?.toUpperCase() || "C"}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            {/* Name + handle overlay */}
+            <div className="absolute bottom-3 left-32 text-white drop-shadow-lg">
+              <p className="font-bold text-lg leading-tight">{displayName || "Your Name"}</p>
+              <p className="text-sm opacity-80">@{handle || "handle"}</p>
+            </div>
+          </div>
+        </section>
+
         {/* Cover Photo Gallery Picker */}
         <section className="space-y-3">
           <Label className="text-base font-semibold">choose your cover</Label>

@@ -1,28 +1,38 @@
 import { useEffect, useState } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 import CreatorProfile from "./CreatorProfile";
 import UserProfile from "./UserProfile";
 import NotFound from "./NotFound";
 
-type RouteType = "loading" | "creator" | "traveler" | "notfound";
+type RouteType = "loading" | "creator" | "creator_draft" | "traveler" | "notfound";
 
 const HandleRouter = () => {
   const { handle } = useParams<{ handle: string }>();
+  const { user } = useAuth();
   const [routeType, setRouteType] = useState<RouteType>("loading");
 
   useEffect(() => {
     if (!handle) { setRouteType("notfound"); return; }
     const resolve = async () => {
-      // Check creator profiles first
+      // Check creator profiles first (without is_published filter)
       const { data: creator } = await supabase
         .from("creator_profiles")
-        .select("handle")
+        .select("handle, is_published, user_id")
         .eq("handle", handle)
-        .eq("is_published", true)
         .maybeSingle();
 
-      if (creator) { setRouteType("creator"); return; }
+      if (creator) {
+        if ((creator as any).is_published) {
+          setRouteType("creator");
+        } else if (user && user.id === (creator as any).user_id) {
+          setRouteType("creator_draft");
+        } else {
+          setRouteType("notfound");
+        }
+        return;
+      }
 
       // Check traveler profiles by username
       const { data: traveler } = await supabase
@@ -36,7 +46,7 @@ const HandleRouter = () => {
       setRouteType("notfound");
     };
     resolve();
-  }, [handle]);
+  }, [handle, user]);
 
   if (routeType === "loading") {
     return (
@@ -46,6 +56,17 @@ const HandleRouter = () => {
     );
   }
   if (routeType === "creator") return <CreatorProfile />;
+  if (routeType === "creator_draft") return (
+    <>
+      <div className="bg-muted border-b border-border px-4 py-2 text-center text-sm text-muted-foreground" style={{ marginTop: '64px' }}>
+        your profile is hidden —{" "}
+        <Link to="/creator/edit" className="underline text-primary hover:text-primary/80">
+          publish it from your editor
+        </Link>
+      </div>
+      <CreatorProfile />
+    </>
+  );
   if (routeType === "traveler") return <UserProfile usernameParam={handle} />;
   return <NotFound />;
 };
