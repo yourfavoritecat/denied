@@ -17,6 +17,7 @@ import { useViewAs } from "@/hooks/useViewAs";
 import { useBetaTester } from "@/hooks/useBetaTester";
 import { useCreator } from "@/hooks/useCreator";
 import { useChat } from "@/hooks/useChatContext";
+import { Settings as SettingsIcon } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import logo from "@/assets/final-new-logo.png";
 
@@ -47,15 +48,8 @@ const Navbar = () => {
 
   const visitorMode = isAdmin && viewAs === "visitor";
 
-  // Build the public profile URL for the current user
-  const publicProfileUrl = (() => {
-    if (!profile) return "/profile";
-    // If user is a creator with a handle, link to their creator page /:handle
-    if (isCreator && creatorHandle) return `/${creatorHandle}`;
-    const p = profile as any;
-    if (p.username) return `/user/${p.username}`;
-    return "/profile";
-  })();
+  // Build the profile link — creators go to /creator/edit, others to /profile
+  const myProfileUrl = (isCreator && creatorHandle) ? "/creator/edit" : "/profile";
 
   const navLinks = visitorMode
     ? [
@@ -66,7 +60,8 @@ const Navbar = () => {
         { to: "/search", icon: Search, label: "Providers" },
         { to: "/creators", icon: Users, label: "Creators" },
         { to: "/my-trips", icon: Plane, label: "My Trips" },
-        { to: publicProfileUrl, icon: User, label: "My Profile" },
+        { to: myProfileUrl, icon: User, label: "My Profile" },
+        { to: "/profile", icon: SettingsIcon, label: "Settings" },
       ];
 
   const handleMobileNav = (to: string) => {
@@ -124,7 +119,7 @@ const Navbar = () => {
                       <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => navigate(publicProfileUrl)}>
+                    <DropdownMenuItem onClick={() => navigate(myProfileUrl)}>
                       <User className="w-4 h-4 mr-2" /> Profile
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/settings")}>
