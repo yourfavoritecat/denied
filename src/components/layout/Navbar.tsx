@@ -60,7 +60,7 @@ const Navbar = () => {
         { to: "/search", icon: Search, label: "Providers" },
         { to: "/creators", icon: Users, label: "Creators" },
         { to: "/my-trips", icon: Plane, label: "My Trips" },
-        ...(showCreatorLink ? [{ to: myProfileUrl, icon: User, label: "My Page" }] : []),
+        ...(showCreatorLink ? [{ to: "/creator/edit", icon: User, label: "My Page" }] : []),
         { to: "/profile", icon: SettingsIcon, label: "Settings" },
       ];
 
