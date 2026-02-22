@@ -19,11 +19,7 @@ const FacebookIcon = () => (
   </svg>
 );
 
-interface LaunchProps {
-  showLogin?: boolean;
-}
-
-const Launch = ({ showLogin = false }: LaunchProps) => {
+const Launch = () => {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -68,18 +64,16 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
       {/* Pure black base + radial vignette — no backdrop image */}
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 0%, rgba(0,0,0,0.6) 60%, #000000 100%)' }} />
 
-      {showLogin && (
-        <div className="absolute top-6 right-6 z-20">
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-white/20 text-white hover:bg-white/10 backdrop-blur-sm"
-            onClick={() => navigate("/auth")}
-          >
-            log in
-          </Button>
-        </div>
-      )}
+      {/* Subtle login link — top right */}
+      <button
+        onClick={() => navigate("/auth?mode=login")}
+        className="absolute top-6 right-6 z-20 text-sm transition-colors duration-200"
+        style={{ color: '#B0B0B0' }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#FFFFFF')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#B0B0B0')}
+      >
+        log in
+      </button>
 
       <div className="w-full max-w-xl flex flex-col items-center text-center relative z-10">
         {/* Logo with soft neon glow behind it */}
