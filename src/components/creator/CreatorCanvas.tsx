@@ -462,6 +462,59 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
     const tabs = ["feed", "reviews", "content", "favorite providers"];
 
+    /* glossy card style helper */
+    const glossyCard: React.CSSProperties = {
+      background: "#0A0A0A",
+      border: "1px solid transparent",
+      backgroundImage: "linear-gradient(#0A0A0A, #0A0A0A), linear-gradient(135deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))",
+      backgroundOrigin: "border-box",
+      backgroundClip: "padding-box, border-box",
+      borderRadius: isMobile ? 14 : 16,
+      boxShadow: "0 0 20px rgba(0,0,0,0.4), 0 0 8px rgba(59,240,122,0.04), inset 0 1px 0 rgba(255,255,255,0.03)",
+    };
+
+    const glossyCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "translateY(-2px)";
+      e.currentTarget.style.boxShadow = "0 0 24px rgba(0,0,0,0.5), 0 0 12px rgba(59,240,122,0.08), inset 0 1px 0 rgba(255,255,255,0.03)";
+    };
+    const glossyCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "translateY(0)";
+      e.currentTarget.style.boxShadow = "0 0 20px rgba(0,0,0,0.4), 0 0 8px rgba(59,240,122,0.04), inset 0 1px 0 rgba(255,255,255,0.03)";
+    };
+
+    /* ── build mixed feed timeline ── */
+    type FeedItem = { type: "review" | "content" | "trip" | "joined"; date: string; data?: any };
+    const feedItems: FeedItem[] = [];
+
+    feedReviews.forEach((r: any) => {
+      feedItems.push({ type: "review", date: r.created_at, data: r });
+    });
+    contentItems.forEach((c: any) => {
+      feedItems.push({ type: "content", date: c.created_at, data: c });
+    });
+    // trips would come from bookings — we already have stats.trips count but not the data
+    // We'll add trip items if we fetched them
+    if (createdAt) {
+      feedItems.push({ type: "joined", date: createdAt });
+    }
+    feedItems.sort((a, b) => {
+      if (a.type === "joined") return 1;
+      if (b.type === "joined") return -1;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+
+    /* ── derive favorite providers from reviews ── */
+    const providerReviewMap = new Map<string, { name: string; slug: string; count: number }>();
+    feedReviews.forEach((r: any) => {
+      const existing = providerReviewMap.get(r.provider_slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        providerReviewMap.set(r.provider_slug, { name: r.provider_name, slug: r.provider_slug, count: 1 });
+      }
+    });
+    const favoriteProviders = Array.from(providerReviewMap.values());
+
     return (
       <div className="min-h-screen" style={{ background: "#060606" }}>
         <Navbar />
@@ -496,10 +549,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               </svg>
             </div>
 
-            {/* ── section 1: identity ── */}
+            {/* ── section 1: identity — wrapped in glossy-card ── */}
             <div
-              className="relative flex flex-col items-center text-center z-[2]"
-              style={{ padding: isMobile ? "28px 20px 20px" : "40px 36px 24px" }}
+              className="relative z-[2]"
+              style={{ margin: isMobile ? "8px 8px 0" : "16px 16px 0", ...glossyCard, padding: isMobile ? "28px 20px 20px" : "40px 36px 28px" }}
             >
               {/* "denied" glow text */}
               <div
@@ -511,7 +564,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     fontSize: isMobile ? 80 : 120,
                     fontWeight: 700,
                     color: "transparent",
-                    backgroundImage: "linear-gradient(135deg, rgba(59,240,122,0.04), rgba(255,107,74,0.03))",
+                    backgroundImage: "linear-gradient(135deg, rgba(59,240,122,0.06), rgba(255,107,74,0.05))",
                     WebkitBackgroundClip: "text",
                     backgroundClip: "text",
                     lineHeight: 1,
@@ -521,140 +574,122 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 </span>
               </div>
 
-              {/* verified badge */}
-              <div
-                className="inline-flex items-center gap-1.5 rounded-full mb-5"
-                style={{
-                  padding: "6px 16px",
-                  background: "linear-gradient(135deg, rgba(59,240,122,0.12), rgba(255,107,74,0.08))",
-                  border: "1px solid rgba(59,240,122,0.18)",
-                  position: "relative",
-                  zIndex: 1,
-                }}
-              >
+              <div className="flex flex-col items-center text-center relative" style={{ zIndex: 1 }}>
+                {/* verified badge */}
                 <div
-                  className="rounded-full flex-shrink-0"
+                  className="inline-flex items-center gap-1.5 rounded-full mb-5"
                   style={{
-                    width: 6, height: 6,
-                    background: "#3BF07A",
-                    boxShadow: "0 0 6px #3BF07A",
-                  }}
-                />
-                <span style={{ fontSize: 11, letterSpacing: 1.5, color: "#3BF07A", fontWeight: 500 }}>
-                  denied verified creator
-                </span>
-              </div>
-
-              {/* avatar */}
-              <div className="relative z-[1] mb-3.5">
-                <Avatar
-                  className="flex-shrink-0"
-                  style={{
-                    width: isMobile ? 80 : 96,
-                    height: isMobile ? 80 : 96,
-                    border: "2px solid rgba(59,240,122,0.15)",
-                    boxShadow: "0 0 24px rgba(59,240,122,0.08)",
+                    padding: "6px 16px",
+                    background: "linear-gradient(135deg, rgba(59,240,122,0.12), rgba(255,107,74,0.08))",
+                    border: "1px solid rgba(59,240,122,0.18)",
                   }}
                 >
-                  {avatarUrl ? (
-                    <AvatarImage src={avatarUrl} alt={displayName} className="object-cover" />
-                  ) : (
-                    <AvatarFallback style={{ background: "#111", color: "#B0B0B0", fontSize: isMobile ? 28 : 32, fontWeight: 700 }}>
-                      {(displayName?.[0] || "?").toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-              </div>
-
-              {/* display name */}
-              <h1
-                className="font-bold mb-1 relative z-[1]"
-                style={{ color: "#FFFFFF", fontSize: isMobile ? 20 : 24 }}
-              >
-                {displayName}
-              </h1>
-
-              {/* handle */}
-              <p className="mb-4 relative z-[1]" style={{ color: "#555", fontSize: 14 }}>
-                @{handle}
-              </p>
-
-              {/* bio */}
-              {bio && (
-                <p
-                  className="mb-4 relative z-[1]"
-                  style={{
-                    color: "#999",
-                    fontSize: 14,
-                    lineHeight: 1.7,
-                    textAlign: "center",
-                    maxWidth: 440,
-                    margin: "0 auto 18px",
-                  }}
-                >
-                  {bio}
-                </p>
-              )}
-
-              {/* specialty tags */}
-              {specialties.length > 0 && (
-                <div className="flex flex-wrap gap-2 justify-center mb-4 relative z-[1]">
-                  {specialties.map((s) => (
-                    <span
-                      key={s}
-                      className="rounded-full"
-                      style={{
-                        padding: "5px 13px",
-                        fontSize: 11,
-                        fontWeight: 500,
-                        background: `rgba(${rgb},0.10)`,
-                        color: accent,
-                        border: `1px solid rgba(${rgb},0.12)`,
-                      }}
-                    >
-                      {s}
-                    </span>
-                  ))}
+                  <div
+                    className="rounded-full flex-shrink-0"
+                    style={{ width: 6, height: 6, background: "#3BF07A", boxShadow: "0 0 6px #3BF07A" }}
+                  />
+                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: "#3BF07A", fontWeight: 500 }}>
+                    denied verified creator
+                  </span>
                 </div>
-              )}
 
-              {/* social icons */}
-              {filledSocials.length > 0 && (
-                <div className="flex items-center justify-center gap-3 relative z-[1]">
-                  {filledSocials.map((platform) => {
-                    const url = normalizeSocial(socialLinks[platform.key], platform.baseUrl);
-                    const IconComp = platform.icon;
-                    const CustomIcon = platform.iconCustom;
-                    return (
-                      <a
-                        key={platform.key}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center rounded-full transition-all duration-200"
+                {/* avatar */}
+                <div className="mb-3.5">
+                  <Avatar
+                    className="flex-shrink-0"
+                    style={{
+                      width: isMobile ? 80 : 96,
+                      height: isMobile ? 80 : 96,
+                      border: `2px solid rgba(${rgb},0.15)`,
+                      boxShadow: `0 0 24px rgba(${rgb},0.08)`,
+                    }}
+                  >
+                    {avatarUrl ? (
+                      <AvatarImage src={avatarUrl} alt={displayName} className="object-cover" />
+                    ) : (
+                      <AvatarFallback style={{ background: "#111", color: "#B0B0B0", fontSize: isMobile ? 28 : 32, fontWeight: 700 }}>
+                        {(displayName?.[0] || "?").toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                </div>
+
+                {/* display name */}
+                <h1 className="font-bold mb-1" style={{ color: "#FFFFFF", fontSize: isMobile ? 20 : 24 }}>
+                  {displayName}
+                </h1>
+
+                {/* handle */}
+                <p className="mb-4" style={{ color: "#555", fontSize: 14 }}>@{handle}</p>
+
+                {/* bio */}
+                {bio && (
+                  <p
+                    className="mb-4"
+                    style={{
+                      color: "#999", fontSize: 14, lineHeight: 1.7,
+                      textAlign: "center", maxWidth: 440, margin: "0 auto 18px",
+                    }}
+                  >
+                    {bio}
+                  </p>
+                )}
+
+                {/* specialty tags */}
+                {specialties.length > 0 && (
+                  <div className="flex flex-wrap gap-2 justify-center mb-4">
+                    {specialties.map((s) => (
+                      <span
+                        key={s}
+                        className="rounded-full"
                         style={{
-                          width: 34, height: 34,
-                          background: "#111",
-                          border: "1px solid rgba(255,255,255,0.05)",
-                          color: "#777",
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
-                          e.currentTarget.style.color = accent;
-                          e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.12)`;
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
-                          e.currentTarget.style.color = "#777";
-                          e.currentTarget.style.boxShadow = "none";
+                          padding: "5px 13px", fontSize: 11, fontWeight: 500,
+                          background: `rgba(${rgb},0.10)`, color: accent,
+                          border: `1px solid rgba(${rgb},0.12)`,
                         }}
                       >
-                        {CustomIcon ? <CustomIcon className="w-3" /> : IconComp ? <IconComp className="w-3" /> : null}
-                      </a>
-                    );
-                  })}
-                </div>
-              )}
+                        {s}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* social icons */}
+                {filledSocials.length > 0 && (
+                  <div className="flex items-center justify-center gap-3">
+                    {filledSocials.map((platform) => {
+                      const url = normalizeSocial(socialLinks[platform.key], platform.baseUrl);
+                      const IconComp = platform.icon;
+                      const CustomIcon = platform.iconCustom;
+                      return (
+                        <a
+                          key={platform.key}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center justify-center rounded-full transition-all duration-200"
+                          style={{
+                            width: 34, height: 34, background: "#111",
+                            border: "1px solid rgba(255,255,255,0.05)", color: "#777",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
+                            e.currentTarget.style.color = accent;
+                            e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.12)`;
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                            e.currentTarget.style.color = "#777";
+                            e.currentTarget.style.boxShadow = "none";
+                          }}
+                        >
+                          {CustomIcon ? <CustomIcon className="w-3" /> : IconComp ? <IconComp className="w-3" /> : null}
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* ── section 2: stats bar ── */}
@@ -663,9 +698,11 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               style={{
                 gap: isMobile ? 20 : 36,
                 padding: isMobile ? "18px 20px" : "18px 36px",
-                borderTop: "1px solid rgba(255,255,255,0.04)",
-                borderBottom: "1px solid rgba(255,255,255,0.04)",
+                borderTop: "1px solid transparent",
+                borderBottom: "1px solid transparent",
+                borderImage: "linear-gradient(90deg, transparent, rgba(255,107,74,0.15), rgba(59,240,122,0.15), transparent) 1",
                 background: "rgba(0,0,0,0.3)",
+                boxShadow: "0 0 16px rgba(59,240,122,0.03)",
               }}
             >
               {[
@@ -685,9 +722,9 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               ))}
             </div>
 
-            {/* ── section 3: content showcase ── */}
+            {/* ── section 3: content showcase — wrapped in glossy-card ── */}
             {hasContent && (
-              <div style={{ padding: isMobile ? "24px 20px" : "24px 36px" }}>
+              <div style={{ margin: isMobile ? "12px 8px 0" : "16px 16px 0", ...glossyCard, padding: isMobile ? 20 : 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: 2, color: "#444", fontWeight: 500, marginBottom: 14 }}>
                   recent content
                 </div>
@@ -708,32 +745,24 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         border: "1px solid rgba(255,255,255,0.04)",
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(59,240,122,0.15)";
+                        e.currentTarget.style.borderColor = "rgba(59,240,122,0.25)";
                         e.currentTarget.style.transform = "scale(1.02)";
+                        e.currentTarget.style.boxShadow = "0 0 12px rgba(59,240,122,0.12)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
                         e.currentTarget.style.transform = "scale(1)";
+                        e.currentTarget.style.boxShadow = "none";
                       }}
                     >
-                      <img
-                        src={item.media_url}
-                        alt={item.caption || "content"}
-                        className="w-full h-full object-cover"
-                      />
+                      <img src={item.media_url} alt={item.caption || "content"} className="w-full h-full object-cover" />
                       {item.media_type === "video" && (
-                        <div
-                          className="absolute inset-0 flex items-center justify-center"
-                        >
+                        <div className="absolute inset-0 flex items-center justify-center">
                           <div
                             className="flex items-center justify-center rounded-full"
                             style={{
-                              width: 36, height: 36,
-                              background: "rgba(0,0,0,0.7)",
-                              border: "1px solid rgba(255,255,255,0.15)",
-                              color: "#fff",
-                              fontSize: 14,
-                              paddingLeft: 2,
+                              width: 36, height: 36, background: "rgba(0,0,0,0.7)",
+                              border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, paddingLeft: 2,
                             }}
                           >
                             ▶
@@ -744,16 +773,9 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         <div
                           className="absolute bottom-1.5 left-1.5"
                           style={{
-                            background: "rgba(0,0,0,0.65)",
-                            padding: "3px 10px",
-                            borderRadius: 8,
-                            fontSize: 10,
-                            color: "#ccc",
-                            backdropFilter: "blur(4px)",
-                            maxWidth: "80%",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
+                            background: "rgba(0,0,0,0.65)", padding: "3px 10px", borderRadius: 8,
+                            fontSize: 10, color: "#ccc", backdropFilter: "blur(4px)",
+                            maxWidth: "80%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                           }}
                         >
                           {item.caption.slice(0, 20)}
@@ -769,20 +791,17 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             <div
               style={{
                 height: 1,
-                margin: isMobile ? "0 20px" : "0 36px",
+                margin: isMobile ? "12px 20px" : "16px 36px",
                 background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.08), rgba(255,107,74,0.06), transparent)",
               }}
             />
 
-            {/* ── section 5: tab bar + content ── */}
-            <div style={{ padding: isMobile ? "0 20px 28px" : "0 36px 36px" }}>
+            {/* ── section 5: tab bar + content — wrapped in glossy-card ── */}
+            <div style={{ margin: isMobile ? "0 8px 8px" : "0 16px 16px", ...glossyCard, padding: isMobile ? "20px 16px" : 28 }}>
               {/* tab bar */}
               <div
                 className="flex"
-                style={{
-                  borderBottom: "1px solid rgba(255,255,255,0.06)",
-                  marginBottom: 24,
-                }}
+                style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: 24 }}
               >
                 {tabs.map((tab) => (
                   <button
@@ -790,7 +809,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     onClick={() => setActiveTab(tab)}
                     className="transition-colors duration-200"
                     style={{
-                      padding: isMobile ? "10px 14px" : "12px 20px",
+                      padding: isMobile ? "10px 12px" : "12px 20px",
                       fontSize: isMobile ? 11 : 12,
                       letterSpacing: 1.5,
                       color: activeTab === tab ? accent : "#444",
@@ -806,88 +825,293 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 ))}
               </div>
 
-              {/* tab content */}
+              {/* ── FEED TAB — mixed timeline ── */}
               {activeTab === "feed" && (
                 <div>
-                  {feedReviews.map((review: any) => (
-                    <div
-                      key={review.id}
-                      className="flex gap-3.5"
-                      style={{
-                        padding: "16px 0",
-                        borderBottom: "1px solid rgba(255,255,255,0.03)",
-                      }}
-                    >
-                      {/* green dot */}
-                      <div
-                        className="flex-shrink-0 rounded-full"
-                        style={{
-                          width: 8, height: 8,
-                          background: "#3BF07A",
-                          boxShadow: "0 0 8px rgba(59,240,122,0.3)",
-                          marginTop: 6,
-                        }}
-                      />
-                      {/* content */}
-                      <div className="flex-1 min-w-0">
-                        <p style={{ fontSize: 13, color: "#B0B0B0" }}>
-                          reviewed <span className="font-bold" style={{ color: "#FFFFFF" }}>{review.provider_name}</span>
-                        </p>
-                        <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
-                          {review.procedure_name} · <span style={{ color: "#FFD700" }}>{renderStars(review.rating)}</span> · {formatDate(review.created_at)}
-                        </p>
-                        {review.review_text && (
-                          <div
-                            style={{
-                              marginTop: 8,
-                              padding: "12px 16px",
-                              background: "#0A0A0A",
-                              borderRadius: 12,
-                              borderLeft: "2px solid rgba(59,240,122,0.2)",
-                            }}
-                          >
-                            <p style={{ fontSize: 13, color: "#888", lineHeight: 1.5 }}>
-                              {review.review_text.length > 150
-                                ? review.review_text.slice(0, 150) + "..."
-                                : review.review_text}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  {/* joined event */}
-                  <div
-                    className="flex gap-3.5"
-                    style={{ padding: "16px 0" }}
-                  >
-                    <div
-                      className="flex-shrink-0 rounded-full"
-                      style={{ width: 8, height: 8, background: "#666", marginTop: 6 }}
-                    />
-                    <div>
-                      <p style={{ fontSize: 13, color: "#B0B0B0" }}>
-                        joined <span className="font-bold" style={{ color: "#FFFFFF" }}>denied.care</span> as a creator
-                      </p>
-                      <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
-                        {createdAt ? formatDate(createdAt) : ""}
-                      </p>
-                    </div>
-                  </div>
-
-                  {feedReviews.length === 0 && (
-                    <p className="text-center text-sm" style={{ color: "#666", paddingTop: 40 }}>
+                  {feedItems.length <= 1 && feedItems[0]?.type === "joined" && (
+                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "32px 0" }}>
                       this creator is just getting started — check back soon!
                     </p>
+                  )}
+                  {feedItems.map((item, idx) => {
+                    const isLast = idx === feedItems.length - 1;
+                    const dotColor = item.type === "trip" ? "#FF6B4A" : item.type === "joined" ? "#555" : "#3BF07A";
+                    const dotShadow = item.type === "trip"
+                      ? "0 0 10px rgba(255,107,74,0.3)"
+                      : item.type === "joined" ? "none" : "0 0 10px rgba(59,240,122,0.35)";
+
+                    return (
+                      <div
+                        key={`${item.type}-${idx}`}
+                        className="flex"
+                        style={{
+                          gap: isMobile ? 12 : 14,
+                          padding: isMobile ? "14px 0" : "18px 0",
+                          borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
+                        }}
+                      >
+                        <div
+                          className="flex-shrink-0 rounded-full"
+                          style={{ width: 8, height: 8, background: dotColor, boxShadow: dotShadow, marginTop: 6 }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          {item.type === "review" && (
+                            <>
+                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                                reviewed <span className="font-bold" style={{ color: "#FFFFFF" }}>{item.data.provider_name}</span>
+                              </p>
+                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
+                                {item.data.procedure_name} · <span style={{ color: "#FFD700" }}>{renderStars(item.data.rating)}</span> · {formatDate(item.date)}
+                                {item.data.verified_trip && <span style={{ color: "#3BF07A" }}> · verified visit</span>}
+                              </p>
+                              {item.data.review_text && (
+                                <div
+                                  style={{
+                                    marginTop: 10, padding: "14px 18px", background: "#0A0A0A",
+                                    borderRadius: 12, borderLeft: "2px solid rgba(59,240,122,0.25)",
+                                  }}
+                                >
+                                  <p style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>
+                                    {item.data.review_text.length > 150 ? item.data.review_text.slice(0, 150) + "..." : item.data.review_text}
+                                  </p>
+                                </div>
+                              )}
+                            </>
+                          )}
+                          {item.type === "content" && (
+                            <>
+                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                                {item.data.media_type === "video"
+                                  ? <>posted a video — <span className="font-bold" style={{ color: "#FFFFFF" }}>{(item.data.caption || "untitled").slice(0, 30)}</span></>
+                                  : <>shared a photo — <span className="font-bold" style={{ color: "#FFFFFF" }}>{(item.data.caption || "untitled").slice(0, 30)}</span></>
+                                }
+                              </p>
+                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>{formatDate(item.date)}</p>
+                              {/* media preview */}
+                              <div className="mt-2.5 flex gap-1.5">
+                                <div
+                                  className="relative overflow-hidden transition-all duration-200"
+                                  style={{
+                                    width: item.data.media_type === "video" ? 160 : 90,
+                                    height: item.data.media_type === "video" ? 90 : 90,
+                                    borderRadius: 10, background: "#111",
+                                    border: "1px solid rgba(255,255,255,0.05)",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.borderColor = "rgba(59,240,122,0.2)";
+                                    e.currentTarget.style.boxShadow = "0 0 10px rgba(59,240,122,0.1)";
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                                    e.currentTarget.style.boxShadow = "none";
+                                  }}
+                                >
+                                  <img src={item.data.media_url} alt="" className="w-full h-full object-cover" />
+                                  {item.data.media_type === "video" && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <div
+                                        className="flex items-center justify-center rounded-full"
+                                        style={{
+                                          width: 32, height: 32, background: "rgba(0,0,0,0.7)",
+                                          border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 12, paddingLeft: 2,
+                                        }}
+                                      >
+                                        ▶
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                          {item.type === "trip" && (
+                            <>
+                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                                completed a trip to <span className="font-bold" style={{ color: "#FFFFFF" }}>mexico</span>
+                              </p>
+                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>{formatDate(item.date)}</p>
+                            </>
+                          )}
+                          {item.type === "joined" && (
+                            <>
+                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                                joined <span className="font-bold" style={{ color: "#FFFFFF" }}>denied.care</span> as a creator
+                              </p>
+                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>{createdAt ? formatDate(createdAt) : ""}</p>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* ── REVIEWS TAB ── */}
+              {activeTab === "reviews" && (
+                <div>
+                  {feedReviews.length === 0 ? (
+                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "40px 0" }}>
+                      no reviews yet
+                    </p>
+                  ) : (
+                    feedReviews.map((review: any) => (
+                      <div
+                        key={review.id}
+                        className="transition-all duration-200"
+                        style={{ ...glossyCard, padding: isMobile ? 16 : 20, marginBottom: 12 }}
+                        onMouseEnter={glossyCardHover}
+                        onMouseLeave={glossyCardLeave}
+                      >
+                        {/* top row */}
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
+                              {review.provider_name}
+                            </div>
+                            <div style={{ fontSize: 12, color: accent, marginTop: 2 }}>
+                              {review.procedure_name}
+                            </div>
+                          </div>
+                          <div style={{ fontSize: 13, color: "#FFD700", letterSpacing: 2 }}>
+                            {renderStars(review.rating)}
+                          </div>
+                        </div>
+                        {/* body */}
+                        <p style={{ fontSize: 13, color: "#B0B0B0", lineHeight: 1.6, marginTop: 12 }}>
+                          {review.review_text}
+                        </p>
+                        {/* footer */}
+                        <div className="flex items-center gap-2" style={{ marginTop: 12, fontSize: 11, color: "#444" }}>
+                          <span>{formatDate(review.created_at)}</span>
+                          {review.verified_trip && (
+                            <span
+                              className="rounded-full"
+                              style={{
+                                background: "rgba(59,240,122,0.08)", color: "#3BF07A",
+                                padding: "2px 8px", fontSize: 10,
+                              }}
+                            >
+                              verified visit
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               )}
 
-              {activeTab !== "feed" && (
-                <p className="text-center text-sm" style={{ color: "#444", padding: 40 }}>
-                  coming soon
-                </p>
+              {/* ── CONTENT TAB ── */}
+              {activeTab === "content" && (
+                <div>
+                  {contentItems.length === 0 ? (
+                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "40px 0" }}>
+                      no content yet
+                    </p>
+                  ) : (
+                    <div className={`grid gap-2 ${isMobile ? "grid-cols-2" : "grid-cols-3"}`}>
+                      {contentItems.map((item: any) => (
+                        <div
+                          key={item.id}
+                          className="relative overflow-hidden transition-all duration-200"
+                          style={{
+                            aspectRatio: "1", borderRadius: 14, background: "#111",
+                            border: "1px solid rgba(255,255,255,0.05)",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(59,240,122,0.2)";
+                            e.currentTarget.style.boxShadow = "0 0 12px rgba(59,240,122,0.1)";
+                            e.currentTarget.style.transform = "scale(1.02)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                            e.currentTarget.style.boxShadow = "none";
+                            e.currentTarget.style.transform = "scale(1)";
+                          }}
+                        >
+                          <img src={item.media_url} alt={item.caption || ""} className="w-full h-full object-cover" />
+                          {item.media_type === "video" && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div
+                                className="flex items-center justify-center rounded-full"
+                                style={{
+                                  width: 36, height: 36, background: "rgba(0,0,0,0.7)",
+                                  border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, paddingLeft: 2,
+                                }}
+                              >
+                                ▶
+                              </div>
+                            </div>
+                          )}
+                          {item.caption && (
+                            <div
+                              className="absolute bottom-1.5 left-1.5"
+                              style={{
+                                background: "rgba(0,0,0,0.65)", padding: "3px 10px", borderRadius: 8,
+                                fontSize: 10, color: "#ccc", backdropFilter: "blur(4px)",
+                                maxWidth: "80%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
+                              }}
+                            >
+                              {item.caption.slice(0, 20)}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── FAVORITE PROVIDERS TAB ── */}
+              {activeTab === "favorite providers" && (
+                <div>
+                  {favoriteProviders.length === 0 ? (
+                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "40px 0" }}>
+                      no favorite providers yet
+                    </p>
+                  ) : (
+                    favoriteProviders.map((prov) => (
+                      <div
+                        key={prov.slug}
+                        className="flex items-center transition-all duration-200 cursor-pointer"
+                        style={{ ...glossyCard, gap: 14, padding: isMobile ? "12px 14px" : "14px 18px", marginBottom: 10 }}
+                        onMouseEnter={glossyCardHover}
+                        onMouseLeave={glossyCardLeave}
+                        onClick={() => navigate(`/providers/${prov.slug}`)}
+                      >
+                        {/* provider initial */}
+                        <div
+                          className="flex items-center justify-center flex-shrink-0"
+                          style={{
+                            width: 44, height: 44, borderRadius: 10,
+                            background: "linear-gradient(135deg, #111, #1a1a1a)",
+                            border: "1px solid rgba(59,240,122,0.1)",
+                            fontSize: 18, color: "#555",
+                          }}
+                        >
+                          {(prov.name?.[0] || "?").toUpperCase()}
+                        </div>
+                        {/* info */}
+                        <div className="flex-1 min-w-0">
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "#FFFFFF" }}>{prov.name}</div>
+                          <div style={{ fontSize: 11, color: "#555" }}>mexico</div>
+                        </div>
+                        {/* review count pill */}
+                        <span
+                          className="flex-shrink-0 rounded-full"
+                          style={{
+                            fontSize: 10, color: "#3BF07A",
+                            background: "rgba(59,240,122,0.08)",
+                            padding: "3px 10px",
+                          }}
+                        >
+                          reviewed {prov.count}x
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
               )}
             </div>
 
