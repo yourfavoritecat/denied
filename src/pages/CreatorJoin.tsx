@@ -117,7 +117,11 @@ const CreatorJoin = () => {
     if (!available) throw new Error(`Handle "${creatorHandle}" is already taken`);
 
     // Insert creator role
-    await supabase.from("user_roles").insert({ user_id: userId, role: "creator" } as any);
+    const { error: roleError } = await supabase.from("user_roles").insert({ user_id: userId, role: "creator" } as any);
+    if (roleError) {
+      console.error("Failed to insert user_roles:", roleError);
+      throw roleError;
+    }
 
     // Insert creator profile
     const { error: profileError } = await supabase.from("creator_profiles").insert({
@@ -128,10 +132,14 @@ const CreatorJoin = () => {
     if (profileError) throw profileError;
 
     // Claim invite code
-    await supabase
+    const { error: claimError } = await supabase
       .from("creator_invite_codes")
       .update({ claimed_by: userId } as any)
       .eq("id", invite!.id);
+    if (claimError) {
+      console.error("Failed to claim invite code:", claimError);
+      throw claimError;
+    }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -167,7 +175,11 @@ const CreatorJoin = () => {
 
       // The profile is auto-created by handle_new_user trigger
       // Insert creator role
-      await supabase.from("user_roles").insert({ user_id: userId, role: "creator" } as any);
+      const { error: roleError2 } = await supabase.from("user_roles").insert({ user_id: userId, role: "creator" } as any);
+      if (roleError2) {
+        console.error("Failed to insert user_roles:", roleError2);
+        throw roleError2;
+      }
 
       // Insert creator profile
       const { error: cpError } = await supabase.from("creator_profiles").insert({
@@ -178,10 +190,14 @@ const CreatorJoin = () => {
       if (cpError) throw cpError;
 
       // Claim invite
-      await supabase
+      const { error: claimError2 } = await supabase
         .from("creator_invite_codes")
         .update({ claimed_by: userId } as any)
         .eq("id", invite!.id);
+      if (claimError2) {
+        console.error("Failed to claim invite code:", claimError2);
+        throw claimError2;
+      }
 
       // Auto sign-in and redirect
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
