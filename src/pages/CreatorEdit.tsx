@@ -21,6 +21,7 @@ import {
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
 import ReviewCard, { type ReviewData } from "@/components/reviews/ReviewCard";
 import SuggestProviderModal from "@/components/creator/SuggestProviderModal";
+import { COVER_OPTIONS, DEFAULT_COVER_URL } from "@/data/coverOptions";
 
 interface CreatorProfile {
   id: string;
@@ -382,25 +383,36 @@ const CreatorEdit = () => {
       </div>
 
       <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-        {/* Cover Photo */}
-        <section>
+        {/* Cover Photo Gallery Picker */}
+        <section className="space-y-3">
+          <Label className="text-base font-semibold">choose your cover</Label>
+          <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
+            {COVER_OPTIONS.map((option) => {
+              const isSelected = (coverPhotoUrl || DEFAULT_COVER_URL) === option.url;
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => setCoverPhotoUrl(option.url)}
+                  className={`aspect-[2/1] rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
+                    isSelected
+                      ? "ring-2 ring-[#3BF07A] scale-105"
+                      : "opacity-70 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={option.url}
+                    alt={option.label}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              );
+            })}
+          </div>
           <button
             onClick={() => coverInputRef.current?.click()}
-            className="w-full aspect-[3/1] rounded-xl border-2 border-dashed border-border bg-card hover:bg-muted/50 transition-colors overflow-hidden relative group"
+            className="text-xs text-muted-foreground hover:text-foreground underline transition-colors"
           >
-            {coverPhotoUrl ? (
-              <>
-                <img src={coverPhotoUrl} alt="Cover" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                  <Camera className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                <Camera className="w-8 h-8 mb-2" />
-                <span className="text-sm">Add cover photo (16:9)</span>
-              </div>
-            )}
+            or upload your own
           </button>
           <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
         </section>

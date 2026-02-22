@@ -133,14 +133,25 @@ const CreatorJoin = () => {
       }
     }
 
-    // Insert creator profile
-    const { error: profileError } = await supabase.from("creator_profiles").insert({
-      user_id: userId,
-      handle: creatorHandle,
-      display_name: displayName,
-      is_published: false,
-    } as any);
-    if (profileError) throw profileError;
+    // Insert creator profile (skip if already exists)
+    const { data: existingProfile } = await supabase
+      .from("creator_profiles")
+      .select("id")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!existingProfile) {
+      const { error: profileError } = await supabase.from("creator_profiles").insert({
+        user_id: userId,
+        handle: creatorHandle,
+        display_name: displayName,
+        is_published: false,
+      } as any);
+      if (profileError) {
+        console.error("Failed to insert creator_profiles:", profileError);
+        throw profileError;
+      }
+    }
 
     // Claim invite code
     const { error: claimError } = await supabase
@@ -210,14 +221,25 @@ const CreatorJoin = () => {
         }
       }
 
-      // Insert creator profile
-      const { error: cpError } = await supabase.from("creator_profiles").insert({
-        user_id: userId,
-        handle,
-        display_name: `${firstName} ${lastName}`.trim() || handle,
-        is_published: false,
-      } as any);
-      if (cpError) throw cpError;
+      // Insert creator profile (skip if already exists)
+      const { data: existingProfile2 } = await supabase
+        .from("creator_profiles")
+        .select("id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (!existingProfile2) {
+        const { error: cpError } = await supabase.from("creator_profiles").insert({
+          user_id: userId,
+          handle,
+          display_name: `${firstName} ${lastName}`.trim() || handle,
+          is_published: false,
+        } as any);
+        if (cpError) {
+          console.error("Failed to insert creator_profiles:", cpError);
+          throw cpError;
+        }
+      }
 
       // Claim invite
       const { error: claimError2 } = await supabase
