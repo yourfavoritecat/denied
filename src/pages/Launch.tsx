@@ -83,13 +83,13 @@ const Launch = ({ showLogin = false }: LaunchProps) => {
 
       <div className="w-full max-w-xl flex flex-col items-center text-center relative z-10">
         {/* Logo with soft neon glow behind it */}
-        <div className="relative mb-6">
+        <div className="relative mb-2">
           {/* Neon green glow blob behind logo */}
           <div className="absolute inset-0 -z-10" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 60%, rgba(80,255,144,0.13) 0%, transparent 70%)', filter: 'blur(24px)' }} />
           <img
             src={logo}
             alt="Denied"
-            className="w-[460px] md:w-[560px] lg:w-[660px] h-auto relative"
+            className="w-[500px] md:w-[600px] lg:w-[700px] h-auto relative"
             style={{ mixBlendMode: 'screen' }}
           />
         </div>
