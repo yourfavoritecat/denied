@@ -9,10 +9,11 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
-  Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink, Star, Play,
+  Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink, Star, Play, Pencil,
 } from "lucide-react";
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
 import ContentUploadModal from "@/components/creator/ContentUploadModal";
+import ContentEditModal from "@/components/creator/ContentEditModal";
 import Navbar from "@/components/layout/Navbar";
 
 /* ── custom svg icons ── */
@@ -219,6 +220,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   const [activeTab, setActiveTab] = useState("feed");
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [editingContent, setEditingContent] = useState<any>(null);
 
   /* editing ui */
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -866,11 +868,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     {contentItems.map((item: any, idx: number) => {
                       const thumb = item.thumbnail_url || item.media_url;
                       const isVideo = item.media_type === "video";
-                      const hashtags: string[] = Array.isArray(item.hashtags) ? item.hashtags : [];
                       return (
                         <div
                           key={item.id}
-                          className="relative flex-shrink-0 overflow-hidden"
+                          className="group relative flex-shrink-0 overflow-hidden"
                           style={{
                             width: thumbSize, height: thumbSize, borderRadius: 14,
                             background: "#111", border: "1px solid rgba(255,255,255,0.04)",
@@ -907,23 +908,21 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                               }}>▶</div>
                             </div>
                           )}
-                          {hashtags.length > 0 && (
-                            <div className="absolute top-0 left-0 flex gap-0.5" style={{ margin: 6 }}>
-                              {hashtags.slice(0, 2).map((h) => (
-                                <span key={h} style={{
-                                  background: "rgba(0,0,0,0.6)", padding: "2px 6px", borderRadius: 6,
-                                  fontSize: 9, color: accent,
-                                }}>#{h}</span>
-                              ))}
-                            </div>
-                          )}
-                          {(item.title || item.caption) && (
-                            <div className="absolute bottom-1.5 left-1.5" style={{
-                              background: "rgba(0,0,0,0.65)", padding: "3px 10px", borderRadius: 8,
-                              fontSize: 10, color: "#ccc", backdropFilter: "blur(4px)",
-                              maxWidth: "80%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
-                            }}>
-                              {(item.title || item.caption || "").slice(0, 20)}
+                          {isOwner && (
+                            <div
+                              className="absolute opacity-0 group-hover:opacity-100"
+                              style={{
+                                top: 8, right: 8, width: 28, height: 28, borderRadius: "50%",
+                                background: "rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.15)",
+                                display: "flex", alignItems: "center", justifyContent: "center",
+                                transition: "opacity 200ms ease", zIndex: 2,
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingContent(item);
+                              }}
+                            >
+                              <Pencil style={{ width: 14, height: 14, color: "#fff" }} />
                             </div>
                           )}
                         </div>
@@ -1397,6 +1396,16 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             onClose={() => setUploadModalOpen(false)}
             creatorId={profileId}
             userId={userId}
+            accent={accent}
+            rgb={rgb}
+            onSuccess={refetchContent}
+          />
+        )}
+        {editingContent && (
+          <ContentEditModal
+            open={!!editingContent}
+            onClose={() => setEditingContent(null)}
+            item={editingContent}
             accent={accent}
             rgb={rgb}
             onSuccess={refetchContent}
