@@ -218,8 +218,8 @@ const BookingDetail = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-4xl">
+      <main>
+        <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
           <Link to="/my-trips" className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm mb-6">
             <ArrowLeft className="w-4 h-4" /> Back to My Trips
           </Link>

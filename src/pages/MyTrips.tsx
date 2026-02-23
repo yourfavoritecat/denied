@@ -314,8 +314,8 @@ const MyTripsPage = () => {
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
       <Navbar />
-      <main className="pt-20 pb-24">
-        <div className="max-w-3xl mx-auto px-4">
+      <main>
+        <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>

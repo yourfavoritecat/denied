@@ -8,8 +8,8 @@ const SettingsPage = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-2xl">
+      <main>
+        <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
           <h1 className="text-2xl font-bold mb-6">Settings</h1>
 
           <Card className="shadow-elevated border-border/50">

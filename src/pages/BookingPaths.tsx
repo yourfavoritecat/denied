@@ -78,10 +78,9 @@ const BookingPaths = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="flex-1">
-        {/* ── Hero ────────────────────────────────────────────────────────── */}
+      <main className="flex-1 pt-24 pb-16">
         <section className="py-20 px-4 text-center">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-[960px] mx-auto">
             <p className="text-xs uppercase tracking-widest font-semibold text-secondary mb-4">
               Book Your Care
             </p>
@@ -99,7 +98,7 @@ const BookingPaths = () => {
 
         {/* ── How It Works Strip ──────────────────────────────────────────── */}
         <section className="py-6 px-4 border-y border-border/50">
-          <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-0">
+          <div className="max-w-[960px] mx-auto flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-0">
             {STEPS.map((step, i) => (
               <div key={step.n} className="flex items-center gap-3">
                 <div className="flex items-center gap-3">
@@ -118,7 +117,7 @@ const BookingPaths = () => {
 
         {/* ── Two Cards ───────────────────────────────────────────────────── */}
         <section className="py-16 px-4">
-          <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="max-w-[960px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Concierge Card */}
             <div className="group relative bg-card border border-border rounded-2xl p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(255,140,105,0.25),0_0_0_1px_rgba(255,140,105,0.2)] cursor-default overflow-hidden">
@@ -215,7 +214,7 @@ const BookingPaths = () => {
 
         {/* ── Trust Bar ───────────────────────────────────────────────────── */}
         <section className="py-12 px-4 bg-muted/30">
-          <div className="max-w-2xl mx-auto text-center space-y-8">
+          <div className="max-w-[960px] mx-auto text-center space-y-8">
             <p className="text-foreground/75 text-base leading-relaxed italic">
               "Every provider on denied.care is personally vetted. I've sat in the
               chair myself. You're not gambling — you're choosing how much support
@@ -234,7 +233,7 @@ const BookingPaths = () => {
 
         {/* ── Mini FAQ ────────────────────────────────────────────────────── */}
         <section className="py-16 px-4">
-          <div className="max-w-xl mx-auto">
+          <div className="max-w-[960px] mx-auto">
             <h2 className="text-xl font-bold text-foreground mb-6 text-center">Common questions</h2>
             <Accordion type="single" collapsible className="space-y-2">
               {FAQ.map((item, i) => (
