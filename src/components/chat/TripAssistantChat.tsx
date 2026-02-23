@@ -195,7 +195,7 @@ export default function TripAssistantChat() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed bottom-4 left-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-2rem)] flex flex-col rounded-2xl shadow-2xl overflow-hidden"
+            className="fixed bottom-4 left-4 z-50 w-[360px] max-w-[calc(100vw-2rem)] h-[520px] max-h-[calc(100vh-2rem)] flex flex-col rounded-xl shadow-2xl overflow-hidden"
             style={{ backgroundColor: "#1A1A1A" }}
           >
             {/* Header */}

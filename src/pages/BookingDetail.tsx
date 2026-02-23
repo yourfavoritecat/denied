@@ -239,7 +239,7 @@ const BookingDetail = () => {
             <div className="mb-8 flex justify-center">
               <div
                 ref={passRef}
-                className="relative w-full max-w-sm rounded-2xl overflow-hidden"
+                className="relative w-full max-w-sm rounded-xl overflow-hidden"
                 style={{ background: "linear-gradient(145deg, #0f0f0f 0%, #1a1a1a 100%)", border: "1px solid rgba(255,255,255,0.08)" }}
               >
                 {/* Peach top accent strip */}
