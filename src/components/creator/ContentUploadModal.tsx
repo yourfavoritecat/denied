@@ -27,6 +27,10 @@ const ContentUploadModal = ({ open, onClose, creatorId, userId, accent, rgb, onS
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [thumbFile, setThumbFile] = useState<File | null>(null);
   const [thumbPreview, setThumbPreview] = useState<string | null>(null);
+  const [autoThumbUrl, setAutoThumbUrl] = useState<string | null>(null);
+  const [fetchingThumb, setFetchingThumb] = useState(false);
+  const [thumbFetchMsg, setThumbFetchMsg] = useState<string | null>(null);
+  const [showManualThumb, setShowManualThumb] = useState(false);
   const [providerSlug, setProviderSlug] = useState("");
   const [providers, setProviders] = useState<{ slug: string; name: string }[]>([]);
   const [publishing, setPublishing] = useState(false);
@@ -55,8 +59,72 @@ const ContentUploadModal = ({ open, onClose, creatorId, userId, accent, rgb, onS
     setPhotoPreview(null);
     setThumbFile(null);
     setThumbPreview(null);
+    setAutoThumbUrl(null);
+    setFetchingThumb(false);
+    setThumbFetchMsg(null);
+    setShowManualThumb(false);
     setProviderSlug("");
   };
+
+  const fetchAutoThumbnail = async (url: string) => {
+    if (!url.trim()) return;
+    try { new URL(url); } catch { return; }
+
+    setFetchingThumb(true);
+    setThumbFetchMsg(null);
+    setAutoThumbUrl(null);
+
+    try {
+      // YouTube
+      const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+      if (ytMatch) {
+        const thumbUrl = `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+        setAutoThumbUrl(thumbUrl);
+        setThumbPreview(thumbUrl);
+        setFetchingThumb(false);
+        return;
+      }
+
+      // TikTok
+      if (url.includes("tiktok.com")) {
+        try {
+          const res = await fetch(`https://www.tiktok.com/oembed?url=${encodeURIComponent(url)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.thumbnail_url) {
+              setAutoThumbUrl(data.thumbnail_url);
+              setThumbPreview(data.thumbnail_url);
+              setFetchingThumb(false);
+              return;
+            }
+          }
+        } catch { /* fall through */ }
+      }
+
+      // Instagram
+      if (url.includes("instagram.com")) {
+        setThumbFetchMsg("couldn't auto-fetch thumbnail — upload one manually");
+        setShowManualThumb(true);
+        setFetchingThumb(false);
+        return;
+      }
+
+      // Other
+      setThumbFetchMsg("upload a thumbnail for this link");
+      setShowManualThumb(true);
+    } catch {
+      setThumbFetchMsg("couldn't auto-fetch thumbnail — upload one manually");
+      setShowManualThumb(true);
+    }
+    setFetchingThumb(false);
+  };
+
+  // Debounced auto-fetch
+  useEffect(() => {
+    if (contentType !== "video" || !videoUrl.trim()) return;
+    const timer = setTimeout(() => fetchAutoThumbnail(videoUrl), 500);
+    return () => clearTimeout(timer);
+  }, [videoUrl, contentType]);
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -107,6 +175,8 @@ const ContentUploadModal = ({ open, onClose, creatorId, userId, accent, rgb, onS
         mediaUrl = videoUrl.trim();
         if (thumbFile) {
           thumbnailUrl = await uploadFile(thumbFile, "thumb");
+        } else if (autoThumbUrl) {
+          thumbnailUrl = autoThumbUrl;
         }
       }
 
@@ -252,12 +322,39 @@ const ContentUploadModal = ({ open, onClose, creatorId, userId, accent, rgb, onS
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 11, letterSpacing: 1, color: "#666", display: "block", marginBottom: 8 }}>thumbnail (optional)</label>
-                  {thumbPreview ? (
-                    <div style={{ width: 120, height: 80, borderRadius: 10, overflow: "hidden", position: "relative" }}>
+                  <label style={{ fontSize: 11, letterSpacing: 1, color: "#666", display: "block", marginBottom: 8 }}>thumbnail</label>
+                  {fetchingThumb ? (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 0" }}>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: accent }} />
+                      <span style={{ fontSize: 12, color: "#666" }}>fetching thumbnail...</span>
+                    </div>
+                  ) : thumbPreview && !thumbFile ? (
+                    <div>
+                      <div style={{ width: "100%", maxWidth: 200, height: 140, borderRadius: 12, overflow: "hidden", position: "relative" }}>
+                        <img src={thumbPreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        <button
+                          onClick={() => { setThumbFile(null); setThumbPreview(null); setAutoThumbUrl(null); setShowManualThumb(true); }}
+                          style={{
+                            position: "absolute", top: 4, right: 4,
+                            background: "rgba(0,0,0,0.7)", color: "#fff",
+                            borderRadius: 9999, width: 20, height: 20,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            border: "none", cursor: "pointer", fontSize: 12,
+                          }}
+                        >×</button>
+                      </div>
+                      <button
+                        onClick={() => setShowManualThumb(true)}
+                        style={{ fontSize: 11, color: accent, background: "none", border: "none", cursor: "pointer", marginTop: 6, textDecoration: "underline" }}
+                      >
+                        use a different image
+                      </button>
+                    </div>
+                  ) : thumbFile && thumbPreview ? (
+                    <div style={{ width: "100%", maxWidth: 200, height: 140, borderRadius: 12, overflow: "hidden", position: "relative" }}>
                       <img src={thumbPreview} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                       <button
-                        onClick={() => { setThumbFile(null); setThumbPreview(null); }}
+                        onClick={() => { setThumbFile(null); setThumbPreview(autoThumbUrl); }}
                         style={{
                           position: "absolute", top: 4, right: 4,
                           background: "rgba(0,0,0,0.7)", color: "#fff",
@@ -267,20 +364,23 @@ const ContentUploadModal = ({ open, onClose, creatorId, userId, accent, rgb, onS
                         }}
                       >×</button>
                     </div>
-                  ) : (
-                    <label
-                      style={{
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        width: 120, height: 80, borderRadius: 10,
-                        border: `2px dashed rgba(${rgb},0.2)`, cursor: "pointer",
-                        color: `rgba(${rgb},0.3)`, fontSize: 11,
-                      }}
-                    >
-                      <Play className="w-4 h-4 mr-1" /> add
-                      <input type="file" accept="image/*" className="hidden" onChange={handleThumbSelect} />
-                    </label>
+                  ) : null}
+                  {(showManualThumb || (!thumbPreview && !fetchingThumb)) && !thumbFile && (
+                    <div style={{ marginTop: thumbPreview ? 8 : 0 }}>
+                      <label
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          width: 120, height: 80, borderRadius: 10,
+                          border: `2px dashed rgba(${rgb},0.2)`, cursor: "pointer",
+                          color: `rgba(${rgb},0.3)`, fontSize: 11,
+                        }}
+                      >
+                        <Play className="w-4 h-4 mr-1" /> upload
+                        <input type="file" accept="image/*" className="hidden" onChange={handleThumbSelect} />
+                      </label>
+                      {thumbFetchMsg && <p style={{ fontSize: 10, color: "#666", marginTop: 6 }}>{thumbFetchMsg}</p>}
+                    </div>
                   )}
-                  <p style={{ fontSize: 10, color: "#444", marginTop: 6 }}>add a thumbnail so people know what they're clicking</p>
                 </div>
               </>
             )}
