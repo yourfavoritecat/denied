@@ -3,13 +3,13 @@ import Footer from "@/components/landing/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Heart, Calendar, ShieldCheck, Camera, ExternalLink, ClipboardList, Sparkles, Shield, KeyRound, Trash2 } from "lucide-react";
+import { Settings, Heart, Calendar, ShieldCheck, Camera, ClipboardList, Sparkles, Shield, KeyRound, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import SettingsTab from "@/components/profile/SettingsTab";
 import SocialVerificationSection from "@/components/profile/SocialVerificationSection";
-import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
+import VerifiedBadge, { isUserVerified } from "@/components/profile/VerifiedBadge";
 import PatientHistoryTab from "@/components/profile/PatientHistoryTab";
 import SavedProvidersTab from "@/components/profile/SavedProvidersTab";
 import TripsTab from "@/components/profile/TripsTab";
@@ -23,15 +23,21 @@ const VALID_TABS = ["feed", "history", "settings", "verification", "saved", "tri
 const ProfilePage = () => {
   const { user, profile } = useAuth();
   const socialVerifications = (profile as any)?.social_verifications || {};
-  const trustTier = computeUserTrustTier(socialVerifications, false);
+  const verified = isUserVerified(socialVerifications);
   const [creatorHandle, setCreatorHandle] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const currentTab = VALID_TABS.includes(searchParams.get("tab") || "") 
     ? searchParams.get("tab")! 
     : "feed";
 
   const handleTabChange = (value: string) => {
+    // If creator clicks "my journey", redirect to their public content tab
+    if (value === "feed" && creatorHandle) {
+      navigate(`/c/${creatorHandle}?tab=content`);
+      return;
+    }
     setSearchParams({ tab: value }, { replace: true });
   };
 
@@ -69,7 +75,7 @@ const ProfilePage = () => {
                   <p className="text-muted-foreground mb-3">{user?.email}</p>
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                     <Badge variant="secondary">member since {new Date(user?.created_at || "").getFullYear()}</Badge>
-                    <UserTrustBadge tier={trustTier} size="md" />
+                    <VerifiedBadge verified={verified} size="md" />
                     {creatorHandle && (
                       <Button variant="secondary" size="sm" asChild className="gap-1.5">
                         <Link to={`/${creatorHandle}`}>

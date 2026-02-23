@@ -2,14 +2,12 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Shield, CheckCircle, ExternalLink, Sparkles } from "lucide-react";
+import { Shield, CheckCircle, ExternalLink, Info } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { lovable } from "@/integrations/lovable/index";
-import UserTrustBadge, { computeUserTrustTier } from "./UserTrustBadge";
+import VerifiedBadge, { isUserVerified } from "./VerifiedBadge";
 
 interface SocialPlatform {
   id: string;
@@ -46,23 +44,19 @@ const SocialVerificationSection = () => {
   const [saving, setSaving] = useState<string | null>(null);
 
   const socialVerifications = (profile as any)?.social_verifications || {};
-  const hasCompletedBooking = false; // Computed separately if needed
-  const trustTier = computeUserTrustTier(socialVerifications, hasCompletedBooking);
+  const verified = isUserVerified(socialVerifications);
   const connectedCount = Object.values(socialVerifications).filter((v: any) => v?.connected).length;
 
   const handleOAuthConnect = async (platformId: string) => {
     setSaving(platformId);
     try {
       if (platformId === "google" || platformId === "apple") {
-        // Use OAuth — on callback we'll mark as connected
         const { error } = await lovable.auth.signInWithOAuth(platformId, {
           redirect_uri: window.location.origin + "/profile",
         });
         if (error) {
           toast({ title: "Connection failed", description: String(error), variant: "destructive" });
         }
-        // The OAuth will redirect; on return, the user is already authenticated via Google/Apple
-        // We mark the social as connected
         const updatedVerifications = {
           ...socialVerifications,
           [platformId]: {
@@ -89,11 +83,7 @@ const SocialVerificationSection = () => {
       toast({ title: "Enter your profile URL", variant: "destructive" });
       return;
     }
-
-    // Basic URL validation
-    try {
-      new URL(url);
-    } catch {
+    try { new URL(url); } catch {
       toast({ title: "Invalid URL", description: "Please enter a valid profile URL", variant: "destructive" });
       return;
     }
@@ -141,58 +131,35 @@ const SocialVerificationSection = () => {
 
   return (
     <div className="space-y-6">
-      {/* Trust Badge CTA */}
+      {/* Verification status */}
       <Card className="border-2 border-dashed border-secondary/40 bg-secondary/5">
         <CardContent className="pt-6">
           <div className="flex items-start gap-3">
             <div className="p-2 rounded-full bg-secondary/10">
-              <Sparkles className="w-5 h-5 text-secondary" />
+              {verified ? (
+                <CheckCircle className="w-5 h-5" style={{ color: "#3BF07A" }} />
+              ) : (
+                <Info className="w-5 h-5 text-muted-foreground" />
+              )}
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-3 mb-1">
-                <UserTrustBadge tier={trustTier} size="md" />
-                <p className="font-semibold text-sm">
-                  {trustTier === "unverified"
-                    ? "Connect your socials to earn Verified status."
-                    : trustTier === "verified" || trustTier === "trusted"
-                      ? "Complete a trip through Denied to become a Trusted Traveler."
-                      : "You're a Trusted Traveler! 🎉"}
-                </p>
-              </div>
-              <p className="text-xs text-muted-foreground mb-3">
-                Verified profiles get more visibility and providers respond faster.
-              </p>
-              <span className="text-xs text-muted-foreground">{connectedCount}/5 connected</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tier explanation */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Shield className="w-5 h-5" />
-            Trust Tiers
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-3 text-sm">
-            <div className="flex items-center gap-3">
-              <UserTrustBadge tier="unverified" />
-              <span className="text-muted-foreground">No socials connected</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <UserTrustBadge tier="verified" />
-              <span className="text-muted-foreground">1 social connected</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <UserTrustBadge tier="trusted" />
-              <span className="text-muted-foreground">2+ socials connected</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <UserTrustBadge tier="trusted_traveler" />
-              <span className="text-muted-foreground">2+ socials + completed booking</span>
+              {verified ? (
+                <div className="flex items-center gap-3 mb-1">
+                  <VerifiedBadge verified={true} size="md" />
+                  <p className="text-sm text-muted-foreground">
+                    your profile is verified. {connectedCount}/5 accounts connected.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="font-semibold text-sm mb-1">
+                    connect at least one social account to verify your profile
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    verified profiles get more visibility and providers respond faster.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
@@ -203,9 +170,9 @@ const SocialVerificationSection = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
             <Shield className="w-5 h-5" />
-            Verify Your Profile
+            verify your profile
           </CardTitle>
-          <CardDescription>Connect accounts to prove your identity</CardDescription>
+          <CardDescription>connect accounts to prove your identity</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {platforms.map((platform) => {
@@ -221,7 +188,7 @@ const SocialVerificationSection = () => {
                   <div className="flex items-center gap-2">
                     <span className="font-medium text-sm">{platform.label}</span>
                     {isConnected && (
-                      <CheckCircle className="w-4 h-4 text-[hsl(160,50%,45%)]" />
+                      <CheckCircle className="w-4 h-4" style={{ color: "#3BF07A" }} />
                     )}
                   </div>
                   {isConnected && verification.username && (

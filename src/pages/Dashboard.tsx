@@ -22,7 +22,7 @@ import {
   Heart,
   Star,
 } from "lucide-react";
-import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
+import VerifiedBadge, { isUserVerified } from "@/components/profile/VerifiedBadge";
 
 const container = {
   hidden: { opacity: 0 },
@@ -50,7 +50,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   const socialVerifications = (profile as any)?.social_verifications || {};
-  const trustTier = computeUserTrustTier(socialVerifications, false);
+  const verified = isUserVerified(socialVerifications);
 
   const firstName = profile?.first_name || "there";
   const initials = profile
@@ -125,7 +125,7 @@ const Dashboard = () => {
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
                   <p className="text-white/70 text-sm">Welcome back to Denied</p>
-                  <UserTrustBadge tier={trustTier} size="sm" />
+                  <VerifiedBadge verified={verified} size="sm" />
                 </div>
               </div>
             </div>
