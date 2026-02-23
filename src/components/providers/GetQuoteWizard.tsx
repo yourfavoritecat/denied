@@ -249,8 +249,10 @@ const GetQuoteWizard = ({
     // Non-blocking notification
     if (booking && !bookingError) {
       supabase.functions.invoke("send-notification", {
-        body: { type: "inquiry_received", booking_id: (booking as any).id },
-      }).catch(() => {});
+        body: { type: "inquiry_received", booking_id: (booking as any).id, recipient_user_id: user.id },
+      }).then(({ error: notifError }) => {
+        if (notifError) console.error("Failed to send notification:", notifError);
+      }).catch((err) => console.error("Failed to send notification:", err));
       // TODO: Send email notification to provider and confirmation to traveler
     }
 

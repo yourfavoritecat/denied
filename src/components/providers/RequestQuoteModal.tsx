@@ -156,10 +156,12 @@ const RequestQuoteModal = ({ open, onOpenChange, providerName, providerSlug }: R
     if (error) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     } else {
-      // Send notification (non-blocking) — edge function handles admin-managed forwarding
+      // Send notification (non-blocking)
       supabase.functions.invoke("send-notification", {
-        body: { type: "inquiry_received", booking_id: (data as any).id },
-      }).catch(() => {});
+        body: { type: "inquiry_received", booking_id: (data as any).id, recipient_user_id: user.id },
+      }).then(({ error: notifError }) => {
+        if (notifError) console.error("Failed to send notification:", notifError);
+      }).catch((err) => console.error("Failed to send notification:", err));
 
       toast({ title: "Inquiry sent!", description: `Your inquiry has been sent to ${providerName}.` });
       onOpenChange(false);
