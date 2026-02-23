@@ -21,7 +21,7 @@ interface NotificationRequest {
 }
 
 const SUBJECTS: Record<string, string> = {
-  inquiry_received: "New Inquiry Received",
+  inquiry_received: "we got your quote request!",
   quote_received: "You Received a Quote!",
   deposit_paid: "Deposit Payment Confirmed",
   trip_confirmed: "Your Trip is Confirmed!",
@@ -30,9 +30,10 @@ const SUBJECTS: Record<string, string> = {
 
 const BODIES: Record<string, (providerName: string, procedures: string) => string> = {
   inquiry_received: (p, proc) => `
-    <h2>New Inquiry from a Patient</h2>
-    <p>A patient has submitted an inquiry for <strong>${proc}</strong>.</p>
-    <p>Log in to your provider dashboard to review the details and submit a quote.</p>
+    <h2>thanks for reaching out!</h2>
+    <p>we received your quote request for <strong>${proc}</strong> at ${p}.</p>
+    <p>someone from denied.care or the clinic will get back to you within 48 hours.</p>
+    <p>in the meantime, you can check your booking status anytime at <a href="https://denied.lovable.app/my-trips">my trips</a>.</p>
   `,
   quote_received: (p, proc) => `
     <h2>Quote Received from ${p}</h2>
@@ -184,8 +185,8 @@ serve(async (req) => {
               <div style="font-family: system-ui, sans-serif; max-width: 560px; margin: 0 auto; padding: 24px;">
                 ${body}
                 <hr style="margin: 24px 0; border: none; border-top: 1px solid #eee;" />
-                <p style="font-size: 12px; color: #999;">You're receiving this because you have an active booking on Denied.care. 
-                <a href="#">Manage notification preferences</a></p>
+                <p style="font-size: 12px; color: #999;">${type === 'inquiry_received' ? "you're receiving this because you submitted a quote request on denied.care." : "You're receiving this because you have an active booking on Denied.care."} 
+                </p>
               </div>
             `,
           });
