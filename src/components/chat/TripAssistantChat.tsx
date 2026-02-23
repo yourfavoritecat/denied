@@ -171,7 +171,7 @@ export default function TripAssistantChat() {
             exit={{ scale: 0 }}
             onClick={() => setOpen(true)}
             className="fixed bottom-6 left-6 z-50 h-14 w-14 rounded-full shadow-lg flex items-center justify-center"
-            style={{ backgroundColor: "#50FF90", transition: "all 300ms ease" }}
+            style={{ backgroundColor: "#3BF07A", transition: "all 300ms ease" }}
             onMouseEnter={(e) => {
               e.currentTarget.style.boxShadow = "0 0 15px rgba(59,240,122,0.3), 0 0 30px rgba(59,240,122,0.15)";
               e.currentTarget.style.transform = "scale(1.08)";
@@ -201,7 +201,7 @@ export default function TripAssistantChat() {
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "#50FF90" }}>
+                <div className="h-8 w-8 rounded-full flex items-center justify-center" style={{ backgroundColor: "#3BF07A" }}>
                   <MessageCircle className="h-4 w-4 text-black" />
                 </div>
                 <div>
@@ -235,7 +235,7 @@ export default function TripAssistantChat() {
                         : "text-foreground rounded-bl-md"
                     )}
                     style={{
-                      backgroundColor: m.role === "user" ? "#FFFFFF" : "#FF8C69",
+                      backgroundColor: m.role === "user" ? "#FFFFFF" : "#FF6B4A",
                       color: "#1A1A1A",
                     }}
                   >
@@ -245,7 +245,7 @@ export default function TripAssistantChat() {
               ))}
               {isLoading && messages[messages.length - 1]?.role === "user" && (
                 <div className="flex justify-start">
-                  <div className="rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5" style={{ backgroundColor: "#FF8C69" }}>
+                  <div className="rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5" style={{ backgroundColor: "#FF6B4A" }}>
                     <span className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce [animation-delay:0ms]" />
                     <span className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce [animation-delay:150ms]" />
                     <span className="w-2 h-2 rounded-full bg-foreground/40 animate-bounce [animation-delay:300ms]" />
@@ -283,7 +283,7 @@ export default function TripAssistantChat() {
                 onClick={() => send(input)}
                 disabled={!input.trim() || isLoading}
                 className="h-10 w-10 rounded-full flex items-center justify-center disabled:opacity-40 transition-opacity"
-                style={{ backgroundColor: "#50FF90" }}
+                style={{ backgroundColor: "#3BF07A" }}
               >
                 {isLoading ? <Loader2 className="h-4 w-4 text-black animate-spin" /> : <Send className="h-4 w-4 text-black" />}
               </button>

@@ -37,25 +37,13 @@ const StarRating = ({ rating }: { rating: number }) => (
   </div>
 );
 
-const glassCard = {
-  background: 'rgba(80,255,144,0.06)',
-  border: '1px solid rgba(80,255,144,0.1)',
-  borderTop: '1px solid rgba(255,255,255,0.1)',
-  boxShadow: '0 0 20px rgba(80,255,144,0.04)',
-  backdropFilter: 'blur(10px)',
-  WebkitBackdropFilter: 'blur(10px)',
-} as const;
-
-const sectionDivider = "border-t border-[rgba(80,255,144,0.1)] my-8";
-
-const peachCard = { ...glassCard, background: 'rgba(255,140,105,0.06)', border: '1px solid rgba(255,140,105,0.1)', boxShadow: '0 0 20px rgba(255,140,105,0.04)' } as const;
-const neutralCard = { ...glassCard, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 20px rgba(0,0,0,0.2)' } as const;
+const sectionDivider = "border-t border-[rgba(59,240,122,0.1)] my-8";
 
 const ExpandToggle = ({
   expanded, onToggle, labelExpand, labelCollapse = "show less",
 }: { expanded: boolean; onToggle: () => void; labelExpand: string; labelCollapse?: string }) => (
   <div className="flex justify-center mt-3">
-    <button onClick={onToggle} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80" style={{ color: '#50FF90' }}>
+    <button onClick={onToggle} className="flex items-center gap-1 text-sm font-medium transition-colors hover:opacity-80 text-primary">
       {expanded ? labelCollapse : labelExpand}
       {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
     </button>
@@ -87,7 +75,7 @@ const TeamMemberCard = ({ member, index, fullBio = false }: { member: any; index
       viewport={{ once: true }}
       transition={{ delay: index * 0.05 }}
     >
-      <div className="rounded-xl p-4 flex gap-3 items-start" style={peachCard}>
+      <div className="glossy-card rounded-xl p-4 flex gap-3 items-start" style={{ background: 'rgba(255,107,74,0.06)', border: '1px solid rgba(255,107,74,0.1)', boxShadow: '0 0 20px rgba(255,107,74,0.04)' }}>
         <Avatar className="w-12 h-12 shrink-0 ring-2 ring-white/20">
           <AvatarImage src={member.headshot_url} alt={member.name} />
           <AvatarFallback className="bg-muted">
@@ -361,7 +349,7 @@ const ProviderProfile = () => {
         <div className="fixed top-16 left-0 right-0 z-40 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium"
           style={{ background: 'rgba(255,140,105,0.15)', borderBottom: '1px solid rgba(255,140,105,0.3)', backdropFilter: 'blur(10px)' }}>
           <span>✨</span>
-          <span style={{ color: '#FF8C69' }}>Concierge mode</span>
+          <span style={{ color: '#FF6B4A' }}>Concierge mode</span>
           <span className="text-muted-foreground">— we'll handle your travel coordination</span>
         </div>
       )}
@@ -403,7 +391,7 @@ const ProviderProfile = () => {
                 >
                   <Heart
                     className="w-5 h-5 transition-colors"
-                    style={isProviderFavorited ? { fill: '#50FF90', color: '#50FF90' } : { color: 'rgba(255,255,255,0.7)' }}
+                    style={isProviderFavorited ? { fill: '#3BF07A', color: '#3BF07A' } : { color: 'rgba(255,255,255,0.7)' }}
                   />
                 </button>
               )}
@@ -416,7 +404,7 @@ const ProviderProfile = () => {
         </div>
 
         {/* ═══════ STICKY TAB BAR ═══════ */}
-        <div className="sticky top-16 z-30 bg-[#1a1714]/95 backdrop-blur-lg border-b border-[rgba(80,255,144,0.1)]">
+        <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-lg border-b border-[rgba(59,240,122,0.1)]">
           <div className="max-w-[960px] mx-auto px-4">
             <div className="flex gap-6">
               {TABS.map((tab) => (
@@ -434,7 +422,7 @@ const ProviderProfile = () => {
                     <motion.div
                       layoutId="provider-tab-underline"
                       className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
-                      style={{ background: '#50FF90' }}
+                      style={{ background: '#3BF07A' }}
                     />
                   )}
                 </button>
@@ -452,7 +440,7 @@ const ProviderProfile = () => {
               {/* ABOUT (mint card) */}
               {providerDescription && (
                 <section>
-                  <div className="rounded-xl p-5" style={glassCard}>
+                  <div className="glossy-card rounded-xl p-5">
                     <h2 className="text-lg font-bold mb-2">About</h2>
                     <p className="text-sm text-muted-foreground leading-relaxed">{providerDescription}</p>
                     {specialties.length > 0 && (
@@ -489,7 +477,7 @@ const ProviderProfile = () => {
                 {(reviewCount > 0 || categoryAggregates) && (
                   <div className="flex flex-col md:flex-row md:items-start gap-4 mb-5">
                     {/* Star rating breakdown — left side */}
-                    <div className="rounded-xl p-5 md:w-[340px] shrink-0" style={glassCard}>
+                    <div className="glossy-card rounded-xl p-5 md:w-[340px] shrink-0">
                       {reviewCount > 0 && (
                         <>
                           <div className="text-center mb-4">
@@ -585,7 +573,7 @@ const ProviderProfile = () => {
                 <section>
                   <h2 className="text-lg font-bold mb-3">Procedures & Pricing</h2>
                   <div className="relative">
-                    <div className="rounded-xl overflow-hidden" style={{ ...peachCard }}>
+                    <div className="glossy-card rounded-xl overflow-hidden" style={{ background: 'rgba(255,107,74,0.06)', border: '1px solid rgba(255,107,74,0.1)', boxShadow: '0 0 20px rgba(255,107,74,0.04)' }}>
                       {/* Savings Calculator as interactive header */}
                       <div className="border-b" style={{ borderColor: 'rgba(224,166,147,0.15)' }}>
                         <SavingsCalculator
@@ -648,25 +636,25 @@ const ProviderProfile = () => {
                   <h2 className="text-lg font-bold mb-3">Policies & Info</h2>
                   <div className="grid sm:grid-cols-2 gap-3">
                     {data.policies.hours_of_operation && (
-                      <div className="rounded-xl p-4" style={neutralCard}>
+                      <div className="glossy-card rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 20px rgba(0,0,0,0.2)' }}>
                         <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> Hours</p>
                         <p className="text-xs text-muted-foreground whitespace-pre-line">{data.policies.hours_of_operation}</p>
                       </div>
                     )}
                     {data.policies.cancellation_policy && (
-                      <div className="rounded-xl p-4" style={neutralCard}>
+                      <div className="glossy-card rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 20px rgba(0,0,0,0.2)' }}>
                         <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-primary" /> Cancellation</p>
                         <p className="text-xs text-muted-foreground">{data.policies.cancellation_policy}</p>
                       </div>
                     )}
                     {data.policies.deposit_requirements && (
-                      <div className="rounded-xl p-4" style={neutralCard}>
+                      <div className="glossy-card rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 20px rgba(0,0,0,0.2)' }}>
                         <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Deposit</p>
                         <p className="text-xs text-muted-foreground">{data.policies.deposit_requirements}</p>
                       </div>
                     )}
                     {data.policies.accepted_payments?.length > 0 && (
-                      <div className="rounded-xl p-4" style={neutralCard}>
+                      <div className="glossy-card rounded-xl p-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 0 20px rgba(0,0,0,0.2)' }}>
                         <p className="text-xs font-semibold mb-1 flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5 text-primary" /> Payments</p>
                         <div className="flex flex-wrap gap-1">
                           {data.policies.accepted_payments.map((p: string) => (
@@ -690,7 +678,7 @@ const ProviderProfile = () => {
                     <button
                       key={i}
                       onClick={() => { setLightboxIndex(i); setLightboxOpen(true); }}
-                      className="relative aspect-square rounded-xl overflow-hidden border border-white/10 hover:ring-2 hover:ring-[#50FF90] transition-all group"
+                      className="relative aspect-square rounded-xl overflow-hidden border border-white/10 hover:ring-2 hover:ring-primary transition-all group"
                     >
                       {item.type === "photo" ? (
                         <img src={item.url} alt="" className="w-full h-full object-cover" />

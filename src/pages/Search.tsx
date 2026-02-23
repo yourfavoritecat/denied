@@ -199,7 +199,7 @@ const SearchPage = () => {
         <div className="fixed top-16 left-0 right-0 z-40 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium"
           style={{ background: 'rgba(255,140,105,0.15)', borderBottom: '1px solid rgba(255,140,105,0.3)', backdropFilter: 'blur(10px)' }}>
           <span>✨</span>
-          <span style={{ color: '#FF8C69' }}>Concierge mode</span>
+          <span style={{ color: '#FF6B4A' }}>Concierge mode</span>
           <span className="text-muted-foreground">— we'll handle your travel coordination</span>
         </div>
       )}
