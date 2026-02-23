@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useReviews } from "@/hooks/useReviews";
 import { useAuth } from "@/hooks/useAuth";
 import ReviewCard from "@/components/reviews/ReviewCard";
-import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
+import VerifiedBadge, { isUserVerified } from "@/components/profile/VerifiedBadge";
 import UserBadge, { BadgeType } from "@/components/profile/UserBadge";
 import { useToast } from "@/hooks/use-toast";
 
@@ -164,7 +164,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
   }
 
   const initials = (profile.first_name || "U").charAt(0).toUpperCase();
-  const trustTier = computeUserTrustTier(profile.social_verifications, tripsCount > 0);
+  const verified = isUserVerified(profile.social_verifications);
   const memberYear = new Date(profile.created_at).getFullYear();
 
   return (
@@ -225,7 +225,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                 draggable={false}
               />
             ) : (
-              <UserTrustBadge tier={trustTier} size="lg" />
+              <VerifiedBadge verified={verified} size="lg" />
             )}
           </div>
         </div>

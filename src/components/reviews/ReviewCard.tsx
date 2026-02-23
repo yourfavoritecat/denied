@@ -11,7 +11,7 @@ import LeaveReviewModal from "@/components/reviews/LeaveReviewModal";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import UserTrustBadge, { computeUserTrustTier } from "@/components/profile/UserTrustBadge";
+import VerifiedBadge, { isUserVerified } from "@/components/profile/VerifiedBadge";
 import UserBadge, { BadgeType } from "@/components/profile/UserBadge";
 import FlagContentButton from "@/components/reviews/FlagContentButton";
 
@@ -138,7 +138,7 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
   const username = review.profile?.username;
   const isPublic = review.profile?.public_profile !== false;
   const isAuthor = user?.id === review.user_id;
-  const trustTier = computeUserTrustTier(review.profile?.social_verifications, review.verified_trip);
+  const verified = isUserVerified(review.profile?.social_verifications);
   const badgeType = review.profile?.badge_type ?? null;
 
   const handleProfileClick = async () => {
@@ -216,7 +216,7 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
                 <div className="flex items-center gap-2 flex-wrap">
                   {nameElement}
                   {city && <span className="text-muted-foreground text-sm">{city}</span>}
-                  <UserTrustBadge tier={computeUserTrustTier(review.profile?.social_verifications, review.verified_trip)} />
+                  <VerifiedBadge verified={verified} />
                   {badgeType && <UserBadge badgeType={badgeType} size="sm" />}
                   {review.verified_trip && (
                     <Badge className="bg-primary/10 text-primary text-xs gap-1">
@@ -355,7 +355,7 @@ const ReviewCard = ({ review, showProviderName, providerName, onEdit }: ReviewCa
             <div>
               <h3 className="text-lg font-bold flex items-center justify-center gap-2">
                 {firstName}
-                <UserTrustBadge tier={trustTier} size="md" />
+                <VerifiedBadge verified={verified} size="md" />
               </h3>
               {memberSince && (
                 <p className="text-sm text-muted-foreground flex items-center justify-center gap-1 mt-1">
