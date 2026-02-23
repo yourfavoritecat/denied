@@ -856,7 +856,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               const showSection = hasContent || isOwner;
               if (!showSection) return null;
               const thumbSize = 140;
-              const showSearch = contentItems.length >= 3;
+              const showSearch = contentItems.length >= 1;
               const filteredItems = contentSearch.trim()
                 ? contentItems.filter((item: any) => {
                     const q = contentSearch.trim().toLowerCase();
