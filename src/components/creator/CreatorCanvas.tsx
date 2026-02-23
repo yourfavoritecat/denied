@@ -948,7 +948,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                       padding: "8px 18px",
                       fontSize: isMobile ? 11 : 12,
                       letterSpacing: 1.5,
-                      color: activeTab === tab ? "#0A0A0A" : "#444",
+                      color: activeTab === tab ? "#0A0A0A" : accent,
                       borderBottom: "none",
                       borderRadius: activeTab === tab ? 9999 : 0,
                       background: activeTab === tab ? accent : "transparent",
@@ -957,8 +957,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                       transition: "color 200ms ease",
                       cursor: "pointer",
                     }}
-                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#888"; }}
-                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#444"; }}
+                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = accent; }}
                   >
                     {tab}
                   </button>
