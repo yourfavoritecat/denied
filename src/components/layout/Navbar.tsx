@@ -62,7 +62,7 @@ const Navbar = () => {
         { to: "/creators", icon: Users, label: "Creators" },
         { to: "/my-trips", icon: Plane, label: "My Trips" },
         ...(showCreatorLink ? [{ to: myPageUrl, icon: User, label: "My Page" }] : []),
-        { to: "/profile", icon: SettingsIcon, label: "Settings" },
+        { to: "/profile", icon: User, label: "my account" },
       ];
 
   /* check if a nav link is active */
@@ -168,8 +168,8 @@ const Navbar = () => {
                     <DropdownMenuItem onClick={() => navigate(creatorHandle ? `/c/${creatorHandle}` : "/profile")}>
                       <User className="w-4 h-4 mr-2" /> Profile
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/settings")}>
-                      <Settings className="w-4 h-4 mr-2" /> Settings
+                    <DropdownMenuItem onClick={() => navigate("/profile?tab=security")}>
+                      <Shield className="w-4 h-4 mr-2" /> Security
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate("/my-trips")}>
                       <Plane className="w-4 h-4 mr-2" /> My Trips
@@ -177,7 +177,7 @@ const Navbar = () => {
                     <DropdownMenuItem onClick={() => navigate("/my-trips?tab=briefs")}>
                       <FileText className="w-4 h-4 mr-2" /> Trip Briefs
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/profile?tab=patient-history")}>
+                    <DropdownMenuItem onClick={() => navigate("/profile?tab=history")}>
                       <ClipboardList className="w-4 h-4 mr-2" /> Patient History
                     </DropdownMenuItem>
                     {showProviderDashboard && (
