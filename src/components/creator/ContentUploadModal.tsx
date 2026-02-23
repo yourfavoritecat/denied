@@ -413,6 +413,44 @@ const ContentUploadModal = ({ open, onClose, creatorId, userId, accent, rgb, onS
                   ))}
                 </div>
               )}
+              <p style={{ fontSize: 11, color: "#555", lineHeight: 1.4, marginTop: 6 }}>
+                hashtags make your content searchable — visitors can search your page by tag to find what they're looking for
+              </p>
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                <span style={{ fontSize: 10, color: "#444", marginRight: 2 }}>suggested:</span>
+                {["tijuana", "dental", "crowns", "recovery", "travel tips", "before after", "veneers", "root canal", "savings", "border crossing"].map((tag) => {
+                  const isActive = parsedHashtags.includes(tag);
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        if (isActive) {
+                          // remove from input
+                          const newTags = parsedHashtags.filter((t) => t !== tag);
+                          setHashtagInput(newTags.join(", "));
+                        } else {
+                          // add to input
+                          const current = hashtagInput.trim();
+                          setHashtagInput(current ? `${current}, ${tag}` : tag);
+                        }
+                      }}
+                      style={{
+                        padding: "3px 10px",
+                        borderRadius: 9999,
+                        fontSize: 10,
+                        background: isActive ? `rgba(${rgb},0.12)` : "rgba(255,255,255,0.04)",
+                        color: isActive ? accent : "#666",
+                        border: `1px solid ${isActive ? `rgba(${rgb},0.2)` : "rgba(255,255,255,0.06)"}`,
+                        cursor: "pointer",
+                        transition: "all 200ms ease",
+                      }}
+                    >
+                      {tag}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             {/* provider */}

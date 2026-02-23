@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
-  Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink, Star, Play, Pencil,
+  Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink, Star, Play, Pencil, Search,
 } from "lucide-react";
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
 import ContentUploadModal from "@/components/creator/ContentUploadModal";
@@ -855,79 +855,125 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               const showSection = hasContent || isOwner;
               if (!showSection) return null;
               const thumbSize = isMobile ? 120 : 140;
+              const [contentSearch, setContentSearch] = useState("");
+              const showSearch = contentItems.length >= 3;
+              const filteredItems = contentSearch.trim()
+                ? contentItems.filter((item: any) => {
+                    const q = contentSearch.trim().toLowerCase();
+                    // match hashtags
+                    if (item.hashtags) {
+                      const tags: string[] = Array.isArray(item.hashtags) ? item.hashtags : [];
+                      if (tags.some((t: string) => t.toLowerCase().includes(q))) return true;
+                    }
+                    // match title
+                    if (item.title && item.title.toLowerCase().includes(q)) return true;
+                    return false;
+                  })
+                : contentItems;
               return (
                 <div style={{ padding: isMobile ? "16px 20px 0" : "20px 36px 0" }}>
                   <div style={{ fontSize: 11, letterSpacing: 2, color: "#444", fontWeight: 500, marginBottom: 14 }}>
                     {isOwner ? "my content" : "recent content"}
                   </div>
+                  {showSearch && (
+                    <div className="relative" style={{ marginBottom: 12 }}>
+                      <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "#444" }} />
+                      <input
+                        value={contentSearch}
+                        onChange={(e) => setContentSearch(e.target.value)}
+                        placeholder="search content by tag..."
+                        style={{
+                          width: "100%", background: "#0A0A0A",
+                          border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12,
+                          padding: "8px 14px 8px 36px", fontSize: 12, color: "#fff",
+                          outline: "none", transition: "all 200ms ease",
+                        }}
+                        onFocus={(e) => {
+                          e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
+                          e.currentTarget.style.boxShadow = `0 0 8px rgba(${rgb},0.08)`;
+                        }}
+                        onBlur={(e) => {
+                          e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
+                          e.currentTarget.style.boxShadow = "none";
+                        }}
+                      />
+                    </div>
+                  )}
                   <div
                     className="flex"
                     style={{ gap: 10, overflowX: "auto", scrollbarWidth: "none" as any }}
                   >
                     <style>{`.csc::-webkit-scrollbar{display:none}`}</style>
-                    {contentItems.map((item: any, idx: number) => {
-                      const thumb = item.thumbnail_url || item.media_url;
-                      const isVideo = item.media_type === "video";
-                      return (
-                        <div
-                          key={item.id}
-                          className="group relative flex-shrink-0 overflow-hidden"
-                          style={{
-                            width: thumbSize, height: thumbSize, borderRadius: 14,
-                            background: "#111", border: "1px solid rgba(255,255,255,0.04)",
-                            cursor: "pointer", transition: "all 200ms ease",
-                          }}
-                          onClick={() => {
-                            if (isVideo && item.url) {
-                              window.open(item.url, "_blank", "noopener");
-                            } else {
-                              setLightboxIdx(idx);
-                            }
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = `rgba(${rgb},0.15)`;
-                            e.currentTarget.style.transform = "scale(1.02)";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
-                            e.currentTarget.style.transform = "scale(1)";
-                          }}
-                        >
-                          {thumb ? (
-                            <img src={thumb} alt={item.title || ""} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center" style={{ background: "#111" }}>
-                              <Play style={{ width: 28, height: 28, color: "#333" }} />
-                            </div>
-                          )}
-                          {isVideo && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="flex items-center justify-center rounded-full" style={{
-                                width: 36, height: 36, background: "rgba(0,0,0,0.7)",
-                                border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, paddingLeft: 2,
-                              }}>▶</div>
-                            </div>
-                          )}
-                          {isOwner && (
-                            <div
-                              className="absolute opacity-0 group-hover:opacity-100"
-                              style={{
-                                top: 8, right: 8, width: 28, height: 28, borderRadius: "50%",
-                                background: "rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.15)",
-                                display: "flex", alignItems: "center", justifyContent: "center",
-                                transition: "opacity 200ms ease", zIndex: 2,
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingContent(item);
-                              }}
-                            >
-                              <Pencil style={{ width: 14, height: 14, color: "#fff" }} />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
+                    {filteredItems.length === 0 && contentSearch.trim() ? (
+                      <div style={{ width: "100%", textAlign: "center", padding: "20px 0", fontSize: 12, color: "#555" }}>
+                        no content matches that tag
+                      </div>
+                    ) : (
+                      filteredItems.map((item: any, idx: number) => {
+                        const thumb = item.thumbnail_url || item.media_url;
+                        const isVideo = item.media_type === "video";
+                        const originalIdx = contentItems.indexOf(item);
+                        return (
+                          <div
+                            key={item.id}
+                            className="group relative flex-shrink-0 overflow-hidden"
+                            style={{
+                              width: thumbSize, height: thumbSize, borderRadius: 14,
+                              background: "#111", border: "1px solid rgba(255,255,255,0.04)",
+                              cursor: "pointer", transition: "all 200ms ease",
+                            }}
+                            onClick={() => {
+                              if (isVideo && item.url) {
+                                window.open(item.url, "_blank", "noopener");
+                              } else {
+                                setLightboxIdx(originalIdx);
+                              }
+                            }}
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.borderColor = `rgba(${rgb},0.15)`;
+                              e.currentTarget.style.transform = "scale(1.02)";
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
+                              e.currentTarget.style.transform = "scale(1)";
+                            }}
+                          >
+                            {thumb ? (
+                              <img src={thumb} alt={item.title || ""} className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center" style={{ background: "#111" }}>
+                                <Play style={{ width: 28, height: 28, color: "#333" }} />
+                              </div>
+                            )}
+                            {isVideo && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="flex items-center justify-center rounded-full" style={{
+                                  width: 36, height: 36, background: "rgba(0,0,0,0.7)",
+                                  border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, paddingLeft: 2,
+                                }}>▶</div>
+                              </div>
+                            )}
+                            {isOwner && (
+                              <div
+                                className="absolute opacity-0 group-hover:opacity-100"
+                                style={{
+                                  top: 8, right: 8, width: 28, height: 28, borderRadius: "50%",
+                                  background: "rgba(0,0,0,0.7)", border: "1px solid rgba(255,255,255,0.15)",
+                                  display: "flex", alignItems: "center", justifyContent: "center",
+                                  transition: "opacity 200ms ease", zIndex: 2,
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEditingContent(item);
+                                }}
+                              >
+                                <Pencil style={{ width: 14, height: 14, color: "#fff" }} />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    )}
                     {/* "+" button for owner */}
                     {isOwner && (
                       <div
