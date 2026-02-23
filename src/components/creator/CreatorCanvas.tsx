@@ -221,6 +221,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [editingContent, setEditingContent] = useState<any>(null);
+  const [contentSearch, setContentSearch] = useState("");
 
   /* editing ui */
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -855,7 +856,6 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               const showSection = hasContent || isOwner;
               if (!showSection) return null;
               const thumbSize = isMobile ? 120 : 140;
-              const [contentSearch, setContentSearch] = useState("");
               const showSearch = contentItems.length >= 3;
               const filteredItems = contentSearch.trim()
                 ? contentItems.filter((item: any) => {
