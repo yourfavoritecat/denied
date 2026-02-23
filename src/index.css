@@ -267,9 +267,9 @@
   }
 
   .glossy-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid transparent;
-    border-image: var(--glossy-border) 1;
+    background: hsl(var(--card));
+    border: 1px solid rgba(255,255,255,0.08);
+    border-top: 1px solid rgba(255,255,255,0.12);
     border-radius: var(--radius);
     box-shadow: var(--shadow-md), 0 8px 32px rgba(59,240,122,0.04);
     @apply transition-all duration-300 ease-out;
@@ -277,7 +277,8 @@
   .glossy-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-lg), 0 8px 32px rgba(59,240,122,0.1);
-    border-image: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.06) 100%) 1;
+    border-color: rgba(59,240,122,0.15);
+    border-top-color: rgba(255,255,255,0.18);
   }
 
   .glossy-border {

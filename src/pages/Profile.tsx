@@ -61,7 +61,7 @@ const ProfilePage = () => {
       <main>
         <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
           {/* Profile Header */}
-          <Card className="mb-8 shadow-elevated border-border/50">
+          <Card className="mb-8 glossy-card">
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <AvatarUpload size="lg" />
@@ -127,7 +127,7 @@ const ProfilePage = () => {
             <TabsContent value="saved"><SavedProvidersTab /></TabsContent>
             <TabsContent value="trips"><TripsTab /></TabsContent>
             <TabsContent value="security">
-              <Card className="shadow-elevated border-border/50">
+              <Card className="glossy-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Shield className="w-5 h-5" />
