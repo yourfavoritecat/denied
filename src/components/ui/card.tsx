@@ -6,29 +6,29 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
   <div
     ref={ref}
     className={cn(
-      "rounded-2xl text-card-foreground glossy-border transition-all duration-200 ease hover:-translate-y-0.5",
+      "rounded-xl text-card-foreground glossy-border transition-all duration-200 ease hover:-translate-y-0.5",
       className
     )}
     style={{
-      background: 'rgba(80,255,144,0.05)',
-      border: '1px solid rgba(80,255,144,0.1)',
+      background: 'rgba(59,240,122,0.05)',
+      border: '1px solid rgba(59,240,122,0.1)',
       borderTop: '1px solid rgba(255,255,255,0.1)',
-      boxShadow: '0 0 20px rgba(80,255,144,0.04)',
+      boxShadow: '0 0 20px rgba(59,240,122,0.04)',
       backdropFilter: 'blur(10px)',
       WebkitBackdropFilter: 'blur(10px)',
       ...style,
     }}
     onMouseEnter={(e) => {
       const el = e.currentTarget;
-      el.style.borderColor = 'rgba(80,255,144,0.2)';
-      el.style.boxShadow = '0 0 20px rgba(80,255,144,0.3), 0 0 40px rgba(80,255,144,0.15), 0 0 60px rgba(80,255,144,0.05)';
-      el.style.background = 'rgba(80,255,144,0.08)';
+      el.style.borderColor = 'rgba(59,240,122,0.2)';
+      el.style.boxShadow = '0 0 20px rgba(59,240,122,0.3), 0 0 40px rgba(59,240,122,0.15), 0 0 60px rgba(59,240,122,0.05)';
+      el.style.background = 'rgba(59,240,122,0.08)';
     }}
     onMouseLeave={(e) => {
       const el = e.currentTarget;
-      el.style.borderColor = 'rgba(80,255,144,0.1)';
-      el.style.boxShadow = '0 0 20px rgba(80,255,144,0.04)';
-      el.style.background = 'rgba(80,255,144,0.05)';
+      el.style.borderColor = 'rgba(59,240,122,0.1)';
+      el.style.boxShadow = '0 0 20px rgba(59,240,122,0.04)';
+      el.style.background = 'rgba(59,240,122,0.05)';
     }}
     {...props}
   />

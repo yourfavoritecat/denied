@@ -91,7 +91,7 @@ const Launch = () => {
         {/* Logo with soft neon glow behind it */}
         <div className="relative mb-2">
           {/* Neon green glow blob behind logo */}
-          <div className="absolute inset-0 -z-10" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 60%, rgba(80,255,144,0.13) 0%, transparent 70%)', filter: 'blur(24px)' }} />
+          <div className="absolute inset-0 -z-10" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 60%, rgba(59,240,122,0.13) 0%, transparent 70%)', filter: 'blur(24px)' }} />
           <img
             src={logo}
             alt="Denied"
@@ -111,10 +111,10 @@ const Launch = () => {
         </p>
 
         {/* Divider */}
-        <div className="mb-6" style={{ width: '200px', height: '1px', background: 'rgba(80,255,144,0.20)' }} />
+        <div className="mb-6" style={{ width: '200px', height: '1px', background: 'rgba(59,240,122,0.20)' }} />
 
         {/* CTA line — peach, draws the eye */}
-        <p className="text-base md:text-lg font-bold mb-8" style={{ color: "#FF8C69" }}>
+        <p className="text-base md:text-lg font-bold mb-8" style={{ color: "#FF6B4A" }}>
           be the first to know when we launch.
         </p>
 
@@ -125,7 +125,7 @@ const Launch = () => {
             placeholder="enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="h-12 flex-1 rounded-full text-white placeholder:text-white/50 shadow-none border focus-visible:ring-2 focus-visible:ring-[#50FF90]/60 focus-visible:border-[#50FF90]/50"
+            className="h-12 flex-1 rounded-full text-white placeholder:text-white/50 shadow-none border focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:border-primary/50"
             style={{ background: 'rgba(0,0,0,0.4)', borderColor: 'rgba(255,255,255,0.15)' }}
             disabled={isLoading}
           />
@@ -133,7 +133,7 @@ const Launch = () => {
             type="submit"
             size="lg"
             className="h-12 px-8 whitespace-nowrap"
-            style={{ background: '#50FF90', color: '#1a1714', fontWeight: 800, fontSize: '15px' }}
+            style={{ background: '#3BF07A', color: '#0A0A0A', fontWeight: 800, fontSize: '15px' }}
             disabled={isLoading}
           >
             {isLoading ? "joining..." : "join the waitlist"}
@@ -154,7 +154,7 @@ const Launch = () => {
               rel="noopener noreferrer"
               className="transition-all duration-200 bg-white/5 rounded-xl w-10 h-10 flex items-center justify-center hover:bg-white/10"
               style={{ color: 'rgba(255,255,255,0.4)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#50FF90')}
+              onMouseEnter={e => (e.currentTarget.style.color = '#3BF07A')}
               onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.4)')}
             >
               {icon}

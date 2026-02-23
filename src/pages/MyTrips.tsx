@@ -100,10 +100,6 @@ const providerLabel = (slug: string) => {
 };
 
 /* ─── Card styles ─── */
-const glassCard = {
-  background: "rgba(255,255,255,0.03)",
-  border: "1px solid rgba(255,255,255,0.08)",
-} as const;
 
 /* ─── Trip Brief Card ─── */
 const TripBriefCard = ({
@@ -120,7 +116,7 @@ const TripBriefCard = ({
   const briefQuotes = quoteRequests.filter((q) => q.trip_brief_id === brief.id);
 
   return (
-    <div className="rounded-2xl p-5 space-y-4" style={glassCard}>
+    <div className="glossy-card rounded-xl p-5 space-y-4">
       <div className="flex items-start justify-between">
         <div className="space-y-1">
           <h3 className="font-bold text-lg">{brief.trip_name}</h3>
@@ -217,7 +213,7 @@ const BookingCard = ({ booking }: { booking: Booking }) => {
 
   return (
     <Link to={`/booking/${booking.id}`}>
-      <div className="rounded-2xl p-5 hover:bg-white/5 transition-colors cursor-pointer" style={glassCard}>
+      <div className="glossy-card rounded-xl p-5 hover:bg-white/5 transition-colors cursor-pointer">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1 min-w-0 pr-3">
             <h3 className="font-bold">{providerLabel(booking.provider_slug)}</h3>

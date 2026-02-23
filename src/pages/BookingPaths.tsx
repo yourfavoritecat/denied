@@ -165,7 +165,7 @@ const BookingPaths = () => {
             </div>
 
             {/* Direct Card */}
-            <div className="group relative bg-card border border-border rounded-2xl p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(80,255,144,0.25),0_0_0_1px_rgba(80,255,144,0.2)] cursor-default overflow-hidden">
+            <div className="group relative glossy-card rounded-xl p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(59,240,122,0.25),0_0_0_1px_rgba(59,240,122,0.2)] cursor-default overflow-hidden">
               {/* Colored top border on hover */}
               <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/80 to-primary rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 

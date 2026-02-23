@@ -65,7 +65,7 @@ const About = () => {
 
           {/* Overlaid text */}
           <div className="relative z-10 flex flex-col justify-end h-full max-w-[960px] mx-auto px-4 pb-4">
-            <h1 className="text-2xl font-bold mb-2" style={{ color: "#50FF90" }}>
+            <h1 className="text-2xl font-bold mb-2 text-primary">
               say yes, because health insurance said no
             </h1>
           </div>
@@ -88,8 +88,8 @@ const About = () => {
         <div className="max-w-[960px] mx-auto px-4 pb-4">
           <div className="grid grid-cols-3 gap-4">
             {steps.map((step) => (
-              <div key={step.title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
-                <step.icon className="w-5 h-5 mx-auto mb-2" style={{ color: "#50FF90" }} />
+              <div key={step.title} className="glossy-card rounded-xl p-4 text-center">
+                <step.icon className="w-5 h-5 mx-auto mb-2 text-primary" />
                 <h3 className="text-sm font-semibold text-white mb-1">{step.title}</h3>
                 <p className="text-xs text-white/50 leading-snug">{step.desc}</p>
               </div>
