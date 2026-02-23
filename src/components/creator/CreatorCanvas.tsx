@@ -855,7 +855,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               const isOwner = !!(user && userId === user.id);
               const showSection = hasContent || isOwner;
               if (!showSection) return null;
-              const thumbSize = isMobile ? 120 : 140;
+              const thumbSize = 140;
               const showSearch = contentItems.length >= 3;
               const filteredItems = contentSearch.trim()
                 ? contentItems.filter((item: any) => {
@@ -939,12 +939,16 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                             }}
                           >
                             {thumb ? (
-                              <img src={thumb} alt={item.title || ""} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center" style={{ background: "#111" }}>
-                                <Play style={{ width: 28, height: 28, color: "#333" }} />
-                              </div>
-                            )}
+                              <img
+                                src={thumb}
+                                alt={item.title || ""}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.parentElement!.querySelector('.thumb-fallback')?.classList.remove('hidden'); }}
+                              />
+                            ) : null}
+                            <div className={`thumb-fallback w-full h-full flex items-center justify-center absolute inset-0 ${thumb ? 'hidden' : ''}`} style={{ background: "#111" }}>
+                              {isVideo ? <Play style={{ width: 28, height: 28, color: "#333" }} /> : <Camera style={{ width: 28, height: 28, color: "#333" }} />}
+                            </div>
                             {isVideo && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="flex items-center justify-center rounded-full" style={{
@@ -1144,9 +1148,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                                 <div
                                   className="relative overflow-hidden transition-all duration-200"
                                   style={{
-                                    width: item.data.media_type === "video" ? 160 : 90,
-                                    height: item.data.media_type === "video" ? 90 : 90,
-                                    borderRadius: 10, background: "#111",
+                                    width: 140, height: 140,
+                                    borderRadius: 14, background: "#111",
                                     border: "1px solid rgba(255,255,255,0.05)",
                                   }}
                                   onMouseEnter={(e) => {
@@ -1158,7 +1161,19 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                                     e.currentTarget.style.boxShadow = "none";
                                   }}
                                 >
-                                  <img src={item.data.media_url} alt="" className="w-full h-full object-cover" />
+                                  {(item.data.thumbnail_url || item.data.media_url) ? (
+                                    <img
+                                      src={item.data.thumbnail_url || item.data.media_url}
+                                      alt=""
+                                      className="w-full h-full object-cover"
+                                      onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.parentElement!.querySelector('.feed-thumb-fallback')?.classList.remove('hidden'); }}
+                                    />
+                                  ) : null}
+                                  <div className={`feed-thumb-fallback w-full h-full flex items-center justify-center absolute inset-0 ${(item.data.thumbnail_url || item.data.media_url) ? 'hidden' : ''}`} style={{ background: "#111" }}>
+                                    {item.data.media_type === "video"
+                                      ? <Play style={{ width: 28, height: 28, color: "#333" }} />
+                                      : <Camera style={{ width: 28, height: 28, color: "#333" }} />}
+                                  </div>
                                   {item.data.media_type === "video" && (
                                     <div className="absolute inset-0 flex items-center justify-center">
                                       <div
