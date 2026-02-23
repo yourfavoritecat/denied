@@ -331,17 +331,17 @@ const MyTripsPage = () => {
             <div className="text-center py-16 text-white/40">Loading your trips…</div>
           ) : (
             <Tabs defaultValue="planning" className="space-y-6">
-              <TabsList className="flex flex-wrap h-auto gap-1 bg-white/5 p-1 rounded-xl">
-                <TabsTrigger value="planning" className="data-[state=active]:bg-white/10 rounded-lg text-sm">
+              <TabsList className="flex flex-wrap h-auto gap-1 bg-card p-1 rounded-xl border border-white/8">
+                <TabsTrigger value="planning" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg text-sm">
                   Planning {planningCount > 0 && <span className="ml-1 text-white/40">({planningCount})</span>}
                 </TabsTrigger>
-                <TabsTrigger value="active" className="data-[state=active]:bg-white/10 rounded-lg text-sm">
+                <TabsTrigger value="active" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg text-sm">
                   Active {activeCount > 0 && <span className="ml-1 text-white/40">({activeCount})</span>}
                 </TabsTrigger>
-                <TabsTrigger value="confirmed" className="data-[state=active]:bg-white/10 rounded-lg text-sm">
+                <TabsTrigger value="confirmed" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg text-sm">
                   Confirmed {confirmedBookings.length > 0 && <span className="ml-1 text-white/40">({confirmedBookings.length})</span>}
                 </TabsTrigger>
-                <TabsTrigger value="completed" className="data-[state=active]:bg-white/10 rounded-lg text-sm">
+                <TabsTrigger value="completed" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg text-sm">
                   Completed {completedBookings.length > 0 && <span className="ml-1 text-white/40">({completedBookings.length})</span>}
                 </TabsTrigger>
               </TabsList>
