@@ -835,6 +835,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               style={{
                 gap: isMobile ? 20 : 36,
                 padding: isMobile ? "18px 20px" : "18px 36px",
+                marginTop: 12,
                 borderTop: `1px solid ${tc.statsBorder}`,
                 borderBottom: `1px solid ${tc.statsBorder}`,
                 background: tc.statsBg,
@@ -942,18 +943,18 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className="transition-colors duration-200"
                     style={{
                       padding: isMobile ? "10px 12px" : "12px 20px",
                       fontSize: isMobile ? 11 : 12,
                       letterSpacing: 1.5,
-                      color: activeTab === tab ? accent : "#444",
-                      borderBottom: `2px solid ${activeTab === tab ? accent : "transparent"}`,
+                      color: activeTab === tab ? accent : "rgba(255,255,255,0.55)",
+                      borderBottom: activeTab === tab ? `2px solid ${accent}` : "2px solid transparent",
+                      transition: "color 200ms ease",
                       cursor: "pointer",
                       background: "none",
                     }}
-                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#888"; }}
-                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#444"; }}
+                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "rgba(255,255,255,0.75)"; }}
+                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
                   >
                     {tab}
                   </button>

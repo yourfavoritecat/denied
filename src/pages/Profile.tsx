@@ -65,20 +65,11 @@ const ProfilePage = () => {
                 <div className="text-center sm:text-left flex-1">
                   <div className="flex items-center gap-3 justify-center sm:justify-start mb-1">
                     <h1 className="text-2xl font-bold">{displayName}</h1>
-                    <Badge variant="outline" className="text-xs">private view</Badge>
                   </div>
                   <p className="text-muted-foreground mb-3">{user?.email}</p>
                   <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                     <Badge variant="secondary">member since {new Date(user?.created_at || "").getFullYear()}</Badge>
                     <UserTrustBadge tier={trustTier} size="md" />
-                    {(profile as any)?.username && (
-                      <Button variant="outline" size="sm" asChild className="gap-1.5">
-                        <Link to={`/user/${(profile as any).username}`}>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                          view public profile
-                        </Link>
-                      </Button>
-                    )}
                     {creatorHandle && (
                       <Button variant="secondary" size="sm" asChild className="gap-1.5">
                         <Link to={`/${creatorHandle}`}>
