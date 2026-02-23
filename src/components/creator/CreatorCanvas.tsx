@@ -719,8 +719,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     style={{
                       width: isMobile ? 80 : 96,
                       height: isMobile ? 80 : 96,
-                      border: `2px solid rgba(${rgb},0.15)`,
-                      boxShadow: `0 0 24px rgba(${rgb},0.08)`,
+                      border: `3px solid ${accent}`,
+                      boxShadow: `0 0 20px rgba(${rgb},0.3), 0 0 40px rgba(${rgb},0.1)`,
                     }}
                   >
                     {avatarUrl ? (
@@ -738,15 +738,16 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   className="inline-flex items-center gap-1.5 rounded-full mb-3"
                   style={{
                     padding: "6px 16px",
-                    background: tc.badgeBg,
-                    border: `1px solid ${tc.badgeBorder}`,
+                    background: accent,
+                    border: "none",
+                    boxShadow: `0 0 12px rgba(${rgb},0.4)`,
                   }}
                 >
                   <div
                     className="rounded-full flex-shrink-0"
-                    style={{ width: 6, height: 6, background: accent, boxShadow: `0 0 10px ${accent}` }}
+                    style={{ width: 6, height: 6, background: "#0A0A0A", boxShadow: "none" }}
                   />
-                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: accent, fontWeight: 500 }}>
+                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: "#0A0A0A", fontWeight: 700 }}>
                     denied verified creator
                   </span>
                 </div>
@@ -851,7 +852,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 { label: "helpful", value: stats.helpful },
               ].map((s) => (
                 <div key={s.label} className="text-center">
-                  <div className="font-bold" style={{ color: "#FFFFFF", fontSize: isMobile ? 18 : 20 }}>
+                  <div className="font-bold" style={{ color: accent, fontSize: isMobile ? 18 : 20 }}>
                     {s.value}
                   </div>
                   <div style={{ fontSize: isMobile ? 9 : 10, letterSpacing: 1, color: "rgba(255,255,255,0.45)" }}>
@@ -944,17 +945,20 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     style={{
-                      padding: isMobile ? "10px 12px" : "12px 20px",
+                      padding: "8px 18px",
                       fontSize: isMobile ? 11 : 12,
                       letterSpacing: 1.5,
-                      color: activeTab === tab ? accent : "rgba(255,255,255,0.55)",
-                      borderBottom: activeTab === tab ? `2px solid ${accent}` : "2px solid transparent",
+                      color: activeTab === tab ? "#0A0A0A" : "#444",
+                      borderBottom: "none",
+                      borderRadius: activeTab === tab ? 9999 : 0,
+                      background: activeTab === tab ? accent : "transparent",
+                      fontWeight: activeTab === tab ? 600 : 400,
+                      boxShadow: activeTab === tab ? `0 0 12px rgba(${rgb},0.35)` : "none",
                       transition: "color 200ms ease",
                       cursor: "pointer",
-                      background: "none",
                     }}
-                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "rgba(255,255,255,0.75)"; }}
-                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
+                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#888"; }}
+                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#444"; }}
                   >
                     {tab}
                   </button>
