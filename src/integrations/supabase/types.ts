@@ -325,34 +325,46 @@ export type Database = {
           caption: string | null
           created_at: string | null
           creator_id: string
+          hashtags: Json | null
           id: string
           media_type: string
           media_url: string
           procedure_tags: string[] | null
           provider_slug: string | null
           sort_order: number | null
+          thumbnail_url: string | null
+          title: string | null
+          url: string | null
         }
         Insert: {
           caption?: string | null
           created_at?: string | null
           creator_id: string
+          hashtags?: Json | null
           id?: string
           media_type: string
           media_url: string
           procedure_tags?: string[] | null
           provider_slug?: string | null
           sort_order?: number | null
+          thumbnail_url?: string | null
+          title?: string | null
+          url?: string | null
         }
         Update: {
           caption?: string | null
           created_at?: string | null
           creator_id?: string
+          hashtags?: Json | null
           id?: string
           media_type?: string
           media_url?: string
           procedure_tags?: string[] | null
           provider_slug?: string | null
           sort_order?: number | null
+          thumbnail_url?: string | null
+          title?: string | null
+          url?: string | null
         }
         Relationships: [
           {

@@ -9,9 +9,10 @@ import { Switch } from "@/components/ui/switch";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import {
-  Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink, Star,
+  Camera, Instagram, Globe, Check, X, Copy, Plus, ExternalLink, Star, Play,
 } from "lucide-react";
 import AvatarCropModal from "@/components/profile/AvatarCropModal";
+import ContentUploadModal from "@/components/creator/ContentUploadModal";
 import Navbar from "@/components/layout/Navbar";
 
 /* ── custom svg icons ── */
@@ -216,6 +217,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
   const [contentItems, setContentItems] = useState<any[]>([]);
   const [feedReviews, setFeedReviews] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("feed");
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
   /* editing ui */
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -291,6 +294,20 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     });
     setLoading(false);
     setTimeout(() => { hasLoadedRef.current = true; }, 100);
+  };
+
+  const refetchContent = async () => {
+    if (!profileId) return;
+    const { data } = await supabase
+      .from("creator_content")
+      .select("*")
+      .eq("creator_id", profileId)
+      .order("created_at", { ascending: false })
+      .limit(10);
+    setContentItems(data || []);
+    // also update post count
+    const { count } = await supabase.from("creator_content").select("id", { count: "exact", head: true }).eq("creator_id", profileId);
+    setStats((s) => ({ ...s, posts: count || 0 }));
   };
 
   /* ── fetch public view data ── */
@@ -830,6 +847,114 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               </div>
             </div>
 
+            {/* ── content showcase (between social icons and stats) ── */}
+            {(() => {
+              const isOwner = !!(user && userId === user.id);
+              const showSection = hasContent || isOwner;
+              if (!showSection) return null;
+              const thumbSize = isMobile ? 120 : 140;
+              return (
+                <div style={{ padding: isMobile ? "16px 20px 0" : "20px 36px 0" }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: "#444", fontWeight: 500, marginBottom: 14 }}>
+                    {isOwner ? "my content" : "recent content"}
+                  </div>
+                  <div
+                    className="flex"
+                    style={{ gap: 10, overflowX: "auto", scrollbarWidth: "none" as any }}
+                  >
+                    <style>{`.csc::-webkit-scrollbar{display:none}`}</style>
+                    {contentItems.map((item: any, idx: number) => {
+                      const thumb = item.thumbnail_url || item.media_url;
+                      const isVideo = item.media_type === "video";
+                      const hashtags: string[] = Array.isArray(item.hashtags) ? item.hashtags : [];
+                      return (
+                        <div
+                          key={item.id}
+                          className="relative flex-shrink-0 overflow-hidden"
+                          style={{
+                            width: thumbSize, height: thumbSize, borderRadius: 14,
+                            background: "#111", border: "1px solid rgba(255,255,255,0.04)",
+                            cursor: "pointer", transition: "all 200ms ease",
+                          }}
+                          onClick={() => {
+                            if (isVideo && item.url) {
+                              window.open(item.url, "_blank", "noopener");
+                            } else {
+                              setLightboxIdx(idx);
+                            }
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = `rgba(${rgb},0.15)`;
+                            e.currentTarget.style.transform = "scale(1.02)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
+                            e.currentTarget.style.transform = "scale(1)";
+                          }}
+                        >
+                          {thumb ? (
+                            <img src={thumb} alt={item.title || ""} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center" style={{ background: "#111" }}>
+                              <Play style={{ width: 28, height: 28, color: "#333" }} />
+                            </div>
+                          )}
+                          {isVideo && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="flex items-center justify-center rounded-full" style={{
+                                width: 36, height: 36, background: "rgba(0,0,0,0.7)",
+                                border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, paddingLeft: 2,
+                              }}>▶</div>
+                            </div>
+                          )}
+                          {hashtags.length > 0 && (
+                            <div className="absolute top-0 left-0 flex gap-0.5" style={{ margin: 6 }}>
+                              {hashtags.slice(0, 2).map((h) => (
+                                <span key={h} style={{
+                                  background: "rgba(0,0,0,0.6)", padding: "2px 6px", borderRadius: 6,
+                                  fontSize: 9, color: accent,
+                                }}>#{h}</span>
+                              ))}
+                            </div>
+                          )}
+                          {(item.title || item.caption) && (
+                            <div className="absolute bottom-1.5 left-1.5" style={{
+                              background: "rgba(0,0,0,0.65)", padding: "3px 10px", borderRadius: 8,
+                              fontSize: 10, color: "#ccc", backdropFilter: "blur(4px)",
+                              maxWidth: "80%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
+                            }}>
+                              {(item.title || item.caption || "").slice(0, 20)}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {/* "+" button for owner */}
+                    {isOwner && (
+                      <div
+                        className="flex items-center justify-center flex-shrink-0"
+                        style={{
+                          width: thumbSize, height: thumbSize, borderRadius: 14,
+                          border: `2px dashed rgba(${rgb},0.25)`, background: "transparent",
+                          cursor: "pointer", transition: "all 200ms ease",
+                        }}
+                        onClick={() => setUploadModalOpen(true)}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
+                          e.currentTarget.style.background = `rgba(${rgb},0.03)`;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
+                          e.currentTarget.style.background = "transparent";
+                        }}
+                      >
+                        <Plus style={{ width: 28, height: 28, color: `rgba(${rgb},0.4)` }} />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
             {/* ── section 2: stats bar ── */}
             <div
               className="flex items-center justify-center"
@@ -861,64 +986,6 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 </div>
               ))}
             </div>
-
-            {/* ── section 3: content showcase — wrapped in glossy-card ── */}
-            {hasContent && (
-              <div style={{ margin: isMobile ? "12px 8px 0" : "16px 16px 0", ...glossyCard, padding: isMobile ? 20 : 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: 2, color: "#444", fontWeight: 500, marginBottom: 14 }}>
-                  recent content
-                </div>
-                <div
-                  className="flex gap-2.5 overflow-x-auto"
-                  style={{ scrollbarWidth: "none" }}
-                >
-                  <style>{`.content-scroll::-webkit-scrollbar { display: none; }`}</style>
-                  {contentItems.map((item: any) => (
-                    <div
-                      key={item.id}
-                      className="relative flex-shrink-0 overflow-hidden group"
-                      style={{
-                        width: isMobile ? 120 : 140,
-                        height: isMobile ? 120 : 140,
-                        borderRadius: 14,
-                        background: "#111",
-                        border: "1px solid rgba(255,255,255,0.04)",
-                        transition: "all 300ms ease",
-                      }}
-                      onMouseEnter={thumbHover}
-                      onMouseLeave={thumbLeave}
-                    >
-                      <img src={item.media_url} alt={item.caption || "content"} className="w-full h-full object-cover" />
-                      {item.media_type === "video" && (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div
-                            className="flex items-center justify-center rounded-full"
-                            style={{
-                              width: 36, height: 36, background: "rgba(0,0,0,0.7)",
-                              border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, paddingLeft: 2,
-                            }}
-                          >
-                            ▶
-                          </div>
-                        </div>
-                      )}
-                      {item.caption && (
-                        <div
-                          className="absolute bottom-1.5 left-1.5"
-                          style={{
-                            background: "rgba(0,0,0,0.65)", padding: "3px 10px", borderRadius: 8,
-                            fontSize: 10, color: "#ccc", backdropFilter: "blur(4px)",
-                            maxWidth: "80%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                          }}
-                        >
-                          {item.caption.slice(0, 20)}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* ── section 4: divider ── */}
             <div
@@ -1259,6 +1326,82 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             <div style={{ height: 80 }} />
           </div>
         </div>
+
+        {/* ── photo lightbox ── */}
+        {lightboxIdx !== null && (() => {
+          const item = contentItems[lightboxIdx];
+          if (!item) return null;
+          const hashtags: string[] = Array.isArray(item.hashtags) ? item.hashtags : [];
+          return (
+            <div
+              className="fixed inset-0 z-50 flex flex-col items-center justify-center"
+              style={{ background: "rgba(0,0,0,0.9)" }}
+              onClick={() => setLightboxIdx(null)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setLightboxIdx(null);
+                if (e.key === "ArrowRight" && lightboxIdx < contentItems.length - 1) setLightboxIdx(lightboxIdx + 1);
+                if (e.key === "ArrowLeft" && lightboxIdx > 0) setLightboxIdx(lightboxIdx - 1);
+              }}
+              tabIndex={0}
+            >
+              <img
+                src={item.thumbnail_url || item.media_url}
+                alt={item.title || ""}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  maxWidth: "90vw", maxHeight: "85vh", objectFit: "contain", borderRadius: 12,
+                }}
+              />
+              {item.title && (
+                <p style={{ color: "#fff", fontSize: 14, marginTop: 12, textAlign: "center" }}>{item.title}</p>
+              )}
+              {hashtags.length > 0 && (
+                <div className="flex gap-1.5 mt-2">
+                  {hashtags.map((h: string) => (
+                    <span key={h} style={{
+                      padding: "3px 10px", borderRadius: 9999, fontSize: 11,
+                      background: `rgba(${rgb},0.1)`, color: accent, border: `1px solid rgba(${rgb},0.12)`,
+                    }}>#{h}</span>
+                  ))}
+                </div>
+              )}
+              {/* nav arrows */}
+              {lightboxIdx > 0 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx - 1); }}
+                  style={{
+                    position: "fixed", left: 20, top: "50%", transform: "translateY(-50%)",
+                    background: "rgba(255,255,255,0.1)", border: "none", color: "#fff",
+                    width: 40, height: 40, borderRadius: 9999, fontSize: 20, cursor: "pointer",
+                  }}
+                >‹</button>
+              )}
+              {lightboxIdx < contentItems.length - 1 && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx + 1); }}
+                  style={{
+                    position: "fixed", right: 20, top: "50%", transform: "translateY(-50%)",
+                    background: "rgba(255,255,255,0.1)", border: "none", color: "#fff",
+                    width: 40, height: 40, borderRadius: 9999, fontSize: 20, cursor: "pointer",
+                  }}
+                >›</button>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* upload modal */}
+        {profileId && userId && (
+          <ContentUploadModal
+            open={uploadModalOpen}
+            onClose={() => setUploadModalOpen(false)}
+            creatorId={profileId}
+            userId={userId}
+            accent={accent}
+            rgb={rgb}
+            onSuccess={refetchContent}
+          />
+        )}
       </div>
     );
   }
