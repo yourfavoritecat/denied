@@ -53,7 +53,7 @@ const About = () => {
     <div className="min-h-screen bg-background flex flex-col">
       <Navbar />
 
-      <main className="flex-1 flex flex-col pt-16">
+      <main className="flex-1 flex flex-col pt-24">
         {/* Hero with background image */}
         <div className="relative w-full" style={{ height: 250 }}>
           <img
@@ -64,7 +64,7 @@ const About = () => {
           <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 60%, hsl(var(--background)) 100%)" }} />
 
           {/* Overlaid text */}
-          <div className="relative z-10 flex flex-col justify-end h-full max-w-2xl mx-auto px-6 pb-4">
+          <div className="relative z-10 flex flex-col justify-end h-full max-w-[960px] mx-auto px-4 pb-4">
             <h1 className="text-2xl font-bold mb-2" style={{ color: "#50FF90" }}>
               say yes, because health insurance said no
             </h1>
@@ -72,7 +72,7 @@ const About = () => {
         </div>
 
         {/* Body copy */}
-        <div className="max-w-2xl mx-auto px-6 py-5 space-y-3">
+        <div className="max-w-[960px] mx-auto px-4 py-5 space-y-3">
           <p className="text-sm text-white/70 leading-relaxed">
             denied.care is a marketplace for people who've been priced out of healthcare in the us. we connect you with vetted dental and medical clinics abroad. real providers, transparent pricing, zero guesswork and saving up to 75% on procedures your insurance denied or barely cover.
           </p>
@@ -85,7 +85,7 @@ const About = () => {
         </div>
 
         {/* How it works */}
-        <div className="max-w-2xl mx-auto px-6 pb-4">
+        <div className="max-w-[960px] mx-auto px-4 pb-4">
           <div className="grid grid-cols-3 gap-4">
             {steps.map((step) => (
               <div key={step.title} className="rounded-xl border border-white/10 bg-white/[0.03] p-4 text-center">
@@ -98,7 +98,7 @@ const About = () => {
         </div>
 
         {/* Waitlist CTA */}
-        <div className="max-w-2xl mx-auto px-6 pb-8">
+        <div className="max-w-[960px] mx-auto px-4 pb-16">
           <p className="text-xs text-white/50 text-center mb-3">be the first to know when we launch</p>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto w-full">
             <Input

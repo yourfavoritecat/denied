@@ -122,8 +122,8 @@ const Apply = () => {
   }
 
   return (
-    <div className="min-h-screen py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen">
+      <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
         <div className="flex justify-center mb-8">
           <Link to="/">
             <img src={logo} alt="Denied" className="h-10" style={{ mixBlendMode: 'screen' }} />

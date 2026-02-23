@@ -4,7 +4,7 @@ import Footer from "@/components/landing/Footer";
 const Terms = () => (
   <div className="min-h-screen bg-background flex flex-col">
     <Navbar />
-    <main className="flex-1 pt-24 pb-12 max-w-2xl mx-auto px-6">
+    <main className="flex-1 max-w-[960px] mx-auto px-4 pt-24 pb-16">
       <h1 className="text-2xl font-bold text-white mb-1">terms of service</h1>
       <p className="text-xs text-white/40 mb-6">effective date: february 17, 2026</p>
       <div className="space-y-4 text-sm text-white/70 leading-relaxed">

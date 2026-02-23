@@ -112,8 +112,8 @@ const ProviderOnboarding = () => {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="pt-20 pb-16">
-        <div className="container mx-auto px-4 max-w-5xl">
+      <main>
+        <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

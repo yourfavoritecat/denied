@@ -388,7 +388,8 @@ const ProviderDashboard = () => {
         providerName={providerName}
       />
 
-      <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
         {section === "home" && (
           <ProviderHome
             providerName={providerName}
@@ -401,6 +402,7 @@ const ProviderDashboard = () => {
           <CheckInScanner providerSlug={providerSlug} />
         )}
         {section !== "home" && section !== "checkin" && renderBookingList(section)}
+        </div>
       </main>
 
       {/* Quote Dialog */}
