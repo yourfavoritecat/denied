@@ -3,7 +3,7 @@ import Footer from "@/components/landing/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Settings, Heart, Calendar, ShieldCheck, Camera, ClipboardList, Sparkles, Shield, KeyRound, Trash2 } from "lucide-react";
+import { Settings, Heart, Calendar, ShieldCheck, ClipboardList, Sparkles, Shield, KeyRound, Trash2, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,12 +13,12 @@ import VerifiedBadge, { isUserVerified } from "@/components/profile/VerifiedBadg
 import PatientHistoryTab from "@/components/profile/PatientHistoryTab";
 import SavedProvidersTab from "@/components/profile/SavedProvidersTab";
 import TripsTab from "@/components/profile/TripsTab";
-import ProfileFeedTab from "@/components/profile/ProfileFeedTab";
+import ReviewsTab from "@/components/profile/ReviewsTab";
 import AvatarUpload from "@/components/profile/AvatarUpload";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-const VALID_TABS = ["feed", "history", "settings", "verification", "saved", "trips", "security"];
+const VALID_TABS = ["reviews", "history", "settings", "verification", "saved", "trips", "security"];
 
 const ProfilePage = () => {
   const { user, profile } = useAuth();
@@ -28,16 +28,13 @@ const ProfilePage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const currentTab = VALID_TABS.includes(searchParams.get("tab") || "") 
-    ? searchParams.get("tab")! 
-    : "feed";
+  const rawTab = searchParams.get("tab") || "";
+  // Redirect legacy tab values
+  const currentTab = (rawTab === "feed" || rawTab === "my-journey")
+    ? "reviews"
+    : VALID_TABS.includes(rawTab) ? rawTab : "reviews";
 
   const handleTabChange = (value: string) => {
-    // If creator clicks "my journey", redirect to their public content tab
-    if (value === "feed" && creatorHandle) {
-      navigate(`/c/${creatorHandle}?tab=content`);
-      return;
-    }
     setSearchParams({ tab: value }, { replace: true });
   };
 
@@ -93,9 +90,9 @@ const ProfilePage = () => {
           {/* Tabbed Content */}
           <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
             <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1">
-              <TabsTrigger value="feed" className="flex items-center gap-1.5 text-xs sm:text-sm">
-                <Camera className="w-4 h-4" />
-                <span className="hidden sm:inline">my journey</span>
+              <TabsTrigger value="reviews" className="flex items-center gap-1.5 text-xs sm:text-sm">
+                <Star className="w-4 h-4" />
+                <span className="hidden sm:inline">reviews</span>
               </TabsTrigger>
               <TabsTrigger value="history" className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <ClipboardList className="w-4 h-4" />
@@ -123,7 +120,7 @@ const ProfilePage = () => {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="feed"><ProfileFeedTab /></TabsContent>
+            <TabsContent value="reviews"><ReviewsTab /></TabsContent>
             <TabsContent value="history"><PatientHistoryTab /></TabsContent>
             <TabsContent value="settings"><SettingsTab /></TabsContent>
             <TabsContent value="verification"><SocialVerificationSection /></TabsContent>
