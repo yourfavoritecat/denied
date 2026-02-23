@@ -12,9 +12,9 @@ const ViewAsBanner = () => {
   const label = labelMap[viewAs] || viewAs;
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-[110] bg-amber-500 text-black text-center text-xs font-semibold py-1 flex items-center justify-center gap-2">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[110] bg-amber-500 text-black text-xs font-semibold py-1.5 px-4 rounded-full flex items-center gap-2 shadow-lg">
       <Eye className="w-3 h-3" />
-      You are viewing the site as a {label}
+      Viewing as {label}
       <button
         onClick={() => setViewAs("admin")}
         className="underline hover:no-underline ml-1"
