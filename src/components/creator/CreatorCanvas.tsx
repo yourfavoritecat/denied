@@ -856,7 +856,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               const showSection = hasContent || isOwner;
               if (!showSection) return null;
               const thumbSize = 140;
-              const showSearch = contentItems.length >= 1;
+              const showSearch = contentItems.length >= 1 || isOwner;
               const filteredItems = contentSearch.trim()
                 ? contentItems.filter((item: any) => {
                     const q = contentSearch.trim().toLowerCase();
@@ -877,23 +877,23 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   </div>
                   {showSearch && (
                     <div className="relative" style={{ marginBottom: 12 }}>
-                      <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "#444" }} />
+                      <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: `rgba(${rgb}, 0.4)` }} />
                       <input
                         value={contentSearch}
                         onChange={(e) => setContentSearch(e.target.value)}
-                        placeholder="search content by tag..."
+                        placeholder="search"
                         style={{
                           width: "100%", background: "#0A0A0A",
-                          border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12,
+                          border: `1px solid rgba(${rgb}, 0.12)`, borderRadius: 12,
                           padding: "8px 14px 8px 36px", fontSize: 12, color: "#fff",
                           outline: "none", transition: "all 200ms ease",
                         }}
                         onFocus={(e) => {
-                          e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
-                          e.currentTarget.style.boxShadow = `0 0 8px rgba(${rgb},0.08)`;
+                          e.currentTarget.style.borderColor = `rgba(${rgb},0.4)`;
+                          e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.12)`;
                         }}
                         onBlur={(e) => {
-                          e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)";
+                          e.currentTarget.style.borderColor = `rgba(${rgb}, 0.12)`;
                           e.currentTarget.style.boxShadow = "none";
                         }}
                       />
