@@ -120,7 +120,7 @@ const BookingPaths = () => {
           <div className="max-w-[960px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
 
             {/* Concierge Card */}
-            <div className="group relative bg-card border border-border rounded-xl p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(255,140,105,0.25),0_0_0_1px_rgba(255,140,105,0.2)] cursor-default overflow-hidden">
+            <div className="group relative glossy-card rounded-xl p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(255,140,105,0.25),0_0_0_1px_rgba(255,140,105,0.2)] cursor-default overflow-hidden">
               {/* Colored top border on hover */}
               <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-secondary/80 to-secondary rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -167,7 +167,7 @@ const BookingPaths = () => {
             {/* Direct Card */}
             <div className="group relative glossy-card rounded-xl p-8 flex flex-col gap-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_48px_-8px_rgba(59,240,122,0.25),0_0_0_1px_rgba(59,240,122,0.2)] cursor-default overflow-hidden">
               {/* Colored top border on hover */}
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/80 to-primary rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/80 to-primary rounded-t-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
               <div className="flex items-start justify-between">
                 <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs font-semibold tracking-wider uppercase flex items-center gap-1.5">
@@ -240,7 +240,7 @@ const BookingPaths = () => {
                 <AccordionItem
                   key={i}
                   value={`faq-${i}`}
-                  className="bg-card border border-border rounded-xl px-5 data-[state=open]:border-primary/30"
+                  className="glossy-card rounded-xl px-5 data-[state=open]:border-primary/30"
                 >
                   <AccordionTrigger className="text-sm font-medium text-foreground hover:no-underline py-4">
                     {item.q}

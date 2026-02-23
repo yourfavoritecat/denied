@@ -89,7 +89,7 @@ const ProfilePage = () => {
 
           {/* Tabbed Content */}
           <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-            <TabsList className="flex flex-wrap h-auto gap-1 bg-muted p-1">
+            <TabsList className="flex flex-wrap h-auto gap-1 bg-card p-1 border border-white/8 rounded-xl">
               <TabsTrigger value="reviews" className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <Star className="w-4 h-4" />
                 <span className="hidden sm:inline">reviews</span>

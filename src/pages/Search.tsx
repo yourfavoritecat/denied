@@ -341,7 +341,7 @@ const SearchPage = () => {
                               ))}
                             </div>
                           )}
-                          <div className="border-t border-border/50 pt-3 flex items-center justify-between">
+                          <div className="border-t border-white/8 pt-3 flex items-center justify-between">
                             <div>
                               {provider.startingPrice > 0 ? (
                                 <>
