@@ -550,12 +550,76 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
     const tabs = ["feed", "reviews", "content", "favorite providers"];
 
+    /* glossy card style helper */
+    const glossyCard: React.CSSProperties = {
+      background: tc.cardGradient,
+      border: `1px solid ${tc.cardBorder}`,
+      borderRadius: isMobile ? 14 : 16,
+      boxShadow: tc.insetGlow,
+      transition: "all 300ms ease",
+    };
+
+    const glossyCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "translateY(-2px)";
+      e.currentTarget.style.borderColor = `rgba(${rgb},0.6)`;
+      e.currentTarget.style.boxShadow = `${tc.insetGlow}, 0 0 20px rgba(${rgb},0.1), 0 0 40px rgba(${rgb},0.05)`;
+    };
+    const glossyCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "translateY(0)";
+      e.currentTarget.style.borderColor = tc.cardBorder;
+      e.currentTarget.style.boxShadow = tc.insetGlow;
+    };
+
+    /* identity card hover */
+    const identityCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "translateY(-2px)";
+      e.currentTarget.style.borderColor = `rgba(${rgb},0.7)`;
+      e.currentTarget.style.boxShadow = `${tc.insetGlow}, 0 0 30px rgba(${rgb},0.15), 0 0 60px rgba(${rgb},0.08)`;
+    };
+    const identityCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.transform = "translateY(0)";
+      e.currentTarget.style.borderColor = tc.cardBorder;
+      e.currentTarget.style.boxShadow = tc.insetGlow;
+    };
+
+    /* stats bar hover */
+    const statsBarHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
+      e.currentTarget.style.boxShadow = `0 0 20px rgba(${rgb},0.1)`;
+    };
+    const statsBarLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.borderColor = tc.statsBorder;
+      e.currentTarget.style.boxShadow = "none";
+    };
+
+    /* content thumbnail hover */
+    const thumbHover = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
+      e.currentTarget.style.boxShadow = `0 0 15px rgba(${rgb},0.15)`;
+      e.currentTarget.style.transform = "scale(1.03)";
+    };
+    const thumbLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+      e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
+      e.currentTarget.style.boxShadow = "none";
+      e.currentTarget.style.transform = "scale(1)";
+    };
+
+    /* outer shell hover glow (1.5x intensified) */
+    const shellOuterGlowHover = `0 0 60px rgba(${rgb},0.3), 0 0 120px rgba(${rgb},0.15), 0 0 180px rgba(${rgb},0.08)`;
+
+
     /* ── build mixed feed timeline ── */
     type FeedItem = { type: "review" | "content" | "trip" | "joined"; date: string; data?: any };
     const feedItems: FeedItem[] = [];
+
     feedReviews.forEach((r: any) => {
       feedItems.push({ type: "review", date: r.created_at, data: r });
     });
+    contentItems.forEach((c: any) => {
+      feedItems.push({ type: "content", date: c.created_at, data: c });
+    });
+    // trips would come from bookings — we already have stats.trips count but not the data
+    // We'll add trip items if we fetched them
     if (createdAt) {
       feedItems.push({ type: "joined", date: createdAt });
     }
@@ -564,6 +628,18 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
       if (b.type === "joined") return -1;
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     });
+
+    /* ── derive favorite providers from reviews ── */
+    const providerReviewMap = new Map<string, { name: string; slug: string; count: number }>();
+    feedReviews.forEach((r: any) => {
+      const existing = providerReviewMap.get(r.provider_slug);
+      if (existing) {
+        existing.count++;
+      } else {
+        providerReviewMap.set(r.provider_slug, { name: r.provider_name, slug: r.provider_slug, count: 1 });
+      }
+    });
+    const favoriteProviders = Array.from(providerReviewMap.values());
 
     return (
       <div className="min-h-screen" style={{ background: "#060606" }}>
@@ -580,11 +656,14 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
           <div
             className="relative overflow-hidden"
             style={{
-              borderRadius: isMobile ? 0 : 16,
-              border: isMobile ? "none" : "1px solid rgba(255,107,74,0.06)",
-              boxShadow: isMobile ? "none" : "0 0 60px rgba(0,0,0,0.4)",
-              background: "#060606",
+              borderRadius: isMobile ? 0 : 20,
+              border: isMobile ? "none" : `1px solid ${tc.shellBorder}`,
+              boxShadow: isMobile ? "none" : tc.outerGlow,
+              background: tc.shellBg,
+              transition: "all 300ms ease",
             }}
+            onMouseEnter={(e) => { if (!isMobile) e.currentTarget.style.boxShadow = shellOuterGlowHover; }}
+            onMouseLeave={(e) => { if (!isMobile) e.currentTarget.style.boxShadow = tc.outerGlow; }}
           >
             {/* grain texture overlay */}
             <div
@@ -592,68 +671,56 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               style={{ opacity: 0.025 }}
             >
               <svg width="100%" height="100%">
-                <filter id="grain-public">
+                <filter id="grain">
                   <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch" />
                 </filter>
-                <rect width="100%" height="100%" filter="url(#grain-public)" />
+                <rect width="100%" height="100%" filter="url(#grain)" />
               </svg>
             </div>
 
-            {/* ══ SECTION 1: IDENTITY ══ */}
             <div
-              className="relative flex flex-col items-center text-center z-[2]"
-              style={{ padding: isMobile ? "28px 20px 20px" : "40px 36px 24px" }}
+              className="relative z-[2]"
+              style={{ margin: isMobile ? "8px 8px 0" : "16px 16px 0", ...glossyCard, padding: isMobile ? "28px 20px 20px" : "40px 36px 28px" }}
+              onMouseEnter={identityCardHover}
+              onMouseLeave={identityCardLeave}
             >
-              {/* "denied" glow text — decorative background */}
-              <div
-                className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 select-none"
-                aria-hidden="true"
-              >
-                <span
-                  style={{
-                    fontSize: 120,
-                    fontWeight: 700,
-                    color: "transparent",
-                    background: "linear-gradient(135deg, rgba(59,240,122,0.04), rgba(255,107,74,0.03))",
-                    WebkitBackgroundClip: "text",
-                    backgroundClip: "text",
-                    userSelect: "none",
-                  }}
-                >
-                  denied
-                </span>
-              </div>
 
-              {/* content above glow text */}
-              <div className="relative z-[1] flex flex-col items-center w-full">
-                {/* verified badge */}
-                <div
-                  className="inline-flex items-center gap-1.5 rounded-full"
-                  style={{
-                    padding: "6px 16px",
-                    marginBottom: 20,
-                    background: "linear-gradient(135deg, rgba(59,240,122,0.12), rgba(255,107,74,0.08))",
-                    border: "1px solid rgba(59,240,122,0.18)",
-                  }}
-                >
-                  <div
-                    className="rounded-full flex-shrink-0"
-                    style={{ width: 6, height: 6, background: "#3BF07A", boxShadow: "0 0 6px #3BF07A" }}
-                  />
-                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: "#3BF07A", fontWeight: 500 }}>
-                    denied verified creator
-                  </span>
-                </div>
-
+              <div className="flex flex-col items-center text-center relative">
+                {/* edit my page button — only for owner */}
+                {user && userId === user.id && (
+                  <button
+                    onClick={() => navigate("/creator/edit")}
+                    className="absolute top-0 right-0 rounded-full"
+                    style={{
+                      fontSize: 11,
+                      letterSpacing: 1,
+                      padding: "6px 16px",
+                      background: `rgba(${rgb},0.15)`,
+                      border: `1px solid rgba(${rgb},0.35)`,
+                      color: accent,
+                      transition: "all 300ms ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.boxShadow = `0 0 12px rgba(${rgb},0.2)`;
+                      e.currentTarget.style.borderColor = `rgba(${rgb},0.6)`;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.boxShadow = "none";
+                      e.currentTarget.style.borderColor = `rgba(${rgb},0.35)`;
+                    }}
+                  >
+                    edit my page
+                  </button>
+                )}
                 {/* avatar */}
-                <div style={{ marginBottom: 14 }}>
+                <div className="mb-3">
                   <Avatar
                     className="flex-shrink-0"
                     style={{
                       width: isMobile ? 80 : 96,
                       height: isMobile ? 80 : 96,
-                      border: "2px solid rgba(59,240,122,0.15)",
-                      boxShadow: "0 0 24px rgba(59,240,122,0.08)",
+                      border: `2px solid rgba(${rgb},0.15)`,
+                      boxShadow: `0 0 24px rgba(${rgb},0.08)`,
                     }}
                   >
                     {avatarUrl ? (
@@ -666,20 +733,39 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   </Avatar>
                 </div>
 
+                {/* verified badge — below avatar */}
+                <div
+                  className="inline-flex items-center gap-1.5 rounded-full mb-3"
+                  style={{
+                    padding: "6px 16px",
+                    background: tc.badgeBg,
+                    border: `1px solid ${tc.badgeBorder}`,
+                  }}
+                >
+                  <div
+                    className="rounded-full flex-shrink-0"
+                    style={{ width: 6, height: 6, background: accent, boxShadow: `0 0 10px ${accent}` }}
+                  />
+                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: accent, fontWeight: 500 }}>
+                    denied verified creator
+                  </span>
+                </div>
+
                 {/* display name */}
-                <h1 className="font-bold" style={{ color: "#FFFFFF", fontSize: isMobile ? 20 : 24, marginBottom: 4 }}>
+                <h1 className="font-bold mb-1" style={{ color: "#FFFFFF", fontSize: isMobile ? 20 : 24 }}>
                   {displayName}
                 </h1>
 
                 {/* handle */}
-                <p style={{ color: "#555", fontSize: 14, marginBottom: 16 }}>@{handle}</p>
+                <p className="mb-4" style={{ color: "#555", fontSize: 14 }}>@{handle}</p>
 
                 {/* bio */}
                 {bio && (
                   <p
+                    className="mb-4"
                     style={{
                       color: "#999", fontSize: 14, lineHeight: 1.7,
-                      textAlign: "center", maxWidth: 440, margin: "0 auto", marginBottom: 18,
+                      textAlign: "center", maxWidth: 440, margin: "0 auto 18px",
                     }}
                   >
                     {bio}
@@ -688,15 +774,15 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
                 {/* specialty tags */}
                 {specialties.length > 0 && (
-                  <div className="flex flex-wrap gap-2 justify-center" style={{ marginBottom: 16 }}>
+                  <div className="flex flex-wrap gap-2 justify-center mb-4">
                     {specialties.map((s) => (
                       <span
                         key={s}
                         className="rounded-full"
                         style={{
                           padding: "5px 13px", fontSize: 11, fontWeight: 500,
-                          background: `rgba(${rgb},0.10)`, color: accent,
-                          border: `1px solid rgba(${rgb},0.12)`,
+                          background: tc.tagBg, color: accent,
+                          border: `1px solid ${tc.tagBorder}`,
                         }}
                       >
                         {s}
@@ -720,16 +806,16 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           rel="noopener noreferrer"
                           className="flex items-center justify-center rounded-full transition-all duration-200"
                           style={{
-                            width: 34, height: 34, background: "#111",
-                            border: "1px solid rgba(255,255,255,0.05)", color: "#777",
+                            width: 34, height: 34, background: tc.socialBg,
+                            border: `1px solid ${tc.socialBorder}`, color: "#777",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = "rgba(59,240,122,0.25)";
-                            e.currentTarget.style.color = "#3BF07A";
-                            e.currentTarget.style.boxShadow = "0 0 10px rgba(59,240,122,0.12)";
+                            e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
+                            e.currentTarget.style.color = accent;
+                            e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.15)`;
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                            e.currentTarget.style.borderColor = tc.socialBorder;
                             e.currentTarget.style.color = "#777";
                             e.currentTarget.style.boxShadow = "none";
                           }}
@@ -743,9 +829,41 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               </div>
             </div>
 
-            {/* ══ SECTION 2: CONTENT SHOWCASE ══ */}
+            {/* ── section 2: stats bar ── */}
+            <div
+              className="flex items-center justify-center"
+              style={{
+                gap: isMobile ? 20 : 36,
+                padding: isMobile ? "18px 20px" : "18px 36px",
+                marginTop: 12,
+                borderTop: `1px solid ${tc.statsBorder}`,
+                borderBottom: `1px solid ${tc.statsBorder}`,
+                background: tc.statsBg,
+                transition: "all 300ms ease",
+              }}
+              onMouseEnter={statsBarHover}
+              onMouseLeave={statsBarLeave}
+            >
+              {[
+                { label: "reviews", value: stats.reviews },
+                { label: "trips", value: stats.trips },
+                { label: "posts", value: stats.posts },
+                { label: "helpful", value: stats.helpful },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <div className="font-bold" style={{ color: "#FFFFFF", fontSize: isMobile ? 18 : 20 }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize: isMobile ? 9 : 10, letterSpacing: 1, color: "rgba(255,255,255,0.45)" }}>
+                    {s.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* ── section 3: content showcase — wrapped in glossy-card ── */}
             {hasContent && (
-              <div style={{ padding: isMobile ? "24px 20px" : "24px 36px" }}>
+              <div style={{ margin: isMobile ? "12px 8px 0" : "16px 16px 0", ...glossyCard, padding: isMobile ? 20 : 24 }}>
                 <div style={{ fontSize: 11, letterSpacing: 2, color: "#444", fontWeight: 500, marginBottom: 14 }}>
                   recent content
                 </div>
@@ -753,27 +871,21 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   className="flex gap-2.5 overflow-x-auto"
                   style={{ scrollbarWidth: "none" }}
                 >
-                  <style>{`.creator-content-scroll::-webkit-scrollbar { display: none; }`}</style>
+                  <style>{`.content-scroll::-webkit-scrollbar { display: none; }`}</style>
                   {contentItems.map((item: any) => (
                     <div
                       key={item.id}
-                      className="relative flex-shrink-0 overflow-hidden creator-content-scroll"
+                      className="relative flex-shrink-0 overflow-hidden group"
                       style={{
                         width: isMobile ? 120 : 140,
                         height: isMobile ? 120 : 140,
                         borderRadius: 14,
                         background: "#111",
                         border: "1px solid rgba(255,255,255,0.04)",
-                        transition: "all 200ms ease",
+                        transition: "all 300ms ease",
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(59,240,122,0.15)";
-                        e.currentTarget.style.transform = "scale(1.02)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
-                        e.currentTarget.style.transform = "scale(1)";
-                      }}
+                      onMouseEnter={thumbHover}
+                      onMouseLeave={thumbLeave}
                     >
                       <img src={item.media_url} alt={item.caption || "content"} className="w-full h-full object-cover" />
                       {item.media_type === "video" && (
@@ -795,7 +907,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           style={{
                             background: "rgba(0,0,0,0.65)", padding: "3px 10px", borderRadius: 8,
                             fontSize: 10, color: "#ccc", backdropFilter: "blur(4px)",
-                            maxWidth: "80%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
+                            maxWidth: "80%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                           }}
                         >
                           {item.caption.slice(0, 20)}
@@ -807,46 +919,21 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               </div>
             )}
 
-            {/* ══ SECTION 3: STATS BAR ══ */}
-            <div
-              className="flex items-center justify-center"
-              style={{
-                gap: isMobile ? 20 : 36,
-                padding: isMobile ? "18px 20px" : "18px 36px",
-                marginTop: 12,
-                borderTop: "1px solid rgba(255,255,255,0.04)",
-                borderBottom: "1px solid rgba(255,255,255,0.04)",
-                background: "rgba(0,0,0,0.3)",
-              }}
-            >
-              {[
-                { label: "reviews", value: stats.reviews },
-                { label: "trips", value: stats.trips },
-                { label: "posts", value: stats.posts },
-                { label: "helpful", value: stats.helpful },
-              ].map((s) => (
-                <div key={s.label} className="text-center">
-                  <div className="font-bold" style={{ color: "#FFFFFF", fontSize: isMobile ? 18 : 20 }}>
-                    {s.value}
-                  </div>
-                  <div style={{ fontSize: isMobile ? 9 : 10, letterSpacing: 1, color: "#555" }}>
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* ══ SECTION 4: DIVIDER ══ */}
+            {/* ── section 4: divider ── */}
             <div
               style={{
                 height: 1,
-                margin: isMobile ? "0 20px" : "0 36px",
-                background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.08), rgba(255,107,74,0.06), transparent)",
+                margin: isMobile ? "12px 20px" : "16px 36px",
+                background: `linear-gradient(90deg, transparent, rgba(${rgb},0.08), rgba(${rgb},0.06), transparent)`,
               }}
             />
 
-            {/* ══ SECTION 5: TAB BAR + CONTENT ══ */}
-            <div style={{ padding: isMobile ? "0 20px 28px" : "0 36px 36px" }}>
+            {/* ── section 5: tab bar + content — wrapped in glossy-card ── */}
+            <div
+              style={{ margin: isMobile ? "0 8px 8px" : "0 16px 16px", ...glossyCard, padding: isMobile ? "20px 16px" : 28 }}
+              onMouseEnter={identityCardHover}
+              onMouseLeave={identityCardLeave}
+            >
               {/* tab bar */}
               <div
                 className="flex"
@@ -857,33 +944,37 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     style={{
-                      padding: isMobile ? "10px 14px" : "12px 20px",
+                      padding: isMobile ? "10px 12px" : "12px 20px",
                       fontSize: isMobile ? 11 : 12,
                       letterSpacing: 1.5,
-                      color: activeTab === tab ? "#3BF07A" : "#444",
-                      borderBottom: activeTab === tab ? "2px solid #3BF07A" : "2px solid transparent",
+                      color: activeTab === tab ? accent : "rgba(255,255,255,0.55)",
+                      borderBottom: activeTab === tab ? `2px solid ${accent}` : "2px solid transparent",
+                      transition: "color 200ms ease",
                       cursor: "pointer",
                       background: "none",
-                      transition: "color 200ms ease",
                     }}
-                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#888"; }}
-                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#444"; }}
+                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "rgba(255,255,255,0.75)"; }}
+                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "rgba(255,255,255,0.55)"; }}
                   >
                     {tab}
                   </button>
                 ))}
               </div>
 
-              {/* ── FEED TAB ── */}
+              {/* ── FEED TAB — mixed timeline ── */}
               {activeTab === "feed" && (
                 <div>
                   {feedItems.length <= 1 && feedItems[0]?.type === "joined" && (
-                    <p className="text-center" style={{ color: "#666", fontSize: 14, paddingTop: 40 }}>
+                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "32px 0" }}>
                       this creator is just getting started — check back soon!
                     </p>
                   )}
                   {feedItems.map((item, idx) => {
                     const isLast = idx === feedItems.length - 1;
+                    const dotColor = item.type === "trip" ? "#FF6B4A" : item.type === "joined" ? "#555" : accent;
+                    const dotShadow = item.type === "trip"
+                      ? "0 0 10px rgba(255,107,74,0.3)"
+                      : item.type === "joined" ? "none" : `0 0 10px rgba(${rgb},0.35)`;
 
                     return (
                       <div
@@ -891,18 +982,13 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         className="flex"
                         style={{
                           gap: isMobile ? 12 : 14,
-                          padding: "16px 0",
-                          borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.03)",
+                          padding: isMobile ? "14px 0" : "18px 0",
+                          borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
                         }}
                       >
                         <div
                           className="flex-shrink-0 rounded-full"
-                          style={{
-                            width: 8, height: 8,
-                            background: item.type === "joined" ? "#666" : "#3BF07A",
-                            boxShadow: item.type === "joined" ? "none" : "0 0 8px rgba(59,240,122,0.3)",
-                            marginTop: 6,
-                          }}
+                          style={{ width: 8, height: 8, background: dotColor, boxShadow: dotShadow, marginTop: 6 }}
                         />
                         <div className="flex-1 min-w-0">
                           {item.type === "review" && (
@@ -912,19 +998,74 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                               </p>
                               <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
                                 {item.data.procedure_name} · <span style={{ color: "#FFD700" }}>{renderStars(item.data.rating)}</span> · {formatDate(item.date)}
+                                {item.data.verified_trip && <span style={{ color: accent }}> · verified visit</span>}
                               </p>
                               {item.data.review_text && (
                                 <div
                                   style={{
-                                    marginTop: 8, padding: "12px 16px", background: "#0A0A0A",
-                                    borderRadius: 12, borderLeft: "2px solid rgba(59,240,122,0.2)",
+                                    marginTop: 10, padding: "14px 18px", background: `linear-gradient(135deg, rgba(${rgb},0.04), rgba(10,10,10,1))`,
+                                    borderRadius: 12, borderLeft: `2px solid rgba(${rgb},0.4)`,
                                   }}
                                 >
-                                  <p style={{ fontSize: 13, color: "#888", lineHeight: 1.5 }}>
+                                  <p style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>
                                     {item.data.review_text.length > 150 ? item.data.review_text.slice(0, 150) + "..." : item.data.review_text}
                                   </p>
                                 </div>
                               )}
+                            </>
+                          )}
+                          {item.type === "content" && (
+                            <>
+                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                                {item.data.media_type === "video"
+                                  ? <>posted a video — <span className="font-bold" style={{ color: "#FFFFFF" }}>{(item.data.caption || "untitled").slice(0, 30)}</span></>
+                                  : <>shared a photo — <span className="font-bold" style={{ color: "#FFFFFF" }}>{(item.data.caption || "untitled").slice(0, 30)}</span></>
+                                }
+                              </p>
+                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>{formatDate(item.date)}</p>
+                              {/* media preview */}
+                              <div className="mt-2.5 flex gap-1.5">
+                                <div
+                                  className="relative overflow-hidden transition-all duration-200"
+                                  style={{
+                                    width: item.data.media_type === "video" ? 160 : 90,
+                                    height: item.data.media_type === "video" ? 90 : 90,
+                                    borderRadius: 10, background: "#111",
+                                    border: "1px solid rgba(255,255,255,0.05)",
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.borderColor = `rgba(${rgb},0.2)`;
+                                    e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.1)`;
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                                    e.currentTarget.style.boxShadow = "none";
+                                  }}
+                                >
+                                  <img src={item.data.media_url} alt="" className="w-full h-full object-cover" />
+                                  {item.data.media_type === "video" && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <div
+                                        className="flex items-center justify-center rounded-full"
+                                        style={{
+                                          width: 32, height: 32, background: "rgba(0,0,0,0.7)",
+                                          border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 12, paddingLeft: 2,
+                                        }}
+                                      >
+                                        ▶
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                          {item.type === "trip" && (
+                            <>
+                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                                completed a trip to <span className="font-bold" style={{ color: "#FFFFFF" }}>mexico</span>
+                              </p>
+                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>{formatDate(item.date)}</p>
                             </>
                           )}
                           {item.type === "joined" && (
@@ -942,29 +1083,175 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 </div>
               )}
 
-              {/* ── REVIEWS TAB (placeholder) ── */}
+              {/* ── REVIEWS TAB ── */}
               {activeTab === "reviews" && (
-                <p className="text-center" style={{ color: "#444", fontSize: 14, padding: 40 }}>
-                  coming soon
-                </p>
+                <div>
+                  {feedReviews.length === 0 ? (
+                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "40px 0" }}>
+                      no reviews yet
+                    </p>
+                  ) : (
+                    feedReviews.map((review: any) => (
+                      <div
+                        key={review.id}
+                        className="transition-all duration-200"
+                        style={{ ...glossyCard, padding: isMobile ? 16 : 20, marginBottom: 12 }}
+                        onMouseEnter={glossyCardHover}
+                        onMouseLeave={glossyCardLeave}
+                      >
+                        {/* top row */}
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
+                              {review.provider_name}
+                            </div>
+                            <div style={{ fontSize: 12, color: accent, marginTop: 2 }}>
+                              {review.procedure_name}
+                            </div>
+                          </div>
+                          <div style={{ fontSize: 13, color: "#FFD700", letterSpacing: 2 }}>
+                            {renderStars(review.rating)}
+                          </div>
+                        </div>
+                        {/* body */}
+                        <p style={{ fontSize: 13, color: "#B0B0B0", lineHeight: 1.6, marginTop: 12 }}>
+                          {review.review_text}
+                        </p>
+                        {/* footer */}
+                        <div className="flex items-center gap-2" style={{ marginTop: 12, fontSize: 11, color: "#444" }}>
+                          <span>{formatDate(review.created_at)}</span>
+                          {review.verified_trip && (
+                            <span
+                              className="rounded-full"
+                              style={{
+                                background: `rgba(${rgb},0.08)`, color: accent,
+                                padding: "2px 8px", fontSize: 10,
+                              }}
+                            >
+                              verified visit
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               )}
 
-              {/* ── CONTENT TAB (placeholder) ── */}
+              {/* ── CONTENT TAB ── */}
               {activeTab === "content" && (
-                <p className="text-center" style={{ color: "#444", fontSize: 14, padding: 40 }}>
-                  coming soon
-                </p>
+                <div>
+                  {contentItems.length === 0 ? (
+                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "40px 0" }}>
+                      no content yet
+                    </p>
+                  ) : (
+                    <div className={`grid gap-2 ${isMobile ? "grid-cols-2" : "grid-cols-3"}`}>
+                      {contentItems.map((item: any) => (
+                        <div
+                          key={item.id}
+                          className="relative overflow-hidden transition-all duration-200"
+                          style={{
+                            aspectRatio: "1", borderRadius: 14, background: "#111",
+                            border: "1px solid rgba(255,255,255,0.05)",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = `rgba(${rgb},0.2)`;
+                            e.currentTarget.style.boxShadow = `0 0 12px rgba(${rgb},0.1)`;
+                            e.currentTarget.style.transform = "scale(1.02)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                            e.currentTarget.style.boxShadow = "none";
+                            e.currentTarget.style.transform = "scale(1)";
+                          }}
+                        >
+                          <img src={item.media_url} alt={item.caption || ""} className="w-full h-full object-cover" />
+                          {item.media_type === "video" && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div
+                                className="flex items-center justify-center rounded-full"
+                                style={{
+                                  width: 36, height: 36, background: "rgba(0,0,0,0.7)",
+                                  border: "1px solid rgba(255,255,255,0.15)", color: "#fff", fontSize: 14, paddingLeft: 2,
+                                }}
+                              >
+                                ▶
+                              </div>
+                            </div>
+                          )}
+                          {item.caption && (
+                            <div
+                              className="absolute bottom-1.5 left-1.5"
+                              style={{
+                                background: "rgba(0,0,0,0.65)", padding: "3px 10px", borderRadius: 8,
+                                fontSize: 10, color: "#ccc", backdropFilter: "blur(4px)",
+                                maxWidth: "80%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" as const,
+                              }}
+                            >
+                              {item.caption.slice(0, 20)}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               )}
 
-              {/* ── FAVORITE PROVIDERS TAB (placeholder) ── */}
+              {/* ── FAVORITE PROVIDERS TAB ── */}
               {activeTab === "favorite providers" && (
-                <p className="text-center" style={{ color: "#444", fontSize: 14, padding: 40 }}>
-                  coming soon
-                </p>
+                <div>
+                  {favoriteProviders.length === 0 ? (
+                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "40px 0" }}>
+                      no favorite providers yet
+                    </p>
+                  ) : (
+                    favoriteProviders.map((prov) => (
+                      <div
+                        key={prov.slug}
+                        className="flex items-center transition-all duration-200 cursor-pointer"
+                        style={{ ...glossyCard, gap: 14, padding: isMobile ? "12px 14px" : "14px 18px", marginBottom: 10 }}
+                        onMouseEnter={glossyCardHover}
+                        onMouseLeave={glossyCardLeave}
+                        onClick={() => navigate(`/providers/${prov.slug}`)}
+                      >
+                        {/* provider initial */}
+                        <div
+                          className="flex items-center justify-center flex-shrink-0"
+                          style={{
+                            width: 44, height: 44, borderRadius: 10,
+                            background: "linear-gradient(135deg, #111, #1a1a1a)",
+                            border: `1px solid rgba(${rgb},0.1)`,
+                            fontSize: 18, color: "#555",
+                          }}
+                        >
+                          {(prov.name?.[0] || "?").toUpperCase()}
+                        </div>
+                        {/* info */}
+                        <div className="flex-1 min-w-0">
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "#FFFFFF" }}>{prov.name}</div>
+                          <div style={{ fontSize: 11, color: "#555" }}>mexico</div>
+                        </div>
+                        {/* review count pill */}
+                        <span
+                          className="flex-shrink-0 rounded-full"
+                          style={{
+                            fontSize: 10, color: accent,
+                            background: `rgba(${rgb},0.1)`,
+                            padding: "3px 10px",
+                          }}
+                        >
+                          reviewed {prov.count}x
+                        </span>
+                      </div>
+                    ))
+                  )}
+                </div>
               )}
             </div>
 
-            {/* ══ SECTION 6: FOOTER SPACER ══ */}
+            {/* ── section 6: footer spacer ── */}
             <div style={{ height: 80 }} />
           </div>
         </div>
