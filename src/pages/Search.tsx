@@ -160,7 +160,7 @@ const SearchPage = () => {
   const LoadingSkeleton = () => (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <Card key={i} className="overflow-hidden border border-border/50 shadow-elevated bg-card">
+        <Card key={i} className="overflow-hidden glossy-card">
           <Skeleton className="aspect-[16/10] w-full" />
           <CardContent className="p-5 space-y-3">
             <Skeleton className="h-5 w-3/4" />
@@ -292,7 +292,7 @@ const SearchPage = () => {
                     transition={{ duration: 0.45, delay: (index % 6) * 0.08 }}
                   >
                     <Link to={`/provider/${provider.slug}${isConcierge ? "?type=concierge" : ""}`}>
-                      <Card className="overflow-hidden border border-border/50 shadow-elevated hover:shadow-floating tactile-lift cursor-pointer h-full group bg-card">
+                      <Card className="overflow-hidden glossy-card tactile-lift cursor-pointer h-full group">
                         <div className="aspect-[16/10] relative overflow-hidden">
                           <img
                             src={provider.cover_photo_url || CATEGORY_IMAGES[category] || clinicDental}

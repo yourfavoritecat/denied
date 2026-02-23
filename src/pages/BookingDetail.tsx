@@ -319,7 +319,7 @@ const BookingDetail = () => {
           )}
 
           {/* Status Tracker */}
-          <Card className="mb-8 shadow-elevated border-border/50">
+          <Card className="mb-8 glossy-card">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between relative">
                 {/* Progress line */}
@@ -360,7 +360,7 @@ const BookingDetail = () => {
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Booking Details */}
                 <div className="space-y-4">
-                  <Card className="shadow-elevated border-border/50">
+                  <Card className="glossy-card">
                     <CardHeader><CardTitle className="text-lg">Inquiry Details</CardTitle></CardHeader>
                     <CardContent className="space-y-3 text-sm">
                       <div>
@@ -389,7 +389,7 @@ const BookingDetail = () => {
                   </Card>
 
                   {booking.quoted_price && (
-                    <Card className="border-primary/30 shadow-lifted">
+                    <Card className="border-primary/30 glossy-card">
                       <CardHeader><CardTitle className="text-lg">Quote</CardTitle></CardHeader>
                       <CardContent className="space-y-3 text-sm">
                         <div className="flex justify-between">
@@ -426,7 +426,7 @@ const BookingDetail = () => {
                 </div>
 
                 {/* Messages Thread */}
-                <Card className="flex flex-col h-[500px] shadow-elevated border-border/50">
+                <Card className="flex flex-col h-[500px] glossy-card">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">Messages</CardTitle>
                   </CardHeader>

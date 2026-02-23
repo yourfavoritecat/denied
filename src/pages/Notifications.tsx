@@ -141,7 +141,7 @@ const Notifications = () => {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
           </div>
         ) : filtered.length === 0 ? (
-          <Card className="py-16 text-center shadow-elevated border-border/50">
+          <Card className="py-16 text-center glossy-card">
             <Bell className="w-12 h-12 mx-auto text-muted-foreground/40 mb-3" />
             <p className="text-muted-foreground">
               {filter === "unread" ? "No unread notifications" : "No notifications yet"}

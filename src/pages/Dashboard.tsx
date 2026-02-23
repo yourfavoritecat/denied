@@ -145,8 +145,8 @@ const Dashboard = () => {
               { icon: Heart, label: "My Profile", to: "/profile", color: "text-pink-400" },
             ].map((action) => (
               <motion.div key={action.label} variants={item}>
-                <Card
-                  className="cursor-pointer tactile-press border-border/50 bg-card shadow-elevated"
+                  <Card
+                    className="cursor-pointer tactile-press glossy-card"
                   onClick={() => navigate(action.to)}
                 >
                   <CardContent className="flex flex-col items-center gap-2 py-5 px-3">
@@ -166,7 +166,7 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <Card className="shadow-lifted bg-card">
+              <Card className="glossy-card">
                 <CardHeader className="flex flex-row items-center justify-between pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Stethoscope className="w-5 h-5 text-primary" />
@@ -240,7 +240,7 @@ const Dashboard = () => {
               transition={{ delay: 0.35, duration: 0.5 }}
             >
               {/* Trip Briefs */}
-              <Card className="shadow-elevated bg-card">
+              <Card className="glossy-card">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <CalendarDays className="w-5 h-5 text-secondary" />
@@ -277,7 +277,7 @@ const Dashboard = () => {
               </Card>
 
               {/* Quick Stats */}
-              <Card className="shadow-elevated bg-card">
+              <Card className="glossy-card">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2">
                     <Star className="w-5 h-5 text-amber-400" />

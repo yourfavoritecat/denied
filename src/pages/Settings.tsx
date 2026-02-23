@@ -12,7 +12,7 @@ const SettingsPage = () => {
         <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
           <h1 className="text-2xl font-bold mb-6">Settings</h1>
 
-          <Card className="shadow-elevated border-border/50">
+          <Card className="glossy-card">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
