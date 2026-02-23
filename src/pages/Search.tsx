@@ -206,7 +206,7 @@ const SearchPage = () => {
       <main>
         <div className={`max-w-[960px] mx-auto px-4 pb-16 ${isConcierge ? "pt-28" : "pt-24"}`}>
           {/* Hero Banner */}
-          <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: 180 }}>
+          <div className="relative rounded-xl overflow-hidden mb-8" style={{ height: 180 }}>
             <img
               src="/images/hero-search.jpg"
               alt=""

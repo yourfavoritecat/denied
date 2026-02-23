@@ -356,7 +356,7 @@ const ProviderProfile = () => {
       <main className={`pb-28 ${isConcierge ? "pt-24" : "pt-16"}`}>
         {/* ═══════ HERO ═══════ */}
         <div className="relative max-w-[960px] mx-auto px-4 mt-6">
-          <div className="relative rounded-2xl overflow-hidden h-[200px]">
+          <div className="relative rounded-xl overflow-hidden h-[200px]">
             {coverPhoto ? (
               <img src={coverPhoto} alt={providerName} className="w-full h-full object-cover" />
             ) : facilityPhotos.length > 0 ? (

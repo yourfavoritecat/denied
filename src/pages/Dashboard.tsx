@@ -102,7 +102,7 @@ const Dashboard = () => {
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative rounded-2xl overflow-hidden mb-8"
+            className="relative rounded-xl overflow-hidden mb-8"
             style={{ height: 220 }}
           >
             <img
