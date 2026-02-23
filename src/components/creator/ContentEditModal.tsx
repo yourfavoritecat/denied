@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -22,8 +22,23 @@ const ContentEditModal = ({ open, onClose, item, accent, rgb, onSuccess }: Props
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [hashtagsInput, setHashtagsInput] = useState("");
 
   const isVideo = item?.media_type === "video";
+
+  useEffect(() => {
+    if (item?.hashtags) {
+      const tags: string[] = Array.isArray(item.hashtags) ? item.hashtags : [];
+      setHashtagsInput(tags.join(", "));
+    } else {
+      setHashtagsInput("");
+    }
+  }, [item]);
+
+  const parsedTags = hashtagsInput
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => t.length > 0);
 
   const handleThumbSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -48,7 +63,10 @@ const ContentEditModal = ({ open, onClose, item, accent, rgb, onSuccess }: Props
         newThumbUrl = pubData.publicUrl;
       }
 
-      const updates: any = { thumbnail_url: newThumbUrl };
+      const updates: any = {
+        thumbnail_url: newThumbUrl,
+        hashtags: parsedTags,
+      };
       if (isVideo) updates.url = videoUrl.trim();
 
       const { error } = await supabase
@@ -158,6 +176,41 @@ const ContentEditModal = ({ open, onClose, item, accent, rgb, onSuccess }: Props
               />
             </div>
           )}
+
+          {/* hashtags */}
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontSize: 12, color: "#999", marginBottom: 6 }}>hashtags</div>
+            <input
+              type="text"
+              value={hashtagsInput}
+              onChange={(e) => setHashtagsInput(e.target.value)}
+              placeholder="add hashtags separated by commas"
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 12,
+                background: "#0A0A0A", border: "1px solid rgba(255,255,255,0.08)",
+                color: "#fff", fontSize: 13, outline: "none",
+              }}
+            />
+            {parsedTags.length > 0 && (
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 8 }}>
+                {parsedTags.map((tag, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      padding: "3px 10px", borderRadius: 999, fontSize: 11,
+                      background: `rgba(${rgb}, 0.1)`, color: accent,
+                      border: `1px solid rgba(${rgb}, 0.12)`,
+                    }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            <div style={{ fontSize: 11, color: "#555", lineHeight: 1.4, marginTop: 6 }}>
+              hashtags make your content searchable to visitors
+            </div>
+          </div>
 
           {/* action buttons */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 28 }}>
