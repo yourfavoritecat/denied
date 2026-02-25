@@ -1,0 +1,1 @@
+ALTER TABLE public.trip_briefs ADD COLUMN IF NOT EXISTS considered_providers jsonb DEFAULT '[]'::jsonb;
