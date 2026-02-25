@@ -257,10 +257,12 @@ const TripBriefCard = ({
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.7), 0 0 20px rgba(59,240,122,0.08)";
+          e.currentTarget.style.transform = "translateY(-2px)";
+          e.currentTarget.style.cursor = "pointer";
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.6)";
-          e.currentTarget.style.transform = "";
+          e.currentTarget.style.transform = "translateY(0)";
         }}
       >
         <div
