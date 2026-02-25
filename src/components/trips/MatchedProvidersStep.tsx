@@ -202,7 +202,10 @@ const MatchedProvidersStep = ({
                 }}
               >
                 {/* Avatar */}
-                <div
+                <a
+                  href={`/provider/${provider.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0 overflow-hidden"
                 >
                   {provider.cover_photo_url ? (
@@ -214,13 +217,18 @@ const MatchedProvidersStep = ({
                   ) : (
                     <Building2 className="w-5 h-5 text-white/30" />
                   )}
-                </div>
+                </a>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-sm truncate lowercase">
+                  <a
+                    href={`/provider/${provider.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-semibold text-sm truncate lowercase block hover:underline"
+                  >
                     {provider.name.toLowerCase()}
-                  </p>
+                  </a>
                   <div className="flex items-center gap-2 mt-0.5">
                     {provider.rating && (
                       <span className="text-xs text-white/50">

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   Calendar, MapPin, FileText, MessageSquare, Clock, CheckCircle,
-  PlusCircle, Trash2, ArrowRight, Users, Stethoscope, DollarSign,
+  PlusCircle, Trash2, ArrowRight, Users, Stethoscope,
   ChevronRight, Building2, Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,13 +88,6 @@ const QUOTE_STATUS_LABELS: Record<string, string> = {
   accepted: "accepted",
   declined: "declined",
   expired: "expired",
-};
-const BUDGET_LABELS: Record<string, string> = {
-  under_1k: "Under $1,000",
-  "1k_3k": "$1,000–$3,000",
-  "3k_5k": "$3,000–$5,000",
-  "5k_plus": "$5,000+",
-  no_budget: "No budget set",
 };
 
 /* ─── Helpers ─── */
@@ -271,13 +264,6 @@ const TripBriefCard = ({
           </div>
         )}
 
-        {/* Budget */}
-        {brief.budget_range && brief.budget_range !== "no_budget" && (
-          <p className="text-xs text-white/40 flex items-center gap-1">
-            <DollarSign className="w-3 h-3" />
-            {BUDGET_LABELS[brief.budget_range] || brief.budget_range} per person
-          </p>
-        )}
 
         {/* Estimated cost range */}
         <EstimatedCostRange procedures={brief.procedures} />
