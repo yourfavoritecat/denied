@@ -18,36 +18,41 @@ const DRAFT_KEY = "denied_trip_brief_draft";
 
 /* ─── Data ─── */
 const DESTINATIONS = [
-  "Tijuana", "Mexico City", "Guadalajara", "Cancun", "Monterrey",
-  "Los Algodones", "Puerto Vallarta", "Merida", "San Jose del Cabo",
+  "tijuana", "mexico city", "guadalajara", "cancun", "monterrey",
+  "los algodones", "puerto vallarta", "merida", "san jose del cabo",
 ];
 
 const CATEGORIES = [
-  { id: "dental", label: "Dental", procedures: [
-    "Zirconia Crown", "Dental Implant", "All-on-4", "All-on-6", "Veneer", "Root Canal",
-    "Tooth Extraction", "Teeth Whitening", "Deep Cleaning", "Dental Bridge", "Dentures", "Dental Filling",
+  { id: "dental", label: "dental", procedures: [
+    "zirconia crown", "dental implant", "all-on-4", "all-on-6", "veneer", "root canal",
+    "tooth extraction", "teeth whitening", "deep cleaning", "dental bridge", "dentures", "dental filling",
   ]},
-  { id: "aesthetics", label: "Aesthetics / Med Spa", procedures: [
-    "Botox", "Dermal Fillers", "Chemical Peel", "Microneedling", "Laser Hair Removal",
-    "HydraFacial", "Thread Lift", "Lip Augmentation", "PRP Therapy", "Skin Tightening",
+  { id: "aesthetics", label: "aesthetics / med spa", procedures: [
+    "botox", "dermal fillers", "chemical peel", "microneedling", "laser hair removal",
+    "hydrafacial", "thread lift", "lip augmentation", "prp therapy", "skin tightening",
   ]},
-  { id: "surgery", label: "Cosmetic Surgery", procedures: [
-    "Rhinoplasty", "Breast Augmentation", "Breast Lift", "Liposuction", "Tummy Tuck",
-    "Facelift", "BBL (Brazilian Butt Lift)", "Mommy Makeover", "Blepharoplasty",
+  { id: "surgery", label: "cosmetic surgery", procedures: [
+    "rhinoplasty", "breast augmentation", "breast lift", "liposuction", "tummy tuck",
+    "facelift", "bbl (brazilian butt lift)", "mommy makeover", "blepharoplasty",
   ]},
-  { id: "medical", label: "Medical", procedures: [
-    "Bariatric Surgery (Gastric Sleeve)", "LASIK", "Gastric Bypass", "Knee Replacement",
-    "Hip Replacement", "Stem Cell Therapy",
+  { id: "medical", label: "medical", procedures: [
+    "bariatric surgery (gastric sleeve)", "lasik", "gastric bypass", "knee replacement",
+    "hip replacement", "stem cell therapy",
   ]},
 ];
 
-const STEPS = ["Where & When", "What do you need?", "Who's going?", "Matched Providers", "Save Trip"];
+const STEPS = ["where & when", "what do you need?", "who's going?", "matched providers", "save trip brief"];
 
 /* ─── Types ─── */
 interface GroupMember {
   name: string;
   procedures: string[];
   notes: string;
+}
+
+interface ProcedureWithQty {
+  name: string;
+  quantity: number;
 }
 
 interface EditBrief {
@@ -57,7 +62,7 @@ interface EditBrief {
   travel_window_start: string | null;
   travel_window_end: string | null;
   is_flexible: boolean;
-  procedures: { name: string; quantity: number }[] | null;
+  procedures: ProcedureWithQty[] | string[] | null;
   is_group: boolean;
   group_members: { name: string; procedures: string[] }[] | null;
   budget_range: string | null;
@@ -77,6 +82,15 @@ interface ProcedurePriceRange {
   min: number;
   max: number;
 }
+
+/* ─── Normalize procedures helper ─── */
+const normalizeProcedures = (procs: any[] | null): ProcedureWithQty[] => {
+  if (!procs || procs.length === 0) return [];
+  if (typeof procs[0] === "string") {
+    return procs.map((p: string) => ({ name: p, quantity: 1 }));
+  }
+  return procs.map((p: any) => ({ name: p.name, quantity: p.quantity || 1 }));
+};
 
 /* ─── Step indicator ─── */
 const StepDots = ({ current, total }: { current: number; total: number }) => (
@@ -100,6 +114,7 @@ interface DraftState {
   isFlexible: boolean;
   selectedCategories: string[];
   selectedProcedures: string[];
+  procedureQuantities: Record<string, number>;
   proceduresUnsure: boolean;
   isGroup: boolean;
   groupSize: number;
@@ -149,6 +164,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
   // Step 2: What
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
+  const [procedureQuantities, setProcedureQuantities] = useState<Record<string, number>>({});
   const [customProcedure, setCustomProcedure] = useState("");
   const [proceduresUnsure, setProceduresUnsure] = useState(false);
   const [procedurePrices, setProcedurePrices] = useState<Record<string, ProcedurePriceRange>>({});
@@ -170,6 +186,11 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
   // Track editing ID
   const [editId, setEditId] = useState<string | null>(null);
 
+  const getQty = (proc: string) => procedureQuantities[proc] || 1;
+  const setQty = (proc: string, qty: number) => {
+    setProcedureQuantities((prev) => ({ ...prev, [proc]: Math.max(1, Math.min(10, qty)) }));
+  };
+
   /* ─── Check for draft on open ─── */
   useEffect(() => {
     if (open && !editBrief) {
@@ -188,6 +209,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     setIsFlexible(draft.isFlexible);
     setSelectedCategories(draft.selectedCategories);
     setSelectedProcedures(draft.selectedProcedures);
+    setProcedureQuantities(draft.procedureQuantities || {});
     setProceduresUnsure(draft.proceduresUnsure);
     setIsGroup(draft.isGroup);
     setGroupSize(draft.groupSize);
@@ -207,14 +229,14 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
   /* ─── Save draft on step change ─── */
   const persistDraft = useCallback(() => {
-    if (editId) return; // don't save drafts when editing
+    if (editId) return;
     saveDraft({
       destination, windowStart, windowEnd, isFlexible,
-      selectedCategories, selectedProcedures, proceduresUnsure,
+      selectedCategories, selectedProcedures, procedureQuantities, proceduresUnsure,
       isGroup, groupSize, groupMembers,
       consideredProviders, tripName, step,
     });
-  }, [destination, windowStart, windowEnd, isFlexible, selectedCategories, selectedProcedures, proceduresUnsure, isGroup, groupSize, groupMembers, consideredProviders, tripName, step, editId]);
+  }, [destination, windowStart, windowEnd, isFlexible, selectedCategories, selectedProcedures, procedureQuantities, proceduresUnsure, isGroup, groupSize, groupMembers, consideredProviders, tripName, step, editId]);
 
   /* ─── Fetch procedure prices from reference table ─── */
   useEffect(() => {
@@ -231,7 +253,6 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
         if (!data) return;
         const prices: Record<string, ProcedurePriceRange> = {};
         for (const row of data as any[]) {
-          // Map back to the original casing used in selectedProcedures
           const match = selectedProcedures.find((p) => p.toLowerCase() === row.procedure_name);
           if (match) {
             prices[match] = { min: Number(row.est_low), max: Number(row.est_high) };
@@ -250,7 +271,11 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       setWindowEnd(editBrief.travel_window_end || "");
       setIsFlexible(editBrief.is_flexible);
       setSelectedCategories(editBrief.procedure_categories || []);
-      setSelectedProcedures(editBrief.procedures?.map((p) => p.name) || []);
+      const normalized = normalizeProcedures(editBrief.procedures as any);
+      setSelectedProcedures(normalized.map((p) => p.name));
+      const qtys: Record<string, number> = {};
+      normalized.forEach((p) => { qtys[p.name] = p.quantity; });
+      setProcedureQuantities(qtys);
       setProceduresUnsure(editBrief.procedures_unsure || false);
       setIsGroup(editBrief.is_group);
       const gm = editBrief.group_members || [];
@@ -286,9 +311,9 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
   /* ─── Helpers ─── */
   const autoName = () => {
-    const dest = destination || "Mexico";
+    const dest = destination || "mexico";
     const now = new Date();
-    const month = now.toLocaleString("en-US", { month: "short" });
+    const month = now.toLocaleString("en-US", { month: "short" }).toLowerCase();
     const year = String(now.getFullYear()).slice(-2);
     return `${dest} ${month} '${year}`;
   };
@@ -300,9 +325,14 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
   };
 
   const toggleProcedure = (p: string) => {
-    setSelectedProcedures((prev) =>
-      prev.includes(p) ? prev.filter((x) => x !== p) : [...prev, p]
-    );
+    setSelectedProcedures((prev) => {
+      if (prev.includes(p)) {
+        // Remove quantity too
+        setProcedureQuantities((q) => { const next = { ...q }; delete next[p]; return next; });
+        return prev.filter((x) => x !== p);
+      }
+      return [...prev, p];
+    });
   };
 
   const addCustomProcedure = () => {
@@ -338,19 +368,28 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     return true;
   };
 
+  const buildProceduresPayload = (): ProcedureWithQty[] => {
+    return selectedProcedures.map((name) => ({ name, quantity: getQty(name) }));
+  };
+
   const handleStepChange = (newStep: number) => {
     setStep(newStep);
-    // Save draft after state updates (next tick)
     setTimeout(() => {
       if (!editId) {
         saveDraft({
           destination, windowStart, windowEnd, isFlexible,
-          selectedCategories, selectedProcedures, proceduresUnsure,
+          selectedCategories, selectedProcedures, procedureQuantities, proceduresUnsure,
           isGroup, groupSize, groupMembers,
           consideredProviders, tripName, step: newStep,
         });
       }
     }, 0);
+  };
+
+  /* ─── Format procedure label with quantity ─── */
+  const procLabel = (name: string, qty?: number) => {
+    const q = qty ?? getQty(name);
+    return q > 1 ? `${name} ×${q}` : name;
   };
 
   /* ─── Send brief to provider ─── */
@@ -359,7 +398,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
     let briefId = editId;
     if (!briefId) {
-      const procedures = selectedProcedures.map((name) => ({ name, quantity: 1 }));
+      const procedures = buildProceduresPayload();
       const payload: any = {
         user_id: user.id,
         trip_name: tripName || autoName(),
@@ -386,7 +425,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       setEditId(briefId);
     }
 
-    const procedures = selectedProcedures.map((name) => ({ name, quantity: 1 }));
+    const procedures = buildProceduresPayload();
 
     const { error } = await supabase
       .from("bookings")
@@ -396,7 +435,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
         trip_brief_id: briefId,
         procedures,
         preferred_dates: {
-          text: isFlexible ? "Flexible" : `${windowStart || ""} ${windowEnd ? `→ ${windowEnd}` : ""}`.trim(),
+          text: isFlexible ? "flexible" : `${windowStart || ""} ${windowEnd ? `→ ${windowEnd}` : ""}`.trim(),
         },
         status: "inquiry",
         booking_type: "direct",
@@ -413,7 +452,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     if (!user) return;
     setSaving(true);
 
-    const procedures = selectedProcedures.map((name) => ({ name, quantity: 1 }));
+    const procedures = buildProceduresPayload();
 
     const payload: any = {
       user_id: user.id,
@@ -451,7 +490,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
     setSaving(false);
     if (result.error) {
-      toast({ title: "Error saving", description: result.error.message, variant: "destructive" });
+      toast({ title: "error saving", description: result.error.message, variant: "destructive" });
     } else {
       toast({
         title: editId ? "trip brief updated!" : "trip brief saved!",
@@ -468,7 +507,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     setStep(0);
     setEditId(null);
     setDestination(""); setWindowStart(""); setWindowEnd(""); setIsFlexible(false);
-    setSelectedCategories([]); setSelectedProcedures([]); setCustomProcedure(""); setProceduresUnsure(false);
+    setSelectedCategories([]); setSelectedProcedures([]); setProcedureQuantities({}); setCustomProcedure(""); setProceduresUnsure(false);
     setIsGroup(false); setGroupSize(2); setGroupMembers([{ name: "", procedures: [], notes: "" }]);
     setTripName("");
     setConsideredProviders([]); setSentBriefs(new Set());
@@ -484,9 +523,10 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
     for (const proc of selectedProcedures) {
       const price = procedurePrices[proc];
+      const qty = getQty(proc);
       if (price) {
-        totalMin += price.min;
-        totalMax += price.max;
+        totalMin += price.min * qty;
+        totalMax += price.max * qty;
       } else {
         hasMissing = true;
       }
@@ -499,7 +539,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
   const renderStep0 = () => (
     <div className="space-y-5">
       <div className="space-y-2">
-        <Label>Destination</Label>
+        <Label>destination</Label>
         <div className="grid grid-cols-3 gap-2">
           {DESTINATIONS.map((d) => (
             <button
@@ -518,22 +558,22 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       </div>
 
       <div className="space-y-3">
-        <Label>Travel Window</Label>
+        <Label>travel window</Label>
         {!isFlexible && (
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Earliest</Label>
+              <Label className="text-xs text-muted-foreground">earliest</Label>
               <Input type="date" value={windowStart} onChange={(e) => setWindowStart(e.target.value)} />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Latest</Label>
+              <Label className="text-xs text-muted-foreground">latest</Label>
               <Input type="date" value={windowEnd} onChange={(e) => setWindowEnd(e.target.value)} />
             </div>
           </div>
         )}
         <label className="flex items-center gap-2 cursor-pointer">
           <Checkbox checked={isFlexible} onCheckedChange={(v) => setIsFlexible(!!v)} />
-          <span className="text-sm text-muted-foreground">I'm flexible on dates</span>
+          <span className="text-sm text-muted-foreground">i'm flexible on dates</span>
         </label>
       </div>
     </div>
@@ -547,7 +587,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       <div className="space-y-4">
         <label className="flex items-center gap-2 cursor-pointer p-3 rounded-lg border border-white/10 bg-white/5">
           <Checkbox checked={proceduresUnsure} onCheckedChange={(v) => setProceduresUnsure(!!v)} />
-          <span className="text-sm">I'm not sure yet — I want to explore options</span>
+          <span className="text-sm">i'm not sure yet — i want to explore options</span>
         </label>
 
         {!proceduresUnsure && (
@@ -585,15 +625,15 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
             </div>
 
             <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground">Add something not listed</Label>
+              <Label className="text-sm text-muted-foreground">add something not listed</Label>
               <div className="flex gap-2">
                 <Input
                   value={customProcedure}
                   onChange={(e) => setCustomProcedure(e.target.value)}
-                  placeholder="e.g. Hair transplant"
+                  placeholder="e.g. hair transplant"
                   onKeyDown={(e) => e.key === "Enter" && addCustomProcedure()}
                 />
-                <Button variant="outline" size="sm" onClick={addCustomProcedure}>Add</Button>
+                <Button variant="outline" size="sm" onClick={addCustomProcedure}>add</Button>
               </div>
             </div>
 
@@ -601,15 +641,36 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
               <div className="space-y-2 pt-1">
                 {selectedProcedures.map((p) => {
                   const price = procedurePrices[p];
+                  const qty = getQty(p);
                   return (
                     <div key={p} className="flex items-center justify-between gap-2">
                       <Badge variant="secondary" className="gap-1 text-xs">
                         {p}
                         <button onClick={() => toggleProcedure(p)}><X className="w-2.5 h-2.5" /></button>
                       </Badge>
+                      {/* Quantity controls */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          onClick={() => setQty(p, qty - 1)}
+                          disabled={qty <= 1}
+                          className="w-5 h-5 rounded border border-white/20 flex items-center justify-center text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:border-white/40"
+                          style={{ color: "#B0B0B0" }}
+                        >
+                          —
+                        </button>
+                        <span className="text-xs w-4 text-center font-medium">{qty}</span>
+                        <button
+                          onClick={() => setQty(p, qty + 1)}
+                          disabled={qty >= 10}
+                          className="w-5 h-5 rounded border border-white/20 flex items-center justify-center text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:border-white/40"
+                          style={{ color: "#B0B0B0" }}
+                        >
+                          +
+                        </button>
+                      </div>
                       <span className="text-[11px] shrink-0" style={{ color: "#B0B0B0" }}>
                         {price
-                          ? `est. $${price.min.toLocaleString()}–$${price.max.toLocaleString()}`
+                          ? `est. $${(price.min * qty).toLocaleString()}–$${(price.max * qty).toLocaleString()}`
                           : "n/a"
                         }
                       </span>
@@ -650,8 +711,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         {[
-          { id: false, label: "Just me", icon: "🧍" },
-          { id: true, label: "Group trip", icon: "👥" },
+          { id: false, label: "just me", icon: "🧍" },
+          { id: true, label: "group trip", icon: "👥" },
         ].map((opt) => (
           <button
             key={String(opt.id)}
@@ -671,7 +732,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       {isGroup && (
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <Label>Number of people</Label>
+            <Label>number of people</Label>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateGroupSize(Math.max(2, groupSize - 1))}>
                 <Minus className="w-3 h-3" />
@@ -687,11 +748,11 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
             {groupMembers.map((member, idx) => (
               <div key={idx} className="p-3 rounded-lg border border-white/10 bg-white/5 space-y-3">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground font-medium w-16">Person {idx + 1}</span>
+                  <span className="text-xs text-muted-foreground font-medium w-16">person {idx + 1}</span>
                   <Input
                     value={member.name}
                     onChange={(e) => updateMember(idx, "name", e.target.value)}
-                    placeholder="Name (optional)"
+                    placeholder="name (optional)"
                     className="h-8 text-sm flex-1"
                   />
                 </div>
@@ -717,7 +778,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                       onClick={() => copyMyProcedures(idx)}
                       className="text-xs px-2 py-0.5 rounded-full border border-white/20 text-white/50 hover:text-white"
                     >
-                      Same as me
+                      same as me
                     </button>
                   )}
                 </div>
@@ -733,6 +794,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     <MatchedProvidersStep
       destination={destination}
       selectedProcedures={selectedProcedures}
+      procedureQuantities={procedureQuantities}
       consideredProviders={consideredProviders}
       onConsideredChange={setConsideredProviders}
       sentBriefs={sentBriefs}
@@ -741,68 +803,89 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     />
   );
 
-  const renderStep4 = () => (
-    <div className="space-y-5">
-      <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2 text-sm">
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <MapPin className="w-4 h-4" />
-          <span>{destination || "No destination selected"}</span>
-        </div>
-        {!isFlexible && (windowStart || windowEnd) && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="w-4 h-4" />
-            <span>{windowStart} {windowEnd ? `→ ${windowEnd}` : ""}</span>
-          </div>
-        )}
-        {isFlexible && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="w-4 h-4" />
-            <span>Flexible on dates</span>
-          </div>
-        )}
-        {(selectedProcedures.length > 0 || proceduresUnsure) && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Stethoscope className="w-4 h-4" />
-            <span>{proceduresUnsure ? "Exploring options" : selectedProcedures.slice(0, 3).join(", ") + (selectedProcedures.length > 3 ? ` +${selectedProcedures.length - 3} more` : "")}</span>
-          </div>
-        )}
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <Users className="w-4 h-4" />
-          <span>{isGroup ? `Group of ${groupSize}` : "Just me"}</span>
-        </div>
-        {consideredProviders.length > 0 || sentBriefs.size > 0 ? (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Building2 className="w-4 h-4" />
-            <span>
-              {consideredProviders.length} provider(s) added
-              {sentBriefs.size > 0 ? ` · ${sentBriefs.size} brief(s) sent` : ""}
-            </span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Building2 className="w-4 h-4" />
-            <span>no providers added yet — you can add them later</span>
-          </div>
-        )}
-      </div>
+  const renderStep4 = () => {
+    const { totalMin, totalMax, hasMissing } = getRunningTotal();
+    const hasAnyPrice = totalMin > 0 || totalMax > 0;
 
-      <div className="space-y-2">
-        <Label>Trip Name</Label>
-        <Input
-          placeholder={autoName()}
-          value={tripName}
-          onChange={(e) => setTripName(e.target.value)}
-        />
-        <p className="text-xs text-muted-foreground">Leave blank to use the suggested name</p>
+    return (
+      <div className="space-y-5">
+        <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2 text-sm">
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <MapPin className="w-4 h-4" />
+            <span>{destination || "no destination selected"}</span>
+          </div>
+          {!isFlexible && (windowStart || windowEnd) && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="w-4 h-4" />
+              <span>{windowStart} {windowEnd ? `→ ${windowEnd}` : ""}</span>
+            </div>
+          )}
+          {isFlexible && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="w-4 h-4" />
+              <span>flexible on dates</span>
+            </div>
+          )}
+          {(selectedProcedures.length > 0 || proceduresUnsure) && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Stethoscope className="w-4 h-4" />
+              <span>
+                {proceduresUnsure
+                  ? "exploring options"
+                  : selectedProcedures.slice(0, 3).map((p) => procLabel(p)).join(", ") + (selectedProcedures.length > 3 ? ` +${selectedProcedures.length - 3} more` : "")
+                }
+              </span>
+            </div>
+          )}
+          {hasAnyPrice && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <span className="w-4 h-4 text-center text-xs">$</span>
+              <span>
+                {hasMissing
+                  ? `estimated total: $${totalMin.toLocaleString()}+`
+                  : `estimated total: $${totalMin.toLocaleString()}–$${totalMax.toLocaleString()}`
+                }
+              </span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Users className="w-4 h-4" />
+            <span>{isGroup ? `group of ${groupSize}` : "just me"}</span>
+          </div>
+          {consideredProviders.length > 0 || sentBriefs.size > 0 ? (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Building2 className="w-4 h-4" />
+              <span>
+                {consideredProviders.length} provider(s) added
+                {sentBriefs.size > 0 ? ` · ${sentBriefs.size} brief(s) sent` : ""}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Building2 className="w-4 h-4" />
+              <span>no providers added yet — you can add them later</span>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label>trip name</Label>
+          <Input
+            placeholder={autoName()}
+            value={tripName}
+            onChange={(e) => setTripName(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">leave blank to use the suggested name</p>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const STEP_RENDERERS = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4];
   const STEP_ICONS = [MapPin, Stethoscope, Users, Building2, FileText];
 
   const stepTitle = step === 3
-    ? `providers near ${(destination || "you").toLowerCase()}`
+    ? `providers near ${(destination || "you").toLowerCase()}${selectedProcedures.length > 0 ? ` for ${selectedProcedures.map((p) => procLabel(p)).join(", ")}` : ""}`
     : STEPS[step];
 
   return (
@@ -840,7 +923,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
         <div className="flex gap-3 pt-2">
           {step > 0 && (
             <Button variant="outline" className="flex-1" onClick={() => handleStepChange(step - 1)}>
-              <ChevronLeft className="w-4 h-4 mr-1" /> Back
+              <ChevronLeft className="w-4 h-4 mr-1" /> back
             </Button>
           )}
           {step < STEPS.length - 1 ? (
@@ -849,7 +932,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
               onClick={() => handleStepChange(step + 1)}
               disabled={!canNext()}
             >
-              Next <ChevronRight className="w-4 h-4 ml-1" />
+              next <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (
             <Button className="flex-1" onClick={handleSave} disabled={saving || !user}>

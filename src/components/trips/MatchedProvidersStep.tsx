@@ -19,6 +19,7 @@ interface MatchedProvider {
 interface MatchedProvidersStepProps {
   destination: string;
   selectedProcedures: string[];
+  procedureQuantities?: Record<string, number>;
   consideredProviders: string[];
   onConsideredChange: (providers: string[]) => void;
   sentBriefs: Set<string>;
@@ -29,6 +30,7 @@ interface MatchedProvidersStepProps {
 const MatchedProvidersStep = ({
   destination,
   selectedProcedures,
+  procedureQuantities = {},
   consideredProviders,
   onConsideredChange,
   sentBriefs,

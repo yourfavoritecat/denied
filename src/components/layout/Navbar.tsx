@@ -142,7 +142,7 @@ const Navbar = () => {
               onClick={() => navigate(user ? "/my-trips?plan=new" : "/auth")}
             >
               <PlusCircle className="w-3.5 h-3.5 shrink-0" />
-              Plan a Trip
+              plan a trip
             </Button>
 
             {/* Notification bell - visible on all sizes when logged in */}
@@ -253,7 +253,7 @@ const Navbar = () => {
                       style={{ color: '#3BF07A' }}
                     >
                       <PlusCircle className="w-5 h-5" />
-                      Plan a Trip
+                      plan a trip
                     </button>
                   </div>
 
