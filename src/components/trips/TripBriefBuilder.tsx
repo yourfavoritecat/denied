@@ -1,19 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Slider } from "@/components/ui/slider";
 import {
-  MapPin, Calendar, Stethoscope, Users, DollarSign, FileText,
+  MapPin, Calendar, Stethoscope, Users, FileText,
   ChevronRight, ChevronLeft, X, Plus, Minus, Check, Building2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import MatchedProvidersStep from "./MatchedProvidersStep";
+
+const DRAFT_KEY = "denied_trip_brief_draft";
 
 /* ─── Data ─── */
 const DESTINATIONS = [
@@ -40,15 +41,7 @@ const CATEGORIES = [
   ]},
 ];
 
-const BUDGET_PRESETS = [
-  { label: "Under $1,000", value: "under_1k" },
-  { label: "$1,000 – $3,000", value: "1k_3k" },
-  { label: "$3,000 – $5,000", value: "3k_5k" },
-  { label: "$5,000+", value: "5k_plus" },
-  { label: "No budget in mind", value: "no_budget" },
-];
-
-const STEPS = ["Where & When", "What do you need?", "Who's going?", "Budget", "Matched Providers", "Save Trip"];
+const STEPS = ["Where & When", "What do you need?", "Who's going?", "Matched Providers", "Save Trip"];
 
 /* ─── Types ─── */
 interface GroupMember {
@@ -80,6 +73,11 @@ interface TripBriefBuilderProps {
   editBrief?: EditBrief | null;
 }
 
+interface ProcedurePriceRange {
+  min: number;
+  max: number;
+}
+
 /* ─── Step indicator ─── */
 const StepDots = ({ current, total }: { current: number; total: number }) => (
   <div className="flex gap-1.5 justify-center">
@@ -94,12 +92,53 @@ const StepDots = ({ current, total }: { current: number; total: number }) => (
   </div>
 );
 
+/* ─── Draft helpers ─── */
+interface DraftState {
+  destination: string;
+  windowStart: string;
+  windowEnd: string;
+  isFlexible: boolean;
+  selectedCategories: string[];
+  selectedProcedures: string[];
+  proceduresUnsure: boolean;
+  isGroup: boolean;
+  groupSize: number;
+  groupMembers: GroupMember[];
+  consideredProviders: string[];
+  tripName: string;
+  step: number;
+}
+
+const saveDraft = (state: DraftState) => {
+  try {
+    localStorage.setItem(DRAFT_KEY, JSON.stringify(state));
+  } catch {}
+};
+
+const loadDraft = (): DraftState | null => {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+const clearDraft = () => {
+  try {
+    localStorage.removeItem(DRAFT_KEY);
+  } catch {}
+};
+
 /* ─── Main component ─── */
 const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefBuilderProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const [pendingDraft, setPendingDraft] = useState<DraftState | null>(null);
 
   // Step 1: Where & When
   const [destination, setDestination] = useState("");
@@ -112,6 +151,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
   const [selectedProcedures, setSelectedProcedures] = useState<string[]>([]);
   const [customProcedure, setCustomProcedure] = useState("");
   const [proceduresUnsure, setProceduresUnsure] = useState(false);
+  const [procedurePrices, setProcedurePrices] = useState<Record<string, ProcedurePriceRange>>({});
 
   // Step 3: Who
   const [isGroup, setIsGroup] = useState(false);
@@ -120,18 +160,89 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     { name: "", procedures: [], notes: "" },
   ]);
 
-  // Step 4: Budget
-  const [budgetRange, setBudgetRange] = useState("no_budget");
-
-  // Step 5: Matched Providers
+  // Step 4: Matched Providers
   const [consideredProviders, setConsideredProviders] = useState<string[]>([]);
   const [sentBriefs, setSentBriefs] = useState<Set<string>>(new Set());
 
-  // Step 6: Name
+  // Step 5: Name
   const [tripName, setTripName] = useState("");
 
   // Track editing ID
   const [editId, setEditId] = useState<string | null>(null);
+
+  /* ─── Check for draft on open ─── */
+  useEffect(() => {
+    if (open && !editBrief) {
+      const draft = loadDraft();
+      if (draft) {
+        setPendingDraft(draft);
+        setShowDraftPrompt(true);
+      }
+    }
+  }, [open, editBrief]);
+
+  const restoreDraft = (draft: DraftState) => {
+    setDestination(draft.destination);
+    setWindowStart(draft.windowStart);
+    setWindowEnd(draft.windowEnd);
+    setIsFlexible(draft.isFlexible);
+    setSelectedCategories(draft.selectedCategories);
+    setSelectedProcedures(draft.selectedProcedures);
+    setProceduresUnsure(draft.proceduresUnsure);
+    setIsGroup(draft.isGroup);
+    setGroupSize(draft.groupSize);
+    setGroupMembers(draft.groupMembers);
+    setConsideredProviders(draft.consideredProviders);
+    setTripName(draft.tripName);
+    setStep(draft.step);
+    setShowDraftPrompt(false);
+    setPendingDraft(null);
+  };
+
+  const dismissDraft = () => {
+    clearDraft();
+    setShowDraftPrompt(false);
+    setPendingDraft(null);
+  };
+
+  /* ─── Save draft on step change ─── */
+  const persistDraft = useCallback(() => {
+    if (editId) return; // don't save drafts when editing
+    saveDraft({
+      destination, windowStart, windowEnd, isFlexible,
+      selectedCategories, selectedProcedures, proceduresUnsure,
+      isGroup, groupSize, groupMembers,
+      consideredProviders, tripName, step,
+    });
+  }, [destination, windowStart, windowEnd, isFlexible, selectedCategories, selectedProcedures, proceduresUnsure, isGroup, groupSize, groupMembers, consideredProviders, tripName, step, editId]);
+
+  /* ─── Fetch procedure prices ─── */
+  useEffect(() => {
+    if (selectedProcedures.length === 0) {
+      setProcedurePrices({});
+      return;
+    }
+    supabase
+      .from("provider_services")
+      .select("procedure_name, base_price_usd")
+      .in("procedure_name", selectedProcedures)
+      .then(({ data }) => {
+        if (!data) return;
+        const prices: Record<string, ProcedurePriceRange> = {};
+        for (const row of data) {
+          const name = row.procedure_name;
+          const price = Number(row.base_price_usd);
+          if (price <= 0) continue;
+          if (!prices[name]) {
+            prices[name] = { min: price, max: price };
+          } else {
+            prices[name].min = Math.min(prices[name].min, price);
+            prices[name].max = Math.max(prices[name].max, price);
+          }
+        }
+        setProcedurePrices(prices);
+      });
+  }, [selectedProcedures]);
 
   /* ─── Populate when editing ─── */
   useEffect(() => {
@@ -152,12 +263,10 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
           ? gm.map((m: any) => ({ name: m.name || "", procedures: m.procedures || [], notes: m.notes || "" }))
           : [{ name: "", procedures: [], notes: "" }]
       );
-      setBudgetRange(editBrief.budget_range || "no_budget");
       setTripName(editBrief.trip_name || "");
       setConsideredProviders(
         Array.isArray(editBrief.considered_providers) ? editBrief.considered_providers : []
       );
-      // Load sent briefs for this trip
       if (editBrief.id) {
         loadSentBriefs(editBrief.id);
       }
@@ -232,14 +341,27 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     return true;
   };
 
-  /* ─── Send brief to provider (creates booking inquiry) ─── */
+  const handleStepChange = (newStep: number) => {
+    setStep(newStep);
+    // Save draft after state updates (next tick)
+    setTimeout(() => {
+      if (!editId) {
+        saveDraft({
+          destination, windowStart, windowEnd, isFlexible,
+          selectedCategories, selectedProcedures, proceduresUnsure,
+          isGroup, groupSize, groupMembers,
+          consideredProviders, tripName, step: newStep,
+        });
+      }
+    }, 0);
+  };
+
+  /* ─── Send brief to provider ─── */
   const handleSendBrief = async (providerSlug: string) => {
     if (!user) return;
 
-    // We need a saved brief ID first. If editing, use editId. Otherwise save first.
     let briefId = editId;
     if (!briefId) {
-      // Quick-save the brief first
       const procedures = selectedProcedures.map((name) => ({ name, quantity: 1 }));
       const payload: any = {
         user_id: user.id,
@@ -253,7 +375,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
         procedures_unsure: proceduresUnsure,
         is_group: isGroup,
         group_members: isGroup ? groupMembers : [],
-        budget_range: budgetRange,
+        budget_range: "no_budget",
         considered_providers: consideredProviders,
         status: "planning",
       };
@@ -308,14 +430,13 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       procedures_unsure: proceduresUnsure,
       is_group: isGroup,
       group_members: isGroup ? groupMembers : [],
-      budget_range: budgetRange,
+      budget_range: "no_budget",
       considered_providers: consideredProviders,
       status: "planning",
     };
 
     let result;
     if (editId) {
-      // Update existing
       const { user_id, status, ...updatePayload } = payload;
       result = await supabase
         .from("trip_briefs" as any)
@@ -336,9 +457,10 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       toast({ title: "Error saving", description: result.error.message, variant: "destructive" });
     } else {
       toast({
-        title: editId ? "Trip Brief Updated!" : "Trip Brief Saved!",
-        description: editId ? "Your changes have been saved." : "Browse providers to start getting quotes, or come back anytime.",
+        title: editId ? "trip brief updated!" : "trip brief saved!",
+        description: editId ? "your changes have been saved." : "you can add providers or come back anytime.",
       });
+      clearDraft();
       onOpenChange(false);
       onSaved?.((result.data as any)?.id);
       resetAll();
@@ -351,8 +473,29 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     setDestination(""); setWindowStart(""); setWindowEnd(""); setIsFlexible(false);
     setSelectedCategories([]); setSelectedProcedures([]); setCustomProcedure(""); setProceduresUnsure(false);
     setIsGroup(false); setGroupSize(2); setGroupMembers([{ name: "", procedures: [], notes: "" }]);
-    setBudgetRange("no_budget"); setTripName("");
+    setTripName("");
     setConsideredProviders([]); setSentBriefs(new Set());
+    setShowDraftPrompt(false); setPendingDraft(null);
+    setProcedurePrices({});
+  };
+
+  /* ─── Pricing helpers ─── */
+  const getRunningTotal = () => {
+    let totalMin = 0;
+    let totalMax = 0;
+    let hasMissing = false;
+
+    for (const proc of selectedProcedures) {
+      const price = procedurePrices[proc];
+      if (price) {
+        totalMin += price.min;
+        totalMax += price.max;
+      } else {
+        hasMissing = true;
+      }
+    }
+
+    return { totalMin, totalMax, hasMissing };
   };
 
   /* ─── Step renders ─── */
@@ -399,74 +542,112 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     </div>
   );
 
-  const renderStep1 = () => (
-    <div className="space-y-4">
-      <label className="flex items-center gap-2 cursor-pointer p-3 rounded-lg border border-white/10 bg-white/5">
-        <Checkbox checked={proceduresUnsure} onCheckedChange={(v) => setProceduresUnsure(!!v)} />
-        <span className="text-sm">I'm not sure yet — I want to explore options</span>
-      </label>
+  const renderStep1 = () => {
+    const { totalMin, totalMax, hasMissing } = getRunningTotal();
+    const hasAnyPrice = totalMin > 0 || totalMax > 0;
 
-      {!proceduresUnsure && (
-        <>
-          <div className="space-y-3">
-            {CATEGORIES.map((cat) => (
-              <div key={cat.id} className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <Checkbox
-                    checked={selectedCategories.includes(cat.id)}
-                    onCheckedChange={() => toggleCategory(cat.id)}
-                  />
-                  <span className="font-medium text-sm">{cat.label}</span>
-                </label>
-                {selectedCategories.includes(cat.id) && (
-                  <div className="ml-6 flex flex-wrap gap-1.5">
-                    {cat.procedures.map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => toggleProcedure(p)}
-                        className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
-                          selectedProcedures.includes(p)
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-white/20 text-white/60 hover:border-white/40"
-                        }`}
-                      >
-                        {selectedProcedures.includes(p) && <Check className="w-2.5 h-2.5 inline mr-1" />}
+    return (
+      <div className="space-y-4">
+        <label className="flex items-center gap-2 cursor-pointer p-3 rounded-lg border border-white/10 bg-white/5">
+          <Checkbox checked={proceduresUnsure} onCheckedChange={(v) => setProceduresUnsure(!!v)} />
+          <span className="text-sm">I'm not sure yet — I want to explore options</span>
+        </label>
+
+        {!proceduresUnsure && (
+          <>
+            <div className="space-y-3">
+              {CATEGORIES.map((cat) => (
+                <div key={cat.id} className="space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <Checkbox
+                      checked={selectedCategories.includes(cat.id)}
+                      onCheckedChange={() => toggleCategory(cat.id)}
+                    />
+                    <span className="font-medium text-sm">{cat.label}</span>
+                  </label>
+                  {selectedCategories.includes(cat.id) && (
+                    <div className="ml-6 flex flex-wrap gap-1.5">
+                      {cat.procedures.map((p) => (
+                        <button
+                          key={p}
+                          onClick={() => toggleProcedure(p)}
+                          className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
+                            selectedProcedures.includes(p)
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-white/20 text-white/60 hover:border-white/40"
+                          }`}
+                        >
+                          {selectedProcedures.includes(p) && <Check className="w-2.5 h-2.5 inline mr-1" />}
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm text-muted-foreground">Add something not listed</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={customProcedure}
+                  onChange={(e) => setCustomProcedure(e.target.value)}
+                  placeholder="e.g. Hair transplant"
+                  onKeyDown={(e) => e.key === "Enter" && addCustomProcedure()}
+                />
+                <Button variant="outline" size="sm" onClick={addCustomProcedure}>Add</Button>
+              </div>
+            </div>
+
+            {selectedProcedures.length > 0 && (
+              <div className="space-y-2 pt-1">
+                {selectedProcedures.map((p) => {
+                  const price = procedurePrices[p];
+                  return (
+                    <div key={p} className="flex items-center justify-between gap-2">
+                      <Badge variant="secondary" className="gap-1 text-xs">
                         {p}
-                      </button>
-                    ))}
+                        <button onClick={() => toggleProcedure(p)}><X className="w-2.5 h-2.5" /></button>
+                      </Badge>
+                      <span className="text-[11px] shrink-0" style={{ color: "#B0B0B0" }}>
+                        {price
+                          ? `est. $${price.min.toLocaleString()}–$${price.max.toLocaleString()}`
+                          : "pricing varies"
+                        }
+                      </span>
+                    </div>
+                  );
+                })}
+
+                {/* Running total */}
+                {selectedProcedures.length > 0 && (
+                  <div className="pt-2 border-t border-white/10 space-y-1">
+                    <p className="text-sm font-medium text-white">
+                      {hasAnyPrice
+                        ? hasMissing
+                          ? `estimated total: $${totalMin.toLocaleString()}+`
+                          : `estimated total: $${totalMin.toLocaleString()}–$${totalMax.toLocaleString()}`
+                        : "estimated total: pricing varies"
+                      }
+                    </p>
+                    {hasMissing && hasAnyPrice && (
+                      <p className="text-[10px]" style={{ color: "#B0B0B0" }}>
+                        some procedures don't have pricing yet
+                      </p>
+                    )}
+                    <p className="text-[10px] italic" style={{ color: "#B0B0B0" }}>
+                      estimates based on provider data · actual prices vary
+                    </p>
                   </div>
                 )}
               </div>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm text-muted-foreground">Add something not listed</Label>
-            <div className="flex gap-2">
-              <Input
-                value={customProcedure}
-                onChange={(e) => setCustomProcedure(e.target.value)}
-                placeholder="e.g. Hair transplant"
-                onKeyDown={(e) => e.key === "Enter" && addCustomProcedure()}
-              />
-              <Button variant="outline" size="sm" onClick={addCustomProcedure}>Add</Button>
-            </div>
-          </div>
-
-          {selectedProcedures.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              {selectedProcedures.map((p) => (
-                <Badge key={p} variant="secondary" className="gap-1 text-xs">
-                  {p}
-                  <button onClick={() => toggleProcedure(p)}><X className="w-2.5 h-2.5" /></button>
-                </Badge>
-              ))}
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
 
   const renderStep2 = () => (
     <div className="space-y-4">
@@ -552,26 +733,6 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
   );
 
   const renderStep3 = () => (
-    <div className="space-y-3">
-      <p className="text-sm text-muted-foreground">This is optional but helps match you with providers who fit your budget.</p>
-      {BUDGET_PRESETS.map((preset) => (
-        <button
-          key={preset.value}
-          onClick={() => setBudgetRange(preset.value)}
-          className={`w-full p-3.5 rounded-lg border text-left text-sm font-medium transition-all ${
-            budgetRange === preset.value
-              ? "border-primary bg-primary/10 text-primary"
-              : "border-white/10 bg-white/5 text-white/70 hover:border-white/30"
-          }`}
-        >
-          {budgetRange === preset.value && <Check className="w-4 h-4 inline mr-2" />}
-          {preset.label}
-        </button>
-      ))}
-    </div>
-  );
-
-  const renderStep4 = () => (
     <MatchedProvidersStep
       destination={destination}
       selectedProcedures={selectedProcedures}
@@ -579,11 +740,11 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       onConsideredChange={setConsideredProviders}
       sentBriefs={sentBriefs}
       onSendBrief={handleSendBrief}
-      onSkip={() => setStep(5)}
+      onSkip={() => handleStepChange(4)}
     />
   );
 
-  const renderStep5 = () => (
+  const renderStep4 = () => (
     <div className="space-y-5">
       <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2 text-sm">
         <div className="flex items-center gap-2 text-muted-foreground">
@@ -612,17 +773,18 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
           <Users className="w-4 h-4" />
           <span>{isGroup ? `Group of ${groupSize}` : "Just me"}</span>
         </div>
-        <div className="flex items-center gap-2 text-muted-foreground">
-          <DollarSign className="w-4 h-4" />
-          <span>{BUDGET_PRESETS.find((b) => b.value === budgetRange)?.label || "No budget set"}</span>
-        </div>
-        {(consideredProviders.length > 0 || sentBriefs.size > 0) && (
+        {consideredProviders.length > 0 || sentBriefs.size > 0 ? (
           <div className="flex items-center gap-2 text-muted-foreground">
             <Building2 className="w-4 h-4" />
             <span>
               {consideredProviders.length} provider(s) added
               {sentBriefs.size > 0 ? ` · ${sentBriefs.size} brief(s) sent` : ""}
             </span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Building2 className="w-4 h-4" />
+            <span>no providers added yet — you can add them later</span>
           </div>
         )}
       </div>
@@ -639,10 +801,10 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     </div>
   );
 
-  const STEP_RENDERERS = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5];
-  const STEP_ICONS = [MapPin, Stethoscope, Users, DollarSign, Building2, FileText];
+  const STEP_RENDERERS = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4];
+  const STEP_ICONS = [MapPin, Stethoscope, Users, Building2, FileText];
 
-  const stepTitle = step === 4
+  const stepTitle = step === 3
     ? `providers near ${(destination || "you").toLowerCase()}`
     : STEPS[step];
 
@@ -657,27 +819,44 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
           <StepDots current={step} total={STEPS.length} />
         </DialogHeader>
 
+        {/* Draft resume prompt */}
+        {showDraftPrompt && pendingDraft && (
+          <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
+            <p className="text-sm">you have an unfinished trip brief. pick up where you left off?</p>
+            <div className="flex items-center gap-3">
+              <Button size="sm" onClick={() => restoreDraft(pendingDraft)}>continue</Button>
+              <button
+                onClick={dismissDraft}
+                className="text-sm hover:underline"
+                style={{ color: "#B0B0B0" }}
+              >
+                start fresh
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="py-2">
           {STEP_RENDERERS[step]()}
         </div>
 
         <div className="flex gap-3 pt-2">
           {step > 0 && (
-            <Button variant="outline" className="flex-1" onClick={() => setStep((s) => s - 1)}>
+            <Button variant="outline" className="flex-1" onClick={() => handleStepChange(step - 1)}>
               <ChevronLeft className="w-4 h-4 mr-1" /> Back
             </Button>
           )}
           {step < STEPS.length - 1 ? (
             <Button
               className="flex-1"
-              onClick={() => setStep((s) => s + 1)}
+              onClick={() => handleStepChange(step + 1)}
               disabled={!canNext()}
             >
               Next <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (
             <Button className="flex-1" onClick={handleSave} disabled={saving || !user}>
-              {saving ? "Saving..." : editId ? "Update Trip Brief" : "Save Trip Brief"}
+              {saving ? "saving..." : editId ? "update trip brief" : "save trip brief"}
             </Button>
           )}
         </div>
