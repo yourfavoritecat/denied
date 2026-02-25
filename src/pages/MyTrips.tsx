@@ -17,6 +17,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import TripBriefBuilder from "@/components/trips/TripBriefBuilder";
 
+/* ─── Normalize procedures helper ─── */
+const normalizeProcedures = (procs: any[] | null): { name: string; quantity: number }[] => {
+  if (!procs || procs.length === 0) return [];
+  if (typeof procs[0] === "string") {
+    return procs.map((p: string) => ({ name: p, quantity: 1 }));
+  }
+  return procs.map((p: any) => ({ name: p.name, quantity: p.quantity || 1 }));
+};
+
 /* ─── Types ─── */
 interface TripBrief {
   id: string;
@@ -25,7 +34,7 @@ interface TripBrief {
   travel_window_start: string | null;
   travel_window_end: string | null;
   is_flexible: boolean;
-  procedures: { name: string; quantity: number }[] | null;
+  procedures: any[] | null;
   is_group: boolean;
   group_members: { name: string; procedures: string[] }[] | null;
   budget_range: string | null;
@@ -119,19 +128,20 @@ const buildCardTitle = (brief: TripBrief) => {
     }
     return `${dest} ${start}, ${y}`.trim();
   }
-  return brief.trip_name;
+  return brief.trip_name?.toLowerCase() || brief.trip_name;
 };
 
 /* ─── Estimated Cost Range ─── */
-const EstimatedCostRange = ({ procedures }: { procedures: { name: string; quantity: number }[] | null }) => {
+const EstimatedCostRange = ({ procedures }: { procedures: any[] | null }) => {
   const [result, setResult] = useState<{ totalLow: number; totalHigh: number; matched: number; unmatched: number } | null>(null);
+  const normalized = normalizeProcedures(procedures);
 
   useEffect(() => {
-    if (!procedures || procedures.length === 0) {
+    if (normalized.length === 0) {
       setResult({ totalLow: 0, totalHigh: 0, matched: 0, unmatched: 0 });
       return;
     }
-    const lowerNames = procedures.map((p) => p.name.toLowerCase());
+    const lowerNames = normalized.map((p) => p.name.toLowerCase());
     supabase
       .from("procedure_pricing_reference" as any)
       .select("procedure_name, est_low, est_high")
@@ -143,8 +153,10 @@ const EstimatedCostRange = ({ procedures }: { procedures: { name: string; quanti
         if (data) {
           for (const row of data as any[]) {
             matched.add(row.procedure_name);
-            totalLow += Number(row.est_low);
-            totalHigh += Number(row.est_high);
+            const proc = normalized.find((p) => p.name.toLowerCase() === row.procedure_name);
+            const qty = proc?.quantity || 1;
+            totalLow += Number(row.est_low) * qty;
+            totalHigh += Number(row.est_high) * qty;
           }
         }
         setResult({
@@ -156,7 +168,7 @@ const EstimatedCostRange = ({ procedures }: { procedures: { name: string; quanti
       });
   }, [procedures]);
 
-  if (!result || (!procedures || procedures.length === 0)) return null;
+  if (!result || normalized.length === 0) return null;
 
   let text: string;
   if (result.matched === 0) {
@@ -279,7 +291,7 @@ const TripBriefCard = ({
         {/* Procedures */}
         {brief.procedures && brief.procedures.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {brief.procedures.map((p, i) => (
+            {normalizeProcedures(brief.procedures).map((p, i) => (
               <Badge key={i} variant="outline" className="text-xs border-white/20">
                 <Stethoscope className="w-2.5 h-2.5 mr-1" />
                 {p.name} {p.quantity > 1 ? `×${p.quantity}` : ""}

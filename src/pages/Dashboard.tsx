@@ -139,10 +139,10 @@ const Dashboard = () => {
             className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
           >
             {[
-              { icon: Search, label: "Find Providers", to: "/search", color: "text-blue-400" },
-              { icon: PlusCircle, label: "Plan a Trip", to: "/my-trips?plan=new", color: "text-secondary" },
-              { icon: Plane, label: "My Trips", to: "/my-trips", color: "text-emerald-400" },
-              { icon: Heart, label: "My Profile", to: "/profile", color: "text-pink-400" },
+              { icon: Search, label: "find providers", to: "/search", color: "text-blue-400" },
+              { icon: PlusCircle, label: "plan a trip", to: "/my-trips?plan=new", color: "text-secondary" },
+              { icon: Plane, label: "my trips", to: "/my-trips", color: "text-emerald-400" },
+              { icon: Heart, label: "my profile", to: "/profile", color: "text-pink-400" },
             ].map((action) => (
               <motion.div key={action.label} variants={item}>
                   <Card
