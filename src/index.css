@@ -376,4 +376,43 @@
   .stagger-children > .scroll-fade-in:nth-child(4) { transition-delay: 300ms; }
   .stagger-children > .scroll-fade-in:nth-child(5) { transition-delay: 400ms; }
   .stagger-children > .scroll-fade-in:nth-child(6) { transition-delay: 500ms; }
+
+  /* ─── Mint Tab Pills ─── */
+  [data-mint-tab][data-state="active"] {
+    background: linear-gradient(135deg, rgba(59,240,122,0.2), rgba(59,240,122,0.08)) !important;
+    border-color: rgba(59,240,122,0.3) !important;
+    color: #3BF07A !important;
+    box-shadow: 0 0 12px rgba(59,240,122,0.15);
+  }
+  [data-mint-tab][data-state="inactive"] {
+    color: #B0B0B0;
+  }
+  [data-mint-tab][data-state="inactive"]:hover {
+    color: #FFFFFF;
+    border-color: rgba(255,255,255,0.15) !important;
+  }
+
+  /* ─── Trip Brief Modal Overlay ─── */
+  .trip-modal-overlay {
+    background: rgba(0,0,0,0.7) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* ─── Trip Brief Modal Content ─── */
+  .trip-modal-content {
+    background: #111111 !important;
+    border: 1px solid rgba(59,240,122,0.12) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4) !important;
+  }
+
+  .trip-modal-content [data-radix-dialog-close] {
+    color: #B0B0B0;
+    transition: all 0.15s ease;
+  }
+  .trip-modal-content [data-radix-dialog-close]:hover {
+    color: #FFFFFF;
+    transform: scale(1.1);
+  }
 }

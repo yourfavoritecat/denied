@@ -171,8 +171,10 @@ const MatchedProvidersStep = ({
         <div className="pt-4">
           <button
             onClick={onSkip}
-            className="text-sm hover:underline"
-            style={{ color: "#B0B0B0" }}
+            className="text-sm"
+            style={{ color: "#B0B0B0", transition: "all 0.15s ease" }}
+            onMouseEnter={(e) => { e.currentTarget.style.color = "#FFFFFF"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.color = "#B0B0B0"; }}
           >
             skip this step
           </button>
@@ -196,10 +198,20 @@ const MatchedProvidersStep = ({
           return (
             <div key={provider.slug} className="space-y-0">
               <div
-                className="flex items-center gap-3 p-3 rounded-xl border transition-all"
+                className="flex items-center gap-3 p-3 transition-all"
                 style={{
-                  background: "#111111",
-                  borderColor: isAdded ? "rgba(59, 240, 122, 0.3)" : "rgba(255,255,255,0.08)",
+                  background: "rgba(17,17,17,0.6)",
+                  border: isAdded ? "1px solid rgba(59,240,122,0.3)" : "1px solid rgba(59,240,122,0.1)",
+                  borderRadius: "12px",
+                  transition: "all 0.15s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = "translateY(-1px)";
+                  e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.3)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "none";
                 }}
               >
                 {/* Avatar */}
@@ -207,7 +219,8 @@ const MatchedProvidersStep = ({
                   href={`/provider/${provider.slug}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center shrink-0 overflow-hidden"
+                  className="w-10 h-10 flex items-center justify-center shrink-0 overflow-hidden"
+                  style={{ borderRadius: "10px", background: "rgba(255,255,255,0.1)" }}
                 >
                   {provider.cover_photo_url ? (
                     <img
@@ -216,7 +229,7 @@ const MatchedProvidersStep = ({
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <Building2 className="w-5 h-5 text-white/30" />
+                    <Building2 className="w-5 h-5" style={{ color: "rgba(255,255,255,0.3)" }} />
                   )}
                 </a>
 
@@ -232,7 +245,7 @@ const MatchedProvidersStep = ({
                   </a>
                   <div className="flex items-center gap-2 mt-0.5">
                     {provider.rating && (
-                      <span className="text-xs text-white/50">
+                      <span className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>
                         ★ {provider.rating.toFixed(1)}
                       </span>
                     )}
@@ -247,18 +260,19 @@ const MatchedProvidersStep = ({
                       {provider.matchingProcedures.slice(0, 3).map((proc) => (
                         <span
                           key={proc}
-                          className="text-[10px] px-1.5 py-0.5 rounded-full"
+                          className="text-[10px] px-1.5 py-0.5"
                           style={{
                             background: "rgba(59, 240, 122, 0.1)",
                             color: "#3BF07A",
                             border: "1px solid rgba(59, 240, 122, 0.2)",
+                            borderRadius: "9999px",
                           }}
                         >
                           {proc.toLowerCase()}
                         </span>
                       ))}
                       {provider.matchingProcedures.length > 3 && (
-                        <span className="text-[10px] text-white/40">
+                        <span className="text-[10px]" style={{ color: "rgba(255,255,255,0.4)" }}>
                           +{provider.matchingProcedures.length - 3}
                         </span>
                       )}
@@ -267,24 +281,30 @@ const MatchedProvidersStep = ({
                 </div>
 
                 {/* Add button */}
-                <button
-                  onClick={() => toggleProvider(provider.slug)}
-                  disabled={isSent}
-                  className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all"
-                  style={{
-                    background: isAdded ? "#3BF07A" : "rgba(255,255,255,0.1)",
-                    color: isAdded ? "#0A0A0A" : "rgba(255,255,255,0.5)",
-                  }}
-                >
-                  {isAdded ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                </button>
+                {isSent ? (
+                  <span className="text-[10px] font-medium shrink-0" style={{ color: "#B0B0B0" }}>brief sent</span>
+                ) : (
+                  <button
+                    onClick={() => toggleProvider(provider.slug)}
+                    className="w-8 h-8 flex items-center justify-center shrink-0"
+                    style={{
+                      borderRadius: "9999px",
+                      background: isAdded ? "#3BF07A" : "transparent",
+                      border: isAdded ? "none" : "1px solid rgba(59,240,122,0.3)",
+                      color: isAdded ? "#0A0A0A" : "#3BF07A",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {isAdded ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                  </button>
+                )}
               </div>
 
               {/* Send brief prompt */}
               {showPrompt && (
                 <div
-                  className="flex items-center justify-between px-3 py-2 rounded-b-xl -mt-1 pt-3"
-                  style={{ background: "rgba(59, 240, 122, 0.05)", borderTop: "none" }}
+                  className="flex items-center justify-between px-3 py-2 -mt-1 pt-3"
+                  style={{ background: "rgba(59, 240, 122, 0.05)", borderRadius: "0 0 12px 12px", borderTop: "none" }}
                 >
                   <span className="text-xs" style={{ color: "#B0B0B0" }}>
                     send them your trip brief now?
@@ -293,15 +313,23 @@ const MatchedProvidersStep = ({
                     <button
                       onClick={() => handleSendBrief(provider.slug)}
                       disabled={sendingTo === provider.slug}
-                      className="text-xs font-medium px-3 py-1 rounded-full"
-                      style={{ background: "#3BF07A", color: "#0A0A0A" }}
+                      className="text-xs font-semibold px-3 py-1"
+                      style={{
+                        background: "linear-gradient(180deg, #4CF88A, #2DD866)",
+                        color: "#0A0A0A",
+                        borderRadius: "9999px",
+                        border: "none",
+                        transition: "all 0.15s ease",
+                      }}
                     >
                       {sendingTo === provider.slug ? "sending…" : "send brief"}
                     </button>
                     <button
                       onClick={() => dismissPrompt(provider.slug)}
-                      className="text-xs hover:underline"
-                      style={{ color: "#B0B0B0" }}
+                      className="text-xs"
+                      style={{ color: "#B0B0B0", transition: "all 0.15s ease" }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "#FFFFFF"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "#B0B0B0"; }}
                     >
                       not yet
                     </button>
@@ -311,7 +339,7 @@ const MatchedProvidersStep = ({
 
               {/* Sent label */}
               {isSent && (
-                <div className="px-3 py-1.5 rounded-b-xl -mt-1" style={{ background: "rgba(59, 240, 122, 0.05)" }}>
+                <div className="px-3 py-1.5 -mt-1" style={{ background: "rgba(59, 240, 122, 0.05)", borderRadius: "0 0 12px 12px" }}>
                   <span className="text-[10px] font-medium uppercase tracking-wide" style={{ color: "#3BF07A" }}>
                     brief sent
                   </span>
@@ -325,8 +353,10 @@ const MatchedProvidersStep = ({
       <div className="text-center pt-2">
         <button
           onClick={onSkip}
-          className="text-sm hover:underline"
-          style={{ color: "#B0B0B0" }}
+          className="text-sm"
+          style={{ color: "#B0B0B0", transition: "all 0.15s ease" }}
+          onMouseEnter={(e) => { e.currentTarget.style.color = "#FFFFFF"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.color = "#B0B0B0"; }}
         >
           skip this step
         </button>
