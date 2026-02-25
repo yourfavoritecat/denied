@@ -98,9 +98,17 @@ const StepDots = ({ current, total }: { current: number; total: number }) => (
     {Array.from({ length: total }).map((_, i) => (
       <div
         key={i}
-        className={`h-1.5 rounded-full transition-all ${
-          i === current ? "w-6 bg-primary" : i < current ? "w-1.5 bg-primary/40" : "w-1.5 bg-white/20"
-        }`}
+        className="rounded-full transition-all"
+        style={{
+          height: "6px",
+          width: i === current ? "24px" : "6px",
+          borderRadius: "9999px",
+          background: i === current
+            ? "#3BF07A"
+            : i < current
+              ? "rgba(59,240,122,0.4)"
+              : "rgba(255,255,255,0.15)",
+        }}
       />
     ))}
   </div>
@@ -544,11 +552,14 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
             <button
               key={d}
               onClick={() => setDestination(d)}
-              className={`p-2.5 rounded-lg text-sm font-medium border transition-all ${
-                destination === d
-                  ? "border-primary bg-primary/10 text-primary"
-                  : "border-white/10 bg-white/5 text-white/70 hover:border-white/30"
-              }`}
+              className="p-2.5 text-sm font-medium transition-all"
+              style={{
+                background: destination === d ? "rgba(59,240,122,0.05)" : "#111111",
+                border: destination === d ? "1px solid rgba(59,240,122,0.4)" : "1px solid rgba(255,255,255,0.08)",
+                borderRadius: "16px",
+                color: destination === d ? "#3BF07A" : "rgba(255,255,255,0.7)",
+                boxShadow: destination === d ? "0 0 12px rgba(59,240,122,0.1)" : "none",
+              }}
             >
               {d}
             </button>
@@ -607,11 +618,17 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                         <button
                           key={p}
                           onClick={() => toggleProcedure(p)}
-                          className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
-                            selectedProcedures.includes(p)
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-white/20 text-white/60 hover:border-white/40"
-                          }`}
+                          className="text-xs px-2.5 py-1 transition-all"
+                          style={{
+                            borderRadius: "9999px",
+                            border: selectedProcedures.includes(p)
+                              ? "1px solid rgba(59,240,122,0.4)"
+                              : "1px solid rgba(255,255,255,0.15)",
+                            background: selectedProcedures.includes(p)
+                              ? "rgba(59,240,122,0.08)"
+                              : "transparent",
+                            color: selectedProcedures.includes(p) ? "#3BF07A" : "rgba(255,255,255,0.6)",
+                          }}
                         >
                           {selectedProcedures.includes(p) && <Check className="w-2.5 h-2.5 inline mr-1" />}
                           {p}
@@ -643,17 +660,32 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                   const qty = getQty(p);
                   return (
                     <div key={p} className="flex items-center justify-between gap-2">
-                      <Badge variant="secondary" className="gap-1 text-xs">
+                      <span
+                        className="text-xs flex items-center gap-1 shrink-0"
+                        style={{
+                          background: "rgba(255,107,74,0.08)",
+                          border: "1px solid rgba(255,107,74,0.4)",
+                          borderRadius: "9999px",
+                          color: "#FF6B4A",
+                          padding: "3px 10px",
+                        }}
+                      >
                         {p}
-                        <button onClick={() => toggleProcedure(p)}><X className="w-2.5 h-2.5" /></button>
-                      </Badge>
+                        <button onClick={() => toggleProcedure(p)} style={{ color: "#FF6B4A" }}><X className="w-2.5 h-2.5" /></button>
+                      </span>
                       {/* Quantity controls */}
                       <div className="flex items-center gap-1.5 shrink-0">
                         <button
                           onClick={() => setQty(p, qty - 1)}
                           disabled={qty <= 1}
-                          className="w-5 h-5 rounded border border-white/20 flex items-center justify-center text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:border-white/40"
-                          style={{ color: "#B0B0B0" }}
+                          className="w-5 h-5 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
+                          style={{
+                            color: "#B0B0B0",
+                            border: "1px solid rgba(255,255,255,0.15)",
+                            borderRadius: "8px",
+                            background: "transparent",
+                            transition: "all 0.15s ease",
+                          }}
                         >
                           —
                         </button>
@@ -661,8 +693,14 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                         <button
                           onClick={() => setQty(p, qty + 1)}
                           disabled={qty >= 10}
-                          className="w-5 h-5 rounded border border-white/20 flex items-center justify-center text-xs transition-colors disabled:opacity-30 disabled:cursor-not-allowed hover:border-white/40"
-                          style={{ color: "#B0B0B0" }}
+                          className="w-5 h-5 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
+                          style={{
+                            color: "#B0B0B0",
+                            border: "1px solid rgba(255,255,255,0.15)",
+                            borderRadius: "8px",
+                            background: "transparent",
+                            transition: "all 0.15s ease",
+                          }}
                         >
                           +
                         </button>
@@ -716,14 +754,16 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
           <button
             key={String(opt.id)}
             onClick={() => setIsGroup(opt.id)}
-            className={`p-4 rounded-xl border-2 transition-all text-center ${
-              isGroup === opt.id
-                ? "border-primary bg-primary/10"
-                : "border-white/10 bg-white/5 hover:border-white/30"
-            }`}
+            className="p-4 text-center transition-all"
+            style={{
+              background: isGroup === opt.id ? "rgba(59,240,122,0.05)" : "#111111",
+              border: isGroup === opt.id ? "1px solid rgba(59,240,122,0.4)" : "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "16px",
+              boxShadow: isGroup === opt.id ? "0 0 12px rgba(59,240,122,0.1)" : "none",
+            }}
           >
             <div className="text-2xl mb-1">{opt.icon}</div>
-            <div className="font-semibold text-sm">{opt.label}</div>
+            <div className="font-semibold text-sm" style={{ color: isGroup === opt.id ? "#3BF07A" : undefined }}>{opt.label}</div>
           </button>
         ))}
       </div>
@@ -889,10 +929,10 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) resetAll(); }}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto trip-modal-content">
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
-            {(() => { const Icon = STEP_ICONS[step]; return <Icon className="w-4 h-4 text-primary" />; })()}
+            {(() => { const Icon = STEP_ICONS[step]; return <Icon className="w-4 h-4" style={{ color: "#3BF07A" }} />; })()}
             <DialogTitle className="text-lg">{stepTitle}</DialogTitle>
           </div>
           <StepDots current={step} total={STEPS.length} />
@@ -900,14 +940,25 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
         {/* Draft resume prompt */}
         {showDraftPrompt && pendingDraft && (
-          <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 space-y-2">
+          <div className="p-3 space-y-2" style={{ borderRadius: "12px", border: "1px solid rgba(59,240,122,0.2)", background: "rgba(59,240,122,0.05)" }}>
             <p className="text-sm">you have an unfinished trip brief. pick up where you left off?</p>
             <div className="flex items-center gap-3">
-              <Button size="sm" onClick={() => restoreDraft(pendingDraft)}>continue</Button>
+              <Button
+                size="sm"
+                onClick={() => restoreDraft(pendingDraft)}
+                className="font-semibold border-none"
+                style={{
+                  background: "linear-gradient(180deg, #4CF88A, #2DD866)",
+                  color: "#0A0A0A",
+                  borderRadius: "9999px",
+                }}
+              >continue</Button>
               <button
                 onClick={dismissDraft}
-                className="text-sm hover:underline"
-                style={{ color: "#B0B0B0" }}
+                className="text-sm"
+                style={{ color: "#B0B0B0", transition: "all 0.15s ease" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#FFFFFF"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "#B0B0B0"; }}
               >
                 start fresh
               </button>
@@ -921,20 +972,57 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
         <div className="flex gap-3 pt-2">
           {step > 0 && (
-            <Button variant="outline" className="flex-1" onClick={() => handleStepChange(step - 1)}>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => handleStepChange(step - 1)}
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                border: "1px solid rgba(255,255,255,0.1)",
+                borderRadius: "9999px",
+                color: "#B0B0B0",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
+                e.currentTarget.style.color = "#FFFFFF";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                e.currentTarget.style.color = "#B0B0B0";
+              }}
+            >
               <ChevronLeft className="w-4 h-4 mr-1" /> back
             </Button>
           )}
           {step < STEPS.length - 1 ? (
             <Button
-              className="flex-1"
+              className="flex-1 font-semibold border-none"
               onClick={() => handleStepChange(step + 1)}
               disabled={!canNext()}
+              style={{
+                background: canNext() ? "linear-gradient(180deg, #4CF88A, #2DD866)" : "rgba(255,255,255,0.1)",
+                color: canNext() ? "#0A0A0A" : "rgba(255,255,255,0.3)",
+                borderRadius: "9999px",
+                boxShadow: canNext() ? "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)" : "none",
+                transition: "all 0.15s ease",
+              }}
             >
               next <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (
-            <Button className="flex-1" onClick={handleSave} disabled={saving || !user}>
+            <Button
+              className="flex-1 font-semibold border-none"
+              onClick={handleSave}
+              disabled={saving || !user}
+              style={{
+                background: "linear-gradient(180deg, #4CF88A, #2DD866)",
+                color: "#0A0A0A",
+                borderRadius: "9999px",
+                boxShadow: "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
+                transition: "all 0.15s ease",
+              }}
+            >
               {saving ? "saving..." : editId ? "update trip brief" : "save trip brief"}
             </Button>
           )}

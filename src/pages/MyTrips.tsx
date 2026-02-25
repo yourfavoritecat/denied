@@ -246,11 +246,35 @@ const TripBriefCard = ({
 
   return (
     <>
-      <div className="glossy-card rounded-xl p-5 space-y-4">
+      {/* Gradient border wrapper */}
+      <div
+        className="group"
+        style={{
+          background: "linear-gradient(135deg, rgba(255,107,74,0.15), rgba(59,240,122,0.15))",
+          padding: "1px",
+          borderRadius: "17px",
+          transition: "all 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.7), 0 0 20px rgba(59,240,122,0.08)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = "0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.6)";
+          e.currentTarget.style.transform = "";
+        }}
+      >
+        <div
+          className="p-6 space-y-4"
+          style={{
+            background: "#111111",
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.6)",
+          }}
+        >
         <div className="flex items-start justify-between">
           <div className="space-y-1">
             <h3 className="font-bold text-lg">{buildCardTitle(brief)}</h3>
-            <div className="flex items-center gap-3 text-sm text-white/50 flex-wrap">
+            <div className="flex items-center gap-3 text-sm flex-wrap" style={{ color: "#B0B0B0" }}>
               {brief.destination && (
                 <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" />{brief.destination}, Mexico</span>
               )}
@@ -270,18 +294,33 @@ const TripBriefCard = ({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-[10px]">
+            <span
+              className="text-[10px] px-2.5 py-1 font-medium"
+              style={{
+                background: "linear-gradient(135deg, rgba(59,240,122,0.15), rgba(59,240,122,0.08))",
+                border: "1px solid rgba(59,240,122,0.2)",
+                borderRadius: "9999px",
+                color: "#3BF07A",
+                boxShadow: "0 0 8px rgba(59,240,122,0.1)",
+              }}
+            >
               {BRIEF_STATUS_LABELS[brief.status] || brief.status}
-            </Badge>
+            </span>
             <button
               onClick={() => onEdit(brief)}
-              className="text-white/30 hover:text-white transition-colors"
+              className="transition-all duration-150"
+              style={{ color: "#B0B0B0" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#FFFFFF"; e.currentTarget.style.transform = "scale(1.1)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#B0B0B0"; e.currentTarget.style.transform = "scale(1)"; }}
             >
               <Pencil className="w-4 h-4" />
             </button>
             <button
               onClick={() => setDeleteOpen(true)}
-              className="text-white/30 hover:text-destructive transition-colors"
+              className="transition-all duration-150"
+              style={{ color: "#B0B0B0" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#FFFFFF"; e.currentTarget.style.transform = "scale(1.1)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#B0B0B0"; e.currentTarget.style.transform = "scale(1)"; }}
             >
               <Trash2 className="w-4 h-4" />
             </button>
@@ -292,10 +331,21 @@ const TripBriefCard = ({
         {brief.procedures && brief.procedures.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {normalizeProcedures(brief.procedures).map((p, i) => (
-              <Badge key={i} variant="outline" className="text-xs border-white/20">
-                <Stethoscope className="w-2.5 h-2.5 mr-1" />
+              <span
+                key={i}
+                className="text-xs flex items-center gap-1"
+                style={{
+                  background: "rgba(59,240,122,0.08)",
+                  border: "1px solid rgba(59,240,122,0.25)",
+                  borderRadius: "9999px",
+                  color: "#3BF07A",
+                  padding: "4px 12px",
+                  fontSize: "0.75rem",
+                }}
+              >
+                <Stethoscope className="w-2.5 h-2.5" />
                 {p.name} {p.quantity > 1 ? `×${p.quantity}` : ""}
-              </Badge>
+              </span>
             ))}
           </div>
         )}
@@ -310,11 +360,11 @@ const TripBriefCard = ({
         {/* Quote requests on this brief */}
         {briefQuotes.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs text-white/40 uppercase tracking-wide font-medium">Quote Requests</p>
+            <p className="text-xs uppercase tracking-wide font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Quote Requests</p>
             {briefQuotes.map((q) => (
-              <div key={q.id} className="flex items-center justify-between py-2 border-t border-white/5">
+              <div key={q.id} className="flex items-center justify-between py-2" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                 <div className="flex items-center gap-2">
-                  <Building2 className="w-3.5 h-3.5 text-white/40" />
+                  <Building2 className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.4)" }} />
                   <span className="text-sm">{providerLabel(q.provider_slug)}</span>
                 </div>
                 <Badge
@@ -328,6 +378,7 @@ const TripBriefCard = ({
           </div>
         )}
 
+        </div>
       </div>
       <DeleteConfirmDialog
         open={deleteOpen}
@@ -460,11 +511,34 @@ const MyTripsPage = () => {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-3xl font-bold mb-1">my trips — travel hub</h1>
-              <p className="text-white/40 text-sm">whether you're type a or type b, plan as much (or as little) as you want before your next trip.</p>
+              <p className="text-sm" style={{ color: "#B0B0B0" }}>whether you're type a or type b, plan as much (or as little) as you want before your next trip.</p>
             </div>
             <Button
               onClick={() => { setEditingBrief(null); setBuilderOpen(true); }}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 font-semibold border-none"
+              style={{
+                background: "linear-gradient(180deg, #4CF88A, #2DD866)",
+                color: "#0A0A0A",
+                borderRadius: "9999px",
+                boxShadow: "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
+                transition: "all 0.15s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = "scale(1.02)";
+                e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,240,122,0.35), inset 0 1px 0 rgba(255,255,255,0.25)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)";
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = "scale(0.98)";
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(59,240,122,0.2)";
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = "scale(1.02)";
+                e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,240,122,0.35), inset 0 1px 0 rgba(255,255,255,0.25)";
+              }}
             >
               <PlusCircle className="w-4 h-4" />
               plan a trip
@@ -475,33 +549,64 @@ const MyTripsPage = () => {
             <div className="text-center py-16 text-white/40">Loading your trips…</div>
           ) : (
             <Tabs defaultValue="planning" className="space-y-6">
-              <TabsList className="flex flex-wrap h-auto gap-1 bg-card p-1 rounded-xl border border-white/8">
-                <TabsTrigger value="planning" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg text-sm">
-                  trip briefs {planningCount > 0 && <span className="ml-1 text-white/40">({planningCount})</span>}
+              <TabsList
+                className="flex flex-wrap h-auto gap-1 p-1"
+                style={{
+                  background: "rgba(17,17,17,0.5)",
+                  borderRadius: "9999px",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                }}
+              >
+                <TabsTrigger
+                  value="planning"
+                  className="rounded-full text-sm px-4 py-1.5 data-[state=active]:shadow-none"
+                  style={{ borderRadius: "9999px", border: "1px solid rgba(255,255,255,0.08)", transition: "all 0.2s ease" }}
+                  data-mint-tab
+                >
+                  trip briefs {planningCount > 0 && <span className="ml-1">({planningCount})</span>}
                 </TabsTrigger>
-                <TabsTrigger value="active" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg text-sm">
-                  active {activeCount > 0 && <span className="ml-1 text-white/40">({activeCount})</span>}
+                <TabsTrigger
+                  value="active"
+                  className="rounded-full text-sm px-4 py-1.5 data-[state=active]:shadow-none"
+                  style={{ borderRadius: "9999px", border: "1px solid rgba(255,255,255,0.08)", transition: "all 0.2s ease" }}
+                  data-mint-tab
+                >
+                  active {activeCount > 0 && <span className="ml-1">({activeCount})</span>}
                 </TabsTrigger>
-                <TabsTrigger value="confirmed" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg text-sm">
-                  upcoming {confirmedBookings.length > 0 && <span className="ml-1 text-white/40">({confirmedBookings.length})</span>}
+                <TabsTrigger
+                  value="confirmed"
+                  className="rounded-full text-sm px-4 py-1.5 data-[state=active]:shadow-none"
+                  style={{ borderRadius: "9999px", border: "1px solid rgba(255,255,255,0.08)", transition: "all 0.2s ease" }}
+                  data-mint-tab
+                >
+                  upcoming {confirmedBookings.length > 0 && <span className="ml-1">({confirmedBookings.length})</span>}
                 </TabsTrigger>
-                <TabsTrigger value="completed" className="data-[state=active]:bg-primary/15 data-[state=active]:text-primary rounded-lg text-sm">
-                  completed {completedBookings.length > 0 && <span className="ml-1 text-white/40">({completedBookings.length})</span>}
+                <TabsTrigger
+                  value="completed"
+                  className="rounded-full text-sm px-4 py-1.5 data-[state=active]:shadow-none"
+                  style={{ borderRadius: "9999px", border: "1px solid rgba(255,255,255,0.08)", transition: "all 0.2s ease" }}
+                  data-mint-tab
+                >
+                  completed {completedBookings.length > 0 && <span className="ml-1">({completedBookings.length})</span>}
                 </TabsTrigger>
               </TabsList>
 
               {/* ─── Planning ─── */}
-              <TabsContent value="planning" className="space-y-4">
+              <TabsContent value="planning" className="space-y-0">
                 {planningBriefs.length > 0 ? (
-                  planningBriefs.map((brief) => (
-                    <TripBriefCard
-                      key={brief.id}
-                      brief={brief}
-                      onDelete={deleteBrief}
-                      onEdit={handleEdit}
-                      quoteRequests={quoteRequests}
-                      navigate={navigate}
-                    />
+                  planningBriefs.map((brief, idx) => (
+                    <div key={brief.id}>
+                      {idx > 0 && (
+                        <div style={{ height: "1px", margin: "16px 0", background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.08), rgba(255,107,74,0.08), transparent)" }} />
+                      )}
+                      <TripBriefCard
+                        brief={brief}
+                        onDelete={deleteBrief}
+                        onEdit={handleEdit}
+                        quoteRequests={quoteRequests}
+                        navigate={navigate}
+                      />
+                    </div>
                   ))
                 ) : (
                   <EmptyState
@@ -509,7 +614,16 @@ const MyTripsPage = () => {
                     title="no trip plans yet"
                     desc="start planning your medical trip and save it as a brief. you can attach it to quote requests later."
                     action={
-                      <Button onClick={() => { setEditingBrief(null); setBuilderOpen(true); }}>
+                      <Button
+                        onClick={() => { setEditingBrief(null); setBuilderOpen(true); }}
+                        className="font-semibold border-none"
+                        style={{
+                          background: "linear-gradient(180deg, #4CF88A, #2DD866)",
+                          color: "#0A0A0A",
+                          borderRadius: "9999px",
+                          boxShadow: "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
+                        }}
+                      >
                         <PlusCircle className="w-4 h-4 mr-2" /> plan a trip
                       </Button>
                     }

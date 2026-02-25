@@ -122,22 +122,29 @@ const Navbar = () => {
           <div className="flex items-center gap-3">
             <Button
               size="sm"
-              variant="outline"
-              className="hidden sm:flex items-center gap-1.5 whitespace-nowrap text-[13px] h-7 px-[18px] py-1.5"
+              className="hidden sm:flex items-center gap-1.5 whitespace-nowrap text-[13px] h-7 px-[18px] py-1.5 font-semibold border-none"
               style={{
-                borderColor: 'rgba(59,240,122,0.4)',
-                color: '#3BF07A',
-                transition: 'all 300ms ease',
+                background: "linear-gradient(180deg, #4CF88A, #2DD866)",
+                color: "#0A0A0A",
+                borderRadius: "9999px",
+                boxShadow: "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
+                transition: "all 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.boxShadow = "0 0 15px rgba(59,240,122,0.25), 0 0 30px rgba(59,240,122,0.12)";
-                e.currentTarget.style.borderColor = "rgba(59,240,122,0.6)";
                 e.currentTarget.style.transform = "scale(1.03)";
+                e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,240,122,0.35), inset 0 1px 0 rgba(255,255,255,0.25)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.boxShadow = "none";
-                e.currentTarget.style.borderColor = "rgba(59,240,122,0.4)";
                 e.currentTarget.style.transform = "scale(1)";
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)";
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = "scale(0.98)";
+                e.currentTarget.style.boxShadow = "0 2px 8px rgba(59,240,122,0.2)";
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = "scale(1.03)";
+                e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,240,122,0.35), inset 0 1px 0 rgba(255,255,255,0.25)";
               }}
               onClick={() => navigate(user ? "/my-trips?plan=new" : "/auth")}
             >
