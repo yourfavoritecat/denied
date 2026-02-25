@@ -552,13 +552,28 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
             <button
               key={d}
               onClick={() => setDestination(d)}
-              className="p-2.5 text-sm font-medium transition-all"
+              className="p-2.5 text-sm font-medium"
               style={{
-                background: destination === d ? "rgba(59,240,122,0.05)" : "#111111",
-                border: destination === d ? "1px solid rgba(59,240,122,0.4)" : "1px solid rgba(255,255,255,0.08)",
+                background: destination === d ? "rgba(59,240,122,0.06)" : "#111111",
+                border: destination === d ? "1px solid rgba(59,240,122,0.5)" : "1px solid rgba(255,255,255,0.08)",
                 borderRadius: "16px",
                 color: destination === d ? "#3BF07A" : "rgba(255,255,255,0.7)",
-                boxShadow: destination === d ? "0 0 12px rgba(59,240,122,0.1)" : "none",
+                boxShadow: destination === d ? "0 0 20px rgba(59,240,122,0.12), 0 0 6px rgba(59,240,122,0.08)" : "none",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                if (destination !== d) {
+                  e.currentTarget.style.borderColor = "rgba(59,240,122,0.3)";
+                  e.currentTarget.style.background = "rgba(59,240,122,0.03)";
+                  e.currentTarget.style.boxShadow = "0 0 16px rgba(59,240,122,0.08), 0 0 4px rgba(59,240,122,0.05)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (destination !== d) {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                  e.currentTarget.style.background = "#111111";
+                  e.currentTarget.style.boxShadow = "none";
+                }
               }}
             >
               {d}
@@ -618,16 +633,29 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                         <button
                           key={p}
                           onClick={() => toggleProcedure(p)}
-                          className="text-xs px-2.5 py-1 transition-all"
+                          className="text-xs px-2.5 py-1"
                           style={{
                             borderRadius: "9999px",
                             border: selectedProcedures.includes(p)
-                              ? "1px solid rgba(59,240,122,0.4)"
-                              : "1px solid rgba(255,255,255,0.15)",
+                              ? "1px solid #3BF07A"
+                              : "1px solid rgba(255,255,255,0.1)",
                             background: selectedProcedures.includes(p)
                               ? "rgba(59,240,122,0.08)"
                               : "transparent",
                             color: selectedProcedures.includes(p) ? "#3BF07A" : "rgba(255,255,255,0.6)",
+                            transition: "all 0.15s ease",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!selectedProcedures.includes(p)) {
+                              e.currentTarget.style.borderColor = "rgba(59,240,122,0.25)";
+                              e.currentTarget.style.background = "rgba(59,240,122,0.03)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (!selectedProcedures.includes(p)) {
+                              e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                              e.currentTarget.style.background = "transparent";
+                            }
                           }}
                         >
                           {selectedProcedures.includes(p) && <Check className="w-2.5 h-2.5 inline mr-1" />}
@@ -754,12 +782,27 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
           <button
             key={String(opt.id)}
             onClick={() => setIsGroup(opt.id)}
-            className="p-4 text-center transition-all"
+            className="p-4 text-center"
             style={{
-              background: isGroup === opt.id ? "rgba(59,240,122,0.05)" : "#111111",
-              border: isGroup === opt.id ? "1px solid rgba(59,240,122,0.4)" : "1px solid rgba(255,255,255,0.08)",
+              background: isGroup === opt.id ? "rgba(59,240,122,0.06)" : "#111111",
+              border: isGroup === opt.id ? "1px solid rgba(59,240,122,0.5)" : "1px solid rgba(255,255,255,0.08)",
               borderRadius: "16px",
-              boxShadow: isGroup === opt.id ? "0 0 12px rgba(59,240,122,0.1)" : "none",
+              boxShadow: isGroup === opt.id ? "0 0 20px rgba(59,240,122,0.12), 0 0 6px rgba(59,240,122,0.08)" : "none",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) => {
+              if (isGroup !== opt.id) {
+                e.currentTarget.style.borderColor = "rgba(59,240,122,0.3)";
+                e.currentTarget.style.background = "rgba(59,240,122,0.03)";
+                e.currentTarget.style.boxShadow = "0 0 16px rgba(59,240,122,0.08), 0 0 4px rgba(59,240,122,0.05)";
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (isGroup !== opt.id) {
+                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                e.currentTarget.style.background = "#111111";
+                e.currentTarget.style.boxShadow = "none";
+              }
             }}
           >
             <div className="text-2xl mb-1">{opt.icon}</div>
