@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,10 +56,26 @@ interface GroupMember {
   notes: string;
 }
 
+interface EditBrief {
+  id: string;
+  trip_name: string;
+  destination: string | null;
+  travel_window_start: string | null;
+  travel_window_end: string | null;
+  is_flexible: boolean;
+  procedures: { name: string; quantity: number }[] | null;
+  is_group: boolean;
+  group_members: { name: string; procedures: string[] }[] | null;
+  budget_range: string | null;
+  procedure_categories?: string[] | null;
+  procedures_unsure?: boolean;
+}
+
 interface TripBriefBuilderProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved?: (briefId?: string) => void;
+  editBrief?: EditBrief | null;
 }
 
 /* ─── Step indicator ─── */
@@ -77,7 +93,7 @@ const StepDots = ({ current, total }: { current: number; total: number }) => (
 );
 
 /* ─── Main component ─── */
-const TripBriefBuilder = ({ open, onOpenChange, onSaved }: TripBriefBuilderProps) => {
+const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefBuilderProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState(0);
@@ -107,6 +123,36 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved }: TripBriefBuilderProps
 
   // Step 5: Name
   const [tripName, setTripName] = useState("");
+
+  // Track editing ID
+  const [editId, setEditId] = useState<string | null>(null);
+
+  /* ─── Populate when editing ─── */
+  useEffect(() => {
+    if (editBrief && open) {
+      setEditId(editBrief.id);
+      setDestination(editBrief.destination || "");
+      setWindowStart(editBrief.travel_window_start || "");
+      setWindowEnd(editBrief.travel_window_end || "");
+      setIsFlexible(editBrief.is_flexible);
+      setSelectedCategories(editBrief.procedure_categories || []);
+      setSelectedProcedures(editBrief.procedures?.map((p) => p.name) || []);
+      setProceduresUnsure(editBrief.procedures_unsure || false);
+      setIsGroup(editBrief.is_group);
+      const gm = editBrief.group_members || [];
+      setGroupSize(Math.max(2, gm.length));
+      setGroupMembers(
+        gm.length > 0
+          ? gm.map((m: any) => ({ name: m.name || "", procedures: m.procedures || [], notes: m.notes || "" }))
+          : [{ name: "", procedures: [], notes: "" }]
+      );
+      setBudgetRange(editBrief.budget_range || "no_budget");
+      setTripName(editBrief.trip_name || "");
+      setStep(0);
+    } else if (!open) {
+      setEditId(null);
+    }
+  }, [editBrief, open]);
 
   /* ─── Helpers ─── */
   const autoName = () => {
@@ -185,28 +231,41 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved }: TripBriefBuilderProps
       status: "planning",
     };
 
-    const { data, error } = await supabase
-      .from("trip_briefs" as any)
-      .insert(payload as any)
-      .select("id")
-      .single();
+    let result;
+    if (editId) {
+      // Update existing
+      const { user_id, status, ...updatePayload } = payload;
+      result = await supabase
+        .from("trip_briefs" as any)
+        .update(updatePayload as any)
+        .eq("id", editId)
+        .select("id")
+        .single();
+    } else {
+      result = await supabase
+        .from("trip_briefs" as any)
+        .insert(payload as any)
+        .select("id")
+        .single();
+    }
 
     setSaving(false);
-    if (error) {
-      toast({ title: "Error saving", description: error.message, variant: "destructive" });
+    if (result.error) {
+      toast({ title: "Error saving", description: result.error.message, variant: "destructive" });
     } else {
       toast({
-        title: "Trip Brief Saved!",
-        description: "Browse providers to start getting quotes, or come back anytime.",
+        title: editId ? "Trip Brief Updated!" : "Trip Brief Saved!",
+        description: editId ? "Your changes have been saved." : "Browse providers to start getting quotes, or come back anytime.",
       });
       onOpenChange(false);
-      onSaved?.((data as any)?.id);
+      onSaved?.((result.data as any)?.id);
       resetAll();
     }
   };
 
   const resetAll = () => {
     setStep(0);
+    setEditId(null);
     setDestination(""); setWindowStart(""); setWindowEnd(""); setIsFlexible(false);
     setSelectedCategories([]); setSelectedProcedures([]); setCustomProcedure(""); setProceduresUnsure(false);
     setIsGroup(false); setGroupSize(2); setGroupMembers([{ name: "", procedures: [], notes: "" }]);
@@ -510,7 +569,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved }: TripBriefBuilderProps
             </Button>
           ) : (
             <Button className="flex-1" onClick={handleSave} disabled={saving || !user}>
-              {saving ? "Saving..." : "Save Trip Brief"}
+              {saving ? "Saving..." : editId ? "Update Trip Brief" : "Save Trip Brief"}
             </Button>
           )}
         </div>
