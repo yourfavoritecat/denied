@@ -306,16 +306,6 @@ const TripBriefCard = ({
           </div>
         )}
 
-        <div className="flex items-center gap-2 pt-1">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 text-xs border-white/20 hover:bg-white/5"
-            onClick={() => navigate("/search")}
-          >
-            browse providers
-          </Button>
-        </div>
       </div>
       <DeleteConfirmDialog
         open={deleteOpen}
