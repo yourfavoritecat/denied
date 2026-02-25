@@ -33,6 +33,7 @@ interface TripBrief {
   created_at: string;
   procedure_categories?: string[] | null;
   procedures_unsure?: boolean;
+  considered_providers?: string[] | null;
 }
 
 interface QuoteRequest {
@@ -156,7 +157,31 @@ const EstimatedCostRange = ({ procedures }: { procedures: { name: string; quanti
   );
 };
 
-/* ─── Delete Confirmation Dialog ─── */
+/* ─── Provider Count Line ─── */
+const ProviderCountLine = ({ briefId, consideredProviders }: { briefId: string; consideredProviders?: string[] | null }) => {
+  const [sentCount, setSentCount] = useState(0);
+  const providerCount = consideredProviders?.length || 0;
+
+  useEffect(() => {
+    if (providerCount === 0) return;
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("trip_brief_id", briefId)
+      .eq("status", "inquiry")
+      .then(({ count }) => {
+        if (count) setSentCount(count);
+      });
+  }, [briefId, providerCount]);
+
+  if (providerCount === 0 && sentCount === 0) return null;
+
+  return (
+    <p className="text-xs flex items-center gap-1" style={{ color: "#B0B0B0" }}>
+      {providerCount} provider(s) added{sentCount > 0 ? ` · ${sentCount} brief(s) sent` : ""}
+    </p>
+  );
+};
 const DeleteConfirmDialog = ({
   open, onOpenChange, onConfirm,
 }: { open: boolean; onOpenChange: (v: boolean) => void; onConfirm: () => void }) => (
@@ -256,6 +281,9 @@ const TripBriefCard = ({
 
         {/* Estimated cost range */}
         <EstimatedCostRange procedures={brief.procedures} />
+
+        {/* Provider counts */}
+        <ProviderCountLine briefId={brief.id} consideredProviders={brief.considered_providers} />
 
         {/* Quote requests on this brief */}
         {briefQuotes.length > 0 && (

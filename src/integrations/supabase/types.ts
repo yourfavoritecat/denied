@@ -1348,6 +1348,7 @@ export type Database = {
           budget_max: number | null
           budget_min: number | null
           budget_range: string | null
+          considered_providers: Json | null
           created_at: string
           destination: string | null
           group_members: Json | null
@@ -1372,6 +1373,7 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           budget_range?: string | null
+          considered_providers?: Json | null
           created_at?: string
           destination?: string | null
           group_members?: Json | null
@@ -1396,6 +1398,7 @@ export type Database = {
           budget_max?: number | null
           budget_min?: number | null
           budget_range?: string | null
+          considered_providers?: Json | null
           created_at?: string
           destination?: string | null
           group_members?: Json | null

@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import {
   MapPin, Calendar, Stethoscope, Users, DollarSign, FileText,
-  ChevronRight, ChevronLeft, X, Plus, Minus, Check
+  ChevronRight, ChevronLeft, X, Plus, Minus, Check, Building2
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import MatchedProvidersStep from "./MatchedProvidersStep";
 
 /* ─── Data ─── */
 const DESTINATIONS = [
@@ -47,7 +48,7 @@ const BUDGET_PRESETS = [
   { label: "No budget in mind", value: "no_budget" },
 ];
 
-const STEPS = ["Where & When", "What do you need?", "Who's going?", "Budget", "Save Trip"];
+const STEPS = ["Where & When", "What do you need?", "Who's going?", "Budget", "Matched Providers", "Save Trip"];
 
 /* ─── Types ─── */
 interface GroupMember {
@@ -69,6 +70,7 @@ interface EditBrief {
   budget_range: string | null;
   procedure_categories?: string[] | null;
   procedures_unsure?: boolean;
+  considered_providers?: string[] | null;
 }
 
 interface TripBriefBuilderProps {
@@ -121,7 +123,11 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
   // Step 4: Budget
   const [budgetRange, setBudgetRange] = useState("no_budget");
 
-  // Step 5: Name
+  // Step 5: Matched Providers
+  const [consideredProviders, setConsideredProviders] = useState<string[]>([]);
+  const [sentBriefs, setSentBriefs] = useState<Set<string>>(new Set());
+
+  // Step 6: Name
   const [tripName, setTripName] = useState("");
 
   // Track editing ID
@@ -148,11 +154,29 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       );
       setBudgetRange(editBrief.budget_range || "no_budget");
       setTripName(editBrief.trip_name || "");
+      setConsideredProviders(
+        Array.isArray(editBrief.considered_providers) ? editBrief.considered_providers : []
+      );
+      // Load sent briefs for this trip
+      if (editBrief.id) {
+        loadSentBriefs(editBrief.id);
+      }
       setStep(0);
     } else if (!open) {
       setEditId(null);
     }
   }, [editBrief, open]);
+
+  const loadSentBriefs = async (briefId: string) => {
+    const { data } = await supabase
+      .from("bookings")
+      .select("provider_slug")
+      .eq("trip_brief_id", briefId)
+      .eq("status", "inquiry");
+    if (data) {
+      setSentBriefs(new Set(data.map((b: any) => b.provider_slug)));
+    }
+  };
 
   /* ─── Helpers ─── */
   const autoName = () => {
@@ -208,6 +232,63 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     return true;
   };
 
+  /* ─── Send brief to provider (creates booking inquiry) ─── */
+  const handleSendBrief = async (providerSlug: string) => {
+    if (!user) return;
+
+    // We need a saved brief ID first. If editing, use editId. Otherwise save first.
+    let briefId = editId;
+    if (!briefId) {
+      // Quick-save the brief first
+      const procedures = selectedProcedures.map((name) => ({ name, quantity: 1 }));
+      const payload: any = {
+        user_id: user.id,
+        trip_name: tripName || autoName(),
+        destination: destination || null,
+        travel_window_start: (!isFlexible && windowStart) ? windowStart : null,
+        travel_window_end: (!isFlexible && windowEnd) ? windowEnd : null,
+        is_flexible: isFlexible,
+        procedure_categories: selectedCategories,
+        procedures,
+        procedures_unsure: proceduresUnsure,
+        is_group: isGroup,
+        group_members: isGroup ? groupMembers : [],
+        budget_range: budgetRange,
+        considered_providers: consideredProviders,
+        status: "planning",
+      };
+      const { data, error } = await supabase
+        .from("trip_briefs" as any)
+        .insert(payload as any)
+        .select("id")
+        .single();
+      if (error || !data) return;
+      briefId = (data as any).id;
+      setEditId(briefId);
+    }
+
+    const procedures = selectedProcedures.map((name) => ({ name, quantity: 1 }));
+
+    const { error } = await supabase
+      .from("bookings")
+      .insert({
+        user_id: user.id,
+        provider_slug: providerSlug,
+        trip_brief_id: briefId,
+        procedures,
+        preferred_dates: {
+          text: isFlexible ? "Flexible" : `${windowStart || ""} ${windowEnd ? `→ ${windowEnd}` : ""}`.trim(),
+        },
+        status: "inquiry",
+        booking_type: "direct",
+      } as any);
+
+    if (!error) {
+      setSentBriefs((prev) => new Set([...prev, providerSlug]));
+      toast({ title: "brief sent!", description: `your trip brief was sent to the provider.` });
+    }
+  };
+
   /* ─── Save ─── */
   const handleSave = async () => {
     if (!user) return;
@@ -228,6 +309,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
       is_group: isGroup,
       group_members: isGroup ? groupMembers : [],
       budget_range: budgetRange,
+      considered_providers: consideredProviders,
       status: "planning",
     };
 
@@ -270,6 +352,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     setSelectedCategories([]); setSelectedProcedures([]); setCustomProcedure(""); setProceduresUnsure(false);
     setIsGroup(false); setGroupSize(2); setGroupMembers([{ name: "", procedures: [], notes: "" }]);
     setBudgetRange("no_budget"); setTripName("");
+    setConsideredProviders([]); setSentBriefs(new Set());
   };
 
   /* ─── Step renders ─── */
@@ -489,6 +572,18 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
   );
 
   const renderStep4 = () => (
+    <MatchedProvidersStep
+      destination={destination}
+      selectedProcedures={selectedProcedures}
+      consideredProviders={consideredProviders}
+      onConsideredChange={setConsideredProviders}
+      sentBriefs={sentBriefs}
+      onSendBrief={handleSendBrief}
+      onSkip={() => setStep(5)}
+    />
+  );
+
+  const renderStep5 = () => (
     <div className="space-y-5">
       <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2 text-sm">
         <div className="flex items-center gap-2 text-muted-foreground">
@@ -521,6 +616,15 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
           <DollarSign className="w-4 h-4" />
           <span>{BUDGET_PRESETS.find((b) => b.value === budgetRange)?.label || "No budget set"}</span>
         </div>
+        {(consideredProviders.length > 0 || sentBriefs.size > 0) && (
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <Building2 className="w-4 h-4" />
+            <span>
+              {consideredProviders.length} provider(s) added
+              {sentBriefs.size > 0 ? ` · ${sentBriefs.size} brief(s) sent` : ""}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -535,8 +639,12 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     </div>
   );
 
-  const STEP_RENDERERS = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4];
-  const STEP_ICONS = [MapPin, Stethoscope, Users, DollarSign, FileText];
+  const STEP_RENDERERS = [renderStep0, renderStep1, renderStep2, renderStep3, renderStep4, renderStep5];
+  const STEP_ICONS = [MapPin, Stethoscope, Users, DollarSign, Building2, FileText];
+
+  const stepTitle = step === 4
+    ? `providers near ${(destination || "you").toLowerCase()}`
+    : STEPS[step];
 
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) resetAll(); }}>
@@ -544,7 +652,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
         <DialogHeader>
           <div className="flex items-center gap-2 mb-1">
             {(() => { const Icon = STEP_ICONS[step]; return <Icon className="w-4 h-4 text-primary" />; })()}
-            <DialogTitle className="text-lg">{STEPS[step]}</DialogTitle>
+            <DialogTitle className="text-lg">{stepTitle}</DialogTitle>
           </div>
           <StepDots current={step} total={STEPS.length} />
         </DialogHeader>
