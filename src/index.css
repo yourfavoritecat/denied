@@ -415,4 +415,35 @@
     color: #FFFFFF;
     transform: scale(1.1);
   }
+
+  /* ─── Trip Status Pulse ─── */
+  @keyframes tripStatusPulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(59,240,122,0.5); }
+    50% { opacity: 0.5; box-shadow: 0 0 3px rgba(59,240,122,0.3); }
+  }
+
+  /* ─── Trips Card Grid Responsive ─── */
+  @media (max-width: 768px) {
+    .trips-card-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  @media (max-width: 375px) {
+    .hero-band-content {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 20px !important;
+    }
+    .hero-band-right {
+      align-items: flex-start !important;
+    }
+  }
+
+  /* Remove hover lift on touch devices */
+  @media (hover: none) {
+    .trip-card-mega {
+      transform: none !important;
+    }
+  }
 }
