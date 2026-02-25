@@ -40,7 +40,7 @@ const MatchedProvidersStep = ({
   const [providers, setProviders] = useState<MatchedProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
-  const [promptVisible, setPromptVisible] = useState<Record<string, boolean>>({});
+  const [dismissedPrompts, setDismissedPrompts] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchMatches();
@@ -125,10 +125,10 @@ const MatchedProvidersStep = ({
     
     if (consideredProviders.includes(slug)) {
       onConsideredChange(consideredProviders.filter((s) => s !== slug));
-      setPromptVisible((prev) => ({ ...prev, [slug]: false }));
+      setDismissedPrompts((prev) => { const next = new Set(prev); next.delete(slug); return next; });
     } else {
       onConsideredChange([...consideredProviders, slug]);
-      setPromptVisible((prev) => ({ ...prev, [slug]: true }));
+      setDismissedPrompts((prev) => { const next = new Set(prev); next.delete(slug); return next; });
     }
   };
 
@@ -136,11 +136,10 @@ const MatchedProvidersStep = ({
     setSendingTo(slug);
     await onSendBrief(slug);
     setSendingTo(null);
-    setPromptVisible((prev) => ({ ...prev, [slug]: false }));
   };
 
   const dismissPrompt = (slug: string) => {
-    setPromptVisible((prev) => ({ ...prev, [slug]: false }));
+    setDismissedPrompts((prev) => new Set([...prev, slug]));
   };
 
   if (loading) {
@@ -192,7 +191,7 @@ const MatchedProvidersStep = ({
         {providers.map((provider) => {
           const isAdded = consideredProviders.includes(provider.slug);
           const isSent = sentBriefs.has(provider.slug);
-          const showPrompt = promptVisible[provider.slug] && isAdded && !isSent;
+          const showPrompt = isAdded && !isSent && !dismissedPrompts.has(provider.slug);
 
           return (
             <div key={provider.slug} className="space-y-0">
@@ -304,7 +303,7 @@ const MatchedProvidersStep = ({
                       className="text-xs hover:underline"
                       style={{ color: "#B0B0B0" }}
                     >
-                      i'll decide later
+                      not yet
                     </button>
                   </div>
                 </div>

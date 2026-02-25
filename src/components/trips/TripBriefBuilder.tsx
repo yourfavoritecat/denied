@@ -302,8 +302,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     const { data } = await supabase
       .from("bookings")
       .select("provider_slug")
-      .eq("trip_brief_id", briefId)
-      .eq("status", "inquiry");
+      .eq("trip_brief_id", briefId);
     if (data) {
       setSentBriefs(new Set(data.map((b: any) => b.provider_slug)));
     }
