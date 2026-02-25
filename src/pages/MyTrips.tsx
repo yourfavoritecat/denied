@@ -124,28 +124,52 @@ const buildCardTitle = (brief: TripBrief) => {
 
 /* ─── Estimated Cost Range ─── */
 const EstimatedCostRange = ({ procedures }: { procedures: { name: string; quantity: number }[] | null }) => {
-  const [range, setRange] = useState<{ min: number; max: number } | null>(null);
+  const [result, setResult] = useState<{ totalLow: number; totalHigh: number; matched: number; unmatched: number } | null>(null);
 
   useEffect(() => {
-    if (!procedures || procedures.length === 0) return;
-    const names = procedures.map((p) => p.name);
+    if (!procedures || procedures.length === 0) {
+      setResult({ totalLow: 0, totalHigh: 0, matched: 0, unmatched: 0 });
+      return;
+    }
+    const lowerNames = procedures.map((p) => p.name.toLowerCase());
     supabase
-      .from("provider_services")
-      .select("procedure_name, base_price_usd")
-      .in("procedure_name", names)
+      .from("procedure_pricing_reference" as any)
+      .select("procedure_name, est_low, est_high")
+      .in("procedure_name", lowerNames)
       .then(({ data }) => {
-        if (!data || data.length === 0) return;
-        const prices = data.map((d: any) => Number(d.base_price_usd));
-        const min = Math.min(...prices);
-        const max = Math.max(...prices);
-        if (min > 0) setRange({ min, max: max > min ? max : min * 1.5 });
+        const matched = new Set<string>();
+        let totalLow = 0;
+        let totalHigh = 0;
+        if (data) {
+          for (const row of data as any[]) {
+            matched.add(row.procedure_name);
+            totalLow += Number(row.est_low);
+            totalHigh += Number(row.est_high);
+          }
+        }
+        setResult({
+          totalLow,
+          totalHigh,
+          matched: matched.size,
+          unmatched: lowerNames.length - matched.size,
+        });
       });
   }, [procedures]);
 
-  if (!range) return null;
+  if (!result || (!procedures || procedures.length === 0)) return null;
+
+  let text: string;
+  if (result.matched === 0) {
+    text = "estimated range: varies · prices vary by provider";
+  } else if (result.unmatched > 0) {
+    text = `estimated range: $${result.totalLow.toLocaleString()}+ · prices vary by provider`;
+  } else {
+    text = `estimated range: $${result.totalLow.toLocaleString()}–$${result.totalHigh.toLocaleString()} · prices vary by provider`;
+  }
+
   return (
     <p className="text-xs flex items-center gap-1" style={{ color: "#B0B0B0" }}>
-      estimated range: ${range.min.toLocaleString()}–${range.max.toLocaleString()} · prices vary by provider
+      {text}
     </p>
   );
 };

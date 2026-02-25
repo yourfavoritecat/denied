@@ -216,28 +216,25 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
     });
   }, [destination, windowStart, windowEnd, isFlexible, selectedCategories, selectedProcedures, proceduresUnsure, isGroup, groupSize, groupMembers, consideredProviders, tripName, step, editId]);
 
-  /* ─── Fetch procedure prices ─── */
+  /* ─── Fetch procedure prices from reference table ─── */
   useEffect(() => {
     if (selectedProcedures.length === 0) {
       setProcedurePrices({});
       return;
     }
+    const lowerNames = selectedProcedures.map((p) => p.toLowerCase());
     supabase
-      .from("provider_services")
-      .select("procedure_name, base_price_usd")
-      .in("procedure_name", selectedProcedures)
+      .from("procedure_pricing_reference" as any)
+      .select("procedure_name, est_low, est_high")
+      .in("procedure_name", lowerNames)
       .then(({ data }) => {
         if (!data) return;
         const prices: Record<string, ProcedurePriceRange> = {};
-        for (const row of data) {
-          const name = row.procedure_name;
-          const price = Number(row.base_price_usd);
-          if (price <= 0) continue;
-          if (!prices[name]) {
-            prices[name] = { min: price, max: price };
-          } else {
-            prices[name].min = Math.min(prices[name].min, price);
-            prices[name].max = Math.max(prices[name].max, price);
+        for (const row of data as any[]) {
+          // Map back to the original casing used in selectedProcedures
+          const match = selectedProcedures.find((p) => p.toLowerCase() === row.procedure_name);
+          if (match) {
+            prices[match] = { min: Number(row.est_low), max: Number(row.est_high) };
           }
         }
         setProcedurePrices(prices);
@@ -613,7 +610,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                       <span className="text-[11px] shrink-0" style={{ color: "#B0B0B0" }}>
                         {price
                           ? `est. $${price.min.toLocaleString()}–$${price.max.toLocaleString()}`
-                          : "pricing varies"
+                          : "n/a"
                         }
                       </span>
                     </div>
@@ -628,7 +625,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                         ? hasMissing
                           ? `estimated total: $${totalMin.toLocaleString()}+`
                           : `estimated total: $${totalMin.toLocaleString()}–$${totalMax.toLocaleString()}`
-                        : "estimated total: pricing varies"
+                        : "estimated total: n/a"
                       }
                     </p>
                     {hasMissing && hasAnyPrice && (
@@ -637,7 +634,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                       </p>
                     )}
                     <p className="text-[10px] italic" style={{ color: "#B0B0B0" }}>
-                      estimates based on provider data · actual prices vary
+                      estimates based on average mexico pricing · actual prices vary by provider
                     </p>
                   </div>
                 )}

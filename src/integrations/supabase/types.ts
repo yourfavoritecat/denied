@@ -565,6 +565,36 @@ export type Database = {
         }
         Relationships: []
       }
+      procedure_pricing_reference: {
+        Row: {
+          category: string
+          created_at: string | null
+          currency: string
+          est_high: number
+          est_low: number
+          id: string
+          procedure_name: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          currency?: string
+          est_high: number
+          est_low: number
+          id?: string
+          procedure_name: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          currency?: string
+          est_high?: number
+          est_low?: number
+          id?: string
+          procedure_name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
