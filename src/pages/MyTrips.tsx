@@ -76,7 +76,7 @@ const BOOKING_STATUS_COLORS: Record<string, string> = {
   quoted: "bg-primary/10 text-primary border-primary/20",
   deposit_paid: "bg-primary/10 text-primary border-primary/20",
   confirmed: "bg-primary/10 text-primary border-primary/20",
-  completed: "bg-white/10 text-white/60 border-white/10",
+  completed: "bg-muted text-muted-foreground border-muted",
   cancelled: "bg-destructive/10 text-destructive border-destructive/20",
 };
 const BOOKING_STATUS_LABELS: Record<string, string> = {
@@ -212,7 +212,7 @@ const ProviderStatusLine = ({ briefId, consideredProviders }: { briefId: string;
           width: "5px",
           height: "5px",
           borderRadius: "50%",
-          background: hasProviders ? "#3BF07A" : "#444",
+          background: hasProviders ? "#3BF07A" : "#ccc",
           boxShadow: hasProviders ? "0 0 6px rgba(59,240,122,0.5)" : "none",
           animation: hasProviders ? "tripStatusPulse 2s ease-in-out infinite" : "none",
           display: "inline-block",
@@ -271,14 +271,15 @@ const TripBriefCard = ({
           display: "flex",
           flexDirection: "column",
           minHeight: "200px",
-          background: "#111111",
+          background: "#FFFFFF",
           borderRadius: "16px",
           padding: "22px 24px",
           cursor: "pointer",
+          border: "1px solid rgba(0,0,0,0.06)",
           boxShadow: hovered
-            ? "0 20px 60px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.5), 0 0 60px rgba(59,240,122,0.15), 0 0 120px rgba(59,240,122,0.08), 0 0 180px rgba(59,240,122,0.04), inset 0 1px 0 rgba(59,240,122,0.1)"
-            : "0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.6)",
-          transform: hovered ? "translateY(-4px) scale(1.008)" : "none",
+            ? "0 4px 20px rgba(59,240,122,0.1)"
+            : "0 2px 12px rgba(0,0,0,0.04)",
+          transform: hovered ? "translateY(-2px)" : "none",
           transition: "all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
         }}
       >
@@ -290,8 +291,8 @@ const TripBriefCard = ({
             borderRadius: "16px",
             padding: "1px",
             background: hovered
-              ? "linear-gradient(135deg, rgba(255,107,74,0.35), rgba(59,240,122,0.35))"
-              : "linear-gradient(135deg, rgba(255,107,74,0.12), rgba(59,240,122,0.12))",
+              ? "linear-gradient(135deg, rgba(255,107,74,0.2), rgba(59,240,122,0.2))"
+              : "linear-gradient(135deg, rgba(255,107,74,0.08), rgba(59,240,122,0.08))",
             WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
             WebkitMaskComposite: "xor",
             maskComposite: "exclude",
@@ -333,10 +334,10 @@ const TripBriefCard = ({
           {/* Top row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "12px" }}>
             <div>
-              <h3 style={{ fontSize: "16px", fontWeight: 600, textTransform: "lowercase", color: "white", margin: 0 }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 600, textTransform: "lowercase", color: "#111111", margin: 0 }}>
                 {buildCardTitle(brief)}
               </h3>
-              <div style={{ fontSize: "11px", color: "#B0B0B0", marginTop: "6px", lineHeight: 1.6 }}>
+              <div style={{ fontSize: "11px", color: "#888888", marginTop: "6px", lineHeight: 1.6 }}>
                 {brief.destination && (
                   <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
                     📍 {brief.destination?.toLowerCase()}, mexico
@@ -375,21 +376,21 @@ const TripBriefCard = ({
                 style={{
                   width: "28px", height: "28px",
                   borderRadius: "8px",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                   border: "1px solid rgba(0,0,0,0.08)",
                   background: "transparent",
-                  color: "#666",
+                   color: "#888",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer",
                   transition: "all 0.15s ease",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#fff";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                  e.currentTarget.style.color = "#111";
+                  e.currentTarget.style.borderColor = "rgba(0,0,0,0.2)";
+                  e.currentTarget.style.background = "rgba(0,0,0,0.04)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#666";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                  e.currentTarget.style.color = "#888";
+                  e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
                   e.currentTarget.style.background = "transparent";
                 }}
               >
@@ -400,21 +401,21 @@ const TripBriefCard = ({
                 style={{
                   width: "28px", height: "28px",
                   borderRadius: "8px",
-                  border: "1px solid rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(0,0,0,0.08)",
                   background: "transparent",
-                  color: "#666",
+                  color: "#888",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   cursor: "pointer",
                   transition: "all 0.15s ease",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#fff";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-                  e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                  e.currentTarget.style.color = "#111";
+                  e.currentTarget.style.borderColor = "rgba(0,0,0,0.2)";
+                  e.currentTarget.style.background = "rgba(0,0,0,0.04)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#666";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
+                  e.currentTarget.style.color = "#888";
+                  e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
                   e.currentTarget.style.background = "transparent";
                 }}
               >
@@ -447,8 +448,8 @@ const TripBriefCard = ({
           )}
 
           {/* Footer */}
-          <div style={{ marginTop: "auto", paddingTop: "14px", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "11px", color: "#B0B0B0" }}>
+          <div style={{ marginTop: "auto", paddingTop: "14px", borderTop: "1px solid rgba(0,0,0,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: "11px", color: "#888888" }}>
               <EstimatedCostRange procedures={brief.procedures} />
             </span>
             <ProviderStatusLine briefId={brief.id} consideredProviders={brief.considered_providers} />
@@ -457,16 +458,16 @@ const TripBriefCard = ({
           {/* Quote requests */}
           {briefQuotes.length > 0 && (
             <div className="space-y-2 mt-3">
-              <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>quote requests</p>
+              <p style={{ fontSize: "10px", color: "#888888", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>quote requests</p>
               {briefQuotes.map((q) => (
-                <div key={q.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
+                <div key={q.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <Building2 className="w-3.5 h-3.5" style={{ color: "rgba(255,255,255,0.4)" }} />
+                    <Building2 className="w-3.5 h-3.5" style={{ color: "#888888" }} />
                     <span style={{ fontSize: "13px" }}>{providerLabel(q.provider_slug)}</span>
                   </div>
                   <Badge
                     variant="outline"
-                    className={`text-[10px] ${q.status === "responded" ? "border-primary/40 text-primary" : "border-white/20 text-white/50"}`}
+                    className={`text-[10px] ${q.status === "responded" ? "border-primary/40 text-primary" : "border-muted-foreground/20 text-muted-foreground"}`}
                   >
                     {QUOTE_STATUS_LABELS[q.status] || q.status}
                   </Badge>
@@ -493,20 +494,20 @@ const BookingCard = ({ booking }: { booking: Booking }) => {
 
   return (
     <Link to={`/booking/${booking.id}`}>
-      <div className="glossy-card rounded-xl p-5 hover:bg-white/5 transition-colors cursor-pointer">
+      <div className="glossy-card rounded-xl p-5 hover:bg-muted/50 transition-colors cursor-pointer">
         <div className="flex items-start justify-between">
           <div className="space-y-1 flex-1 min-w-0 pr-3">
-            <h3 className="font-bold">{providerLabel(booking.provider_slug)}</h3>
-            {procedures && <p className="text-sm text-white/50 line-clamp-1">{procedures}</p>}
+            <h3 className="font-bold" style={{ color: '#111111' }}>{providerLabel(booking.provider_slug)}</h3>
+            {procedures && <p className="text-sm line-clamp-1" style={{ color: '#888888' }}>{procedures}</p>}
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <Badge className={`text-[10px] border ${BOOKING_STATUS_COLORS[booking.status] || "bg-muted border-white/10"}`}>
+            <Badge className={`text-[10px] border ${BOOKING_STATUS_COLORS[booking.status] || "bg-muted border-muted"}`}>
               {BOOKING_STATUS_LABELS[booking.status] || booking.status}
             </Badge>
           </div>
         </div>
         <div className="flex items-center justify-between mt-3">
-          <div className="flex items-center gap-3 text-sm text-white/40">
+          <div className="flex items-center gap-3 text-sm" style={{ color: '#888888' }}>
             {booking.preferred_dates?.text && (
               <span className="flex items-center gap-1"><Calendar className="w-3.5 h-3.5" />{booking.preferred_dates.text}</span>
             )}
@@ -515,7 +516,7 @@ const BookingCard = ({ booking }: { booking: Booking }) => {
             {booking.quoted_price && (
               <span className="font-bold text-primary text-sm">${Number(booking.quoted_price).toLocaleString()}</span>
             )}
-            <ArrowRight className="w-4 h-4 text-white/30" />
+            <ArrowRight className="w-4 h-4 text-muted-foreground" />
           </div>
         </div>
       </div>
@@ -533,7 +534,7 @@ const EmptyState = ({
 }: { icon: any; title: string; desc: string; action?: React.ReactNode; candy?: "pill" | "tooth" | "star" }) => (
   <div className="text-center py-16">
     <CandyEmptyState candy={candy} message={title} />
-    <p className="text-white/40 text-sm mb-6 max-w-sm mx-auto -mt-12">{desc}</p>
+    <p className="text-muted-foreground text-sm mb-6 max-w-sm mx-auto -mt-12">{desc}</p>
     {action}
   </div>
 );
@@ -611,36 +612,29 @@ const MyTripsPage = () => {
   }, [tripBriefs]);
 
   return (
-    <div className="min-h-screen" style={{ background: "#0a0a0a", textTransform: "lowercase" }}>
-      <Navbar />
+    <div className="min-h-screen theme-public" style={{ background: "#FFFFFF", textTransform: "lowercase" }}>
+      <Navbar light />
 
-      {/* Ambient page glows */}
-      <div style={{ position: "fixed", top: "-150px", right: "-120px", width: "550px", height: "550px", background: "radial-gradient(circle, rgba(59,240,122,0.06) 0%, rgba(59,240,122,0.02) 40%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
-      <div style={{ position: "fixed", bottom: "-100px", left: "-150px", width: "500px", height: "500px", background: "radial-gradient(circle, rgba(255,107,74,0.04) 0%, rgba(255,107,74,0.015) 40%, transparent 70%)", pointerEvents: "none", zIndex: 0 }} />
+      {/* Ambient page glows - hidden in light theme */}
 
       <main style={{ position: "relative", zIndex: 1 }}>
         {/* ─── Hero Band ─── */}
         <div style={{ position: "relative", padding: "40px 48px 36px 48px", marginTop: "64px" }}>
-          {/* Top gradient line + glow */}
-          <div style={{ position: "absolute", top: "-4px", left: "5%", right: "5%", height: "12px", background: "linear-gradient(90deg, transparent, rgba(255,107,74,0.07) 20%, rgba(59,240,122,0.07) 80%, transparent)", filter: "blur(8px)", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", top: 0, left: "5%", right: "5%", height: "2px", background: "linear-gradient(90deg, transparent, rgba(255,107,74,0.3) 20%, rgba(59,240,122,0.3) 80%, transparent)", filter: "blur(0.5px)" }} />
-          {/* Bottom gradient line + glow */}
-          <div style={{ position: "absolute", bottom: "4px", left: "5%", right: "5%", height: "12px", background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.06) 20%, rgba(255,107,74,0.06) 80%, transparent)", filter: "blur(8px)", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", bottom: 0, left: "5%", right: "5%", height: "2px", background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.2) 20%, rgba(255,107,74,0.2) 80%, transparent)", filter: "blur(0.5px)" }} />
-          {/* Internal ambient glow */}
-          <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at 25% 50%, rgba(255,107,74,0.025) 0%, transparent 50%), radial-gradient(ellipse at 75% 50%, rgba(59,240,122,0.025) 0%, transparent 50%)", pointerEvents: "none" }} />
+          {/* Top gradient line */}
+          <div style={{ position: "absolute", top: 0, left: "5%", right: "5%", height: "2px", background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.2) 20%, rgba(255,107,74,0.2) 80%, transparent)" }} />
+          {/* Bottom gradient line */}
+          <div style={{ position: "absolute", bottom: 0, left: "5%", right: "5%", height: "2px", background: "linear-gradient(90deg, transparent, rgba(59,240,122,0.15) 20%, rgba(255,107,74,0.15) 80%, transparent)" }} />
 
           <div className="hero-band-content" style={{ maxWidth: "1200px", margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", position: "relative", zIndex: 1 }}>
             <div>
               <h1 style={{
                 fontSize: "30px", fontWeight: 800, textTransform: "lowercase",
-                background: "linear-gradient(135deg, #FFFFFF, rgba(255,255,255,0.7))",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                backgroundClip: "text", margin: 0,
+                color: "#111111",
+                margin: 0,
               }}>
                 my trips — travel hub
               </h1>
-              <p style={{ fontSize: "14px", color: "#B0B0B0", marginTop: "8px", maxWidth: "460px", lineHeight: 1.5 }}>
+              <p style={{ fontSize: "14px", color: "#555555", marginTop: "8px", maxWidth: "460px", lineHeight: 1.5 }}>
                 whether you're type a or type b, plan as much (or as little) as you want before your next trip.
               </p>
             </div>
@@ -678,7 +672,7 @@ const MyTripsPage = () => {
                 <PlusCircle className="w-4 h-4" />
                 plan a trip
               </Button>
-              <span style={{ fontSize: "12px", color: "#B0B0B0" }}>
+              <span style={{ fontSize: "12px", color: "#888888" }}>
                 <span style={{ color: "#3BF07A" }}>{totalBriefs}</span> briefs · <span style={{ color: "#3BF07A" }}>{totalProviders}</span> providers contacted
               </span>
             </div>
@@ -688,17 +682,17 @@ const MyTripsPage = () => {
         {/* ─── Content ─── */}
         <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "0 24px 64px" }}>
           {loading ? (
-            <div className="text-center py-16 text-white/40">loading your trips…</div>
+            <div className="text-center py-16 text-muted-foreground">loading your trips…</div>
           ) : (
             <Tabs defaultValue="planning" className="space-y-7">
               <TabsList
                 className="flex flex-wrap h-auto"
                 style={{
                   gap: "6px",
-                  background: "rgba(17,17,17,0.5)",
+                  background: "rgba(0,0,0,0.03)",
                   borderRadius: "9999px",
                   padding: "4px",
-                  border: "1px solid rgba(255,255,255,0.05)",
+                  border: "1px solid rgba(0,0,0,0.06)",
                   width: "fit-content",
                   marginBottom: "28px",
                 }}
@@ -778,7 +772,7 @@ const MyTripsPage = () => {
                   <>
                     {quotedBriefs.length > 0 && (
                       <div className="space-y-3">
-                        <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>quotes requested</p>
+                        <p style={{ fontSize: "10px", color: "#888888", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>quotes requested</p>
                         <div className="trips-card-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}>
                           {quotedBriefs.map((brief) => (
                             <TripBriefCard
@@ -795,7 +789,7 @@ const MyTripsPage = () => {
                     )}
                     {activeBookings.length > 0 && (
                       <div className="space-y-3">
-                        <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>inquiries</p>
+                        <p style={{ fontSize: "10px", color: "#888888", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 500 }}>inquiries</p>
                         {activeBookings.map((b) => <BookingCard key={b.id} booking={b} />)}
                       </div>
                     )}
@@ -836,7 +830,7 @@ const MyTripsPage = () => {
                 )}
                 {cancelledBookings.length > 0 && (
                   <div className="space-y-3 mt-6">
-                    <p className="text-xs text-white/30 uppercase tracking-wide font-medium">cancelled</p>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">cancelled</p>
                     {cancelledBookings.map((b) => <BookingCard key={b.id} booking={b} />)}
                   </div>
                 )}

@@ -54,8 +54,8 @@ const MyBugReports = () => {
   }, [user]);
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+      <Navbar light />
       <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
         <div className="flex items-center gap-3 mb-6">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>

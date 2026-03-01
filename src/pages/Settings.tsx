@@ -6,8 +6,8 @@ import { Shield, KeyRound, Trash2 } from "lucide-react";
 
 const SettingsPage = () => {
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+      <Navbar light />
       <main>
         <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
           <h1 className="text-2xl font-bold mb-6">Settings</h1>
