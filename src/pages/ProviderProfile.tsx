@@ -311,8 +311,8 @@ const ProviderProfile = () => {
   /* ── Loading ── */
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
+      <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+        <Navbar light />
         <main className="pt-16 pb-24">
           <div className="max-w-[960px] mx-auto px-4 py-12 space-y-4">
             <Skeleton className="h-[200px] w-full rounded-xl bg-white/10" />
@@ -328,10 +328,10 @@ const ProviderProfile = () => {
   /* ── 404 ── */
   if (!pRec) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
+      <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+        <Navbar light />
         <main className="pt-24 pb-16 text-center">
-          <h1 className="text-3xl font-bold mb-4">Provider Not Found</h1>
+          <h1 className="text-3xl font-bold mb-4" style={{ color: '#111111' }}>Provider Not Found</h1>
           <p className="text-muted-foreground mb-6">This provider doesn't exist or has been removed.</p>
           <Link to="/search"><Button>Back to Search</Button></Link>
         </main>
@@ -342,8 +342,8 @@ const ProviderProfile = () => {
   const locationString = `${providerCity}${data?.business?.state_country ? `, ${data.business.state_country}` : pRec?.country ? `, ${pRec.country}` : ""}`;
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+      <Navbar light />
       {/* Concierge mode banner */}
       {isConcierge && (
         <div className="fixed top-16 left-0 right-0 z-40 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium"
@@ -364,7 +364,7 @@ const ProviderProfile = () => {
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-[hsl(var(--primary))]/20 to-[hsl(var(--primary))]/5" />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/60 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
             <div className="absolute bottom-0 left-0 right-0 p-5 flex items-end gap-4">
               <div className="w-16 h-16 rounded-xl bg-[hsl(var(--primary))]/20 border border-[hsl(var(--primary))]/30 flex items-center justify-center shrink-0 backdrop-blur-sm">
@@ -404,7 +404,7 @@ const ProviderProfile = () => {
         </div>
 
         {/* ═══════ STICKY TAB BAR ═══════ */}
-        <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-lg border-b border-[rgba(59,240,122,0.1)]">
+        <div className="sticky top-16 z-30 backdrop-blur-lg border-b" style={{ background: 'rgba(255,255,255,0.95)', borderColor: '#EEEEEE' }}>
           <div className="max-w-[960px] mx-auto px-4">
             <div className="flex gap-6">
               {TABS.map((tab) => (
@@ -413,8 +413,8 @@ const ProviderProfile = () => {
                   onClick={() => setActiveTab(tab)}
                   className={`py-3 text-sm font-medium transition-colors relative ${
                     activeTab === tab
-                      ? "text-white"
-                      : "text-muted-foreground hover:text-white/70"
+                      ? "text-[#111111]"
+                      : "text-[#888888] hover:text-[#555555]"
                   }`}
                 >
                   {tab}
@@ -724,7 +724,7 @@ const ProviderProfile = () => {
       </main>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card/95 backdrop-blur-lg border-t border-border shadow-floating z-40">
+      <div className="fixed bottom-0 left-0 right-0 backdrop-blur-lg border-t shadow-floating z-40" style={{ background: 'rgba(255,255,255,0.95)', borderColor: '#EEEEEE' }}>
         <div className="max-w-[960px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
           <div className="shrink-0">
             <span className="text-xs text-muted-foreground">Starting at </span>
@@ -763,7 +763,7 @@ const ProviderProfile = () => {
         editReview={editingReview}
       />
 
-      <Footer />
+      <Footer light />
     </div>
   );
 };

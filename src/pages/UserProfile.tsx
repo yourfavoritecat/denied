@@ -136,8 +136,8 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
+      <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+        <Navbar light />
         <main className="pt-24 pb-16 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
         </main>
@@ -152,13 +152,13 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen">
-        <Navbar />
+      <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+        <Navbar light />
         <main className="pt-24 pb-16 text-center">
-          <h1 className="text-2xl font-bold mb-2">Profile Not Found</h1>
+          <h1 className="text-2xl font-bold mb-2" style={{ color: '#111111' }}>Profile Not Found</h1>
           <p className="text-muted-foreground">This user doesn't have a public profile.</p>
         </main>
-        <Footer />
+        <Footer light />
       </div>
     );
   }
@@ -168,8 +168,8 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
   const memberYear = new Date(profile.created_at).getFullYear();
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+      <Navbar light />
 
       {/* Owner edit banner */}
       {isOwner && (
@@ -197,7 +197,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
           className="absolute inset-0 w-full h-full object-cover"
           style={{ objectPosition: 'center 25%' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white via-white/40 to-transparent" />
       </div>
 
       {/* All content below cover */}
@@ -205,14 +205,14 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
 
         {/* Identity row — avatar overlaps cover */}
         <div className="flex items-center gap-6 -mt-14 relative z-10 mb-3">
-          <Avatar className="w-32 h-32 shrink-0 border-[3px] border-[#0a0a0a] shadow-lg">
+          <Avatar className="w-32 h-32 shrink-0 border-[3px] border-white shadow-lg">
             {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.first_name || "User"} className="object-cover" />}
             <AvatarFallback className="bg-primary text-primary-foreground text-4xl font-bold">{initials}</AvatarFallback>
           </Avatar>
 
           {/* Name + badge */}
           <div className="flex items-center gap-3 flex-wrap pt-14">
-            <h1 className="text-5xl font-bold leading-none tracking-tight">{profile.first_name || "User"}</h1>
+            <h1 className="text-5xl font-bold leading-none tracking-tight" style={{ color: '#111111' }}>{profile.first_name || "User"}</h1>
             {profile.badge_type ? (
               <img
                 src={
@@ -232,20 +232,20 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
 
         {/* Stats line */}
         <div className="mb-1">
-          <p className="text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
-            <span className="font-semibold text-white">{reviews.length}</span>
+          <p className="text-sm" style={{ color: '#888888' }}>
+            <span className="font-semibold" style={{ color: '#111111' }}>{reviews.length}</span>
             {' '}review{reviews.length !== 1 ? 's' : ''}
             {' · '}
-            <span className="font-semibold text-white">{tripsCount}</span>
+            <span className="font-semibold" style={{ color: '#111111' }}>{tripsCount}</span>
             {' '}trip{tripsCount !== 1 ? 's' : ''} completed
             {profile.city && (
               <>
                 {' · '}
-                <span className="font-semibold text-white">{profile.city}</span>
+                <span className="font-semibold" style={{ color: '#111111' }}>{profile.city}</span>
               </>
             )}
             {' · '}
-            member since <span className="font-semibold text-white">{memberYear}</span>
+            member since <span className="font-semibold" style={{ color: '#111111' }}>{memberYear}</span>
           </p>
         </div>
 
@@ -265,7 +265,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                   placeholder="share what you're up to..."
                   maxLength={150}
                   className="bg-transparent border-none outline-none text-base italic w-full max-w-[500px]"
-                  style={{ color: 'rgba(255,255,255,0.6)' }}
+                   style={{ color: '#555555' }}
                 />
                 <button
                   onClick={handleSaveStatus}
@@ -275,7 +275,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                 >
                   <Check className="w-4 h-4" />
                 </button>
-                <span className="text-xs shrink-0" style={{ color: 'rgba(255,255,255,0.3)' }}>{statusText.length}/150</span>
+                <span className="text-xs shrink-0" style={{ color: '#888888' }}>{statusText.length}/150</span>
               </div>
             ) : (
               <div
@@ -283,17 +283,17 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                 onClick={() => setEditingStatus(true)}
               >
                 {statusText ? (
-                  <p className="text-base italic" style={{ color: 'rgba(255,255,255,0.6)' }}>{statusText}</p>
+                  <p className="text-base italic" style={{ color: '#555555' }}>{statusText}</p>
                 ) : (
-                  <p className="text-sm italic" style={{ color: 'rgba(255,255,255,0.25)' }}>+ add a status</p>
+                  <p className="text-sm italic" style={{ color: '#888888' }}>+ add a status</p>
                 )}
-                <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" style={{ color: 'rgba(255,255,255,0.6)' }} />
+                <Pencil className="w-3 h-3 opacity-0 group-hover:opacity-60 transition-opacity shrink-0" style={{ color: '#888888' }} />
               </div>
             )}
           </div>
         ) : (
           profile.status && (
-            <p className="text-base italic mb-4 mt-1" style={{ color: 'rgba(255,255,255,0.6)' }}>
+            <p className="text-base italic mb-4 mt-1" style={{ color: '#555555' }}>
               {profile.status}
             </p>
           )
@@ -353,7 +353,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                     {/* Favorite Providers */}
                     {favProviders.length > 0 && (
                       <div>
-                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#888888' }}>
                           <Heart className="w-3 h-3 inline mr-1.5 text-primary" />
                           favorite providers
                         </h3>
@@ -387,8 +387,8 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
                     {/* Favorite Creators */}
                     {favCreators.length > 0 && (
                       <div>
-                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                          <Star className="w-3 h-3 inline mr-1.5" style={{ color: '#E0A693' }} />
+                        <h3 className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: '#888888' }}>
+                          <Star className="w-3 h-3 inline mr-1.5" style={{ color: '#FF6B4A' }} />
                           favorite creators
                         </h3>
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -427,7 +427,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
         </div>
       </div>
 
-      <Footer />
+      <Footer light />
     </div>
   );
 };

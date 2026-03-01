@@ -190,17 +190,17 @@ const AuthPage = () => {
   // Show loading spinner when login is processing (waiting for auth state)
   if (isLoading && !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center theme-public" style={{ background: '#FFFFFF' }}>
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 pt-24 pb-16">
+    <div className="min-h-screen flex items-center justify-center px-4 pt-24 pb-16 theme-public" style={{ background: '#FFFFFF' }}>
       <div className="w-full max-w-md">
         <div className="flex justify-center mb-8">
-          <img src={logo} alt="Denied" className="h-12" style={{ mixBlendMode: 'screen' }} />
+          <img src={logo} alt="Denied" className="h-12" style={{ filter: 'brightness(0)' }} />
         </div>
 
         <Card className="shadow-hero border-border/50">

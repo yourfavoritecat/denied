@@ -99,7 +99,7 @@ const Apply = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4 theme-public" style={{ background: '#FFFFFF' }}>
         <Card className="max-w-lg w-full text-center glossy-card">
           <CardContent className="pt-10 pb-10 space-y-6">
             <CheckCircle className="w-16 h-16 text-primary mx-auto" />
@@ -122,11 +122,11 @@ const Apply = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
       <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
         <div className="flex justify-center mb-8">
           <Link to="/">
-            <img src={logo} alt="Denied" className="h-10" style={{ mixBlendMode: 'screen' }} />
+            <img src={logo} alt="Denied" className="h-10" style={{ filter: 'brightness(0)' }} />
           </Link>
         </div>
 
