@@ -17,7 +17,7 @@ const Index = () => {
         <PriceComparisonSection />
         <TestimonialsSection />
       </main>
-      <Footer light />
+      <Footer />
     </div>
   );
 };

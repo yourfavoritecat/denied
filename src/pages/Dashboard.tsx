@@ -23,6 +23,7 @@ import {
   Star,
 } from "lucide-react";
 import VerifiedBadge, { isUserVerified } from "@/components/profile/VerifiedBadge";
+import { GlassCard } from "@/components/ui/glass-card";
 
 const container = {
   hidden: { opacity: 0 },
@@ -34,12 +35,12 @@ const item = {
 };
 
 const statusColors: Record<string, string> = {
-  inquiry: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  quoted: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  deposit_paid: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  confirmed: "bg-primary/10 text-primary border-primary/20",
-  completed: "bg-muted text-muted-foreground border-border",
-  cancelled: "bg-destructive/10 text-destructive border-destructive/20",
+  inquiry: "bg-blue-100 text-blue-700 border-blue-200",
+  quoted: "bg-amber-100 text-amber-700 border-amber-200",
+  deposit_paid: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  confirmed: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  completed: "bg-gray-100 text-gray-500 border-gray-200",
+  cancelled: "bg-red-100 text-red-600 border-red-200",
 };
 
 const Dashboard = () => {
@@ -113,10 +114,10 @@ const Dashboard = () => {
             />
             <div
               className="absolute inset-0"
-              style={{ background: 'linear-gradient(to bottom, transparent 20%, #FFFFFF 100%)' }}
+              style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(255,255,255,0.95) 85%, #FFFFFF 100%)' }}
             />
             <div className="absolute bottom-0 left-0 p-6 flex items-end gap-4" style={{ zIndex: 1 }}>
-              <Avatar className="w-14 h-14 bg-primary text-primary-foreground border-2 border-background">
+              <Avatar className="w-14 h-14 bg-primary text-primary-foreground border-2" style={{ borderColor: '#FFFFFF' }}>
                 <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
               </Avatar>
               <div>
@@ -124,14 +125,14 @@ const Dashboard = () => {
                   {greeting()}, {firstName} 👋
                 </h1>
                 <div className="flex items-center gap-2 mt-1">
-                  <p className="text-sm" style={{ color: '#555555' }}>Welcome back to Denied</p>
+                  <p className="text-sm" style={{ color: '#888888' }}>welcome back to denied</p>
                   <VerifiedBadge verified={verified} size="sm" />
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Quick Actions */}
+          {/* Quick Actions — Glass Card Treatment */}
           <motion.div
             variants={container}
             initial="hidden"
@@ -139,21 +140,21 @@ const Dashboard = () => {
             className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8"
           >
             {[
-              { icon: Search, label: "find providers", to: "/search", color: "text-blue-400" },
-              { icon: PlusCircle, label: "plan a trip", to: "/my-trips?plan=new", color: "text-secondary" },
-              { icon: Plane, label: "my trips", to: "/my-trips", color: "text-emerald-400" },
-              { icon: Heart, label: "my profile", to: "/profile", color: "text-pink-400" },
+              { icon: Search, label: "find providers", to: "/search" },
+              { icon: PlusCircle, label: "plan a trip", to: "/my-trips?plan=new" },
+              { icon: Plane, label: "my trips", to: "/my-trips" },
+              { icon: Heart, label: "my profile", to: "/profile" },
             ].map((action) => (
               <motion.div key={action.label} variants={item}>
-                  <Card
-                    className="cursor-pointer tactile-press glossy-card"
+                <GlassCard
+                  className="cursor-pointer transition-all duration-200 hover:scale-[1.02]"
                   onClick={() => navigate(action.to)}
                 >
-                  <CardContent className="flex flex-col items-center gap-2 py-5 px-3">
-                    <action.icon className={`w-6 h-6 ${action.color}`} />
-                    <span className="text-sm font-medium text-center">{action.label}</span>
-                  </CardContent>
-                </Card>
+                  <div className="flex flex-col items-center gap-2 py-1 px-1">
+                    <action.icon className="w-6 h-6" style={{ color: '#111111' }} />
+                    <span className="text-sm font-semibold text-center" style={{ color: '#333333' }}>{action.label}</span>
+                  </div>
+                </GlassCard>
               </motion.div>
             ))}
           </motion.div>
@@ -166,70 +167,86 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.5 }}
             >
-              <Card className="glossy-card">
-                <CardHeader className="flex flex-row items-center justify-between pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Stethoscope className="w-5 h-5 text-primary" />
-                    Active Bookings
-                  </CardTitle>
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  borderRadius: 16,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                  padding: 24,
+                }}
+              >
+                <div className="flex items-center justify-between pb-3">
+                  <h3 className="text-lg font-bold flex items-center gap-2" style={{ color: '#111111' }}>
+                    <Stethoscope className="w-5 h-5" style={{ color: '#111111' }} />
+                    active bookings
+                  </h3>
                   {activeBookings.length > 0 && (
                     <Badge variant="secondary" className="text-xs">
                       {activeBookings.length}
                     </Badge>
                   )}
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className="space-y-3">
-                      {[1, 2].map((i) => (
-                        <div key={i} className="h-16 rounded-lg bg-muted animate-pulse" />
-                      ))}
-                    </div>
-                  ) : activeBookings.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Plane className="w-10 h-10 mx-auto text-muted-foreground/40 mb-3" />
-                      <p className="text-muted-foreground text-sm mb-4">No active bookings yet</p>
-                      <Button size="sm" onClick={() => navigate("/search")}>
-                        <Search className="w-4 h-4 mr-2" /> Browse Providers
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {activeBookings.map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="flex items-center justify-between p-3 rounded-lg border border-border/50 hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => navigate(`/booking/${booking.id}`)}
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                              <MapPin className="w-4 h-4 text-primary" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-medium truncate">
-                                {booking.provider_slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
-                              </p>
-                              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {new Date(booking.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
+                </div>
+                {loading ? (
+                  <div className="space-y-3">
+                    {[1, 2].map((i) => (
+                      <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: '#F5F5F5' }} />
+                    ))}
+                  </div>
+                ) : activeBookings.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Plane className="w-10 h-10 mx-auto mb-3" style={{ color: '#CCCCCC' }} />
+                    <p className="text-sm mb-4" style={{ color: '#888888' }}>no active bookings yet</p>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate("/search")}
+                      style={{ background: '#3BF07A', color: '#111111', borderRadius: 9999 }}
+                    >
+                      <Search className="w-4 h-4 mr-2" /> browse providers
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {activeBookings.map((booking) => (
+                      <div
+                        key={booking.id}
+                        className="flex items-center justify-between p-3 rounded-lg cursor-pointer transition-all duration-200"
+                        style={{ border: '1px solid rgba(0,0,0,0.06)' }}
+                        onClick={() => navigate(`/booking/${booking.id}`)}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#FAFAFA'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+                            style={{ background: 'rgba(59,240,122,0.06)', border: '1px solid rgba(59,240,122,0.12)' }}
+                          >
+                            <MapPin className="w-4 h-4" style={{ color: '#111111' }} />
                           </div>
-                          <div className="flex items-center gap-2 shrink-0">
-                            <Badge
-                              variant="outline"
-                              className={`text-[10px] capitalize shadow-elevated ${statusColors[booking.status] || ""}`}
-                            >
-                              {booking.status.replace(/_/g, " ")}
-                            </Badge>
-                            <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium truncate" style={{ color: '#111111' }}>
+                              {booking.provider_slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}
+                            </p>
+                            <p className="text-xs flex items-center gap-1" style={{ color: '#888888' }}>
+                              <Clock className="w-3 h-3" />
+                              {new Date(booking.created_at).toLocaleDateString()}
+                            </p>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] capitalize ${statusColors[booking.status] || ""}`}
+                          >
+                            {booking.status.replace(/_/g, " ")}
+                          </Badge>
+                          <ArrowRight className="w-4 h-4" style={{ color: '#CCCCCC' }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </motion.div>
 
             {/* Sidebar */}
@@ -240,69 +257,91 @@ const Dashboard = () => {
               transition={{ delay: 0.35, duration: 0.5 }}
             >
               {/* Trip Briefs */}
-              <Card className="glossy-card">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <CalendarDays className="w-5 h-5 text-secondary" />
-                    Trip Briefs
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className="h-16 rounded-lg bg-muted animate-pulse" />
-                  ) : tripBriefs.length === 0 ? (
-                    <div className="text-center py-4">
-                      <p className="text-muted-foreground text-sm mb-3">No trip briefs yet</p>
-                      <Button size="sm" variant="outline" onClick={() => navigate("/my-trips?plan=new")}>
-                        <PlusCircle className="w-4 h-4 mr-1" /> Create One
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {tripBriefs.map((tb) => (
-                        <div
-                          key={tb.id}
-                          className="p-2.5 rounded-lg border border-border/50 hover:bg-muted/50 cursor-pointer transition-colors"
-                          onClick={() => navigate("/my-trips")}
-                        >
-                          <p className="text-sm font-medium truncate">{tb.trip_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {tb.destination || "No destination set"}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  borderRadius: 16,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                  padding: 24,
+                }}
+              >
+                <h3 className="text-lg font-bold flex items-center gap-2 pb-3" style={{ color: '#111111' }}>
+                  <CalendarDays className="w-5 h-5" style={{ color: '#111111' }} />
+                  trip briefs
+                </h3>
+                {loading ? (
+                  <div className="h-16 rounded-lg animate-pulse" style={{ background: '#F5F5F5' }} />
+                ) : tripBriefs.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm mb-3" style={{ color: '#888888' }}>no trip briefs yet</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate("/my-trips?plan=new")}
+                      style={{ border: '2px solid #3BF07A', color: '#111111', borderRadius: 9999 }}
+                    >
+                      <PlusCircle className="w-4 h-4 mr-1" /> create one
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {tripBriefs.map((tb) => (
+                      <div
+                        key={tb.id}
+                        className="p-2.5 rounded-lg cursor-pointer transition-all duration-200"
+                        style={{ border: '1px solid rgba(0,0,0,0.06)' }}
+                        onClick={() => navigate("/my-trips")}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = '#FAFAFA'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <p className="text-sm font-medium truncate" style={{ color: '#111111' }}>{tb.trip_name}</p>
+                        <p className="text-xs" style={{ color: '#888888' }}>
+                          {tb.destination || "no destination set"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Quick Stats */}
-              <Card className="glossy-card">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Star className="w-5 h-5 text-amber-400" />
-                    Your Stats
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div 
-                      className="text-center p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
-                      onClick={() => navigate("/my-trips")}
-                    >
-                      <p className="text-2xl font-bold text-foreground">{bookings.length}</p>
-                      <p className="text-[11px] text-muted-foreground">Bookings</p>
-                    </div>
-                    <div 
-                      className="text-center p-3 rounded-lg bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
-                      onClick={() => navigate("/my-trips")}
-                    >
-                      <p className="text-2xl font-bold text-foreground">{tripBriefs.length}</p>
-                      <p className="text-[11px] text-muted-foreground">Trip Briefs</p>
-                    </div>
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  borderRadius: 16,
+                  boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+                  padding: 24,
+                }}
+              >
+                <h3 className="text-lg font-bold flex items-center gap-2 pb-3" style={{ color: '#111111' }}>
+                  <Star className="w-5 h-5" style={{ color: '#FFD700' }} />
+                  your stats
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  <div
+                    className="text-center p-3 rounded-lg cursor-pointer transition-all duration-200"
+                    style={{ background: '#FAFAFA', border: '1px solid rgba(0,0,0,0.04)' }}
+                    onClick={() => navigate("/my-trips")}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F5F5'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#FAFAFA'; }}
+                  >
+                    <p className="text-2xl font-bold" style={{ color: '#111111' }}>{bookings.length}</p>
+                    <p className="text-[11px]" style={{ color: '#888888' }}>bookings</p>
                   </div>
-                </CardContent>
-              </Card>
+                  <div
+                    className="text-center p-3 rounded-lg cursor-pointer transition-all duration-200"
+                    style={{ background: '#FAFAFA', border: '1px solid rgba(0,0,0,0.04)' }}
+                    onClick={() => navigate("/my-trips")}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#F5F5F5'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#FAFAFA'; }}
+                  >
+                    <p className="text-2xl font-bold" style={{ color: '#111111' }}>{tripBriefs.length}</p>
+                    <p className="text-[11px]" style={{ color: '#888888' }}>trip briefs</p>
+                  </div>
+                </div>
+              </div>
             </motion.div>
           </div>
         </div>

@@ -119,7 +119,7 @@ const About = () => {
         </div>
       </main>
 
-      <Footer light />
+      <Footer />
     </div>
   );
 };

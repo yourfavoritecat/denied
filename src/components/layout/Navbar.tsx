@@ -75,9 +75,9 @@ const Navbar = ({ light }: { light?: boolean }) => {
     navigate(to);
   };
 
-  // Theme-aware colors
+  // Theme-aware colors — active links use dark text + green indicator, not green text
   const linkDefault = light ? '#555555' : 'rgba(255,255,255,0.8)';
-  const linkActive = '#3BF07A';
+  const linkHover = light ? '#111111' : '#FFFFFF';
 
   return (
     <nav
@@ -106,21 +106,32 @@ const Navbar = ({ light }: { light?: boolean }) => {
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="flex items-center gap-1 lg:gap-2 whitespace-nowrap text-xs lg:text-sm"
+                  className="flex items-center gap-1 lg:gap-2 whitespace-nowrap text-xs lg:text-sm relative"
                   style={{
-                    color: active ? linkActive : linkDefault,
-                    textShadow: active && !light ? "0 0 8px rgba(59,240,122,0.2)" : "none",
+                    color: active ? (light ? '#111111' : '#FFFFFF') : linkDefault,
+                    fontWeight: active ? 600 : 400,
                     transition: "all 200ms ease",
+                    padding: active && light ? '4px 12px' : '4px 0',
+                    borderRadius: active && light ? '9999px' : '0',
+                    background: active && light ? 'rgba(59,240,122,0.08)' : 'transparent',
+                    textShadow: active && !light ? "0 0 8px rgba(59,240,122,0.2)" : "none",
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {
-                      e.currentTarget.style.color = linkActive;
-                      if (!light) e.currentTarget.style.textShadow = "0 0 10px rgba(59,240,122,0.3)";
+                      e.currentTarget.style.color = linkHover;
+                      if (light) {
+                        e.currentTarget.style.textDecorationLine = 'underline';
+                        e.currentTarget.style.textDecorationColor = '#3BF07A';
+                        e.currentTarget.style.textUnderlineOffset = '4px';
+                      } else {
+                        e.currentTarget.style.textShadow = "0 0 10px rgba(59,240,122,0.3)";
+                      }
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!active) {
                       e.currentTarget.style.color = linkDefault;
+                      e.currentTarget.style.textDecorationLine = 'none';
                       e.currentTarget.style.textShadow = "none";
                     }
                   }}
@@ -276,7 +287,11 @@ const Navbar = ({ light }: { light?: boolean }) => {
                           key={link.to}
                           onClick={() => handleMobileNav(link.to)}
                           className="flex items-center gap-3 w-full px-3 py-3 rounded-lg hover:bg-muted transition-colors text-sm"
-                          style={{ color: active ? "#3BF07A" : light ? '#555555' : undefined }}
+                          style={{
+                            color: active ? '#111111' : (light ? '#555555' : undefined),
+                            fontWeight: active ? 600 : 400,
+                            background: active ? 'rgba(59,240,122,0.08)' : 'transparent',
+                          }}
                         >
                           <link.icon className="w-5 h-5" />
                           {link.label}
@@ -286,9 +301,9 @@ const Navbar = ({ light }: { light?: boolean }) => {
                     <button
                       onClick={() => handleMobileNav(user ? "/my-trips?plan=new" : "/auth")}
                       className="flex items-center gap-3 w-full px-3 py-3 rounded-lg font-semibold hover:bg-muted transition-colors text-sm"
-                      style={{ color: '#3BF07A' }}
+                      style={{ color: '#111111', background: 'rgba(59,240,122,0.08)' }}
                     >
-                      <PlusCircle className="w-5 h-5" />
+                      <PlusCircle className="w-5 h-5" style={{ color: '#3BF07A' }} />
                       plan a trip
                     </button>
                   </div>

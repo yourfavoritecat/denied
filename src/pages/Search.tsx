@@ -360,7 +360,7 @@ const SearchPage = () => {
           )}
         </div>
       </main>
-      <Footer light />
+      <Footer />
     </div>
   );
 };

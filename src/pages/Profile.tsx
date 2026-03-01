@@ -2,7 +2,6 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/landing/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Settings, Heart, Calendar, ShieldCheck, ClipboardList, Sparkles, Shield, KeyRound, Trash2, Star } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -29,7 +28,6 @@ const ProfilePage = () => {
   const navigate = useNavigate();
 
   const rawTab = searchParams.get("tab") || "";
-  // Redirect legacy tab values
   const currentTab = (rawTab === "feed" || rawTab === "my-journey")
     ? "reviews"
     : VALID_TABS.includes(rawTab) ? rawTab : "reviews";
@@ -61,35 +59,68 @@ const ProfilePage = () => {
       <main>
         <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
           {/* Profile Header */}
-          <Card className="mb-8 glossy-card">
-            <CardContent className="pt-6">
-              <div className="flex flex-col sm:flex-row items-center gap-6">
-                <AvatarUpload size="lg" />
-                <div className="text-center sm:text-left flex-1">
-                  <div className="flex items-center gap-3 justify-center sm:justify-start mb-1">
-                    <h1 className="text-2xl font-bold">{displayName}</h1>
-                  </div>
-                  <p className="text-muted-foreground mb-3">{user?.email}</p>
-                  <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
-                    <Badge variant="secondary">member since {new Date(user?.created_at || "").getFullYear()}</Badge>
-                    <VerifiedBadge verified={verified} size="md" />
-                    {creatorHandle && (
-                      <Button variant="secondary" size="sm" asChild className="gap-1.5">
-                        <Link to={`/${creatorHandle}`}>
-                          <Sparkles className="w-3.5 h-3.5" />
-                          view creator page
-                        </Link>
-                      </Button>
-                    )}
-                  </div>
+          <div
+            className="mb-8"
+            style={{
+              background: '#FFFFFF',
+              border: '1px solid rgba(0,0,0,0.06)',
+              borderRadius: 16,
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+              padding: 24,
+            }}
+          >
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <AvatarUpload size="lg" />
+              <div className="text-center sm:text-left flex-1">
+                <div className="flex items-center gap-3 justify-center sm:justify-start mb-1">
+                  <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>{displayName}</h1>
+                </div>
+                <p className="mb-3" style={{ color: '#888888', fontSize: 14 }}>{user?.email}</p>
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                  {/* Member since badge */}
+                  <span
+                    className="inline-flex items-center text-xs font-medium"
+                    style={{
+                      background: 'rgba(0,0,0,0.04)',
+                      border: '1px solid rgba(0,0,0,0.08)',
+                      borderRadius: 9999,
+                      padding: '4px 12px',
+                      color: '#555555',
+                    }}
+                  >
+                    member since {new Date(user?.created_at || "").getFullYear()}
+                  </span>
+                  <VerifiedBadge verified={verified} size="md" />
+                  {creatorHandle && (
+                    <Link
+                      to={`/${creatorHandle}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium transition-all duration-200"
+                      style={{
+                        background: 'rgba(255,107,74,0.06)',
+                        border: '1px solid rgba(255,107,74,0.12)',
+                        borderRadius: 9999,
+                        padding: '4px 12px',
+                        color: '#FF6B4A',
+                      }}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      view creator page
+                    </Link>
+                  )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           {/* Tabbed Content */}
           <Tabs value={currentTab} onValueChange={handleTabChange} className="space-y-6">
-            <TabsList className="flex flex-wrap h-auto gap-1 bg-card p-1 border border-white/8 rounded-xl">
+            <TabsList
+              className="flex flex-wrap h-auto gap-1 p-1 rounded-xl"
+              style={{
+                background: '#FAFAFA',
+                border: '1px solid rgba(0,0,0,0.06)',
+              }}
+            >
               <TabsTrigger value="reviews" className="flex items-center gap-1.5 text-xs sm:text-sm">
                 <Star className="w-4 h-4" />
                 <span className="hidden sm:inline">reviews</span>
@@ -127,39 +158,55 @@ const ProfilePage = () => {
             <TabsContent value="saved"><SavedProvidersTab /></TabsContent>
             <TabsContent value="trips"><TripsTab /></TabsContent>
             <TabsContent value="security">
-              <Card className="glossy-card">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    security
-                  </CardTitle>
-                  <CardDescription>manage your account security</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
+              <div
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  borderRadius: 16,
+                  boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+                  padding: 24,
+                }}
+              >
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield className="w-5 h-5" style={{ color: '#111111' }} />
+                  <h3 style={{ fontSize: 16, fontWeight: 700, color: '#111111' }}>security</h3>
+                </div>
+                <p style={{ fontSize: 13, color: '#888888', marginBottom: 24 }}>manage your account security</p>
+                <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium">change password</p>
-                      <p className="text-xs text-muted-foreground">update your account password</p>
+                      <p className="text-sm font-medium" style={{ color: '#111111' }}>change password</p>
+                      <p className="text-xs" style={{ color: '#888888' }}>update your account password</p>
                     </div>
-                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2"
+                      style={{ borderRadius: 9999, border: '1px solid rgba(0,0,0,0.1)', color: '#555555' }}
+                    >
                       <KeyRound className="w-4 h-4" />
                       change password
                     </Button>
                   </div>
-                  <div className="border-t pt-6">
+                  <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 24 }}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-destructive">delete account</p>
-                        <p className="text-xs text-muted-foreground">permanently delete your account and all associated data</p>
+                        <p className="text-sm font-medium" style={{ color: '#DC2626' }}>delete account</p>
+                        <p className="text-xs" style={{ color: '#888888' }}>permanently delete your account and all associated data</p>
                       </div>
-                      <Button variant="destructive" size="sm" className="flex items-center gap-2">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="flex items-center gap-2"
+                        style={{ borderRadius: 9999 }}
+                      >
                         <Trash2 className="w-4 h-4" />
                         delete account
                       </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
           </Tabs>
         </div>

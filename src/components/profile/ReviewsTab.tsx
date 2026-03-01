@@ -70,20 +70,21 @@ const ReviewsTab = () => {
         <div
           key={r.id}
           style={{
-            background: "#0A0A0A",
-            border: "1px solid rgba(255,107,74,0.08)",
+            background: "#FFFFFF",
+            border: "1px solid rgba(0,0,0,0.06)",
             borderRadius: 16,
             padding: 20,
+            boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
           }}
           className="md:p-5 p-4"
         >
           {/* top row */}
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2 min-w-0">
-              <span style={{ fontSize: 14, fontWeight: 600, color: "#fff" }} className="truncate">
+              <span style={{ fontSize: 14, fontWeight: 600, color: "#111111" }} className="truncate">
                 {providerNames[r.provider_slug] || r.provider_slug}
               </span>
-              <span style={{ fontSize: 12, color: "#3BF07A" }}>{r.procedure_name}</span>
+              <span style={{ fontSize: 12, color: "#888888" }}>{r.procedure_name}</span>
             </div>
             <div className="flex shrink-0">
               {[1, 2, 3, 4, 5].map((s) => (
@@ -92,7 +93,7 @@ const ReviewsTab = () => {
                   className="w-3.5 h-3.5"
                   style={{
                     fill: s <= r.rating ? "#FFD700" : "transparent",
-                    color: s <= r.rating ? "#FFD700" : "#333",
+                    color: s <= r.rating ? "#FFD700" : "#DDD",
                   }}
                 />
               ))}
@@ -100,7 +101,7 @@ const ReviewsTab = () => {
           </div>
 
           {/* body */}
-          <p style={{ fontSize: 13, color: "#B0B0B0", lineHeight: 1.6 }}>{r.review_text}</p>
+          <p style={{ fontSize: 13, color: "#555555", lineHeight: 1.6 }}>{r.review_text}</p>
 
           {/* photos */}
           {r.photos && r.photos.length > 0 && (
@@ -109,7 +110,8 @@ const ReviewsTab = () => {
                 <button
                   key={i}
                   onClick={() => setLightboxImg(url)}
-                  className="md:w-16 md:h-16 w-14 h-14 rounded-lg overflow-hidden bg-[#111] shrink-0"
+                  className="md:w-16 md:h-16 w-14 h-14 rounded-lg overflow-hidden shrink-0"
+                  style={{ border: '1px solid rgba(0,0,0,0.08)' }}
                 >
                   <img src={url} alt="" className="w-full h-full object-cover" />
                 </button>
@@ -119,18 +121,19 @@ const ReviewsTab = () => {
 
           {/* footer */}
           <div className="flex items-center gap-2 mt-3">
-            <span style={{ fontSize: 11, color: "#444" }}>
+            <span style={{ fontSize: 11, color: "#888888" }}>
               {new Date(r.created_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })}
             </span>
             {r.verified_trip && (
               <span
                 style={{
                   display: "inline-block",
-                  background: "rgba(59,240,122,0.08)",
-                  color: "#3BF07A",
+                  background: "rgba(59,240,122,0.06)",
+                  color: "#333333",
                   padding: "2px 8px",
                   borderRadius: 9999,
                   fontSize: 10,
+                  border: "1px solid rgba(59,240,122,0.12)",
                 }}
               >
                 verified visit

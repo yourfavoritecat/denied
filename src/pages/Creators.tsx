@@ -103,7 +103,7 @@ const Creators = () => {
           )}
         </div>
       </main>
-      <Footer light />
+      <Footer />
     </div>
   );
 };
