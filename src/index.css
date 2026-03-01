@@ -268,18 +268,16 @@
   }
 
   .glossy-card {
-    background: hsl(var(--card));
-    border: 1px solid rgba(255,255,255,0.08);
-    border-top: 1px solid rgba(255,255,255,0.12);
+    background: #FFFFFF;
+    border: 1px solid rgba(0,0,0,0.06);
     border-radius: var(--radius);
-    box-shadow: var(--shadow-md), 0 8px 32px rgba(59,240,122,0.04);
-    @apply transition-all duration-300 ease-out;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    @apply transition-all duration-200 ease-out;
   }
   .glossy-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg), 0 8px 32px rgba(59,240,122,0.1);
-    border-color: rgba(59,240,122,0.15);
-    border-top-color: rgba(255,255,255,0.18);
+    box-shadow: 0 4px 24px rgba(59,240,122,0.12);
+    border-color: rgba(59,240,122,0.2);
   }
 
   .glossy-border {
@@ -474,18 +472,16 @@
   background-color: #FFFFFF;
 }
 
-/* Light-theme card & glossy overrides */
+/* Light-theme card overrides — same as default now */
 .theme-public .glossy-card {
   background: #FFFFFF !important;
   border: 1px solid rgba(0,0,0,0.06) !important;
-  border-top: 1px solid rgba(0,0,0,0.06) !important;
   box-shadow: 0 2px 12px rgba(0,0,0,0.04) !important;
 }
 .theme-public .glossy-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
-  border-color: rgba(0,0,0,0.1) !important;
-  border-top-color: rgba(0,0,0,0.1) !important;
+  box-shadow: 0 4px 24px rgba(59,240,122,0.12) !important;
+  border-color: rgba(59,240,122,0.2) !important;
 }
 
 .theme-public .text-card-foreground {
