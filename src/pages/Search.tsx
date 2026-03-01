@@ -14,7 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import clinicDental from "@/assets/clinic-dental.jpg";
 import clinicMedspa from "@/assets/clinic-medspa.jpg";
 import clinicSurgery from "@/assets/clinic-surgery.jpg";
-import candyScatter from "@/assets/candy-scatter-top.jpg";
+import candyScatter from "@/assets/search-banner.png";
 
 const dentalKeywords = ["dental", "crown", "implant", "all-on-4", "veneer", "root canal", "cleaning", "whitening", "denture"];
 const aestheticKeywords = ["botox", "syringe", "chemical peel", "microneedling", "prp", "liposuction", "rhinoplasty", "tummy tuck", "facelift", "medspa", "aesthetics", "cosmetic surgery", "breast"];
@@ -210,7 +210,7 @@ const SearchPage = () => {
             <img
               src={candyScatter}
               alt=""
-              className="w-[85%] h-auto pointer-events-none hidden md:block"
+              className="w-full h-auto pointer-events-none hidden md:block"
               loading="lazy"
               style={{ opacity: 0.65, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.04))' }}
             />

@@ -15,7 +15,7 @@ const Footer = () => {
           src={footerBeads}
           alt=""
           style={{
-            width: "clamp(400px, 50vw, 700px)",
+            width: "100%",
             height: "auto",
             opacity: 0.25,
             pointerEvents: "none",
