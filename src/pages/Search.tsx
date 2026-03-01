@@ -206,13 +206,13 @@ const SearchPage = () => {
       <main>
         <div className={`max-w-[960px] mx-auto px-4 pb-16 ${isConcierge ? "pt-28" : "pt-24"}`}>
           {/* Candy scatter accent */}
-          <div className="relative flex justify-center mb-2">
+          <div className="relative mb-2 -mx-4">
             <img
               src={candyScatter}
               alt=""
               className="w-full h-auto pointer-events-none hidden md:block"
               loading="lazy"
-              style={{ opacity: 0.65, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.04))' }}
+              style={{ objectFit: 'cover', opacity: 0.65, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.04))' }}
             />
           </div>
 
