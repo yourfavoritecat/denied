@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Heart, MapPin, Loader2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import CandyEmptyState from "@/components/ui/candy-empty-state";
 
 interface FavProvider {
   slug: string;
@@ -66,14 +67,12 @@ const SavedProvidersTab = () => {
 
   if (providers.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <Heart className="w-10 h-10 text-muted-foreground/30 mb-3" />
-        <p className="text-muted-foreground text-sm">No favorite providers yet.</p>
-        <p className="text-muted-foreground text-xs mt-1">Browse providers and tap the heart to save your favorites.</p>
-        <Button asChild variant="outline" size="sm" className="mt-4">
-          <Link to="/search">Browse Providers</Link>
-        </Button>
-      </div>
+      <CandyEmptyState
+        candy="star"
+        message="no favorites yet"
+        ctaLabel="browse providers"
+        ctaTo="/search"
+      />
     );
   }
 

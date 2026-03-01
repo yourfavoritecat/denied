@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Star } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import CandyEmptyState from "@/components/ui/candy-empty-state";
 
 interface ReviewItem {
   id: string;
@@ -60,11 +61,7 @@ const ReviewsTab = () => {
   }
 
   if (reviews.length === 0) {
-    return (
-      <div style={{ textAlign: "center", padding: "40px 0", color: "#555", fontSize: 14 }}>
-        no reviews yet
-      </div>
-    );
+    return <CandyEmptyState candy="tooth" message="no reviews yet" />;
   }
 
   return (

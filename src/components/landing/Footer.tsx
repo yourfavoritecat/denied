@@ -1,16 +1,33 @@
 import { Link } from "react-router-dom";
 import { Instagram } from "lucide-react";
 import logo from "@/assets/final-new-logo.png";
+import footerBeads from "@/assets/footer-beads.png";
 
 const Footer = ({ light }: { light?: boolean }) => {
   return (
     <footer
-      className="border-t py-14"
+      className="py-14"
       style={light
-        ? { background: '#F9F9F9', borderTopColor: 'rgba(0,0,0,0.06)' }
-        : { background: 'hsl(var(--denied-black))', borderTopColor: 'rgba(255,255,255,0.06)' }
+        ? { background: '#F9F9F9', borderTop: '1px solid rgba(0,0,0,0.04)' }
+        : { background: 'hsl(var(--denied-black))', borderTop: '1px solid rgba(255,255,255,0.06)' }
       }
     >
+      {/* Candy bead accent strip */}
+      {light && (
+        <div className="flex justify-center -mt-14 mb-8">
+          <img
+            src={footerBeads}
+            alt=""
+            style={{
+              width: "clamp(400px, 50vw, 700px)",
+              height: "auto",
+              opacity: 0.25,
+              pointerEvents: "none",
+              filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.03))",
+            }}
+          />
+        </div>
+      )}
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 mb-10">
           <div>
@@ -23,24 +40,24 @@ const Footer = ({ light }: { light?: boolean }) => {
               />
             </Link>
             <p className="text-sm leading-relaxed" style={{ color: light ? '#888888' : 'rgba(255,255,255,0.5)' }}>
-              Fighting back against the broken healthcare system. One procedure at a time.
+              fighting back against the broken healthcare system. one procedure at a time.
             </p>
           </div>
 
           <div>
-            <h4 className="font-bold mb-4 text-sm tracking-wide" style={{ color: light ? '#111111' : '#FFFFFF' }}>Company</h4>
+            <h4 className="mb-4 tracking-wide" style={{ color: light ? '#333333' : '#FFFFFF', fontSize: 14, fontWeight: 700 }}>company</h4>
             <ul className="space-y-2.5">
               {[
-                { to: "/about", label: "About" },
-                { to: "/about", label: "How It Works" },
-                { to: "/apply", label: "For Providers" },
-                { to: "/creators", label: "Creators" },
+                { to: "/about", label: "about" },
+                { to: "/about", label: "how it works" },
+                { to: "/apply", label: "for providers" },
+                { to: "/creators", label: "creators" },
               ].map(link => (
                 <li key={link.label}>
                   <Link
                     to={link.to}
-                    className="text-sm transition-colors"
-                    style={{ color: light ? '#555555' : 'rgba(255,255,255,0.5)' }}
+                    className="transition-colors"
+                    style={{ color: light ? '#555555' : 'rgba(255,255,255,0.5)', fontSize: 14 }}
                     onMouseEnter={e => e.currentTarget.style.color = '#3BF07A'}
                     onMouseLeave={e => e.currentTarget.style.color = light ? '#555555' : 'rgba(255,255,255,0.5)'}
                   >
@@ -52,18 +69,18 @@ const Footer = ({ light }: { light?: boolean }) => {
           </div>
 
           <div>
-            <h4 className="font-bold mb-4 text-sm tracking-wide" style={{ color: light ? '#111111' : '#FFFFFF' }}>Legal</h4>
+            <h4 className="mb-4 tracking-wide" style={{ color: light ? '#333333' : '#FFFFFF', fontSize: 14, fontWeight: 700 }}>legal</h4>
             <ul className="space-y-2.5">
               {[
-                { to: "/privacy", label: "Privacy Policy" },
-                { to: "/terms", label: "Terms of Service" },
-                { to: "/cookies", label: "Cookie Policy" },
+                { to: "/privacy", label: "privacy policy" },
+                { to: "/terms", label: "terms of service" },
+                { to: "/cookies", label: "cookie policy" },
               ].map(link => (
                 <li key={link.label}>
                   <Link
                     to={link.to}
-                    className="text-sm transition-colors"
-                    style={{ color: light ? '#555555' : 'rgba(255,255,255,0.5)' }}
+                    className="transition-colors"
+                    style={{ color: light ? '#555555' : 'rgba(255,255,255,0.5)', fontSize: 14 }}
                     onMouseEnter={e => e.currentTarget.style.color = '#3BF07A'}
                     onMouseLeave={e => e.currentTarget.style.color = light ? '#555555' : 'rgba(255,255,255,0.5)'}
                   >
@@ -75,7 +92,7 @@ const Footer = ({ light }: { light?: boolean }) => {
           </div>
 
           <div>
-            <h4 className="font-bold mb-4 text-sm tracking-wide" style={{ color: light ? '#111111' : '#FFFFFF' }}>Connect</h4>
+            <h4 className="mb-4 tracking-wide" style={{ color: light ? '#333333' : '#FFFFFF', fontSize: 14, fontWeight: 700 }}>connect</h4>
             <div className="flex gap-4">
               <a
                 href="https://instagram.com/denied.care"
@@ -95,9 +112,9 @@ const Footer = ({ light }: { light?: boolean }) => {
           </div>
         </div>
 
-        <div className="pt-8 text-center" style={{ borderTop: light ? '1px solid rgba(0,0,0,0.06)' : '1px solid rgba(255,255,255,0.06)' }}>
-          <p className="text-sm" style={{ color: light ? '#888888' : 'rgba(255,255,255,0.3)' }}>
-            © 2026 Denied.care. All rights reserved.
+        <div className="pt-8 text-center" style={{ borderTop: light ? '1px solid rgba(0,0,0,0.04)' : '1px solid rgba(255,255,255,0.06)' }}>
+          <p style={{ color: light ? '#AAAAAA' : 'rgba(255,255,255,0.3)', fontSize: 12 }}>
+            © 2026 denied.care. all rights reserved.
           </p>
         </div>
       </div>
