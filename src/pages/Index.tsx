@@ -7,15 +7,15 @@ import Footer from "@/components/landing/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+      <Navbar light />
       <main>
         <HeroSection />
         <HowItWorksSection />
         <PriceComparisonSection />
         <TestimonialsSection />
       </main>
-      <Footer />
+      <Footer light />
     </div>
   );
 };

@@ -1,126 +1,87 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/final-new-logo.png";
+import heroLogo from "@/assets/hero-logo-3d.png";
+import candyStrip from "@/assets/candy-strip-wide.png";
 
 const HeroSection = () => {
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const { toast } = useToast();
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!email.trim()) {
-      toast({ title: "Email required", description: "Please enter your email address.", variant: "destructive" });
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast({ title: "Invalid email", description: "Please enter a valid email address.", variant: "destructive" });
-      return;
-    }
-
-    setIsLoading(true);
-    
-    try {
-      const { error } = await supabase.from("waitlist").insert({ email: email.trim().toLowerCase() });
-
-      if (error) {
-        if (error.code === "23505") {
-          toast({ title: "Already on the list!", description: "This email is already on our waitlist." });
-        } else {
-          throw error;
-        }
-      } else {
-        toast({ title: "You're on the list! 🎉", description: "We'll notify you when we launch." });
-        setEmail("");
-      }
-    } catch (error) {
-      if (import.meta.env.DEV) console.error("Waitlist error:", error);
-      toast({ title: "Something went wrong", description: "Please try again later.", variant: "destructive" });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const navigate = useNavigate();
 
   return (
-    <section className="min-h-screen flex items-center pt-16 relative overflow-hidden">
-      {/* Full-screen resort background */}
-      <div
-        className="absolute inset-0"
+    <section
+      className="relative flex flex-col items-center justify-center overflow-hidden"
+      style={{ minHeight: '100vh', background: '#FFFFFF' }}
+    >
+      {/* 3D Logo */}
+      <img
+        src={heroLogo}
+        alt="denied"
+        className="mb-8 md:mb-10"
         style={{
-          backgroundImage: `url('/images/hero-landing.jpg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          height: '56px',
+          width: 'auto',
+          filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.06))',
         }}
       />
-      {/* Dark gradient overlay */}
-      <div
-        className="absolute inset-0"
+
+      {/* Headline */}
+      <h1
+        className="text-center lowercase px-4"
         style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.7) 50%, #000000 100%)',
+          fontSize: 'clamp(32px, 5vw, 56px)',
+          fontWeight: 800,
+          letterSpacing: '-2.5px',
+          lineHeight: 1.05,
+        }}
+      >
+        <span style={{ color: '#111111' }}>your insurance said no.</span>
+        <br />
+        <span style={{ color: '#3BF07A' }}>we say let's go.</span>
+      </h1>
+
+      {/* Subline */}
+      <p
+        className="text-center px-4"
+        style={{
+          fontSize: '15px',
+          color: '#888888',
+          fontWeight: 400,
+          maxWidth: '420px',
+          marginTop: '20px',
+          lineHeight: 1.6,
+        }}
+      >
+        save up to 70% on dental and wellness with vetted providers in mexico.
+      </p>
+
+      {/* CTA */}
+      <Button
+        onClick={() => navigate("/search")}
+        className="mt-8"
+        style={{
+          background: '#3BF07A',
+          color: '#111111',
+          border: 'none',
+          borderRadius: '50px',
+          padding: '18px 48px',
+          fontSize: '17px',
+          fontWeight: 700,
+        }}
+      >
+        get a free quote
+      </Button>
+
+      {/* Candy strip — anchored to bottom */}
+      <img
+        src={candyStrip}
+        alt=""
+        className="absolute bottom-0 left-0 w-full pointer-events-none"
+        style={{
+          filter: 'drop-shadow(0 4px 16px rgba(0,0,0,0.05))',
+          maxHeight: '35vh',
+          objectFit: 'contain',
+          objectPosition: 'bottom center',
         }}
       />
-      
-      <div className="container mx-auto px-4 py-20 text-center relative z-10">
-        {/* Logo */}
-        <div className="mb-6 animate-fade-in flex justify-center">
-          <img 
-            src={logo} 
-            alt="Denied Logo" 
-            className="w-72 md:w-96 lg:w-[500px] h-auto drop-shadow-[0_8px_32px_hsl(15_100%_71%/0.15)]"
-            style={{ mixBlendMode: 'screen' }}
-          />
-        </div>
-        
-        <h1 className="text-4xl md:text-5xl lg:text-[56px] font-[800] text-primary mb-8 animate-fade-in lowercase" style={{ animationDelay: "0.1s", letterSpacing: "-2px", lineHeight: "1.05" }}>
-          fuck health insurance.
-        </h1>
-        
-        <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-12 animate-fade-in font-normal leading-relaxed" style={{ animationDelay: "0.2s", lineHeight: "1.6" }}>
-          save 50-70% on dental, cosmetic, and medical care with verified providers worldwide. starting with mexico.
-        </p>
-
-        {/* Elevated form container */}
-        <div className="max-w-md mx-auto mb-16 animate-fade-in-up" style={{ animationDelay: "0.3s" }}>
-          <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-2 shadow-hero">
-            <Input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="bg-white/10 border-white/15 text-white placeholder:text-white/40 h-12 rounded-xl shadow-none focus-visible:ring-primary/50"
-              disabled={isLoading}
-            />
-            <Button 
-              type="submit" 
-              size="lg"
-              className="font-bold h-12 px-8 whitespace-nowrap rounded-xl"
-              disabled={isLoading}
-            >
-              {isLoading ? "Joining..." : "Join the Waitlist"}
-            </Button>
-          </form>
-        </div>
-
-        {/* Trust Indicators — elevated cards */}
-        <div className="flex flex-wrap justify-center gap-6 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-          {[
-            { value: "50-70%", label: "Average Savings" },
-            { value: "100+", label: "Verified Providers" },
-            { value: "24/7", label: "Concierge Support" },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-8 py-5 shadow-elevated">
-              <div className="text-3xl font-black text-secondary">{stat.value}</div>
-              <div className="text-sm text-white/50 mt-1">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
     </section>
   );
 };
