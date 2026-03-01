@@ -426,9 +426,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
   /* ── loading / not found ── */
   if (loading) {
+    const loadBg = isEditing ? "#060606" : "#FFFFFF";
     return (
-      <div className="min-h-screen" style={{ background: "#060606" }}>
-        <Navbar />
+      <div className="min-h-screen" style={{ background: loadBg }}>
+        <Navbar light={!isEditing} />
         <div className="flex items-center justify-center pt-32">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2" style={{ borderColor: "#3BF07A" }} />
         </div>
@@ -438,11 +439,11 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
   if (notFound) {
     return (
-      <div className="min-h-screen" style={{ background: "#060606" }}>
-        <Navbar />
+      <div className="min-h-screen theme-public" style={{ background: "#FFFFFF" }}>
+        <Navbar light />
         <div className="flex flex-col items-center justify-center gap-4 px-4 pt-32">
-          <h1 className="text-2xl font-bold text-white">creator not found</h1>
-          <p className="text-sm" style={{ color: "#B0B0B0" }}>this profile doesn't exist or isn't published yet.</p>
+          <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>creator not found</h1>
+          <p className="text-sm" style={{ color: "#888888" }}>this profile doesn't exist or isn't published yet.</p>
         </div>
       </div>
     );
@@ -536,62 +537,62 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
 
     const tabs = ["feed", "reviews", "content", "favorite providers"];
 
-    /* glossy card style helper */
+    /* glossy card style helper — WHITE THEME */
     const glossyCard: React.CSSProperties = {
-      background: tc.cardGradient,
-      border: `1px solid ${tc.cardBorder}`,
+      background: '#FFFFFF',
+      border: '1px solid rgba(0,0,0,0.06)',
       borderRadius: isMobile ? 14 : 16,
-      boxShadow: tc.insetGlow,
+      boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
       transition: "all 300ms ease",
     };
 
     const glossyCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(-2px)";
-      e.currentTarget.style.borderColor = `rgba(${rgb},0.6)`;
-      e.currentTarget.style.boxShadow = `${tc.insetGlow}, 0 0 20px rgba(${rgb},0.1), 0 0 40px rgba(${rgb},0.05)`;
+      e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)';
+      e.currentTarget.style.boxShadow = '0 4px 24px rgba(59,240,122,0.12)';
     };
     const glossyCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.borderColor = tc.cardBorder;
-      e.currentTarget.style.boxShadow = tc.insetGlow;
+      e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
+      e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)';
     };
 
     /* identity card hover */
     const identityCardHover = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(-2px)";
-      e.currentTarget.style.borderColor = `rgba(${rgb},0.7)`;
-      e.currentTarget.style.boxShadow = `${tc.insetGlow}, 0 0 30px rgba(${rgb},0.15), 0 0 60px rgba(${rgb},0.08)`;
+      e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)';
+      e.currentTarget.style.boxShadow = '0 4px 24px rgba(59,240,122,0.12)';
     };
     const identityCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
       e.currentTarget.style.transform = "translateY(0)";
-      e.currentTarget.style.borderColor = tc.cardBorder;
-      e.currentTarget.style.boxShadow = tc.insetGlow;
+      e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
+      e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)';
     };
 
     /* stats bar hover */
     const statsBarHover = (e: React.MouseEvent<HTMLDivElement>) => {
-      e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
-      e.currentTarget.style.boxShadow = `0 0 20px rgba(${rgb},0.1)`;
+      e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)';
+      e.currentTarget.style.boxShadow = '0 2px 12px rgba(59,240,122,0.08)';
     };
     const statsBarLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-      e.currentTarget.style.borderColor = tc.statsBorder;
+      e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';
       e.currentTarget.style.boxShadow = "none";
     };
 
     /* content thumbnail hover */
     const thumbHover = (e: React.MouseEvent<HTMLDivElement>) => {
-      e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
-      e.currentTarget.style.boxShadow = `0 0 15px rgba(${rgb},0.15)`;
+      e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)';
+      e.currentTarget.style.boxShadow = '0 4px 16px rgba(59,240,122,0.12)';
       e.currentTarget.style.transform = "scale(1.03)";
     };
     const thumbLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-      e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
+      e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)";
       e.currentTarget.style.boxShadow = "none";
       e.currentTarget.style.transform = "scale(1)";
     };
 
-    /* outer shell hover glow (1.5x intensified) */
-    const shellOuterGlowHover = `0 0 60px rgba(${rgb},0.3), 0 0 120px rgba(${rgb},0.15), 0 0 180px rgba(${rgb},0.08)`;
+    /* outer shell hover glow */
+    const shellOuterGlowHover = '0 8px 32px rgba(59,240,122,0.1), 0 4px 20px rgba(0,0,0,0.06)';
 
 
     /* ── build mixed feed timeline ── */
@@ -628,8 +629,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
     const favoriteProviders = Array.from(providerReviewMap.values());
 
     return (
-      <div className="min-h-screen" style={{ background: "#060606" }}>
-        <Navbar />
+      <div className="min-h-screen theme-public" style={{ background: "#FFFFFF" }}>
+        <Navbar light />
         <div
           className="mx-auto pt-24 pb-0"
           style={{
@@ -643,26 +644,14 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
             className="relative overflow-hidden"
             style={{
               borderRadius: isMobile ? 0 : 20,
-              border: isMobile ? "none" : `1px solid ${tc.shellBorder}`,
-              boxShadow: isMobile ? "none" : tc.outerGlow,
-              background: tc.shellBg,
+              border: isMobile ? "none" : '1px solid rgba(0,0,0,0.06)',
+              boxShadow: isMobile ? "none" : '0 4px 20px rgba(0,0,0,0.06)',
+              background: '#FFFFFF',
               transition: "all 300ms ease",
             }}
             onMouseEnter={(e) => { if (!isMobile) e.currentTarget.style.boxShadow = shellOuterGlowHover; }}
-            onMouseLeave={(e) => { if (!isMobile) e.currentTarget.style.boxShadow = tc.outerGlow; }}
+            onMouseLeave={(e) => { if (!isMobile) e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.06)'; }}
           >
-            {/* grain texture overlay */}
-            <div
-              className="absolute inset-0 pointer-events-none z-[1]"
-              style={{ opacity: 0.025 }}
-            >
-              <svg width="100%" height="100%">
-                <filter id="grain">
-                  <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch" />
-                </filter>
-                <rect width="100%" height="100%" filter="url(#grain)" />
-              </svg>
-            </div>
 
             <div
               className="relative z-[2]"
@@ -681,18 +670,18 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                       fontSize: 11,
                       letterSpacing: 1,
                       padding: "6px 16px",
-                      background: `rgba(${rgb},0.15)`,
-                      border: `1px solid rgba(${rgb},0.35)`,
-                      color: accent,
-                      transition: "all 300ms ease",
+                      background: 'transparent',
+                      border: '2px solid rgba(0,0,0,0.1)',
+                      color: '#555555',
+                      transition: "all 200ms ease",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.boxShadow = `0 0 12px rgba(${rgb},0.2)`;
-                      e.currentTarget.style.borderColor = `rgba(${rgb},0.6)`;
+                      e.currentTarget.style.boxShadow = '0 2px 12px rgba(59,240,122,0.15)';
+                      e.currentTarget.style.borderColor = '#3BF07A';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.boxShadow = "none";
-                      e.currentTarget.style.borderColor = `rgba(${rgb},0.35)`;
+                      e.currentTarget.style.borderColor = 'rgba(0,0,0,0.1)';
                     }}
                   >
                     edit my page
@@ -705,14 +694,14 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     style={{
                       width: isMobile ? 80 : 96,
                       height: isMobile ? 80 : 96,
-                      border: `3px solid ${accent}`,
-                      boxShadow: `0 0 20px rgba(${rgb},0.3), 0 0 40px rgba(${rgb},0.1)`,
+                      border: '3px solid #3BF07A',
+                      boxShadow: '0 0 20px rgba(59,240,122,0.15)',
                     }}
                   >
                     {avatarUrl ? (
                       <AvatarImage src={avatarUrl} alt={displayName} className="object-cover" />
                     ) : (
-                      <AvatarFallback style={{ background: "#111", color: "#B0B0B0", fontSize: isMobile ? 28 : 32, fontWeight: 700 }}>
+                      <AvatarFallback style={{ background: "#F5F5F5", color: "#888888", fontSize: isMobile ? 28 : 32, fontWeight: 700 }}>
                         {(displayName?.[0] || "?").toUpperCase()}
                       </AvatarFallback>
                     )}
@@ -724,34 +713,33 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   className="inline-flex items-center gap-1.5 rounded-full mb-3"
                   style={{
                     padding: "6px 16px",
-                    background: accent,
-                    border: "none",
-                    boxShadow: `0 0 12px rgba(${rgb},0.4)`,
+                    background: 'rgba(255,107,74,0.06)',
+                    border: '1px solid rgba(255,107,74,0.12)',
                   }}
                 >
                   <div
                     className="rounded-full flex-shrink-0"
-                    style={{ width: 6, height: 6, background: "#0A0A0A", boxShadow: "none" }}
+                    style={{ width: 6, height: 6, background: "#FF6B4A" }}
                   />
-                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: "#0A0A0A", fontWeight: 700 }}>
+                  <span style={{ fontSize: 11, letterSpacing: 1.5, color: "#FF6B4A", fontWeight: 700 }}>
                     denied verified creator
                   </span>
                 </div>
 
                 {/* display name */}
-                <h1 className="font-bold mb-1" style={{ color: "#FFFFFF", fontSize: isMobile ? 20 : 24 }}>
+                <h1 className="font-bold mb-1" style={{ color: "#111111", fontSize: isMobile ? 20 : 24 }}>
                   {displayName}
                 </h1>
 
                 {/* handle */}
-                <p className="mb-4" style={{ color: "#555", fontSize: 14 }}>@{handle}</p>
+                <p className="mb-4" style={{ color: "#888888", fontSize: 14 }}>@{handle}</p>
 
                 {/* bio */}
                 {bio && (
                   <p
                     className="mb-4"
                     style={{
-                      color: "#999", fontSize: 14, lineHeight: 1.7,
+                      color: "#555555", fontSize: 14, lineHeight: 1.7,
                       textAlign: "center", maxWidth: 440, margin: "0 auto 18px",
                     }}
                   >
@@ -765,12 +753,14 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                     {specialties.map((s) => (
                       <span
                         key={s}
-                        className="rounded-full"
+                        className="rounded-full transition-all duration-200"
                         style={{
                           padding: "5px 13px", fontSize: 11, fontWeight: 500,
-                          background: tc.tagBg, color: accent,
-                          border: `1px solid ${tc.tagBorder}`,
+                          background: 'rgba(59,240,122,0.06)', color: '#333333',
+                          border: '1px solid rgba(59,240,122,0.12)',
                         }}
+                        onMouseEnter={(e: any) => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(59,240,122,0.15)'; }}
+                        onMouseLeave={(e: any) => { e.currentTarget.style.boxShadow = 'none'; }}
                       >
                         {s}
                       </span>
@@ -793,17 +783,17 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           rel="noopener noreferrer"
                           className="flex items-center justify-center rounded-full transition-all duration-200"
                           style={{
-                            width: 34, height: 34, background: tc.socialBg,
-                            border: `1px solid ${tc.socialBorder}`, color: "#777",
+                            width: 34, height: 34, background: 'rgba(0,0,0,0.03)',
+                            border: '1px solid rgba(0,0,0,0.08)', color: "#888888",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
-                            e.currentTarget.style.color = accent;
-                            e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.15)`;
+                            e.currentTarget.style.borderColor = 'rgba(59,240,122,0.3)';
+                            e.currentTarget.style.color = '#3BF07A';
+                            e.currentTarget.style.boxShadow = '0 2px 12px rgba(59,240,122,0.15)';
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = tc.socialBorder;
-                            e.currentTarget.style.color = "#777";
+                            e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
+                            e.currentTarget.style.color = "#888888";
                             e.currentTarget.style.boxShadow = "none";
                           }}
                         >
@@ -838,28 +828,28 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 : contentItems;
               return (
                 <div style={{ padding: isMobile ? "16px 20px 0" : "20px 36px 0" }}>
-                  <div style={{ fontSize: 11, letterSpacing: 2, color: "#444", fontWeight: 500, marginBottom: 14 }}>
+                  <div style={{ fontSize: 11, letterSpacing: 2, color: "#888888", fontWeight: 500, marginBottom: 14, textTransform: 'uppercase' as const }}>
                     {isOwner ? "my content" : "recent content"}
                   </div>
                   {showSearch && (
                     <div className="relative" style={{ marginBottom: 12 }}>
-                      <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: `rgba(${rgb}, 0.4)` }} />
+                       <Search style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: '#AAAAAA' }} />
                       <input
                         value={contentSearch}
                         onChange={(e) => setContentSearch(e.target.value)}
                         placeholder="search"
                         style={{
-                          width: "100%", background: "#0A0A0A",
-                          border: `1px solid rgba(${rgb}, 0.12)`, borderRadius: 12,
-                          padding: "8px 14px 8px 36px", fontSize: 12, color: "#fff",
+                          width: "100%", background: "#FAFAFA",
+                          border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12,
+                          padding: "8px 14px 8px 36px", fontSize: 12, color: "#333333",
                           outline: "none", transition: "all 200ms ease",
                         }}
                         onFocus={(e) => {
-                          e.currentTarget.style.borderColor = `rgba(${rgb},0.4)`;
-                          e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.12)`;
+                          e.currentTarget.style.borderColor = 'rgba(59,240,122,0.4)';
+                          e.currentTarget.style.boxShadow = '0 0 10px rgba(59,240,122,0.08)';
                         }}
                         onBlur={(e) => {
-                          e.currentTarget.style.borderColor = `rgba(${rgb}, 0.12)`;
+                          e.currentTarget.style.borderColor = 'rgba(0,0,0,0.08)';
                           e.currentTarget.style.boxShadow = "none";
                         }}
                       />
@@ -871,7 +861,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   >
                     <style>{`.csc::-webkit-scrollbar{display:none}`}</style>
                     {filteredItems.length === 0 && contentSearch.trim() ? (
-                      <div style={{ width: "100%", textAlign: "center", padding: "20px 0", fontSize: 12, color: "#555" }}>
+                     <div style={{ width: "100%", textAlign: "center", padding: "20px 0", fontSize: 12, color: "#888888" }}>
                         no content matches that tag
                       </div>
                     ) : (
@@ -885,7 +875,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                             className="group relative flex-shrink-0 overflow-hidden"
                             style={{
                               width: thumbSize, height: thumbSize, borderRadius: 14,
-                              background: "#111", border: "1px solid rgba(255,255,255,0.04)",
+                              background: "#F5F5F5", border: "1px solid rgba(0,0,0,0.06)",
                               cursor: "pointer", transition: "all 200ms ease",
                             }}
                             onClick={() => {
@@ -896,12 +886,14 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                               }
                             }}
                             onMouseEnter={(e) => {
-                              e.currentTarget.style.borderColor = `rgba(${rgb},0.15)`;
+                              e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)';
                               e.currentTarget.style.transform = "scale(1.02)";
+                              e.currentTarget.style.boxShadow = '0 4px 16px rgba(59,240,122,0.12)';
                             }}
                             onMouseLeave={(e) => {
-                              e.currentTarget.style.borderColor = "rgba(255,255,255,0.04)";
+                              e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)";
                               e.currentTarget.style.transform = "scale(1)";
+                              e.currentTarget.style.boxShadow = "none";
                             }}
                           >
                             {thumb ? (
@@ -912,8 +904,8 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                                 onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.parentElement!.querySelector('.thumb-fallback')?.classList.remove('hidden'); }}
                               />
                             ) : null}
-                            <div className={`thumb-fallback w-full h-full flex items-center justify-center absolute inset-0 ${thumb ? 'hidden' : ''}`} style={{ background: "#111" }}>
-                              {isVideo ? <Play style={{ width: 28, height: 28, color: "#333" }} /> : <Camera style={{ width: 28, height: 28, color: "#333" }} />}
+                    <div className={`thumb-fallback w-full h-full flex items-center justify-center absolute inset-0 ${thumb ? 'hidden' : ''}`} style={{ background: "#F5F5F5" }}>
+                               {isVideo ? <Play style={{ width: 28, height: 28, color: "#AAAAAA" }} /> : <Camera style={{ width: 28, height: 28, color: "#AAAAAA" }} />}
                             </div>
                             {isVideo && (
                               <div className="absolute inset-0 flex items-center justify-center">
@@ -950,20 +942,20 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         className="flex items-center justify-center flex-shrink-0"
                         style={{
                           width: thumbSize, height: thumbSize, borderRadius: 14,
-                          border: `2px dashed rgba(${rgb},0.25)`, background: "transparent",
+                          border: '2px dashed rgba(59,240,122,0.25)', background: "transparent",
                           cursor: "pointer", transition: "all 200ms ease",
                         }}
                         onClick={() => setUploadModalOpen(true)}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = `rgba(${rgb},0.5)`;
-                          e.currentTarget.style.background = `rgba(${rgb},0.03)`;
+                          e.currentTarget.style.borderColor = 'rgba(59,240,122,0.5)';
+                          e.currentTarget.style.background = 'rgba(59,240,122,0.03)';
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = `rgba(${rgb},0.25)`;
+                          e.currentTarget.style.borderColor = 'rgba(59,240,122,0.25)';
                           e.currentTarget.style.background = "transparent";
                         }}
                       >
-                        <Plus style={{ width: 28, height: 28, color: `rgba(${rgb},0.4)` }} />
+                        <Plus style={{ width: 28, height: 28, color: 'rgba(59,240,122,0.4)' }} />
                       </div>
                     )}
                   </div>
@@ -977,9 +969,9 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 gap: isMobile ? 20 : 36,
                 padding: isMobile ? "18px 20px" : "18px 36px",
                 marginTop: 12,
-                borderTop: `1px solid ${tc.statsBorder}`,
-                borderBottom: `1px solid ${tc.statsBorder}`,
-                background: tc.statsBg,
+                borderTop: '1px solid rgba(0,0,0,0.06)',
+                borderBottom: '1px solid rgba(0,0,0,0.06)',
+                background: '#FAFAFA',
                 transition: "all 300ms ease",
               }}
               onMouseEnter={statsBarHover}
@@ -992,10 +984,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                 { label: "helpful", value: stats.helpful },
               ].map((s) => (
                 <div key={s.label} className="text-center">
-                  <div className="font-bold" style={{ color: accent, fontSize: isMobile ? 18 : 20 }}>
+                  <div className="font-bold" style={{ color: '#111111', fontSize: isMobile ? 18 : 20 }}>
                     {s.value}
                   </div>
-                  <div style={{ fontSize: isMobile ? 9 : 10, letterSpacing: 1, color: "rgba(255,255,255,0.45)" }}>
+                  <div style={{ fontSize: isMobile ? 9 : 10, letterSpacing: 1, color: "#888888" }}>
                     {s.label}
                   </div>
                 </div>
@@ -1007,7 +999,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               style={{
                 height: 1,
                 margin: isMobile ? "12px 20px" : "16px 36px",
-                background: `linear-gradient(90deg, transparent, rgba(${rgb},0.08), rgba(${rgb},0.06), transparent)`,
+                background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.06), rgba(0,0,0,0.04), transparent)',
               }}
             />
 
@@ -1020,7 +1012,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               {/* tab bar */}
               <div
                 className="flex"
-                style={{ borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: 24 }}
+                style={{ borderBottom: "1px solid rgba(0,0,0,0.06)", marginBottom: 24 }}
               >
                 {tabs.map((tab) => (
                   <button
@@ -1030,17 +1022,17 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                       padding: "8px 18px",
                       fontSize: isMobile ? 11 : 12,
                       letterSpacing: 1.5,
-                      color: activeTab === tab ? "#0A0A0A" : accent,
+                      color: activeTab === tab ? "#111111" : '#888888',
                       borderBottom: "none",
                       borderRadius: activeTab === tab ? 9999 : 0,
-                      background: activeTab === tab ? accent : "transparent",
+                      background: activeTab === tab ? 'rgba(59,240,122,0.08)' : "transparent",
                       fontWeight: activeTab === tab ? 600 : 400,
-                      boxShadow: activeTab === tab ? `0 0 12px rgba(${rgb},0.35)` : "none",
-                      transition: "color 200ms ease",
+                      border: activeTab === tab ? '1px solid rgba(59,240,122,0.15)' : '1px solid transparent',
+                      transition: "all 200ms ease",
                       cursor: "pointer",
                     }}
-                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#fff"; }}
-                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = accent; }}
+                    onMouseEnter={(e) => { if (activeTab !== tab) e.currentTarget.style.color = "#333333"; }}
+                    onMouseLeave={(e) => { if (activeTab !== tab) e.currentTarget.style.color = '#888888'; }}
                   >
                     {tab}
                   </button>
@@ -1057,10 +1049,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                   )}
                   {feedItems.map((item, idx) => {
                     const isLast = idx === feedItems.length - 1;
-                    const dotColor = item.type === "trip" ? "#FF6B4A" : item.type === "joined" ? "#555" : accent;
+                    const dotColor = item.type === "trip" ? "#FF6B4A" : item.type === "joined" ? "#CCCCCC" : "#3BF07A";
                     const dotShadow = item.type === "trip"
-                      ? "0 0 10px rgba(255,107,74,0.3)"
-                      : item.type === "joined" ? "none" : `0 0 10px rgba(${rgb},0.35)`;
+                      ? "0 0 6px rgba(255,107,74,0.2)"
+                      : item.type === "joined" ? "none" : '0 0 6px rgba(59,240,122,0.2)';
 
                     return (
                       <div
@@ -1069,7 +1061,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         style={{
                           gap: isMobile ? 12 : 14,
                           padding: isMobile ? "14px 0" : "18px 0",
-                          borderBottom: isLast ? "none" : "1px solid rgba(255,255,255,0.04)",
+                          borderBottom: isLast ? "none" : "1px solid rgba(0,0,0,0.04)",
                         }}
                       >
                         <div
@@ -1079,21 +1071,21 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         <div className="flex-1 min-w-0">
                           {item.type === "review" && (
                             <>
-                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
-                                reviewed <span className="font-bold" style={{ color: "#FFFFFF" }}>{item.data.provider_name}</span>
+                              <p style={{ fontSize: 13, color: "#555555" }}>
+                                reviewed <span className="font-bold" style={{ color: "#111111" }}>{item.data.provider_name}</span>
                               </p>
-                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>
+                              <p style={{ fontSize: 11, color: "#888888", marginTop: 2 }}>
                                 {item.data.procedure_name} · <span style={{ color: "#FFD700" }}>{renderStars(item.data.rating)}</span> · {formatDate(item.date)}
-                                {item.data.verified_trip && <span style={{ color: accent }}> · verified visit</span>}
+                                {item.data.verified_trip && <span style={{ color: "#333333" }}> · verified visit</span>}
                               </p>
                               {item.data.review_text && (
                                 <div
                                   style={{
-                                    marginTop: 10, padding: "14px 18px", background: `linear-gradient(135deg, rgba(${rgb},0.04), rgba(10,10,10,1))`,
-                                    borderRadius: 12, borderLeft: `2px solid rgba(${rgb},0.4)`,
+                                    marginTop: 10, padding: "14px 18px", background: '#FAFAFA',
+                                    borderRadius: 12, borderLeft: '2px solid rgba(59,240,122,0.4)',
                                   }}
                                 >
-                                  <p style={{ fontSize: 13, color: "#999", lineHeight: 1.5 }}>
+                                  <p style={{ fontSize: 13, color: "#555555", lineHeight: 1.5 }}>
                                     {item.data.review_text.length > 150 ? item.data.review_text.slice(0, 150) + "..." : item.data.review_text}
                                   </p>
                                 </div>
@@ -1102,28 +1094,28 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           )}
                           {item.type === "content" && (
                             <>
-                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
+                              <p style={{ fontSize: 13, color: "#555555" }}>
                                 {item.data.media_type === "video"
-                                  ? <>posted a video — <span className="font-bold" style={{ color: "#FFFFFF" }}>{(item.data.caption || "untitled").slice(0, 30)}</span></>
-                                  : <>shared a photo — <span className="font-bold" style={{ color: "#FFFFFF" }}>{(item.data.caption || "untitled").slice(0, 30)}</span></>
+                                  ? <>posted a video — <span className="font-bold" style={{ color: "#111111" }}>{(item.data.caption || "untitled").slice(0, 30)}</span></>
+                                  : <>shared a photo — <span className="font-bold" style={{ color: "#111111" }}>{(item.data.caption || "untitled").slice(0, 30)}</span></>
                                 }
                               </p>
-                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>{formatDate(item.date)}</p>
+                              <p style={{ fontSize: 11, color: "#888888", marginTop: 2 }}>{formatDate(item.date)}</p>
                               {/* media preview */}
                               <div className="mt-2.5 flex gap-1.5">
                                 <div
                                   className="relative overflow-hidden transition-all duration-200"
                                   style={{
                                     width: 140, height: 140,
-                                    borderRadius: 14, background: "#111",
-                                    border: "1px solid rgba(255,255,255,0.05)",
+                                    borderRadius: 14, background: "#F5F5F5",
+                                    border: "1px solid rgba(0,0,0,0.06)",
                                   }}
                                   onMouseEnter={(e) => {
-                                    e.currentTarget.style.borderColor = `rgba(${rgb},0.2)`;
-                                    e.currentTarget.style.boxShadow = `0 0 10px rgba(${rgb},0.1)`;
+                                    e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)';
+                                    e.currentTarget.style.boxShadow = '0 4px 16px rgba(59,240,122,0.1)';
                                   }}
                                   onMouseLeave={(e) => {
-                                    e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                                    e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)";
                                     e.currentTarget.style.boxShadow = "none";
                                   }}
                                 >
@@ -1135,10 +1127,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                                       onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.parentElement!.querySelector('.feed-thumb-fallback')?.classList.remove('hidden'); }}
                                     />
                                   ) : null}
-                                  <div className={`feed-thumb-fallback w-full h-full flex items-center justify-center absolute inset-0 ${(item.data.thumbnail_url || item.data.media_url) ? 'hidden' : ''}`} style={{ background: "#111" }}>
+                                  <div className={`feed-thumb-fallback w-full h-full flex items-center justify-center absolute inset-0 ${(item.data.thumbnail_url || item.data.media_url) ? 'hidden' : ''}`} style={{ background: "#F5F5F5" }}>
                                     {item.data.media_type === "video"
-                                      ? <Play style={{ width: 28, height: 28, color: "#333" }} />
-                                      : <Camera style={{ width: 28, height: 28, color: "#333" }} />}
+                                      ? <Play style={{ width: 28, height: 28, color: "#AAAAAA" }} />
+                                      : <Camera style={{ width: 28, height: 28, color: "#AAAAAA" }} />}
                                   </div>
                                   {item.data.media_type === "video" && (
                                     <div className="absolute inset-0 flex items-center justify-center">
@@ -1159,18 +1151,18 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           )}
                           {item.type === "trip" && (
                             <>
-                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
-                                completed a trip to <span className="font-bold" style={{ color: "#FFFFFF" }}>mexico</span>
+                              <p style={{ fontSize: 13, color: "#555555" }}>
+                                completed a trip to <span className="font-bold" style={{ color: "#111111" }}>mexico</span>
                               </p>
-                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>{formatDate(item.date)}</p>
+                              <p style={{ fontSize: 11, color: "#888888", marginTop: 2 }}>{formatDate(item.date)}</p>
                             </>
                           )}
                           {item.type === "joined" && (
                             <>
-                              <p style={{ fontSize: 13, color: "#B0B0B0" }}>
-                                joined <span className="font-bold" style={{ color: "#FFFFFF" }}>denied.care</span> as a creator
+                              <p style={{ fontSize: 13, color: "#555555" }}>
+                                joined <span className="font-bold" style={{ color: "#111111" }}>denied.care</span> as a creator
                               </p>
-                              <p style={{ fontSize: 11, color: "#444", marginTop: 2 }}>{createdAt ? formatDate(createdAt) : ""}</p>
+                              <p style={{ fontSize: 11, color: "#888888", marginTop: 2 }}>{createdAt ? formatDate(createdAt) : ""}</p>
                             </>
                           )}
                         </div>
@@ -1199,10 +1191,10 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                         {/* top row */}
                         <div className="flex justify-between items-start">
                           <div>
-                            <div style={{ fontSize: 14, fontWeight: 600, color: "#FFFFFF" }}>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: "#111111" }}>
                               {review.provider_name}
                             </div>
-                            <div style={{ fontSize: 12, color: accent, marginTop: 2 }}>
+                            <div style={{ fontSize: 12, color: "#555555", marginTop: 2 }}>
                               {review.procedure_name}
                             </div>
                           </div>
@@ -1211,18 +1203,19 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           </div>
                         </div>
                         {/* body */}
-                        <p style={{ fontSize: 13, color: "#B0B0B0", lineHeight: 1.6, marginTop: 12 }}>
+                        <p style={{ fontSize: 13, color: "#555555", lineHeight: 1.6, marginTop: 12 }}>
                           {review.review_text}
                         </p>
                         {/* footer */}
-                        <div className="flex items-center gap-2" style={{ marginTop: 12, fontSize: 11, color: "#444" }}>
+                        <div className="flex items-center gap-2" style={{ marginTop: 12, fontSize: 11, color: "#888888" }}>
                           <span>{formatDate(review.created_at)}</span>
                           {review.verified_trip && (
                             <span
                               className="rounded-full"
                               style={{
-                                background: `rgba(${rgb},0.08)`, color: accent,
+                                background: 'rgba(59,240,122,0.06)', color: '#333333',
                                 padding: "2px 8px", fontSize: 10,
+                                border: '1px solid rgba(59,240,122,0.12)',
                               }}
                             >
                               verified visit
@@ -1239,7 +1232,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               {activeTab === "content" && (
                 <div>
                   {contentItems.length === 0 ? (
-                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "40px 0" }}>
+                    <p className="text-center" style={{ color: "#888888", fontSize: 14, padding: "40px 0" }}>
                       no content yet
                     </p>
                   ) : (
@@ -1249,16 +1242,16 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           key={item.id}
                           className="relative overflow-hidden transition-all duration-200"
                           style={{
-                            aspectRatio: "1", borderRadius: 14, background: "#111",
-                            border: "1px solid rgba(255,255,255,0.05)",
+                            aspectRatio: "1", borderRadius: 14, background: "#F5F5F5",
+                            border: "1px solid rgba(0,0,0,0.06)",
                           }}
                           onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = `rgba(${rgb},0.2)`;
-                            e.currentTarget.style.boxShadow = `0 0 12px rgba(${rgb},0.1)`;
+                            e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)';
+                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(59,240,122,0.12)';
                             e.currentTarget.style.transform = "scale(1.02)";
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                            e.currentTarget.style.borderColor = "rgba(0,0,0,0.06)";
                             e.currentTarget.style.boxShadow = "none";
                             e.currentTarget.style.transform = "scale(1)";
                           }}
@@ -1300,7 +1293,7 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
               {activeTab === "favorite providers" && (
                 <div>
                   {favoriteProviders.length === 0 ? (
-                    <p className="text-center" style={{ color: "#555", fontSize: 14, padding: "40px 0" }}>
+                    <p className="text-center" style={{ color: "#888888", fontSize: 14, padding: "40px 0" }}>
                       no favorite providers yet
                     </p>
                   ) : (
@@ -1318,24 +1311,25 @@ const CreatorCanvas = ({ isEditing, handleParam }: Props) => {
                           className="flex items-center justify-center flex-shrink-0"
                           style={{
                             width: 44, height: 44, borderRadius: 10,
-                            background: "linear-gradient(135deg, #111, #1a1a1a)",
-                            border: `1px solid rgba(${rgb},0.1)`,
-                            fontSize: 18, color: "#555",
+                            background: "#F5F5F5",
+                            border: '1px solid rgba(0,0,0,0.06)',
+                            fontSize: 18, color: "#888888",
                           }}
                         >
                           {(prov.name?.[0] || "?").toUpperCase()}
                         </div>
                         {/* info */}
                         <div className="flex-1 min-w-0">
-                          <div style={{ fontSize: 13, fontWeight: 600, color: "#FFFFFF" }}>{prov.name}</div>
-                          <div style={{ fontSize: 11, color: "#555" }}>mexico</div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: "#111111" }}>{prov.name}</div>
+                          <div style={{ fontSize: 11, color: "#888888" }}>mexico</div>
                         </div>
                         {/* review count pill */}
                         <span
                           className="flex-shrink-0 rounded-full"
                           style={{
-                            fontSize: 10, color: accent,
-                            background: `rgba(${rgb},0.1)`,
+                            fontSize: 10, color: '#333333',
+                            background: 'rgba(59,240,122,0.06)',
+                            border: '1px solid rgba(59,240,122,0.12)',
                             padding: "3px 10px",
                           }}
                         >

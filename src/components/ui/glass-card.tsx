@@ -10,10 +10,18 @@ const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
     return (
       <div
         ref={ref}
-        className={cn("relative rounded-[20px] p-[3px] overflow-hidden", className)}
+        className={cn("relative rounded-[20px] p-[3px] overflow-hidden transition-all duration-200", className)}
         style={{
           background: 'linear-gradient(135deg, #FF6B4A 0%, #FFDDD2 30%, #C8FFD4 70%, #3BF07A 100%)',
           boxShadow: '0 8px 40px rgba(255,107,74,0.12), 0 8px 40px rgba(59,240,122,0.08)',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = '0 12px 48px rgba(255,107,74,0.15), 0 12px 48px rgba(59,240,122,0.12)';
+          e.currentTarget.style.transform = 'translateY(-2px)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = '0 8px 40px rgba(255,107,74,0.12), 0 8px 40px rgba(59,240,122,0.08)';
+          e.currentTarget.style.transform = 'translateY(0)';
         }}
         {...props}
       >
