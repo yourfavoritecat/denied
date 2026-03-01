@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import clinicDental from "@/assets/clinic-dental.jpg";
 import clinicMedspa from "@/assets/clinic-medspa.jpg";
 import clinicSurgery from "@/assets/clinic-surgery.jpg";
+import candyScatter from "@/assets/candy-scatter-top.jpg";
 
 const dentalKeywords = ["dental", "crown", "implant", "all-on-4", "veneer", "root canal", "cleaning", "whitening", "denture"];
 const aestheticKeywords = ["botox", "syringe", "chemical peel", "microneedling", "prp", "liposuction", "rhinoplasty", "tummy tuck", "facelift", "medspa", "aesthetics", "cosmetic surgery", "breast"];
@@ -204,15 +205,23 @@ const SearchPage = () => {
       )}
       <main>
         <div className={`max-w-[960px] mx-auto px-4 pb-16 ${isConcierge ? "pt-28" : "pt-24"}`}>
-          {/* Hero Banner */}
-          <div className="relative rounded-xl overflow-hidden mb-8" style={{ height: 180 }}>
-            <img src="/images/hero-search.jpg" alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.7) 100%)' }} />
-            <div className="absolute bottom-0 left-0 p-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Find Your Provider</h1>
-              <p className="text-white/70">Browse verified clinics with transparent pricing across Mexico</p>
-            </div>
+          {/* Candy scatter accent */}
+          <div className="relative flex justify-center mb-2">
+            <img
+              src={candyScatter}
+              alt=""
+              className="w-[85%] h-auto pointer-events-none hidden md:block"
+              style={{ opacity: 0.65, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.04))' }}
+            />
           </div>
+
+          {/* Page title */}
+          <h1
+            className="text-3xl md:text-4xl font-[800] lowercase mb-8 text-center md:text-left md:-mt-4"
+            style={{ color: '#111111', letterSpacing: '-1.5px', lineHeight: 1.1 }}
+          >
+            find your provider
+          </h1>
 
           {/* Search Bar */}
           <motion.div className="mb-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
@@ -280,9 +289,9 @@ const SearchPage = () => {
                     <Link to={`/provider/${provider.slug}${isConcierge ? "?type=concierge" : ""}`}>
                       <div
                         className="overflow-hidden cursor-pointer h-full group transition-all duration-200 hover:-translate-y-0.5"
-                        style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', borderRadius: '20px' }}
-                        onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; }}
+                        style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', borderRadius: '20px', padding: '0' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(59,240,122,0.1)'; e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'; }}
                       >
                         <div className="aspect-[16/10] relative overflow-hidden">
                           <img

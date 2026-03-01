@@ -26,6 +26,8 @@ import { supabase } from "@/integrations/supabase/client";
 import SavingsCalculator from "@/components/provider/SavingsCalculator";
 import VideoTestimonialGallery from "@/components/provider/VideoTestimonialGallery";
 import VibeTagsDisplay from "@/components/provider/VibeTagsDisplay";
+import candyPill from "@/assets/candy-pill.png";
+import candyTooth from "@/assets/candy-tooth.png";
 
 /* ── Shared helpers ── */
 
@@ -342,7 +344,10 @@ const ProviderProfile = () => {
   const locationString = `${providerCity}${data?.business?.state_country ? `, ${data.business.state_country}` : pRec?.country ? `, ${pRec.country}` : ""}`;
 
   return (
-    <div className="min-h-screen theme-public" style={{ background: '#FFFFFF' }}>
+    <div className="min-h-screen theme-public relative" style={{ background: '#FFFFFF' }}>
+      {/* Floating candy accents */}
+      <img src={candyPill} alt="" className="absolute top-24 right-[-20px] w-[50px] pointer-events-none hidden lg:block" style={{ opacity: 0.35, transform: 'rotate(20deg)', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.04))' }} />
+      <img src={candyTooth} alt="" className="absolute top-[60vh] left-[-15px] w-[45px] pointer-events-none hidden lg:block" style={{ opacity: 0.3, transform: 'rotate(-15deg)', filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.04))' }} />
       <Navbar light />
       {/* Concierge mode banner */}
       {isConcierge && (
