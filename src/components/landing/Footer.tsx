@@ -7,7 +7,12 @@ const Footer = () => {
   return (
     <footer
       className="py-14"
-      style={{ background: '#F9F9F9', borderTop: '1px solid rgba(0,0,0,0.04)' }}
+      style={{
+        background: 'linear-gradient(135deg, rgba(59,240,122,0.06) 0%, rgba(249,249,249,0.9) 30%, rgba(249,249,249,0.9) 70%, rgba(255,107,74,0.06) 100%)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderTop: '1px solid rgba(59,240,122,0.08)',
+      }}
     >
       {/* Candy bead accent strip */}
       <div className="flex justify-center -mt-14 mb-8">

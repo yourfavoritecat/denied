@@ -83,7 +83,13 @@ const Navbar = ({ light }: { light?: boolean }) => {
     <nav
       className={`fixed left-0 right-0 z-50 ${showBanner ? "top-6" : "top-0"}`}
       style={light
-        ? { background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }
+        ? {
+            background: 'linear-gradient(135deg, rgba(59,240,122,0.04) 0%, rgba(255,255,255,0.7) 30%, rgba(255,255,255,0.7) 70%, rgba(255,107,74,0.04) 100%)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(59,240,122,0.08)',
+            boxShadow: '0 4px 30px rgba(0,0,0,0.03)',
+          }
         : { background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }
       }
     >
