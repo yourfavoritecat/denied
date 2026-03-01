@@ -211,6 +211,7 @@ const SearchPage = () => {
               src={candyScatter}
               alt=""
               className="w-[85%] h-auto pointer-events-none hidden md:block"
+              loading="lazy"
               style={{ opacity: 0.65, filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.04))' }}
             />
           </div>

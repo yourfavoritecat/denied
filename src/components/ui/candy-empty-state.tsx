@@ -30,6 +30,7 @@ const CandyEmptyState = ({
       src={candyImages[candy]}
       alt=""
       className="candy-float"
+      loading="lazy"
       style={{
         width: candy === "tooth" ? 80 : 100,
         height: "auto",

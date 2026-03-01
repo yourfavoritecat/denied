@@ -87,7 +87,10 @@ const About = () => {
         <div className="max-w-[960px] mx-auto px-4 pb-4">
           <div className="grid grid-cols-3 gap-4">
             {steps.map((step) => (
-              <div key={step.title} className="rounded-xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+              <div key={step.title} className="rounded-xl p-4 text-center transition-all duration-200" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+                onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(59,240,122,0.1)'; e.currentTarget.style.borderColor = 'rgba(59,240,122,0.2)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)'; }}
+              >
                 <step.icon className="w-5 h-5 mx-auto mb-2 text-primary" />
                 <h3 className="text-sm font-semibold mb-1" style={{ color: '#111111' }}>{step.title}</h3>
                 <p className="text-xs leading-snug" style={{ color: '#888888' }}>{step.desc}</p>

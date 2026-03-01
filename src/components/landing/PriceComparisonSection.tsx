@@ -27,7 +27,7 @@ const formatCurrency = (amount: number) => {
 
 const PriceComparisonSection = () => {
   return (
-    <section className="bg-muted py-24">
+    <section className="py-16" style={{ background: '#F9F9F9' }}>
       <div className="container mx-auto px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 lowercase" style={{ color: '#111111', letterSpacing: '-1px', lineHeight: '1.1' }}>
           see the difference
@@ -36,33 +36,36 @@ const PriceComparisonSection = () => {
           real prices. real savings. no insurance games.
         </p>
 
-        <div className="max-w-4xl mx-auto overflow-hidden rounded-2xl border border-border bg-card shadow-floating">
+        <div className="max-w-4xl mx-auto overflow-hidden rounded-2xl" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
           <Table>
             <TableHeader>
-              <TableRow className="bg-denied-black hover:bg-denied-black">
-                <TableHead className="text-white font-bold text-base">Procedure</TableHead>
-                <TableHead className="text-white font-bold text-base text-right">U.S. Price</TableHead>
-                <TableHead className="text-white font-bold text-base text-right">Mexico Price</TableHead>
-                <TableHead className="text-white font-bold text-base text-right">You Save</TableHead>
+              <TableRow style={{ background: '#111111' }} className="hover:bg-[#111111]">
+                <TableHead className="text-white font-bold text-base">procedure</TableHead>
+                <TableHead className="text-white font-bold text-base text-right">u.s. price</TableHead>
+                <TableHead className="text-white font-bold text-base text-right">mexico price</TableHead>
+                <TableHead className="text-white font-bold text-base text-right">you save</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {procedures.map((procedure, index) => (
                 <TableRow 
                   key={procedure.name}
-                  className="animate-fade-in hover:bg-muted/50 transition-colors"
+                  className="animate-fade-in transition-colors duration-200"
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <TableCell className="font-semibold">{procedure.name}</TableCell>
-                  <TableCell className="text-right text-muted-foreground line-through">
+                  <TableCell className="font-semibold" style={{ color: '#111111' }}>{procedure.name}</TableCell>
+                  <TableCell className="text-right line-through" style={{ color: '#888888' }}>
                     {formatCurrency(procedure.usPrice)}
                   </TableCell>
-                  <TableCell className="text-right font-bold text-primary text-lg">
+                  <TableCell className="text-right font-bold text-lg" style={{ color: '#3BF07A' }}>
                     {formatCurrency(procedure.mxPrice)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Badge className="bg-primary/15 text-primary hover:bg-primary/25 font-bold shadow-sm">
-                      {procedure.savings}% OFF
+                    <Badge 
+                      className="font-bold shadow-sm"
+                      style={{ background: 'rgba(59,240,122,0.1)', color: '#3BF07A', border: '1px solid rgba(59,240,122,0.2)' }}
+                    >
+                      {procedure.savings}% off
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -71,8 +74,8 @@ const PriceComparisonSection = () => {
           </Table>
         </div>
 
-        <p className="text-center text-muted-foreground mt-8 text-sm">
-          * Prices are estimates based on average costs. Actual prices may vary by provider.
+        <p className="text-center mt-8 text-sm" style={{ color: '#888888' }}>
+          * prices are estimates based on average costs. actual prices may vary by provider.
         </p>
       </div>
     </section>
