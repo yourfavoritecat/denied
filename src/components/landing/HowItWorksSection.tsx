@@ -23,11 +23,11 @@ const HowItWorksSection = () => {
   return (
     <section className="bg-card py-24">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl md:text-5xl font-black text-center text-foreground mb-4">
-          How It Works
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 lowercase" style={{ color: '#111111', letterSpacing: '-1px', lineHeight: '1.1' }}>
+          how it works
         </h2>
-        <p className="text-xl text-muted-foreground text-center max-w-2xl mx-auto mb-14 font-light">
-          Getting quality care abroad is simpler than you think
+        <p className="text-base text-center max-w-2xl mx-auto mb-14 font-normal" style={{ color: '#555555', lineHeight: '1.6' }}>
+          getting quality care abroad is simpler than you think
         </p>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
@@ -41,7 +41,7 @@ const HowItWorksSection = () => {
                 <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-elevated">
                   <step.icon className="w-8 h-8 text-primary" />
                 </div>
-                <CardTitle className="text-xl font-bold">{step.title}</CardTitle>
+                <CardTitle className="text-lg font-bold lowercase" style={{ color: '#333333' }}>{step.title}</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-center text-base leading-relaxed">

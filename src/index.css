@@ -99,7 +99,7 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     text-transform: lowercase;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -173,25 +173,26 @@
   .btn-glossy-mint {
     background: #3BF07A !important;
     border: none;
-    color: #0a0a0a !important;
+    color: #111111 !important;
   }
   .btn-glossy-mint:hover {
-    background: #2DD169 !important;
+    background: #3BF07A !important;
+    box-shadow: 0 4px 24px rgba(59,240,122,0.3);
   }
   .btn-glossy-mint:active {
-    background: #22B558 !important;
+    background: #2DD169 !important;
   }
 
   .btn-glossy-peach {
-    background: #FF6B4A !important;
-    border: none;
-    color: #0a0a0a !important;
+    background: rgba(255,107,74,0.08) !important;
+    border: 1px solid rgba(255,107,74,0.15) !important;
+    color: #FF6B4A !important;
   }
   .btn-glossy-peach:hover {
-    background: #FF5533 !important;
+    background: rgba(255,107,74,0.12) !important;
   }
   .btn-glossy-peach:active {
-    background: #E84420 !important;
+    background: rgba(255,107,74,0.16) !important;
   }
 
   .btn-glossy-destructive {
@@ -208,14 +209,14 @@
 
   .btn-glossy-outline {
     background: transparent;
-    border: 1px solid rgba(59,240,122,0.35);
+    border: 2px solid #3BF07A;
     color: #3BF07A;
   }
   .btn-glossy-outline:hover {
-    background: rgba(59,240,122,0.08);
+    background: rgba(59,240,122,0.05);
   }
   .btn-glossy-outline:active {
-    background: rgba(59,240,122,0.14);
+    background: rgba(59,240,122,0.10);
   }
 
   .page-backdrop {

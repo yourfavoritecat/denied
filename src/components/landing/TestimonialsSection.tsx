@@ -33,11 +33,11 @@ const TestimonialsSection = () => {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_hsl(15_100%_71%/0.04)_0%,_transparent_50%)]" />
       
       <div className="container mx-auto px-4 relative z-10">
-        <h2 className="text-4xl md:text-5xl font-black text-center text-secondary mb-4">
-          Real People. Real Savings.
+        <h2 className="text-3xl md:text-4xl font-bold text-center text-secondary mb-4 lowercase" style={{ letterSpacing: '-1px', lineHeight: '1.1' }}>
+          real people. real savings.
         </h2>
-        <p className="text-xl text-white/60 text-center max-w-2xl mx-auto mb-14 font-light">
-          Join thousands who've escaped the insurance trap
+        <p className="text-base text-white/60 text-center max-w-2xl mx-auto mb-14 font-normal" style={{ lineHeight: '1.6' }}>
+          join thousands who've escaped the insurance trap
         </p>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
