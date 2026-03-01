@@ -21,7 +21,7 @@ import { Settings as SettingsIcon } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import logo from "@/assets/final-new-logo.png";
 
-const Navbar = () => {
+const Navbar = ({ light }: { light?: boolean }) => {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,7 +49,6 @@ const Navbar = () => {
 
   const visitorMode = isAdmin && viewAs === "visitor";
 
-  // Build the "my page" link — goes to public creator profile
   const myPageUrl = creatorHandle ? `/c/${creatorHandle}` : "/creator/edit";
 
   const navLinks = visitorMode
@@ -65,7 +64,6 @@ const Navbar = () => {
         { to: "/profile", icon: User, label: "my account" },
       ];
 
-  /* check if a nav link is active */
   const isLinkActive = (to: string) => {
     if (to === "/dashboard") return location.pathname === "/dashboard";
     if (to.startsWith("/c/")) return location.pathname === to;
@@ -77,12 +75,27 @@ const Navbar = () => {
     navigate(to);
   };
 
+  // Theme-aware colors
+  const linkDefault = light ? '#555555' : 'rgba(255,255,255,0.8)';
+  const linkActive = '#3BF07A';
+
   return (
-    <nav className={`fixed left-0 right-0 z-50 ${showBanner ? "top-6" : "top-0"}`} style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+    <nav
+      className={`fixed left-0 right-0 z-50 ${showBanner ? "top-6" : "top-0"}`}
+      style={light
+        ? { background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.06)' }
+        : { background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }
+      }
+    >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="Denied Logo" className="h-10 w-auto" style={{ mixBlendMode: 'screen' }} />
+            <img
+              src={logo}
+              alt="Denied Logo"
+              className="h-10 w-auto"
+              style={light ? { filter: 'brightness(0)' } : { mixBlendMode: 'screen' as any }}
+            />
           </Link>
 
           {/* Desktop nav */}
@@ -95,19 +108,19 @@ const Navbar = () => {
                   to={link.to}
                   className="flex items-center gap-1 lg:gap-2 whitespace-nowrap text-xs lg:text-sm"
                   style={{
-                    color: active ? "#3BF07A" : "rgba(255,255,255,0.8)",
-                    textShadow: active ? "0 0 8px rgba(59,240,122,0.2)" : "none",
+                    color: active ? linkActive : linkDefault,
+                    textShadow: active && !light ? "0 0 8px rgba(59,240,122,0.2)" : "none",
                     transition: "all 300ms ease",
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {
-                      e.currentTarget.style.color = "#3BF07A";
-                      e.currentTarget.style.textShadow = "0 0 10px rgba(59,240,122,0.3), 0 0 20px rgba(59,240,122,0.15)";
+                      e.currentTarget.style.color = linkActive;
+                      if (!light) e.currentTarget.style.textShadow = "0 0 10px rgba(59,240,122,0.3)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!active) {
-                      e.currentTarget.style.color = "rgba(255,255,255,0.8)";
+                      e.currentTarget.style.color = linkDefault;
                       e.currentTarget.style.textShadow = "none";
                     }
                   }}
@@ -124,27 +137,25 @@ const Navbar = () => {
               size="sm"
               className="hidden sm:flex items-center gap-1.5 whitespace-nowrap text-[13px] h-7 px-[18px] py-1.5 font-semibold border-none"
               style={{
-                background: "linear-gradient(180deg, #4CF88A, #2DD866)",
-                color: "#0A0A0A",
+                background: "#3BF07A",
+                color: "#111111",
                 borderRadius: "9999px",
-                boxShadow: "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
+                boxShadow: "0 4px 16px rgba(59,240,122,0.25)",
                 transition: "all 0.15s ease",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = "scale(1.03)";
-                e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,240,122,0.35), inset 0 1px 0 rgba(255,255,255,0.25)";
+                e.currentTarget.style.boxShadow = "0 4px 24px rgba(59,240,122,0.3)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.boxShadow = "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)";
+                e.currentTarget.style.boxShadow = "0 4px 16px rgba(59,240,122,0.25)";
               }}
               onMouseDown={(e) => {
                 e.currentTarget.style.transform = "scale(0.98)";
-                e.currentTarget.style.boxShadow = "0 2px 8px rgba(59,240,122,0.2)";
               }}
               onMouseUp={(e) => {
                 e.currentTarget.style.transform = "scale(1.03)";
-                e.currentTarget.style.boxShadow = "0 6px 20px rgba(59,240,122,0.35), inset 0 1px 0 rgba(255,255,255,0.25)";
               }}
               onClick={() => navigate(user ? "/my-trips?plan=new" : "/auth")}
             >
@@ -152,7 +163,6 @@ const Navbar = () => {
               plan a trip
             </Button>
 
-            {/* Notification bell - visible on all sizes when logged in */}
             {user && !visitorMode && <NotificationBell />}
 
             {/* Desktop auth */}
@@ -208,10 +218,18 @@ const Navbar = () => {
                 </DropdownMenu>
               ) : (
                 <>
-                  <Button variant="ghost" className="text-white hover:text-white hover:bg-white/10" onClick={() => navigate("/auth")}>
+                  <Button
+                    variant="ghost"
+                    className={light ? "text-[#555555] hover:text-[#111111] hover:bg-black/5" : "text-white hover:text-white hover:bg-white/10"}
+                    onClick={() => navigate("/auth")}
+                  >
                     Log In
                   </Button>
-                  <Button className="font-semibold" onClick={() => navigate("/auth")}>
+                  <Button
+                    className="font-semibold"
+                    style={{ background: '#3BF07A', color: '#111111', borderRadius: '9999px' }}
+                    onClick={() => navigate("/auth")}
+                  >
                     Sign Up
                   </Button>
                 </>
@@ -221,11 +239,22 @@ const Navbar = () => {
             {/* Mobile hamburger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden text-white hover:bg-white/10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`md:hidden ${light ? "text-[#111111] hover:bg-black/5" : "text-white hover:bg-white/10"}`}
+                >
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-72 bg-card z-[60]">
+              <SheetContent
+                side="right"
+                className="w-72 z-[60]"
+                style={light
+                  ? { background: '#FFFFFF', borderLeft: '1px solid rgba(0,0,0,0.06)' }
+                  : { background: 'hsl(var(--card))' }
+                }
+              >
                 <div className="flex flex-col h-full pt-6">
                   {user && (
                     <div className="flex items-center gap-3 px-2 pb-6 border-b mb-4">
@@ -233,7 +262,7 @@ const Navbar = () => {
                         <AvatarFallback className="bg-primary text-primary-foreground">{initials}</AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="font-medium text-sm truncate">{displayName}</p>
+                        <p className="font-medium text-sm truncate" style={{ color: light ? '#111111' : undefined }}>{displayName}</p>
                         <p className="text-xs text-muted-foreground truncate">{user.email}</p>
                       </div>
                     </div>
@@ -247,7 +276,7 @@ const Navbar = () => {
                           key={link.to}
                           onClick={() => handleMobileNav(link.to)}
                           className="flex items-center gap-3 w-full px-3 py-3 rounded-lg hover:bg-muted transition-colors text-sm"
-                          style={{ color: active ? "#3BF07A" : undefined }}
+                          style={{ color: active ? "#3BF07A" : light ? '#555555' : undefined }}
                         >
                           <link.icon className="w-5 h-5" />
                           {link.label}
@@ -275,7 +304,7 @@ const Navbar = () => {
                       </Button>
                     ) : (
                       <div className="space-y-2">
-                        <Button className="w-full" onClick={() => handleMobileNav("/auth")}>Sign Up</Button>
+                        <Button className="w-full" style={{ background: '#3BF07A', color: '#111111' }} onClick={() => handleMobileNav("/auth")}>Sign Up</Button>
                         <Button variant="outline" className="w-full" onClick={() => handleMobileNav("/auth")}>Log In</Button>
                       </div>
                     )}
