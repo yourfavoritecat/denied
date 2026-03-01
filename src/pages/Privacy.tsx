@@ -16,7 +16,7 @@ const Privacy = () => (
         <p style={{ color: '#888888' }}>contact: cat@denied.care</p>
       </div>
     </main>
-    <Footer light />
+    <Footer />
   </div>
 );
 

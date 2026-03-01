@@ -158,7 +158,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
           <h1 className="text-2xl font-bold mb-2" style={{ color: '#111111' }}>Profile Not Found</h1>
           <p className="text-muted-foreground">This user doesn't have a public profile.</p>
         </main>
-        <Footer light />
+        <Footer />
       </div>
     );
   }
@@ -427,7 +427,7 @@ const UserProfile = ({ usernameParam }: { usernameParam?: string } = {}) => {
         </div>
       </div>
 
-      <Footer light />
+      <Footer />
     </div>
   );
 };

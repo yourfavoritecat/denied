@@ -3,31 +3,26 @@ import { Instagram } from "lucide-react";
 import logo from "@/assets/final-new-logo.png";
 import footerBeads from "@/assets/footer-beads.png";
 
-const Footer = ({ light }: { light?: boolean }) => {
+const Footer = () => {
   return (
     <footer
       className="py-14"
-      style={light
-        ? { background: '#F9F9F9', borderTop: '1px solid rgba(0,0,0,0.04)' }
-        : { background: 'hsl(var(--denied-black))', borderTop: '1px solid rgba(255,255,255,0.06)' }
-      }
+      style={{ background: '#F9F9F9', borderTop: '1px solid rgba(0,0,0,0.04)' }}
     >
       {/* Candy bead accent strip */}
-      {light && (
-        <div className="flex justify-center -mt-14 mb-8">
-          <img
-            src={footerBeads}
-            alt=""
-            style={{
-              width: "clamp(400px, 50vw, 700px)",
-              height: "auto",
-              opacity: 0.25,
-              pointerEvents: "none",
-              filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.03))",
-            }}
-          />
-        </div>
-      )}
+      <div className="flex justify-center -mt-14 mb-8">
+        <img
+          src={footerBeads}
+          alt=""
+          style={{
+            width: "clamp(400px, 50vw, 700px)",
+            height: "auto",
+            opacity: 0.25,
+            pointerEvents: "none",
+            filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.03))",
+          }}
+        />
+      </div>
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-4 gap-8 mb-10">
           <div>
@@ -36,16 +31,16 @@ const Footer = ({ light }: { light?: boolean }) => {
                 src={logo}
                 alt="Denied Logo"
                 className="h-10 w-auto"
-                style={light ? { filter: 'brightness(0)' } : { mixBlendMode: 'screen' as any }}
+                style={{ filter: 'brightness(0)' }}
               />
             </Link>
-            <p className="text-sm leading-relaxed" style={{ color: light ? '#888888' : 'rgba(255,255,255,0.5)' }}>
+            <p className="text-sm leading-relaxed" style={{ color: '#888888' }}>
               fighting back against the broken healthcare system. one procedure at a time.
             </p>
           </div>
 
           <div>
-            <h4 className="mb-4 tracking-wide" style={{ color: light ? '#333333' : '#FFFFFF', fontSize: 14, fontWeight: 700 }}>company</h4>
+            <h4 className="mb-4 tracking-wide" style={{ color: '#333333', fontSize: 14, fontWeight: 700 }}>company</h4>
             <ul className="space-y-2.5">
               {[
                 { to: "/about", label: "about" },
@@ -57,9 +52,9 @@ const Footer = ({ light }: { light?: boolean }) => {
                   <Link
                     to={link.to}
                     className="transition-colors"
-                    style={{ color: light ? '#555555' : 'rgba(255,255,255,0.5)', fontSize: 14 }}
+                    style={{ color: '#555555', fontSize: 14 }}
                     onMouseEnter={e => e.currentTarget.style.color = '#3BF07A'}
-                    onMouseLeave={e => e.currentTarget.style.color = light ? '#555555' : 'rgba(255,255,255,0.5)'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#555555'}
                   >
                     {link.label}
                   </Link>
@@ -69,7 +64,7 @@ const Footer = ({ light }: { light?: boolean }) => {
           </div>
 
           <div>
-            <h4 className="mb-4 tracking-wide" style={{ color: light ? '#333333' : '#FFFFFF', fontSize: 14, fontWeight: 700 }}>legal</h4>
+            <h4 className="mb-4 tracking-wide" style={{ color: '#333333', fontSize: 14, fontWeight: 700 }}>legal</h4>
             <ul className="space-y-2.5">
               {[
                 { to: "/privacy", label: "privacy policy" },
@@ -80,9 +75,9 @@ const Footer = ({ light }: { light?: boolean }) => {
                   <Link
                     to={link.to}
                     className="transition-colors"
-                    style={{ color: light ? '#555555' : 'rgba(255,255,255,0.5)', fontSize: 14 }}
+                    style={{ color: '#555555', fontSize: 14 }}
                     onMouseEnter={e => e.currentTarget.style.color = '#3BF07A'}
-                    onMouseLeave={e => e.currentTarget.style.color = light ? '#555555' : 'rgba(255,255,255,0.5)'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#555555'}
                   >
                     {link.label}
                   </Link>
@@ -92,19 +87,16 @@ const Footer = ({ light }: { light?: boolean }) => {
           </div>
 
           <div>
-            <h4 className="mb-4 tracking-wide" style={{ color: light ? '#333333' : '#FFFFFF', fontSize: 14, fontWeight: 700 }}>connect</h4>
+            <h4 className="mb-4 tracking-wide" style={{ color: '#333333', fontSize: 14, fontWeight: 700 }}>connect</h4>
             <div className="flex gap-4">
               <a
                 href="https://instagram.com/denied.care"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="rounded-xl w-10 h-10 flex items-center justify-center transition-colors"
-                style={light
-                  ? { background: 'rgba(0,0,0,0.05)', color: '#555555' }
-                  : { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' }
-                }
-                onMouseEnter={e => { e.currentTarget.style.color = '#3BF07A'; e.currentTarget.style.background = light ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.1)'; }}
-                onMouseLeave={e => { e.currentTarget.style.color = light ? '#555555' : 'rgba(255,255,255,0.5)'; e.currentTarget.style.background = light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)'; }}
+                style={{ background: 'rgba(0,0,0,0.05)', color: '#555555' }}
+                onMouseEnter={e => { e.currentTarget.style.color = '#3BF07A'; e.currentTarget.style.background = 'rgba(0,0,0,0.08)'; }}
+                onMouseLeave={e => { e.currentTarget.style.color = '#555555'; e.currentTarget.style.background = 'rgba(0,0,0,0.05)'; }}
               >
                 <Instagram className="w-5 h-5" />
               </a>
@@ -112,8 +104,8 @@ const Footer = ({ light }: { light?: boolean }) => {
           </div>
         </div>
 
-        <div className="pt-8 text-center" style={{ borderTop: light ? '1px solid rgba(0,0,0,0.04)' : '1px solid rgba(255,255,255,0.06)' }}>
-          <p style={{ color: light ? '#AAAAAA' : 'rgba(255,255,255,0.3)', fontSize: 12 }}>
+        <div className="pt-8 text-center" style={{ borderTop: '1px solid rgba(0,0,0,0.04)' }}>
+          <p style={{ color: '#AAAAAA', fontSize: 12 }}>
             © 2026 denied.care. all rights reserved.
           </p>
         </div>

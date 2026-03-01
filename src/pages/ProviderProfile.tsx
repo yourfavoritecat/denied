@@ -768,7 +768,7 @@ const ProviderProfile = () => {
         editReview={editingReview}
       />
 
-      <Footer light />
+      <Footer />
     </div>
   );
 };

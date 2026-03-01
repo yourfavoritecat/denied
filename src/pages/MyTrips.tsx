@@ -673,7 +673,7 @@ const MyTripsPage = () => {
                 plan a trip
               </Button>
               <span style={{ fontSize: "12px", color: "#888888" }}>
-                <span style={{ color: "#3BF07A" }}>{totalBriefs}</span> briefs · <span style={{ color: "#3BF07A" }}>{totalProviders}</span> providers contacted
+                {totalBriefs} briefs · {totalProviders} providers contacted
               </span>
             </div>
           </div>

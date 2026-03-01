@@ -32,19 +32,19 @@ const VerifiedBadge = ({ verified, size = "sm" }: VerifiedBadgeProps) => {
     <span
       className="inline-flex items-center shrink-0"
       style={{
-        background: "rgba(59,240,122,0.15)",
-        border: "1px solid rgba(59,240,122,0.3)",
+        background: "rgba(59,240,122,0.06)",
+        border: "1px solid rgba(59,240,122,0.12)",
         borderRadius: 999,
         padding: s.padding,
         fontSize: s.fontSize,
-        color: "#3BF07A",
+        color: "#333333",
         fontWeight: 600,
         letterSpacing: 0.5,
         gap: s.gap,
         lineHeight: 1,
       }}
     >
-      <CheckCircle style={{ width: s.iconSize, height: s.iconSize }} />
+      <CheckCircle style={{ width: s.iconSize, height: s.iconSize, color: "#3BF07A" }} />
       verified
     </span>
   );
