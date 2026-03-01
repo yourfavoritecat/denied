@@ -29,11 +29,11 @@ const PriceComparisonSection = () => {
   return (
     <section className="bg-muted py-24">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl md:text-5xl font-black text-center text-foreground mb-4">
-          See the Difference
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 lowercase" style={{ color: '#111111', letterSpacing: '-1px', lineHeight: '1.1' }}>
+          see the difference
         </h2>
-        <p className="text-xl text-muted-foreground text-center max-w-2xl mx-auto mb-14 font-light">
-          Real prices. Real savings. No insurance games.
+        <p className="text-base text-center max-w-2xl mx-auto mb-14 font-normal" style={{ color: '#555555', lineHeight: '1.6' }}>
+          real prices. real savings. no insurance games.
         </p>
 
         <div className="max-w-4xl mx-auto overflow-hidden rounded-2xl border border-border bg-card shadow-floating">

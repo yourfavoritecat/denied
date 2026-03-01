@@ -77,12 +77,12 @@ const HeroSection = () => {
           />
         </div>
         
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-primary mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-          Fuck Health Insurance.
+        <h1 className="text-4xl md:text-5xl lg:text-[56px] font-[800] text-primary mb-8 animate-fade-in lowercase" style={{ animationDelay: "0.1s", letterSpacing: "-2px", lineHeight: "1.05" }}>
+          fuck health insurance.
         </h1>
         
-        <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 animate-fade-in font-light leading-relaxed" style={{ animationDelay: "0.2s" }}>
-          Save 50-70% on dental, cosmetic, and medical care with verified providers worldwide. Starting with Mexico.
+        <p className="text-lg md:text-xl text-white/90 max-w-3xl mx-auto mb-12 animate-fade-in font-normal leading-relaxed" style={{ animationDelay: "0.2s", lineHeight: "1.6" }}>
+          save 50-70% on dental, cosmetic, and medical care with verified providers worldwide. starting with mexico.
         </p>
 
         {/* Elevated form container */}
