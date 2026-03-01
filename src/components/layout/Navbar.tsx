@@ -110,7 +110,7 @@ const Navbar = ({ light }: { light?: boolean }) => {
                   style={{
                     color: active ? linkActive : linkDefault,
                     textShadow: active && !light ? "0 0 8px rgba(59,240,122,0.2)" : "none",
-                    transition: "all 300ms ease",
+                    transition: "all 200ms ease",
                   }}
                   onMouseEnter={(e) => {
                     if (!active) {

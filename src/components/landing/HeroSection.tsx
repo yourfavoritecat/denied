@@ -9,7 +9,7 @@ const HeroSection = () => {
   return (
     <section
       className="relative flex flex-col items-center justify-center overflow-hidden"
-      style={{ minHeight: '100vh', background: '#FFFFFF' }}
+      style={{ minHeight: '100vh', background: '#FFFFFF', paddingTop: '96px', paddingBottom: '0' }}
     >
       {/* 3D Logo */}
       <img
@@ -46,7 +46,7 @@ const HeroSection = () => {
           color: '#888888',
           fontWeight: 400,
           maxWidth: '420px',
-          marginTop: '20px',
+          marginTop: '24px',
           lineHeight: 1.6,
         }}
       >
@@ -56,7 +56,7 @@ const HeroSection = () => {
       {/* CTA */}
       <Button
         onClick={() => navigate("/search")}
-        className="mt-8"
+        className="mt-8 transition-all duration-200"
         style={{
           background: '#3BF07A',
           color: '#111111',
@@ -66,11 +66,19 @@ const HeroSection = () => {
           fontSize: '17px',
           fontWeight: 700,
         }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.boxShadow = '0 4px 24px rgba(59,240,122,0.3)';
+          e.currentTarget.style.transform = 'translateY(-1px)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.transform = 'translateY(0)';
+        }}
       >
         get a free quote
       </Button>
 
-      {/* Candy strip — anchored to bottom */}
+      {/* Candy strip — anchored to bottom, eager load (above fold) */}
       <img
         src={candyStrip}
         alt=""
