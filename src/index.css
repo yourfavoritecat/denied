@@ -276,8 +276,8 @@
   }
   .glossy-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 24px rgba(59,240,122,0.12);
-    border-color: rgba(59,240,122,0.2);
+    box-shadow: 0 8px 32px rgba(59,240,122,0.2);
+    border-color: rgba(59,240,122,0.3);
   }
 
   .glossy-border {
@@ -378,17 +378,18 @@
 
   /* ─── Mint Tab Pills ─── */
   [data-mint-tab][data-state="active"] {
-    background: linear-gradient(135deg, rgba(59,240,122,0.2), rgba(59,240,122,0.08)) !important;
-    border-color: rgba(59,240,122,0.3) !important;
-    color: #3BF07A !important;
-    box-shadow: 0 0 12px rgba(59,240,122,0.15);
+    background: #3BF07A !important;
+    border-color: #3BF07A !important;
+    color: #111111 !important;
+    box-shadow: 0 4px 16px rgba(59,240,122,0.25);
+    font-weight: 700;
   }
   [data-mint-tab][data-state="inactive"] {
-    color: #B0B0B0;
+    color: #888888;
   }
   [data-mint-tab][data-state="inactive"]:hover {
-    color: #FFFFFF;
-    border-color: rgba(255,255,255,0.15) !important;
+    background: rgba(59,240,122,0.15) !important;
+    color: #111111;
   }
 
   /* ─── Trip Brief Modal Overlay ─── */
@@ -398,20 +399,20 @@
     -webkit-backdrop-filter: blur(12px);
   }
 
-  /* ─── Trip Brief Modal Content ─── */
+  /* ─── Trip Brief Modal Content (Light Theme) ─── */
   .trip-modal-content {
-    background: #111111 !important;
-    border: 1px solid rgba(59,240,122,0.12) !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(0,0,0,0.08) !important;
     border-radius: 20px !important;
-    box-shadow: 0 24px 64px rgba(0,0,0,0.6), 0 8px 24px rgba(0,0,0,0.4) !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.12), 0 8px 24px rgba(0,0,0,0.06) !important;
   }
 
   .trip-modal-content [data-radix-dialog-close] {
-    color: #B0B0B0;
+    color: #888888;
     transition: all 0.15s ease;
   }
   .trip-modal-content [data-radix-dialog-close]:hover {
-    color: #FFFFFF;
+    color: #111111;
     transform: scale(1.1);
   }
 
@@ -448,6 +449,11 @@
     }
   }
 
+  /* ─── Animated Link Underline ─── */
+  a:not([class*="btn"]):not([role="tab"]):not(.no-underline) {
+    position: relative;
+  }
+
   /* Remove hover lift on touch devices */
   @media (hover: none) {
     .trip-card-mega {
@@ -480,8 +486,8 @@
 }
 .theme-public .glossy-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 24px rgba(59,240,122,0.12) !important;
-  border-color: rgba(59,240,122,0.2) !important;
+  box-shadow: 0 8px 32px rgba(59,240,122,0.2) !important;
+  border-color: rgba(59,240,122,0.3) !important;
 }
 
 .theme-public .text-card-foreground {

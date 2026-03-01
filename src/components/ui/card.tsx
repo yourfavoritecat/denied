@@ -17,8 +17,8 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
     }}
     onMouseEnter={(e) => {
       const el = e.currentTarget;
-      el.style.borderColor = 'rgba(59,240,122,0.2)';
-      el.style.boxShadow = '0 4px 24px rgba(59,240,122,0.12)';
+      el.style.borderColor = 'rgba(59,240,122,0.3)';
+      el.style.boxShadow = '0 8px 32px rgba(59,240,122,0.2)';
     }}
     onMouseLeave={(e) => {
       const el = e.currentTarget;

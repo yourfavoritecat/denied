@@ -138,13 +138,6 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
       <div className="p-4">
         <div className="flex items-center gap-2 flex-wrap mb-1.5">
           <h3 className="font-bold text-lg leading-tight" style={{ color: '#111111' }}>{creator.display_name}</h3>
-          {creator.badge_type ? (
-            <UserBadge badgeType={creator.badge_type as any} size="sm" />
-          ) : (
-            <Badge className="bg-primary/10 text-primary border-primary/20 gap-1 text-xs h-5">
-              <BadgeCheck className="w-2.5 h-2.5" /> creator
-            </Badge>
-          )}
         </div>
 
         {creator.bio && (

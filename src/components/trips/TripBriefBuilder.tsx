@@ -107,7 +107,7 @@ const StepDots = ({ current, total }: { current: number; total: number }) => (
             ? "#3BF07A"
             : i < current
               ? "rgba(59,240,122,0.4)"
-              : "rgba(255,255,255,0.15)",
+              : "rgba(0,0,0,0.1)",
         }}
       />
     ))}
@@ -554,10 +554,10 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
               onClick={() => setDestination(d)}
               className="p-2.5 text-sm font-medium"
               style={{
-                background: destination === d ? "rgba(59,240,122,0.06)" : "#111111",
-                border: destination === d ? "1px solid rgba(59,240,122,0.5)" : "1px solid rgba(255,255,255,0.08)",
+                background: destination === d ? "rgba(59,240,122,0.06)" : "#FFFFFF",
+                border: destination === d ? "1px solid rgba(59,240,122,0.5)" : "1px solid rgba(0,0,0,0.08)",
                 borderRadius: "16px",
-                color: destination === d ? "#3BF07A" : "rgba(255,255,255,0.7)",
+                color: destination === d ? "#111111" : "#555555",
                 boxShadow: destination === d ? "0 0 20px rgba(59,240,122,0.12), 0 0 6px rgba(59,240,122,0.08)" : "none",
                 transition: "all 0.2s ease",
               }}
@@ -570,8 +570,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
               }}
               onMouseLeave={(e) => {
                 if (destination !== d) {
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-                  e.currentTarget.style.background = "#111111";
+                  e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
+                  e.currentTarget.style.background = "#FFFFFF";
                   e.currentTarget.style.boxShadow = "none";
                 }
               }}
@@ -610,7 +610,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
     return (
       <div className="space-y-4">
-        <label className="flex items-center gap-2 cursor-pointer p-3 rounded-lg border border-white/10 bg-white/5">
+        <label className="flex items-center gap-2 cursor-pointer p-3 rounded-lg border border-black/10 bg-black/[0.02]">
           <Checkbox checked={proceduresUnsure} onCheckedChange={(v) => setProceduresUnsure(!!v)} />
           <span className="text-sm">i'm not sure yet — i want to explore options</span>
         </label>
@@ -638,11 +638,11 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                             borderRadius: "9999px",
                             border: selectedProcedures.includes(p)
                               ? "1px solid #3BF07A"
-                              : "1px solid rgba(255,255,255,0.1)",
+                              : "1px solid rgba(0,0,0,0.1)",
                             background: selectedProcedures.includes(p)
                               ? "rgba(59,240,122,0.08)"
                               : "transparent",
-                            color: selectedProcedures.includes(p) ? "#3BF07A" : "rgba(255,255,255,0.6)",
+                            color: selectedProcedures.includes(p) ? "#111111" : "#555555",
                             transition: "all 0.15s ease",
                           }}
                           onMouseEnter={(e) => {
@@ -653,7 +653,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                           }}
                           onMouseLeave={(e) => {
                             if (!selectedProcedures.includes(p)) {
-                              e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
+                              e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)";
                               e.currentTarget.style.background = "transparent";
                             }
                           }}
@@ -708,8 +708,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                           disabled={qty <= 1}
                           className="w-5 h-5 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
                           style={{
-                            color: "#B0B0B0",
-                            border: "1px solid rgba(255,255,255,0.15)",
+                            color: "#888888",
+                            border: "1px solid rgba(0,0,0,0.1)",
                             borderRadius: "8px",
                             background: "transparent",
                             transition: "all 0.15s ease",
@@ -723,8 +723,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                           disabled={qty >= 10}
                           className="w-5 h-5 flex items-center justify-center text-xs disabled:opacity-30 disabled:cursor-not-allowed"
                           style={{
-                            color: "#B0B0B0",
-                            border: "1px solid rgba(255,255,255,0.15)",
+                            color: "#888888",
+                            border: "1px solid rgba(0,0,0,0.1)",
                             borderRadius: "8px",
                             background: "transparent",
                             transition: "all 0.15s ease",
@@ -733,7 +733,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                           +
                         </button>
                       </div>
-                      <span className="text-[11px] shrink-0" style={{ color: "#B0B0B0" }}>
+                      <span className="text-[11px] shrink-0" style={{ color: "#888888" }}>
                         {price
                           ? `est. $${(price.min * qty).toLocaleString()}–$${(price.max * qty).toLocaleString()}`
                           : "n/a"
@@ -745,8 +745,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
                 {/* Running total */}
                 {selectedProcedures.length > 0 && (
-                  <div className="pt-2 border-t border-white/10 space-y-1">
-                    <p className="text-sm font-medium text-white">
+                  <div className="pt-2 border-t border-black/10 space-y-1">
+                    <p className="text-sm font-medium" style={{ color: '#111111' }}>
                       {hasAnyPrice
                         ? hasMissing
                           ? `estimated total: $${totalMin.toLocaleString()}+`
@@ -755,11 +755,11 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                       }
                     </p>
                     {hasMissing && hasAnyPrice && (
-                      <p className="text-[10px]" style={{ color: "#B0B0B0" }}>
+                      <p className="text-[10px]" style={{ color: "#888888" }}>
                         some procedures don't have pricing yet
                       </p>
                     )}
-                    <p className="text-[10px] italic" style={{ color: "#B0B0B0" }}>
+                    <p className="text-[10px] italic" style={{ color: "#888888" }}>
                       estimates based on average mexico pricing · actual prices vary by provider
                     </p>
                   </div>
@@ -784,8 +784,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
             onClick={() => setIsGroup(opt.id)}
             className="p-4 text-center"
             style={{
-              background: isGroup === opt.id ? "rgba(59,240,122,0.06)" : "#111111",
-              border: isGroup === opt.id ? "1px solid rgba(59,240,122,0.5)" : "1px solid rgba(255,255,255,0.08)",
+              background: isGroup === opt.id ? "rgba(59,240,122,0.06)" : "#FFFFFF",
+              border: isGroup === opt.id ? "1px solid rgba(59,240,122,0.5)" : "1px solid rgba(0,0,0,0.08)",
               borderRadius: "16px",
               boxShadow: isGroup === opt.id ? "0 0 20px rgba(59,240,122,0.12), 0 0 6px rgba(59,240,122,0.08)" : "none",
               transition: "all 0.2s ease",
@@ -799,14 +799,14 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
             }}
             onMouseLeave={(e) => {
               if (isGroup !== opt.id) {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-                e.currentTarget.style.background = "#111111";
+                e.currentTarget.style.borderColor = "rgba(0,0,0,0.08)";
+                e.currentTarget.style.background = "#FFFFFF";
                 e.currentTarget.style.boxShadow = "none";
               }
             }}
           >
             <div className="text-2xl mb-1">{opt.icon}</div>
-            <div className="font-semibold text-sm" style={{ color: isGroup === opt.id ? "#3BF07A" : undefined }}>{opt.label}</div>
+            <div className="font-semibold text-sm" style={{ color: isGroup === opt.id ? "#111111" : "#555555" }}>{opt.label}</div>
           </button>
         ))}
       </div>
@@ -828,7 +828,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
           <div className="space-y-3">
             {groupMembers.map((member, idx) => (
-              <div key={idx} className="p-3 rounded-lg border border-white/10 bg-white/5 space-y-3">
+              <div key={idx} className="p-3 rounded-lg border border-black/10 bg-black/[0.02] space-y-3">
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground font-medium w-16">person {idx + 1}</span>
                   <Input
@@ -848,8 +848,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                       }}
                       className={`text-xs px-2 py-0.5 rounded-full border transition-all ${
                         member.procedures.includes(p)
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-white/20 text-white/50"
+                        ? "border-primary bg-primary/10 text-[#111111]"
+                        : "border-black/10 text-[#555555]"
                       }`}
                     >
                       {p}
@@ -858,7 +858,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                   {selectedProcedures.length > 0 && (
                     <button
                       onClick={() => copyMyProcedures(idx)}
-                      className="text-xs px-2 py-0.5 rounded-full border border-white/20 text-white/50 hover:text-white"
+                      className="text-xs px-2 py-0.5 rounded-full border border-black/10 text-[#555555] hover:text-[#111111]"
                     >
                       same as me
                     </button>
@@ -891,7 +891,7 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
 
     return (
       <div className="space-y-5">
-        <div className="p-4 rounded-xl border border-white/10 bg-white/5 space-y-2 text-sm">
+        <div className="p-4 rounded-xl border border-black/10 bg-black/[0.02] space-y-2 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin className="w-4 h-4" />
             <span>{destination || "no destination selected"}</span>
@@ -991,17 +991,17 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
                 onClick={() => restoreDraft(pendingDraft)}
                 className="font-semibold border-none"
                 style={{
-                  background: "linear-gradient(180deg, #4CF88A, #2DD866)",
-                  color: "#0A0A0A",
+                  background: "#3BF07A",
+                  color: "#111111",
                   borderRadius: "9999px",
                 }}
               >continue</Button>
               <button
                 onClick={dismissDraft}
                 className="text-sm"
-                style={{ color: "#B0B0B0", transition: "all 0.15s ease" }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#FFFFFF"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "#B0B0B0"; }}
+                style={{ color: "#888888", transition: "all 0.15s ease" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#111111"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "#888888"; }}
               >
                 start fresh
               </button>
@@ -1020,19 +1020,19 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
               className="flex-1"
               onClick={() => handleStepChange(step - 1)}
               style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(0,0,0,0.02)",
+                border: "1px solid rgba(0,0,0,0.1)",
                 borderRadius: "9999px",
-                color: "#B0B0B0",
+                color: "#555555",
                 transition: "all 0.15s ease",
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.2)";
-                e.currentTarget.style.color = "#FFFFFF";
+                e.currentTarget.style.borderColor = "rgba(0,0,0,0.2)";
+                e.currentTarget.style.color = "#111111";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.1)";
-                e.currentTarget.style.color = "#B0B0B0";
+                e.currentTarget.style.borderColor = "rgba(0,0,0,0.1)";
+                e.currentTarget.style.color = "#555555";
               }}
             >
               <ChevronLeft className="w-4 h-4 mr-1" /> back
@@ -1044,8 +1044,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
               onClick={() => handleStepChange(step + 1)}
               disabled={!canNext()}
               style={{
-                background: canNext() ? "linear-gradient(180deg, #4CF88A, #2DD866)" : "rgba(255,255,255,0.1)",
-                color: canNext() ? "#0A0A0A" : "rgba(255,255,255,0.3)",
+                background: canNext() ? "#3BF07A" : "rgba(0,0,0,0.06)",
+                color: canNext() ? "#111111" : "rgba(0,0,0,0.3)",
                 borderRadius: "9999px",
                 boxShadow: canNext() ? "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)" : "none",
                 transition: "all 0.15s ease",
@@ -1059,8 +1059,8 @@ const TripBriefBuilder = ({ open, onOpenChange, onSaved, editBrief }: TripBriefB
               onClick={handleSave}
               disabled={saving || !user}
               style={{
-                background: "linear-gradient(180deg, #4CF88A, #2DD866)",
-                color: "#0A0A0A",
+                background: "#3BF07A",
+                color: "#111111",
                 borderRadius: "9999px",
                 boxShadow: "0 4px 16px rgba(59,240,122,0.25), inset 0 1px 0 rgba(255,255,255,0.2)",
                 transition: "all 0.15s ease",
