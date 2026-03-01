@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import TripBriefBuilder from "@/components/trips/TripBriefBuilder";
+import CandyEmptyState from "@/components/ui/candy-empty-state";
 
 /* ─── Normalize procedures helper ─── */
 const normalizeProcedures = (procs: any[] | null): { name: string; quantity: number }[] => {
@@ -522,17 +523,17 @@ const BookingCard = ({ booking }: { booking: Booking }) => {
   );
 };
 
-/* ─── Empty state ─── */
+/* ─── Empty state (legacy wrapper) ─── */
 const EmptyState = ({
-  icon: Icon,
+  icon: _Icon,
   title,
   desc,
   action,
-}: { icon: any; title: string; desc: string; action?: React.ReactNode }) => (
+  candy = "pill",
+}: { icon: any; title: string; desc: string; action?: React.ReactNode; candy?: "pill" | "tooth" | "star" }) => (
   <div className="text-center py-16">
-    <Icon className="w-12 h-12 text-white/20 mx-auto mb-4" />
-    <h3 className="font-semibold text-lg mb-2">{title}</h3>
-    <p className="text-white/40 text-sm mb-6 max-w-sm mx-auto">{desc}</p>
+    <CandyEmptyState candy={candy} message={title} />
+    <p className="text-white/40 text-sm mb-6 max-w-sm mx-auto -mt-12">{desc}</p>
     {action}
   </div>
 );

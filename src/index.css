@@ -423,6 +423,15 @@
     50% { opacity: 0.5; box-shadow: 0 0 3px rgba(59,240,122,0.3); }
   }
 
+  @keyframes candyFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+  }
+
+  .candy-float {
+    animation: candyFloat 3s ease-in-out infinite;
+  }
+
   /* ─── Trips Card Grid Responsive ─── */
   @media (max-width: 768px) {
     .trips-card-grid {
