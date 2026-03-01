@@ -71,21 +71,14 @@ const Creators = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
+    <div className="min-h-screen theme-public">
+      <Navbar light />
       <main>
         <div className="max-w-[960px] mx-auto px-4 pt-24 pb-16">
-          {/* Hero banner matching Search page style */}
+          {/* Hero banner */}
           <div className="relative rounded-xl overflow-hidden mb-8" style={{ height: 180 }}>
-            <img
-              src="/images/hero-creator.jpg"
-              alt=""
-              className="w-full h-full object-cover"
-            />
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to bottom, transparent 20%, #0a0a0a 100%)' }}
-            />
+            <img src="/images/hero-creator.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.7) 100%)' }} />
             <div className="absolute bottom-0 left-0 p-6">
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Creators</h1>
               <p className="text-white/70">Real people sharing real medical tourism experiences</p>
@@ -98,7 +91,7 @@ const Creators = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
             </div>
           ) : creators.length === 0 ? (
-            <div className="text-center py-20 text-muted-foreground">
+            <div className="text-center py-20" style={{ color: '#888888' }}>
               No creators yet. Check back soon.
             </div>
           ) : (
@@ -110,17 +103,20 @@ const Creators = () => {
           )}
         </div>
       </main>
-      <Footer />
+      <Footer light />
     </div>
   );
 };
 
 const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
   <Link to={`/${creator.handle}`} className="group block">
-     <div
-      className="glossy-card rounded-xl overflow-hidden transition-all duration-200 cursor-pointer h-full"
+    <div
+      className="rounded-[20px] overflow-hidden transition-all duration-200 cursor-pointer h-full hover:-translate-y-0.5"
+      style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+      onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; }}
     >
-      {/* Cover photo — same 16/10 aspect ratio as provider cards */}
+      {/* Cover photo */}
       <div className="aspect-[16/10] relative overflow-hidden bg-muted">
         <img
           src={creator.cover_photo_url || '/images/hero-creator.jpg'}
@@ -128,9 +124,8 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-        {/* Avatar overlapping bottom of cover */}
         <div className="absolute bottom-3 left-4">
-          <Avatar className="w-14 h-14 border-[2px] border-[#0a0a0a] shadow-md">
+          <Avatar className="w-14 h-14 border-[2px] border-white shadow-md">
             {creator.avatar_url && <AvatarImage src={creator.avatar_url} alt={creator.display_name} className="object-cover" />}
             <AvatarFallback className="bg-primary text-primary-foreground text-lg font-bold">
               {creator.display_name?.[0]?.toUpperCase() || "C"}
@@ -141,9 +136,8 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
 
       {/* Content */}
       <div className="p-4">
-        {/* Name + Badge row */}
         <div className="flex items-center gap-2 flex-wrap mb-1.5">
-          <h3 className="font-bold text-lg leading-tight">{creator.display_name}</h3>
+          <h3 className="font-bold text-lg leading-tight" style={{ color: '#111111' }}>{creator.display_name}</h3>
           {creator.badge_type ? (
             <UserBadge badgeType={creator.badge_type as any} size="sm" />
           ) : (
@@ -153,22 +147,20 @@ const CreatorCardItem = ({ creator }: { creator: CreatorCard }) => (
           )}
         </div>
 
-        {/* Bio — 1-line preview */}
         {creator.bio && (
-          <p className="text-sm text-muted-foreground line-clamp-1 mb-3">{creator.bio}</p>
+          <p className="text-sm line-clamp-1 mb-3" style={{ color: '#888888' }}>{creator.bio}</p>
         )}
 
-        {/* Specialties */}
         {creator.specialties.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {creator.specialties.slice(0, 3).map((s) => (
               <span key={s} className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{ background: 'rgba(59,240,122,0.1)', border: '1px solid rgba(59,240,122,0.2)', color: '#3BF07A' }}>
+                style={{ background: 'rgba(59,240,122,0.08)', border: '1px solid rgba(59,240,122,0.15)', color: '#333333' }}>
                 {s}
               </span>
             ))}
             {creator.specialties.length > 3 && (
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.4)' }}>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(0,0,0,0.04)', color: '#888888' }}>
                 +{creator.specialties.length - 3}
               </span>
             )}

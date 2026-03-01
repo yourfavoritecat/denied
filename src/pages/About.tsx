@@ -50,8 +50,8 @@ const About = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+    <div className="min-h-screen theme-public flex flex-col">
+      <Navbar light />
 
       <main className="flex-1 flex flex-col pt-24">
         {/* Hero with background image */}
@@ -61,9 +61,8 @@ const About = () => {
             alt=""
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 60%, hsl(var(--background)) 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.5) 60%, rgba(255,255,255,0.9) 90%, #FFFFFF 100%)" }} />
 
-          {/* Overlaid text */}
           <div className="relative z-10 flex flex-col justify-end h-full max-w-[960px] mx-auto px-4 pb-4">
             <h1 className="text-2xl font-bold mb-2 text-primary">
               say yes, because health insurance said no
@@ -73,13 +72,13 @@ const About = () => {
 
         {/* Body copy */}
         <div className="max-w-[960px] mx-auto px-4 py-5 space-y-3">
-          <p className="text-sm text-white/70 leading-relaxed">
+          <p className="text-sm leading-relaxed" style={{ color: '#555555' }}>
             denied.care is a marketplace for people who've been priced out of healthcare in the us. we connect you with vetted dental and medical clinics abroad. real providers, transparent pricing, zero guesswork and saving up to 75% on procedures your insurance denied or barely cover.
           </p>
-          <p className="text-sm text-white/70 leading-relaxed">
+          <p className="text-sm leading-relaxed" style={{ color: '#555555' }}>
             we're more than a booking site. we're building a community of people who've been through it. our users are sharing real experiences, honest reviews, safety tips, what to look for (and what to avoid) when exploring medical tourism. the more we share, the safer and smarter everyone gets.
           </p>
-          <p className="text-xs text-white/40 italic leading-relaxed">
+          <p className="text-xs italic leading-relaxed" style={{ color: '#888888' }}>
             our founder got quoted $11,800 for dental work in the US. blue cross blue shield denied coverage. she flew to tijuana, got the same procedures, and paid $3,400. denied.care exists so nobody else has to figure that out alone.
           </p>
         </div>
@@ -88,10 +87,10 @@ const About = () => {
         <div className="max-w-[960px] mx-auto px-4 pb-4">
           <div className="grid grid-cols-3 gap-4">
             {steps.map((step) => (
-              <div key={step.title} className="glossy-card rounded-xl p-4 text-center">
+              <div key={step.title} className="rounded-xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
                 <step.icon className="w-5 h-5 mx-auto mb-2 text-primary" />
-                <h3 className="text-sm font-semibold text-white mb-1">{step.title}</h3>
-                <p className="text-xs text-white/50 leading-snug">{step.desc}</p>
+                <h3 className="text-sm font-semibold mb-1" style={{ color: '#111111' }}>{step.title}</h3>
+                <p className="text-xs leading-snug" style={{ color: '#888888' }}>{step.desc}</p>
               </div>
             ))}
           </div>
@@ -99,24 +98,25 @@ const About = () => {
 
         {/* Waitlist CTA */}
         <div className="max-w-[960px] mx-auto px-4 pb-16">
-          <p className="text-xs text-white/50 text-center mb-3">be the first to know when we launch</p>
+          <p className="text-xs text-center mb-3" style={{ color: '#888888' }}>be the first to know when we launch</p>
           <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto w-full">
             <Input
               type="email"
               placeholder="enter your email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-white/10 border-white/15 text-white placeholder:text-white/40 h-9 rounded-full text-sm"
+              className="h-9 rounded-full text-sm"
+              style={{ background: '#F5F5F5', borderColor: 'rgba(0,0,0,0.1)', color: '#111111' }}
               disabled={isLoading}
             />
-            <Button type="submit" className="h-9 px-5 whitespace-nowrap rounded-full text-sm" disabled={isLoading}>
+            <Button type="submit" className="h-9 px-5 whitespace-nowrap rounded-full text-sm" style={{ background: '#3BF07A', color: '#111111' }} disabled={isLoading}>
               {isLoading ? "joining..." : "join the waitlist"}
             </Button>
           </form>
         </div>
       </main>
 
-      <Footer />
+      <Footer light />
     </div>
   );
 };

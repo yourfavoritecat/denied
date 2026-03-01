@@ -160,9 +160,9 @@ const SearchPage = () => {
   const LoadingSkeleton = () => (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <Card key={i} className="overflow-hidden glossy-card">
+        <div key={i} className="overflow-hidden rounded-[20px]" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
           <Skeleton className="aspect-[16/10] w-full" />
-          <CardContent className="p-5 space-y-3">
+          <div className="p-5 space-y-3">
             <Skeleton className="h-5 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
             <Skeleton className="h-4 w-1/3" />
@@ -171,8 +171,8 @@ const SearchPage = () => {
               <Skeleton className="h-5 w-20 rounded-full" />
             </div>
             <Skeleton className="h-6 w-24 mt-2" />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ))}
     </div>
   );
@@ -180,11 +180,11 @@ const SearchPage = () => {
   const EmptyState = () => (
     <div className="text-center py-20">
       <div className="max-w-md mx-auto">
-        <p className="text-2xl font-bold text-foreground mb-2">We're onboarding providers now</p>
-        <p className="text-muted-foreground mb-6">
+        <p className="text-2xl font-bold mb-2" style={{ color: '#111111' }}>We're onboarding providers now</p>
+        <p className="mb-6" style={{ color: '#555555' }}>
           Check back soon or join the waitlist to be the first to know when new clinics are available.
         </p>
-        <Button asChild>
+        <Button asChild style={{ background: '#3BF07A', color: '#111111', borderRadius: '50px' }}>
           <Link to="/">Join the Waitlist</Link>
         </Button>
       </div>
@@ -192,50 +192,36 @@ const SearchPage = () => {
   );
 
   return (
-    <div className="min-h-screen">
-      <Navbar />
-      {/* Concierge mode banner */}
+    <div className="min-h-screen theme-public">
+      <Navbar light />
       {isConcierge && (
         <div className="fixed top-16 left-0 right-0 z-40 flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-medium"
-          style={{ background: 'rgba(255,140,105,0.15)', borderBottom: '1px solid rgba(255,140,105,0.3)', backdropFilter: 'blur(10px)' }}>
+          style={{ background: 'rgba(255,107,74,0.08)', borderBottom: '1px solid rgba(255,107,74,0.15)', backdropFilter: 'blur(10px)' }}>
           <span>✨</span>
           <span style={{ color: '#FF6B4A' }}>Concierge mode</span>
-          <span className="text-muted-foreground">— we'll handle your travel coordination</span>
+          <span style={{ color: '#888888' }}>— we'll handle your travel coordination</span>
         </div>
       )}
       <main>
         <div className={`max-w-[960px] mx-auto px-4 pb-16 ${isConcierge ? "pt-28" : "pt-24"}`}>
           {/* Hero Banner */}
           <div className="relative rounded-xl overflow-hidden mb-8" style={{ height: 180 }}>
-            <img
-              src="/images/hero-search.jpg"
-              alt=""
-              className="w-full h-full object-cover"
-            />
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(to bottom, transparent 20%, #0a0a0a 100%)' }}
-            />
+            <img src="/images/hero-search.jpg" alt="" className="w-full h-full object-cover" />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.7) 100%)' }} />
             <div className="absolute bottom-0 left-0 p-6">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
-                Find Your Provider
-              </h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">Find Your Provider</h1>
               <p className="text-white/70">Browse verified clinics with transparent pricing across Mexico</p>
             </div>
           </div>
 
           {/* Search Bar */}
-          <motion.div
-            className="mb-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
+          <motion.div className="mb-8" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
             <div className="relative max-w-2xl">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5" style={{ color: '#888888' }} />
               <Input
                 placeholder="Search clinics, procedures..."
                 className="pl-10 h-12"
+                style={{ background: '#F5F5F5', borderColor: 'rgba(0,0,0,0.1)', color: '#111111' }}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -244,21 +230,21 @@ const SearchPage = () => {
 
           {/* Results header */}
           <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-            <p className="text-muted-foreground">
+            <p style={{ color: '#555555' }}>
               {loading ? (
                 <Skeleton className="h-5 w-32 inline-block" />
               ) : (
                 <>
-                  <span className="font-bold text-foreground">{filtered.length}</span> provider{filtered.length !== 1 ? "s" : ""} found
+                  <span className="font-bold" style={{ color: '#111111' }}>{filtered.length}</span> provider{filtered.length !== 1 ? "s" : ""} found
                 </>
               )}
             </p>
             <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-              <SelectTrigger className="w-48 bg-background">
-                <ArrowUpDown className="w-4 h-4 mr-2 text-muted-foreground" />
+              <SelectTrigger className="w-48" style={{ background: '#FFFFFF', borderColor: 'rgba(0,0,0,0.1)' }}>
+                <ArrowUpDown className="w-4 h-4 mr-2" style={{ color: '#888888' }} />
                 <SelectValue placeholder="Sort by" />
               </SelectTrigger>
-              <SelectContent className="bg-popover z-50">
+              <SelectContent className="bg-white z-50">
                 <SelectItem value="default">Default</SelectItem>
                 <SelectItem value="price-low">Price: Low to High</SelectItem>
                 <SelectItem value="price-high">Price: High to Low</SelectItem>
@@ -275,8 +261,8 @@ const SearchPage = () => {
             <EmptyState />
           ) : filtered.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-2xl font-bold text-foreground mb-2">No providers found</p>
-              <p className="text-muted-foreground mb-4">Try adjusting your search terms</p>
+              <p className="text-2xl font-bold mb-2" style={{ color: '#111111' }}>No providers found</p>
+              <p style={{ color: '#555555' }} className="mb-4">Try adjusting your search terms</p>
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -292,7 +278,12 @@ const SearchPage = () => {
                     transition={{ duration: 0.45, delay: (index % 6) * 0.08 }}
                   >
                     <Link to={`/provider/${provider.slug}${isConcierge ? "?type=concierge" : ""}`}>
-                      <Card className="overflow-hidden glossy-card tactile-lift cursor-pointer h-full group">
+                      <div
+                        className="overflow-hidden cursor-pointer h-full group transition-all duration-200 hover:-translate-y-0.5"
+                        style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.06)', boxShadow: '0 2px 12px rgba(0,0,0,0.04)', borderRadius: '20px' }}
+                        onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.08)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.04)'; }}
+                      >
                         <div className="aspect-[16/10] relative overflow-hidden">
                           <img
                             src={provider.cover_photo_url || CATEGORY_IMAGES[category] || clinicDental}
@@ -303,59 +294,54 @@ const SearchPage = () => {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
                           {isVerified && (
                             <div className="absolute top-3 right-3">
-                              <img
-                                src="/badges/provider.png?v=3"
-                                alt="Verified Provider"
-                                className="h-7 w-auto drop-shadow-lg"
-                                draggable={false}
-                              />
+                              <img src="/badges/provider.png?v=3" alt="Verified Provider" className="h-7 w-auto drop-shadow-lg" draggable={false} />
                             </div>
                           )}
                           <div className="absolute bottom-3 left-4">
-                            <span className="bg-black/50 backdrop-blur-sm text-white text-xs uppercase tracking-wider font-medium px-2.5 py-1 rounded-full shadow-elevated">
+                            <span className="bg-black/50 backdrop-blur-sm text-white text-xs uppercase tracking-wider font-medium px-2.5 py-1 rounded-full">
                               {category === "dental" ? "Dental Clinic" : category === "surgery" ? "Surgery Center" : "Aesthetics & MedSpa"}
                             </span>
                           </div>
                         </div>
-                        <CardContent className="p-5">
+                        <div className="p-5">
                           <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-bold text-lg leading-tight">{provider.name}</h3>
+                            <h3 className="font-bold text-lg leading-tight" style={{ color: '#111111' }}>{provider.name}</h3>
                           </div>
-                          <div className="flex items-center gap-1 text-muted-foreground text-sm mb-3">
+                          <div className="flex items-center gap-1 text-sm mb-3" style={{ color: '#888888' }}>
                             <MapPin className="w-4 h-4 shrink-0" />
                             {provider.city || "Mexico"}, Mexico
                           </div>
                           {provider.reviews > 0 && (
                             <div className="flex items-center gap-2 mb-3">
-                              <Star className="w-4 h-4 fill-secondary text-secondary" />
-                              <span className="font-bold">{provider.rating}</span>
-                              <span className="text-muted-foreground text-sm">({provider.reviews} review{provider.reviews !== 1 ? "s" : ""})</span>
+                              <Star className="w-4 h-4 fill-[#FF6B4A] text-[#FF6B4A]" />
+                              <span className="font-bold" style={{ color: '#111111' }}>{provider.rating}</span>
+                              <span className="text-sm" style={{ color: '#888888' }}>({provider.reviews} review{provider.reviews !== 1 ? "s" : ""})</span>
                             </div>
                           )}
                           {(provider.specialties || []).length > 0 && (
                             <div className="flex flex-wrap gap-1.5 mb-4">
                               {(provider.specialties || []).slice(0, 3).map((specialty) => (
-                                <Badge key={specialty} variant="secondary" className="text-xs font-medium">
+                                <span key={specialty} className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: 'rgba(59,240,122,0.08)', border: '1px solid rgba(59,240,122,0.15)', color: '#333333' }}>
                                   {specialty}
-                                </Badge>
+                                </span>
                               ))}
                             </div>
                           )}
-                          <div className="border-t border-white/8 pt-3 flex items-center justify-between">
+                          <div className="pt-3 flex items-center justify-between" style={{ borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                             <div>
                               {provider.startingPrice > 0 ? (
                                 <>
-                                  <span className="text-sm text-muted-foreground">From </span>
+                                  <span className="text-sm" style={{ color: '#888888' }}>From </span>
                                   <span className="text-xl font-bold text-primary">${provider.startingPrice.toLocaleString()}</span>
                                 </>
                               ) : (
-                                <span className="text-sm text-muted-foreground">Contact for pricing</span>
+                                <span className="text-sm" style={{ color: '#888888' }}>Contact for pricing</span>
                               )}
                             </div>
-                            <span className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">View →</span>
+                            <span className="text-xs opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#888888' }}>View →</span>
                           </div>
-                        </CardContent>
-                      </Card>
+                        </div>
+                      </div>
                     </Link>
                   </motion.div>
                 );
@@ -364,7 +350,7 @@ const SearchPage = () => {
           )}
         </div>
       </main>
-      <Footer />
+      <Footer light />
     </div>
   );
 };

@@ -447,3 +447,60 @@
     }
   }
 }
+
+/* ========== Public (Light) Theme ========== */
+.theme-public {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 7%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 7%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 33%;
+  --border: 0 0% 93%;
+  --input: 0 0% 93%;
+  --ring: 145 100% 61%;
+  background-color: #FFFFFF;
+}
+
+/* Light-theme card & glossy overrides */
+.theme-public .glossy-card {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  border-top: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04) !important;
+}
+.theme-public .glossy-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+  border-top-color: rgba(0,0,0,0.1) !important;
+}
+
+.theme-public .text-card-foreground {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(0,0,0,0.06) !important;
+  border-top: 1px solid rgba(0,0,0,0.06) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.theme-public .text-card-foreground:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08) !important;
+  border-color: rgba(0,0,0,0.1) !important;
+}
+
+.theme-public .glossy-border::before {
+  background: linear-gradient(180deg, rgba(0,0,0,0.06) 0%, rgba(0,0,0,0.02) 100%) !important;
+}
+
+.theme-public .glossy-divider {
+  background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.08) 50%, transparent 100%);
+}
+
+/* Hide the global dark backdrop on public pages */
+.theme-public ~ #root::before,
+.theme-public ~ #root::after {
+  display: none;
+}
