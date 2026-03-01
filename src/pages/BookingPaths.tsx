@@ -75,8 +75,8 @@ const BookingPaths = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Navbar />
+    <div className="min-h-screen bg-background flex flex-col theme-public" style={{ background: '#FFFFFF' }}>
+      <Navbar light />
 
       <main className="flex-1 pt-24 pb-16">
         <section className="py-20 px-4 text-center">

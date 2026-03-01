@@ -375,7 +375,7 @@ const ProviderDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex theme-public" style={{ background: '#FFFFFF' }}>
       <ProviderSidebar
         active={section}
         onChange={setSection}
